@@ -1,0 +1,22 @@
+version: '2.1'
+
+services:
+  snl-events:
+    build:
+      context: .
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: docker.artifactory.reform.hmcts.net/reform/snl-events
+    container_name: snl-events
+    environment:
+      # these environment variables are used by java-logging library
+      - ROOT_APPENDER
+      - JSON_CONSOLE_PRETTY_PRINT
+      - ROOT_LOGGING_LEVEL
+      - REFORM_SERVICE_NAME
+      - REFORM_TEAM
+      - REFORM_ENVIRONMENT
+    ports:
+      - $SERVER_PORT:$SERVER_PORT
