@@ -1,0 +1,12 @@
+#!groovy
+
+@Library("Infrastructure")
+
+def product = "snl"
+def component = "events"
+
+withPipeline("java", product, component) {
+  after('checkout') {
+    echo 'sln-events checked out'
+  }
+}
