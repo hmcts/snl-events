@@ -1,3 +1,3 @@
 output "frontend_deployment_endpoint" {
-  value = "${module.frontend.gitendpoint}"
+  value = "${module.snl-events.gitendpoint}"
 }

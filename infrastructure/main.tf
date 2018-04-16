@@ -1,7 +1,7 @@
 locals {
   app_full_name = "${var.product}-${var.component}"
 }
-module "snl-api" {
+module "snl-events" {
   source               = "git@github.com:hmcts/moj-module-webapp"
   product              = "${var.product}-${var.component}"
   location             = "${var.location}"
@@ -12,10 +12,19 @@ module "snl-api" {
   additional_host_name = "${var.external_host_name}"
 
   app_settings = {
-    # REDIS_HOST                   = "${module.redis-cache.host_name}"
-    # REDIS_PORT                   = "${module.redis-cache.redis_port}"
-    # REDIS_PASSWORD               = "${module.redis-cache.access_key}"
-    # RECIPE_BACKEND_URL = "http://snl-recipe-backend-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
-
+    DEFINITION_STORE_DB_HOST = "${module.postgres-sln-events.host_name}"
+    DEFINITION_STORE_DB_PORT = "${module.postgres-sln-events.postgresql_listen_port}"
+    DEFINITION_STORE_DB_NAME = "${module.postgres-sln-events.postgresql_database}"
+    DEFINITION_STORE_DB_USERNAME = "${module.postgres-sln-events.user_name}"
+    DEFINITION_STORE_DB_PASSWORD = "${module.postgres-sln-events.postgresql_password}"
   }
+
+}
+
+module "postgres-sln-events" {
+  source              = "git@github.com:contino/moj-module-postgres?ref=master"
+  product             = "${var.product}-${var.component}"
+  location            = "West Europe"
+  env                 = "${var.env}"
+  postgresql_user     = "snl-events"
 }
