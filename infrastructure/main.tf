@@ -26,5 +26,5 @@ module "postgres-snl-events" {
   product             = "${var.product}-${var.component}"
   location            = "West Europe"
   env                 = "${var.env}"
-  postgresql_user     = "snl-events"
+  postgresql_user     = "snlevents"
 }
