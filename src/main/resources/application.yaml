@@ -14,7 +14,7 @@ spring:
   application:
     name: Spring Boot Template
   datasource:
-      url: jdbc:postgresql://${SNL-EVENTS_DB_HOST}:${SNL-EVENTS_DB_PORT}/${SNL-EVENTS_DB_NAME}
+      url: jdbc:postgresql://${SNL-EVENTS_DB_HOST}:${SNL-EVENTS_DB_PORT}/${SNL-EVENTS_DB_NAME}?ssl=true
       username: ${SNL-EVENTS_DB_USERNAME}
       password: ${SNL-EVENTS_DB_PASSWORD}
   jpa:
