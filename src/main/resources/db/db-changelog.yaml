@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-sessions-table
+      author: rkruk
+      changes:
+        - sqlFile:
+            path: db/schema/create-sessions-table.sql
+            splitStatements: false

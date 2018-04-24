@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: db/db-changelog.yaml
+
+  - changeSet:
+      id: insert-test-sessions
+      author: rkruk
+      changes:
+        - sqlFile:
+            path: db/fixtures/insert-sessions-testdata.sql
+            splitStatements: false
+
+

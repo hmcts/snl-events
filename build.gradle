@@ -82,9 +82,13 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: versions.springBoot
 
   compile group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
   compile group: 'ch.qos.logback', name: 'logback-core', version: versions.logback
+
+  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
+  compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.1'
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
