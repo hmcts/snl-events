@@ -15,6 +15,8 @@ databaseChangeLog:
                 name: judge_id
                 type: UUID
             - column:
+                constraints:
+                  nullable: false
                 name: start
                 type: TIMESTAMP WITH TIME ZONE
             - column:
