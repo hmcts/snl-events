@@ -1,6 +1,27 @@
 version: '2.1'
 
 services:
+  snl-db:
+    container_name: snl-db
+    build: ./docker/snl-db
+    networks:
+      - snl-events-network
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=snluser
+      - POSTGRES_PASSWORD=snlpass
+      - POSTGRES_DB=snl
+  snl-wait-for-db:
+    container_name: snl-wait-for-db
+    build: ./docker/snl-wait-for-db
+    depends_on:
+      - snl-db
+    links:
+      - snl-db
+    command: dockerize -wait tcp://db:5432 -timeout 30s
+    networks:
+      - snl-events-network
   snl-events:
     build:
       context: .
@@ -10,6 +31,8 @@ services:
         - no_proxy
     image: docker.artifactory.reform.hmcts.net/reform/snl-events
     container_name: snl-events
+    depends_on:
+      - snl-wait-for-db
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
@@ -18,5 +41,15 @@ services:
       - REFORM_SERVICE_NAME
       - REFORM_TEAM
       - REFORM_ENVIRONMENT
+      - SNL_EVENTS_DB_HOST=snl-db
+      - SNL_EVENTS_DB_PORT=5432
+      - SNL_EVENTS_DB_NAME=snl
+      - SNL_EVENTS_DB_USERNAME=snluser
+      - SNL_EVENTS_DB_PASSWORD=snlpass
     ports:
-      - $SERVER_PORT:$SERVER_PORT
+      - 8082:8092
+    networks:
+      - snl-events-network
+networks:
+  snl-events-network:
+    driver: bridge

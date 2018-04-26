@@ -1,5 +1,5 @@
 server:
-  port: 8092
+  port: ${SERVER_PORT:8092}
 
 management:
   security:
@@ -12,11 +12,11 @@ liquibase:
 #If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:
   application:
-    name: Spring Boot Template
+    name: Scheduling and Listng Events
   datasource:
-      url: jdbc:postgresql://${SNL-EVENTS_DB_HOST}:${SNL-EVENTS_DB_PORT}/${SNL-EVENTS_DB_NAME}?ssl=true
-      username: ${SNL-EVENTS_DB_USERNAME}
-      password: ${SNL-EVENTS_DB_PASSWORD}
+      url: jdbc:postgresql://${SNL_EVENTS_DB_HOST:localhost}:${SNL_EVENTS_DB_PORT:5432}/${SNL_EVENTS_DB_NAME:snl}${SNL_EVENTS_DB_PARAMS:?}
+      username: ${SNL_EVENTS_DB_USERNAME:snluser}
+      password: ${SNL_EVENTS_DB_PASSWORD:snlpass}
   jpa:
     hibernate:
       ddl-auto: validate
