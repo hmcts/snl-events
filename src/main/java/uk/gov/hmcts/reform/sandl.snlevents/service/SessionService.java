@@ -20,8 +20,7 @@ public class SessionService {
         return sessionRepository.findAll();
     }
 
-    public List getSessionsFromDate(String stringDate) {
-        LocalDate localDate =  LocalDate.parse(stringDate);
+    public List getSessionsFromDate(LocalDate localDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(localDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(localDate, LocalTime.MAX, ZoneOffset.UTC);
 

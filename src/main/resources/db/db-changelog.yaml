@@ -1,26 +1,3 @@
 databaseChangeLog:
-  - changeSet:
-      id: create-sessions-table
-      author: rkruk
-      changes:
-        - createTable:
-            tableName: session
-            columns:
-            - column:
-                constraints:
-                  primaryKey: true
-                name: id
-                type: UUID
-            - column:
-                name: judge_id
-                type: UUID
-            - column:
-                constraints:
-                  nullable: false
-                name: start
-                type: TIMESTAMP WITH TIME ZONE
-            - column:
-                constraints:
-                  nullable: false
-                name: duration
-                type: BIGINT
+  - include:
+      file: db/schema/db-changelog.yaml
