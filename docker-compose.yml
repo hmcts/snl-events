@@ -19,7 +19,7 @@ services:
       - snl-db
     links:
       - snl-db
-    command: dockerize -wait tcp://db:5432 -timeout 30s
+    command: dockerize -wait tcp://snl-db:5432 -timeout 30s
     networks:
       - snl-events-network
   snl-events:
@@ -46,6 +46,7 @@ services:
       - SNL_EVENTS_DB_NAME=snl
       - SNL_EVENTS_DB_USERNAME=snluser
       - SNL_EVENTS_DB_PASSWORD=snlpass
+      - SNL_RULES_URL=http://localhost:8091
     ports:
       - 8082:8092
     networks:

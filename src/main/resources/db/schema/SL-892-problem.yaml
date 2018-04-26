@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+        id: create-problems-table
+        author: kpakur
+        changes:
+          - createTable:
+              tableName: problem
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: varchar(100)
+              - column:
+                  name: message
+                  type: varchar(500)
+

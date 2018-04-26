@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.sandl.snlevents.converters;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter(autoApply = true)
 public class DurationConverter implements AttributeConverter<Duration, Long> {

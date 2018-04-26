@@ -1,3 +1,4 @@
 databaseChangeLog:
   - include:
       file: db/schema/SL-830-sessions-from-db.yaml
+      file: db/schema/SL-892-problem.yaml
