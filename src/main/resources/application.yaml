@@ -5,14 +5,22 @@ management:
   security:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
 
+liquibase:
+  enabled: true
+  change-log: classpath:db/db-testdata-changelog.yaml
+
 #If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:
   application:
     name: Spring Boot Template
-#  datasource:
-#      url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-#      username: ${DB_USER_NAME}
-#      password: ${DB_PASSWORD}
+  datasource:
+      url: jdbc:postgresql://${SNL-EVENTS_DB_HOST}:${SNL-EVENTS_DB_PORT}/${SNL-EVENTS_DB_NAME}?ssl=true
+      username: ${SNL-EVENTS_DB_USERNAME}
+      password: ${SNL-EVENTS_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      dialect: org.hibernate.dialect.PostgreSQLDialect
 #      properties:
 #        charSet: UTF-8
 #      tomcat:

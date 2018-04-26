@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: db/schema/SL-830-sessions-from-db.yaml
