@@ -13,6 +13,6 @@ import java.util.List;
 public interface SessionRepository extends JpaRepository<Session, Long> {
 
     @Query("FROM Session WHERE start BETWEEN :dateStart AND :dateEnd")
-    public List<Session> findSessionByStartDate(@Param("dateStart") OffsetDateTime dateStart,
+    List<Session> findSessionByStartDate(@Param("dateStart") OffsetDateTime dateStart,
                                                 @Param("dateEnd") OffsetDateTime dateEnd);
 }

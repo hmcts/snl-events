@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.SessionRepository;
 
 import java.time.LocalDate;
@@ -25,5 +26,9 @@ public class SessionService {
         OffsetDateTime toDate = OffsetDateTime.of(localDate, LocalTime.MAX, ZoneOffset.UTC);
 
         return sessionRepository.findSessionByStartDate(fromDate, toDate);
+    }
+
+    public void save(Session session) {
+        sessionRepository.save(session);
     }
 }
