@@ -5,6 +5,9 @@ management:
   security:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
 
+communication:
+  rulesUrl: ${SNL_RULES_URL:http://localhost:8091}
+
 liquibase:
   enabled: true
   change-log: classpath:db/db-testdata-changelog.yaml
