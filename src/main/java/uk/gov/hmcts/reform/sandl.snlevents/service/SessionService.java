@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uk.gov.hmcts.reform.sandl.snlevents.model.Session;
-import uk.gov.hmcts.reform.sandl.snlevents.model.SessionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.time.LocalDate;

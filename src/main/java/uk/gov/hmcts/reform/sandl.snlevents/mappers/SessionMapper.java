@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sandl.snlevents.model.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 
 import java.time.Duration;
 
@@ -31,9 +32,19 @@ public class SessionMapper {
         objectMapper.registerModule(simpleModule);
     }
 
-    public String mapSessionToRuleJsonMessage(Session session) throws JsonProcessingException {
-        // note this may need to be done differently once the session
-        // object from the request get different to the rules fact entity
-        return objectMapper.writeValueAsString(session);
+    public String mapSessionToRuleJsonMessage(CreateSession createSession) throws JsonProcessingException {
+        FactSession factSession = new FactSession();
+        factSession.setId(createSession.getId().toString());
+        factSession.setDuration(createSession.getDuration());
+        factSession.setStart(createSession.getStart());
+        if (createSession.getPersonId() != null) {
+            factSession.setJudgeId(createSession.getPersonId().toString());
+        }
+
+        if (createSession.getRoomId() != null) {
+            factSession.setRoomId(createSession.getRoomId().toString());
+        }
+
+        return objectMapper.writeValueAsString(factSession);
     }
 }

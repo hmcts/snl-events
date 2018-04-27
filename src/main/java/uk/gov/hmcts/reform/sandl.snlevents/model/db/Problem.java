@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.model;
+package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
