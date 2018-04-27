@@ -4,4 +4,4 @@ databaseChangeLog:
   - include:
       file: db/schema/SL-892-problem.yaml
   - include:
-      file: db/schema/SL-892-add-person-table.yaml
+      file: db/schema/SL-892-add-person-room-tables.yaml

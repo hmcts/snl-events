@@ -15,6 +15,9 @@ databaseChangeLog:
                   name: person_id
                   type: UUID
               - column:
+                  name: room_id
+                  type: UUID
+              - column:
                   constraints:
                     nullable: false
                   name: start

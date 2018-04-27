@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class SessionWithJudge implements Serializable {
+public class SessionInfo implements Serializable {
 
     UUID id;
 
@@ -21,4 +21,6 @@ public class SessionWithJudge implements Serializable {
     Duration duration;
 
     Person judge;
+
+    Room room;
 }
