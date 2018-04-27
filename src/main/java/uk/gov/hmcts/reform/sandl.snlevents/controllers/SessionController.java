@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.SessionMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.SessionWithJudge;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 
@@ -38,7 +39,7 @@ public class SessionController {
     }
 
     @RequestMapping(path = "/sessions", params = "date",  method = RequestMethod.GET, produces = {"application/json"})
-    public @ResponseBody List<Session> fetchSessions(
+    public @ResponseBody List<SessionWithJudge> fetchSessions(
         @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         return sessionService.getSessionsFromDate(date);
     }

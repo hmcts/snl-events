@@ -5,6 +5,10 @@ import java.time.temporal.ChronoUnit;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+
+
 @Converter(autoApply = true)
 public class DurationConverter implements AttributeConverter<Duration, Long> {
     @Override

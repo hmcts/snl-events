@@ -5,12 +5,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+
+import javax.persistence.ManyToOne;
 
 @Entity
 @Data
@@ -21,7 +24,8 @@ public class Session implements Serializable {
     @Id
     private UUID id;
 
-    private UUID judgeId;
+    @ManyToOne
+    private Person person;
 
     @NotNull
     private OffsetDateTime start;

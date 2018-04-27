@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Problem;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.ProblemRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
 
 import java.io.IOException;
 

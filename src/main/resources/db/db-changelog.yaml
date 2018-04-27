@@ -1,4 +1,7 @@
 databaseChangeLog:
   - include:
       file: db/schema/SL-830-sessions-from-db.yaml
+  - include:
       file: db/schema/SL-892-problem.yaml
+  - include:
+      file: db/schema/SL-892-add-person-table.yaml
