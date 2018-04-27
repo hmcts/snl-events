@@ -2,17 +2,19 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import uk.gov.hmcts.reform.sandl.snlevents.model.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionRepository.GET_SESSION_INFO_SQL;
 
