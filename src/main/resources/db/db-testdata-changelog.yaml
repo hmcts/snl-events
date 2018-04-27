@@ -7,7 +7,7 @@ databaseChangeLog:
       author: rkruk
       changes:
         - sqlFile:
-            path: db/fixtures/insert-sessions-testdata.sql
+            path: db/fixtures/insert-testdata.sql
             splitStatements: false
 
 

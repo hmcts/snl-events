@@ -1,10 +1,10 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.reform.sandl.snlevents.model.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 
 import java.time.OffsetDateTime;
 import java.util.List;
