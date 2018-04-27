@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+        id: create-person-table
+        author: rkruk
+        changes:
+          - createTable:
+              tableName: person
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: UUID
+              - column:
+                  name: person_type
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(100)
+          - addForeignKeyConstraint:
+              baseColumnNames: person_id
+              baseTableName: session
+              constraintName: fk_session_person
+              referencedColumnNames: id
+              referencedTableName: person
+          - createTable:
+              tableName: room
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: UUID
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+          - addForeignKeyConstraint:
+              baseColumnNames: room_id
+              baseTableName: session
+              constraintName: fk_session_room
+              referencedColumnNames: id
+              referencedTableName: room

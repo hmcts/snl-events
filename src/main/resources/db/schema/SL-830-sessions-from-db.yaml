@@ -12,7 +12,10 @@ databaseChangeLog:
                   name: id
                   type: UUID
               - column:
-                  name: judge_id
+                  name: person_id
+                  type: UUID
+              - column:
+                  name: room_id
                   type: UUID
               - column:
                   constraints:
