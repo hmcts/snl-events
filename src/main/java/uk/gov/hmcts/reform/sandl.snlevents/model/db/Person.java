@@ -31,6 +31,10 @@ public class Person implements Serializable {
     @Setter
     String name;
 
+    @Getter
+    @Setter
+    String username;
+
     @JsonIgnore
     @OneToMany(mappedBy = "person")
     private List<Session> sessionList;
