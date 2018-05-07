@@ -44,6 +44,18 @@ public class SessionService {
         return list;
     }
 
+    public List<SessionInfo> getSessionsForDates(LocalDate startDate, LocalDate endDate) {
+        OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
+        OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
+
+        List<SessionInfo> list = entityManager.createQuery(GET_SESSION_INFO_SQL, SessionInfo.class)
+            .setParameter("dateStart", fromDate)
+            .setParameter("dateEnd", toDate)
+            .getResultList();
+
+        return list;
+    }
+
     public List<SessionInfo> getJudgeDiaryForDates(String judgeUsername, LocalDate startDate, LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
@@ -60,4 +72,5 @@ public class SessionService {
     public void save(Session session) {
         sessionRepository.save(session);
     }
+
 }
