@@ -72,13 +72,13 @@ public class SessionController {
         session.setStart(createSession.getStart());
         //session.setCaseType(createSession.getCaseType());
 
-        Room room = roomRepository.findOne(createSession.getRoomId());
-        if (room != null) {
+        if(createSession.getRoomId() != null) {
+            Room room = roomRepository.findOne(createSession.getRoomId());
             session.setRoom(room);
         }
 
-        Person person = personRepository.findOne(createSession.getPersonId());
-        if (person != null) {
+        if (createSession.getPersonId() != null) {
+            Person person = personRepository.findOne(createSession.getPersonId());
             session.setPerson(person);
         }
 
