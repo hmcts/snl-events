@@ -80,7 +80,7 @@ public class SessionController {
         session.setStart(createSession.getStart());
         //session.setCaseType(createSession.getCaseType());
 
-        if(createSession.getRoomId() != null) {
+        if (createSession.getRoomId() != null) {
             Room room = roomRepository.findOne(createSession.getRoomId());
             session.setRoom(room);
         }
