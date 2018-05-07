@@ -5,9 +5,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,20 +47,28 @@ public class SessionController {
     @Autowired
     private SessionMapper sessionMapper;
 
-    @RequestMapping(path = "", method = RequestMethod.GET, produces = {"application/json"})
+    @GetMapping(path = "", produces = {"application/json"})
     public @ResponseBody
     List<Session> fetchAllSessions() {
         return sessionService.getSessions();
     }
 
-    @RequestMapping(path = "", params = "date", method = RequestMethod.GET, produces = {"application/json"})
+    @GetMapping(path = "", params = "date", produces = {"application/json"})
     public @ResponseBody
     List<SessionInfo> fetchSessions(
         @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
         return sessionService.getSessionsFromDate(date);
     }
 
-    @RequestMapping(path = "", method = RequestMethod.PUT, consumes = {"application/json"})
+    @GetMapping(path = "", params = {"startDate", "endDate"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    List<SessionInfo> fetchSessionsForDates(
+        @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
+        @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
+        return sessionService.getSessionsForDates(startDate, endDate);
+    }
+
+    @PutMapping(path = "", consumes = {"application/json"})
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
         String msg = sessionMapper.mapSessionToRuleJsonMessage(createSession);
