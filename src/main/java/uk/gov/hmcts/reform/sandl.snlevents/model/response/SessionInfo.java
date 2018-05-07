@@ -24,11 +24,4 @@ public class SessionInfo implements Serializable {
     Person judge;
 
     Room room;
-
-    public SessionInfo(UUID id, OffsetDateTime start, Duration duration, Room room) {
-        this.id = id;
-        this.start = start;
-        this.duration = duration;
-        this.room = room;
-    }
 }

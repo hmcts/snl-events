@@ -47,13 +47,13 @@ public class SessionController {
     @Autowired
     private SessionMapper sessionMapper;
 
-    @GetMapping(path = "", produces = {"application/json"})
+    @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     List<Session> fetchAllSessions() {
         return sessionService.getSessions();
     }
 
-    @GetMapping(path = "", params = "date", produces = {"application/json"})
+    @GetMapping(path = "", params = "date", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     List<SessionInfo> fetchSessions(
         @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
@@ -68,7 +68,7 @@ public class SessionController {
         return sessionService.getSessionsForDates(startDate, endDate);
     }
 
-    @PutMapping(path = "", consumes = {"application/json"})
+    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
         String msg = sessionMapper.mapSessionToRuleJsonMessage(createSession);
