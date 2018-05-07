@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+        id: Add-username-field-to-Person-table
+        author: lgurniewicz
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: username
+                  type: varchar(255)
+              schemaName: public
+              tableName: person
+          - sqlFile:
+              comment: Just one person in the db at this point
+              encoding: utf8
+              endDelimiter: \nGO
+              path: ../fixtures/SL-878-person-update.sql
+              relativeToChangelogFile: true
+              splitStatements: true
+              stripComments: true
