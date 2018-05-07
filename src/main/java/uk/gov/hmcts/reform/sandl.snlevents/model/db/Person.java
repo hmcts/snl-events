@@ -21,6 +21,8 @@ import javax.persistence.OneToMany;
 @NoArgsConstructor
 public class Person implements Serializable {
     @Id
+    @Getter
+    @Setter
     UUID id;
 
     @Getter
@@ -30,6 +32,10 @@ public class Person implements Serializable {
     @Getter
     @Setter
     String name;
+
+    @Getter
+    @Setter
+    String username;
 
     @JsonIgnore
     @OneToMany(mappedBy = "person")

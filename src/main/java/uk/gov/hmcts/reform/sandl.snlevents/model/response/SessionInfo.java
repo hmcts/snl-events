@@ -21,7 +21,7 @@ public class SessionInfo implements Serializable {
 
     Duration duration;
 
-    Person judge;
+    Person person;
 
     Room room;
 }

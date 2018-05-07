@@ -9,4 +9,8 @@ withPipeline("java", product, component) {
   after('checkout') {
     echo 'sln-events checked out'
   }
+
+  before('buildinfra:aat') {
+    error 'This is PoC project for Scheduling and Listing therefore the environments will not be built'
+  }
 }

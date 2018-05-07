@@ -2,13 +2,15 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.SessionMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
@@ -26,7 +28,8 @@ import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
-@Controller
+@RestController()
+@RequestMapping("/sessions")
 public class SessionController {
 
     @Autowired
@@ -44,18 +47,28 @@ public class SessionController {
     @Autowired
     private SessionMapper sessionMapper;
 
-    @RequestMapping(path = "/sessions", method = RequestMethod.GET, produces = {"application/json"})
-    public @ResponseBody List<Session> fetchAllSessions() {
+    @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    List<Session> fetchAllSessions() {
         return sessionService.getSessions();
     }
 
-    @RequestMapping(path = "/sessions", params = "date",  method = RequestMethod.GET, produces = {"application/json"})
-    public @ResponseBody List<SessionInfo> fetchSessions(
-        @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+    @GetMapping(path = "", params = "date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    List<SessionInfo> fetchSessions(
+        @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
         return sessionService.getSessionsFromDate(date);
     }
 
-    @RequestMapping(path = "/sessions", method = RequestMethod.PUT, consumes = {"application/json"})
+    @GetMapping(path = "", params = {"startDate", "endDate"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    List<SessionInfo> fetchSessionsForDates(
+        @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
+        @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
+        return sessionService.getSessionsForDates(startDate, endDate);
+    }
+
+    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
         String msg = sessionMapper.mapSessionToRuleJsonMessage(createSession);
@@ -67,18 +80,27 @@ public class SessionController {
         session.setStart(createSession.getStart());
         //session.setCaseType(createSession.getCaseType());
 
-        Room room = roomRepository.findOne(createSession.getRoomId());
-        if (room != null) {
+        if (createSession.getRoomId() != null) {
+            Room room = roomRepository.findOne(createSession.getRoomId());
             session.setRoom(room);
         }
 
-        Person person = personRepository.findOne(createSession.getPersonId());
-        if (person != null) {
+        if (createSession.getPersonId() != null) {
+            Person person = personRepository.findOne(createSession.getPersonId());
             session.setPerson(person);
         }
 
         sessionService.save(session);
 
         return ok("OK");
+    }
+
+    @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<SessionInfo> getJudgeDiary(
+        @RequestParam("judge") String judge,
+        @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
+        @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
+        return sessionService.getJudgeDiaryForDates(judge, startDate, endDate);
     }
 }

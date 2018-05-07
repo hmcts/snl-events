@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/schema/SL-892-problem.yaml
   - include:
       file: db/schema/SL-892-add-person-room-tables.yaml
+  - include:
+      file: db/schema/SL-878-person-username.yaml
