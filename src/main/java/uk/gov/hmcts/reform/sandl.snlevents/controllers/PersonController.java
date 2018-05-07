@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.PersonService;
 
 import java.util.List;
 
-@RestController()
+@RestController
 @RequestMapping("/person")
 public class PersonController {
 

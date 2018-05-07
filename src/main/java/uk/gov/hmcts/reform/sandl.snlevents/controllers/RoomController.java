@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RoomService;
 
 import java.util.List;
 
-@RestController()
+@RestController
 @RequestMapping("/room")
 public class RoomController {
 
