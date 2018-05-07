@@ -17,7 +17,7 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    public List<Person> getPeopleByType(String personType) {
+    public List<Person> getPersonByType(String personType) {
         return personRepository.findPeopleByPersonTypeEqualsIgnoreCase(personType);
     }
 }
