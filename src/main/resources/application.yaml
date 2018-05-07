@@ -24,7 +24,7 @@ spring:
     hibernate:
       ddl-auto: validate
       dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: false
 #      properties:
 #        charSet: UTF-8
 #      tomcat:

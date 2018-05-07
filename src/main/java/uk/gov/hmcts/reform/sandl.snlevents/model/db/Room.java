@@ -30,7 +30,5 @@ public class Room {
 
     @JsonIgnore
     @OneToMany(mappedBy = "room")
-    @Getter
-    @Setter
     List<Session> sessionList;
 }
