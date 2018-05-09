@@ -48,21 +48,18 @@ public class SessionController {
     private SessionMapper sessionMapper;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<Session> fetchAllSessions() {
+    public @ResponseBody List<Session> fetchAllSessions() {
         return sessionService.getSessions();
     }
 
     @GetMapping(path = "", params = "date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<SessionInfo> fetchSessions(
+    @ResponseBody public List<SessionInfo> fetchSessions(
         @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
         return sessionService.getSessionsFromDate(date);
     }
 
     @GetMapping(path = "", params = {"startDate", "endDate"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<SessionInfo> fetchSessionsForDates(
+    @ResponseBody public List<SessionInfo> fetchSessionsForDates(
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
         return sessionService.getSessionsForDates(startDate, endDate);
@@ -96,8 +93,7 @@ public class SessionController {
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public List<SessionInfo> getJudgeDiary(
+    @ResponseBody public List<SessionInfo> getJudgeDiary(
         @RequestParam("judge") String judge,
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {

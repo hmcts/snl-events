@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+        id: create-hearing-part-table
+        author: remigiuszk
+        changes:
+          - createTable:
+              tableName: hearing_part
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: UUID
+              - column:
+                  name: case_number
+                  type: VARCHAR(200)
+              - column:
+                  name: case_title
+                  type: VARCHAR(200)
+              - column:
+                  name: case_type
+                  type: VARCHAR(100)
+              - column:
+                  name: hearing_type
+                  type: VARCHAR(100)
+              - column:
+                  name: duration
+                  type: BIGINT
+              - column:
+                  name: schedule_start
+                  type: DATE
+              - column:
+                  name: schedule_end
+                  type: DATE
+              - column:
+                  constraints:
+                    foreignKeyName: fk_hearing_session
+                    references: session(id)
+                  name: session_id
+                  type: UUID
+              - column:
+                  name: start
+                  type: TIMESTAMP WITH TIME ZONE
+
