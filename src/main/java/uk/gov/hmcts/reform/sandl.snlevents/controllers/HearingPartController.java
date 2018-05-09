@@ -26,8 +26,7 @@ public class HearingPartController {
     HearingPartService hearingPartService;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<HearingPart> fetchAllHearingParts() {
+    @ResponseBody public List<HearingPart> fetchAllHearingParts() {
         return hearingPartService.getAllHearingParts();
     }
 

@@ -52,5 +52,5 @@ public class Session implements Serializable {
 
     @OneToMany(mappedBy = "session")
     @JsonIgnore
-    private List<HearingPart> hearingPartList;
+    private List<HearingPart> hearingParts;
 }
