@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 
 @RestController
-@RequestMapping("/hearingPart")
+@RequestMapping("/hearing-part")
 public class HearingPartController {
 
     @Autowired
