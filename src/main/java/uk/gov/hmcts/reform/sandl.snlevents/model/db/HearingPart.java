@@ -1,19 +1,14 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serializable;
-
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,34 +18,47 @@ import lombok.Setter;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Session implements Serializable {
+public class HearingPart implements Serializable {
 
     @Id
     @Getter
     @Setter
     private UUID id;
 
-    @ManyToOne
     @Getter
     @Setter
-    private Person person;
+    private String caseNumber;
 
-    @NotNull
     @Getter
     @Setter
-    private OffsetDateTime start;
+    private String caseTitle;
 
-    @NotNull
+    @Getter
+    @Setter
+    private String caseType;
+
+    @Getter
+    @Setter
+    private String hearingType;
+
     @Getter
     @Setter
     private Duration duration;
 
-    @ManyToOne
     @Getter
     @Setter
-    private Room room;
+    private LocalDate scheduleStart;
 
-    @OneToMany(mappedBy = "session")
-    @JsonIgnore
-    private List<HearingPart> hearingPartList;
+    @Getter
+    @Setter
+    private LocalDate scheduleEnd;
+
+    @Getter
+    @Setter
+    @ManyToOne
+    private Session session;
+
+    @Getter
+    @Setter
+    private OffsetDateTime start;
 }
