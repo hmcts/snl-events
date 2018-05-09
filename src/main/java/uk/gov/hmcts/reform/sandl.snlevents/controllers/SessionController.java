@@ -75,7 +75,7 @@ public class SessionController {
         session.setId(createSession.getId());
         session.setDuration(createSession.getDuration());
         session.setStart(createSession.getStart());
-        //session.setCaseType(createSession.getCaseType());
+        session.setCaseType(createSession.getCaseType());
 
         if (createSession.getRoomId() != null) {
             Room room = roomRepository.findOne(createSession.getRoomId());
