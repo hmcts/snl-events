@@ -28,7 +28,7 @@ public class HearingPartService {
         return hearingPartRepository.save(hearingPart);
     }
 
-    public HearingPart assignHearingPartWithSession(UUID hearingPartId, UUID sessionId) {
+    public HearingPart assignHearingPartToSession(UUID hearingPartId, UUID sessionId) {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
 
         Session session = sessionRepository.findOne(sessionId);

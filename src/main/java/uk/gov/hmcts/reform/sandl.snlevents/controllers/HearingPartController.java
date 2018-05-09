@@ -49,9 +49,9 @@ public class HearingPartController {
     }
 
     @PutMapping(path = "/{hearingPartId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity assignHearingPartWithSession(@PathVariable UUID hearingPartId,
+    public ResponseEntity assignHearingPartToSession(@PathVariable UUID hearingPartId,
                                                        @RequestBody HearingPartSessionRelationship assignment) {
-        HearingPart hearingPart = hearingPartService.assignHearingPartWithSession(hearingPartId,
+        HearingPart hearingPart = hearingPartService.assignHearingPartToSession(hearingPartId,
             assignment.getSessionId());
 
         return ok(hearingPart);
