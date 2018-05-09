@@ -45,6 +45,10 @@ public class Session implements Serializable {
     @Setter
     private Duration duration;
 
+    @Getter
+    @Setter
+    private String caseType;
+
     @ManyToOne
     @Getter
     @Setter
