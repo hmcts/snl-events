@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 
 import java.time.Duration;
@@ -15,10 +18,10 @@ import static com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITI
 import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
 
 @Component
-public class SessionMapper {
+public class FactsMapper {
     private final ObjectMapper objectMapper;
 
-    public SessionMapper() {
+    public FactsMapper() {
         objectMapper = new ObjectMapper()
             .findAndRegisterModules()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
@@ -32,11 +35,13 @@ public class SessionMapper {
         objectMapper.registerModule(simpleModule);
     }
 
-    public String mapSessionToRuleJsonMessage(CreateSession createSession) throws JsonProcessingException {
+    public String mapCreateSessionToRuleJsonMessage(CreateSession createSession) throws JsonProcessingException {
         FactSession factSession = new FactSession();
+
         factSession.setId(createSession.getId().toString());
         factSession.setDuration(createSession.getDuration());
         factSession.setStart(createSession.getStart());
+        factSession.setCaseType(createSession.getCaseType());
         if (createSession.getPersonId() != null) {
             factSession.setJudgeId(createSession.getPersonId().toString());
         }
@@ -46,5 +51,27 @@ public class SessionMapper {
         }
 
         return objectMapper.writeValueAsString(factSession);
+    }
+
+    public String mapCreateHearingPartToRuleJsonMessage(CreateHearingPart createHearingPart)
+        throws JsonProcessingException {
+        FactHearingPart factHearingPart = new FactHearingPart();
+
+        factHearingPart.setId(createHearingPart.getId().toString());
+        factHearingPart.setDuration(createHearingPart.getDuration());
+        factHearingPart.setCaseType(createHearingPart.getCaseType());
+
+        return objectMapper.writeValueAsString(factHearingPart);
+    }
+
+    public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
+        FactHearingPart factHearingPart = new FactHearingPart();
+
+        factHearingPart.setId(hearingPart.getId().toString());
+        factHearingPart.setDuration(hearingPart.getDuration());
+        factHearingPart.setCaseType(hearingPart.getCaseType());
+        factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+
+        return objectMapper.writeValueAsString(factHearingPart);
     }
 }

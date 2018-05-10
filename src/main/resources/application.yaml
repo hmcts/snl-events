@@ -8,6 +8,15 @@ management:
 communication:
   rulesUrl: ${SNL_RULES_URL:http://localhost:8091}
 
+fact-propagation:
+  subscribers:
+    insert-session:
+      - ${SNL_RULES_URL/msg/rulesDefinition=Sessions:http://localhost:8091/msg?rulesDefinition=Sessions}
+      - ${SNL_RULES_URL/msg/rulesDefinition=Listings:http://localhost:8091/msg?rulesDefinition=Listings}
+    upsert-hearingPart:
+      - ${SNL_RULES_URL/msg/rulesDefinition=Listings:http://localhost:8091/msg?rulesDefinition=Listings}
+
+
 liquibase:
   enabled: true
   change-log: classpath:db/db-testdata-changelog.yaml

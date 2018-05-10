@@ -6,16 +6,13 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FactSession implements Serializable {
+public class FactHearingPart implements Serializable {
     private String id;
-    private String judgeId;
-    private OffsetDateTime start;
-    private Duration duration;
-    private String roomId;
+    private String sessionId;
     private String caseType;
+    private Duration duration;
 }
