@@ -24,4 +24,6 @@ public class SessionInfo implements Serializable {
     Person person;
 
     Room room;
+
+    String caseType;
 }
