@@ -5,9 +5,6 @@ management:
   security:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
 
-communication:
-  rulesUrl: ${SNL_RULES_URL:http://localhost:8091}
-
 fact-propagation:
   subscribers:
     insert-session:
