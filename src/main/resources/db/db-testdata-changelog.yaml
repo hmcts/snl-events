@@ -9,5 +9,10 @@ databaseChangeLog:
         - sqlFile:
             path: db/fixtures/insert-testdata.sql
             splitStatements: false
-
-
+  - changeSet:
+      id: insert-sample-hearings
+      author: rkruk
+      changes:
+        - sqlFile:
+            path: db/fixtures/SL-907-add-sample-hearings.sql
+            splitStatements: false
