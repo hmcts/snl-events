@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.SessionMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -45,7 +45,7 @@ public class SessionController {
     private PersonRepository personRepository;
 
     @Autowired
-    private SessionMapper sessionMapper;
+    private FactsMapper factsMapper;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody List<Session> fetchAllSessions() {
@@ -68,7 +68,7 @@ public class SessionController {
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
-        String msg = sessionMapper.mapSessionToRuleJsonMessage(createSession);
+        String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
         rulesService.postMessage(RulesService.INSERT_SESSION, msg);
 
         Session session = new Session();
