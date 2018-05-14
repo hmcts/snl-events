@@ -65,8 +65,7 @@ public class HearingPartController {
         @PathVariable UUID hearingPartId,
         @RequestBody HearingPartSessionRelationship assignment) throws IOException {
 
-        HearingPart hearingPart = hearingPartService.assignHearingPartToSession(hearingPartId,
-            assignment.getSessionId());
+        HearingPart hearingPart = hearingPartService.assignHearingPartToSession(hearingPartId, assignment);
 
         return ok(hearingPart);
     }
