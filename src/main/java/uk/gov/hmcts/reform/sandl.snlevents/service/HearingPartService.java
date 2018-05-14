@@ -38,11 +38,7 @@ public class HearingPartService {
     public HearingPart assignHearingPartToSession(UUID hearingPartId, UUID sessionId) throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
 
-        Session session = null;
-
-        if (sessionId != null) {
-            session = sessionRepository.findOne(sessionId);
-        }
+        Session session = (sessionId == null) ? null : sessionRepository.findOne(sessionId);
 
         hearingPart.setSession(session);
 
