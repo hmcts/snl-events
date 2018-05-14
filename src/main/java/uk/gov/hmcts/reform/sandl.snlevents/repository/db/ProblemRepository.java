@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 
 @Repository
-public interface ProblemRepository extends JpaRepository<Problem, Long> {
+public interface ProblemRepository extends JpaRepository<Problem, String> {
 
 }
