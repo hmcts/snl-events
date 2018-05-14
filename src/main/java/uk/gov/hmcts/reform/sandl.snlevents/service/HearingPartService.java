@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
@@ -35,12 +36,15 @@ public class HearingPartService {
         return hearingPartRepository.save(hearingPart);
     }
 
-    public HearingPart assignHearingPartToSession(UUID hearingPartId, UUID sessionId) throws IOException {
+    public HearingPart assignHearingPartToSession(UUID hearingPartId,
+                                                  HearingPartSessionRelationship assignment) throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
 
-        Session session = (sessionId == null) ? null : sessionRepository.findOne(sessionId);
+        Session session = (assignment.getSessionId() == null) ? null :
+            sessionRepository.findOne(assignment.getSessionId());
 
         hearingPart.setSession(session);
+        hearingPart.setStart(assignment.getStart());
 
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
