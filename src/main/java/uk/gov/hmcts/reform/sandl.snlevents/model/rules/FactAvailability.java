@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.rules;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
