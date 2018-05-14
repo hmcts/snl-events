@@ -12,13 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 
@@ -37,12 +33,6 @@ public class SessionController {
 
     @Autowired
     private RulesService rulesService;
-
-    @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
 
     @Autowired
     private FactsMapper factsMapper;
@@ -70,24 +60,7 @@ public class SessionController {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
         rulesService.postMessage(RulesService.INSERT_SESSION, msg);
-
-        Session session = new Session();
-        session.setId(createSession.getId());
-        session.setDuration(createSession.getDuration());
-        session.setStart(createSession.getStart());
-        session.setCaseType(createSession.getCaseType());
-
-        if (createSession.getRoomId() != null) {
-            Room room = roomRepository.findOne(createSession.getRoomId());
-            session.setRoom(room);
-        }
-
-        if (createSession.getPersonId() != null) {
-            Person person = personRepository.findOne(createSession.getPersonId());
-            session.setPerson(person);
-        }
-
-        sessionService.save(session);
+        sessionService.save(createSession);
 
         return ok("OK");
     }
