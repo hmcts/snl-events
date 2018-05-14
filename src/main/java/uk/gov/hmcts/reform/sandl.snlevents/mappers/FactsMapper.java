@@ -6,10 +6,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactPerson;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactRoom;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 
 import java.time.Duration;
@@ -65,6 +72,28 @@ public class FactsMapper {
     }
 
     public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
+        return mapDbHearingPartToRuleJsonMessage(hearingPart);
+    }
+
+    public String mapDbSessionToRuleJsonMessage(Session session) throws JsonProcessingException {
+        FactSession factSession = new FactSession();
+
+        factSession.setId(session.getId().toString());
+        factSession.setDuration(session.getDuration());
+        factSession.setStart(session.getStart());
+        factSession.setCaseType(session.getCaseType());
+        if (session.getPerson() != null) {
+            factSession.setJudgeId(session.getPerson().getId().toString());
+        }
+
+        if (session.getRoom() != null) {
+            factSession.setRoomId(session.getRoom().getId().toString());
+        }
+
+        return objectMapper.writeValueAsString(factSession);
+    }
+
+    public String mapDbHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
         FactHearingPart factHearingPart = new FactHearingPart();
 
         factHearingPart.setId(hearingPart.getId().toString());
@@ -75,5 +104,36 @@ public class FactsMapper {
         }
 
         return objectMapper.writeValueAsString(factHearingPart);
+    }
+
+    public String mapDbRoomToRuleJsonMessage(Room room) throws JsonProcessingException {
+        FactRoom factRoom = new FactRoom();
+
+        factRoom.setId(room.getId().toString());
+        factRoom.setName(room.getName());
+
+        return objectMapper.writeValueAsString(factRoom);
+    }
+
+    public String mapDbPersonToRuleJsonMessage(Person person) throws JsonProcessingException {
+        FactPerson factPerson = new FactPerson();
+
+        factPerson.setId(person.getId().toString());
+        factPerson.setName(person.getName());
+
+        return objectMapper.writeValueAsString(factPerson);
+    }
+
+    public String mapDbAvailabilityToRuleJsonMessage(Availability availability) throws JsonProcessingException {
+        FactAvailability factAvailability = new FactAvailability();
+
+        factAvailability.setId(availability.getId().toString());
+        factAvailability.setDuration(availability.getDuration());
+        factAvailability.setStart(availability.getStart());
+        if (availability.getPerson() != null) {
+            factAvailability.setJudgeId(availability.getPerson().getId().toString());
+        }
+
+        return objectMapper.writeValueAsString(factAvailability);
     }
 }
