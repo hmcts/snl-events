@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/schema/SL-898-add-hearing-part-table.yaml
   - include:
       file: db/schema/SL-907-add-case-type-column-to-session-table.yaml
+  - include:
+      file: db/schema/SL-915-availability.yaml

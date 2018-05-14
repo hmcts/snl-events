@@ -55,14 +55,14 @@ public class PostDbDataController {
             rulesService.postMessage(RulesService.UPSERT_ROOM, msg);
         }
 
-        for (Availability availability : availabilityRepository.findAll()) {
-            String msg = factsMapper.mapDbAvailabilityToRuleJsonMessage(availability);
-            rulesService.postMessage(RulesService.INSERT_AVAILABILITY, msg);
-        }
-
         for (Person person : personRepository.findPeopleByPersonTypeEqualsIgnoreCase("judge")) {
             String msg = factsMapper.mapDbPersonToRuleJsonMessage(person);
-            rulesService.postMessage(RulesService.INSERT_JUDGE, msg);
+            rulesService.postMessage(RulesService.UPSERT_JUDGE, msg);
+        }
+
+        for (Availability availability : availabilityRepository.findAll()) {
+            String msg = factsMapper.mapDbAvailabilityToRuleJsonMessage(availability);
+            rulesService.postMessage(RulesService.UPSERT_AVAILABILITY, msg);
         }
 
         for (Session session : sessionRepository.findAll()) {

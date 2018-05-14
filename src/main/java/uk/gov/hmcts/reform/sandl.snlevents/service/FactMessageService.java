@@ -37,7 +37,10 @@ public class FactMessageService {
         JsonNode oldFact = item.get("oldFact");
 
         if (oldFact != null) {
-            problemRepository.delete(oldFact.get("id").asText());
+            String id = oldFact.get("id").asText();
+            if (problemRepository.exists(id)) {
+                problemRepository.delete(id);
+            }
         }
 
         if (newFact != null) {

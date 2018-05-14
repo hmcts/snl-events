@@ -42,6 +42,6 @@ public class Person implements Serializable {
     private List<Session> sessionList;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "availability")
+    @OneToMany(mappedBy = "person")
     private List<Availability> availabilityList;
 }
