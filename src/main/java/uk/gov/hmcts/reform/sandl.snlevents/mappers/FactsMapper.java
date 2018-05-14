@@ -70,7 +70,9 @@ public class FactsMapper {
         factHearingPart.setId(hearingPart.getId().toString());
         factHearingPart.setDuration(hearingPart.getDuration());
         factHearingPart.setCaseType(hearingPart.getCaseType());
-        factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        if (hearingPart.getSession() != null) {
+            factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        }
 
         return objectMapper.writeValueAsString(factHearingPart);
     }
