@@ -36,14 +36,14 @@ public class FactMessageService {
         JsonNode newFact = item.get("newFact");
         JsonNode oldFact = item.get("oldFact");
 
-        if (oldFact != null) {
+        if (oldFact != null && !oldFact.isNull()) {
             String id = oldFact.get("id").asText();
             if (problemRepository.exists(id)) {
                 problemRepository.delete(id);
             }
         }
 
-        if (newFact != null) {
+        if (newFact != null && !newFact.isNull()) {
             problem.setId(newFact.get("id").asText());
             problem.setMessage(newFact.get("message").asText());
 
