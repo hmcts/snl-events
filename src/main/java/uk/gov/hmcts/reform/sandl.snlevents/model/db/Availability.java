@@ -1,47 +1,41 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-
-import java.util.List;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.UUID;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person implements Serializable {
+public class Availability implements Serializable {
+
     @Id
     @Getter
     @Setter
-    UUID id;
+    private UUID id;
 
+    @ManyToOne
     @Getter
     @Setter
-    String personType;
+    private Person person;
 
+    @NotNull
     @Getter
     @Setter
-    String name;
+    private OffsetDateTime start;
 
+    @NotNull
     @Getter
     @Setter
-    String username;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "person")
-    private List<Session> sessionList;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "person")
-    private List<Availability> availabilityList;
+    private Duration duration;
 }

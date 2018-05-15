@@ -16,7 +16,11 @@ import java.util.Map;
 @Service
 public class RulesService {
     public static final String INSERT_SESSION = "insert-session";
+    public static final String UPSERT_SESSION = "upsert-session";
     public static final String UPSERT_HEARING_PART = "upsert-hearingPart";
+    public static final String UPSERT_ROOM = "upsert-room";
+    public static final String UPSERT_JUDGE = "upsert-judge";
+    public static final String UPSERT_AVAILABILITY = "upsert-availability";
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
