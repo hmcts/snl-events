@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+        id: create-availability-table
+        author: kpakur
+        changes:
+          - createTable:
+              tableName: availability
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: UUID
+              - column:
+                  name: start
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: duration
+                  type: BIGINT
+              - column:
+                  constraints:
+                    foreignKeyName: fk_availability_person
+                    references: person(id)
+                  name: person_id
+                  type: UUID

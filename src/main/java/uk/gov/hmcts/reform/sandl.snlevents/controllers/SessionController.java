@@ -11,14 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.SessionMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 
@@ -39,30 +35,21 @@ public class SessionController {
     private RulesService rulesService;
 
     @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private SessionMapper sessionMapper;
+    private FactsMapper factsMapper;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<Session> fetchAllSessions() {
+    public @ResponseBody List<Session> fetchAllSessions() {
         return sessionService.getSessions();
     }
 
     @GetMapping(path = "", params = "date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<SessionInfo> fetchSessions(
+    @ResponseBody public List<SessionInfo> fetchSessions(
         @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
         return sessionService.getSessionsFromDate(date);
     }
 
     @GetMapping(path = "", params = {"startDate", "endDate"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    List<SessionInfo> fetchSessionsForDates(
+    @ResponseBody public List<SessionInfo> fetchSessionsForDates(
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
         return sessionService.getSessionsForDates(startDate, endDate);
@@ -71,33 +58,15 @@ public class SessionController {
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
-        String msg = sessionMapper.mapSessionToRuleJsonMessage(createSession);
+        String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
         rulesService.postMessage(RulesService.INSERT_SESSION, msg);
-
-        Session session = new Session();
-        session.setId(createSession.getId());
-        session.setDuration(createSession.getDuration());
-        session.setStart(createSession.getStart());
-        //session.setCaseType(createSession.getCaseType());
-
-        if (createSession.getRoomId() != null) {
-            Room room = roomRepository.findOne(createSession.getRoomId());
-            session.setRoom(room);
-        }
-
-        if (createSession.getPersonId() != null) {
-            Person person = personRepository.findOne(createSession.getPersonId());
-            session.setPerson(person);
-        }
-
-        sessionService.save(session);
+        sessionService.save(createSession);
 
         return ok("OK");
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public List<SessionInfo> getJudgeDiary(
+    @ResponseBody public List<SessionInfo> getJudgeDiary(
         @RequestParam("judge") String judge,
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {

@@ -7,3 +7,9 @@ databaseChangeLog:
       file: db/schema/SL-892-add-person-room-tables.yaml
   - include:
       file: db/schema/SL-878-person-username.yaml
+  - include:
+      file: db/schema/SL-898-add-hearing-part-table.yaml
+  - include:
+      file: db/schema/SL-907-add-case-type-column-to-session-table.yaml
+  - include:
+      file: db/schema/SL-915-availability.yaml

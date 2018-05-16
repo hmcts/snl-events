@@ -8,9 +8,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface SessionRepository extends JpaRepository<Session, Long> {
+public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     @Query("FROM Session WHERE start BETWEEN :dateStart AND :dateEnd")
     List<Session> findSessionByStartDate(@Param("dateStart") OffsetDateTime dateStart,

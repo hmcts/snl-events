@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+        id: add-case-type-field-to-session-table
+        author: remigiuszk
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: case_type
+                  type: varchar(255)
+              tableName: session
