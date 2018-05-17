@@ -8,19 +8,19 @@ management:
 fact-propagation:
   subscribers:
     insert-session:
-      - ${SNL_RULES_URL/msg/rulesDefinition=Sessions:http://localhost:8091/msg?rulesDefinition=Sessions}
-      - ${SNL_RULES_URL/msg/rulesDefinition=Listings:http://localhost:8091/msg?rulesDefinition=Listings}
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
     upsert-session:
-      - ${SNL_RULES_URL/msg/rulesDefinition=Sessions:http://localhost:8091/msg?rulesDefinition=Sessions}
-      - ${SNL_RULES_URL/msg/rulesDefinition=Listings:http://localhost:8091/msg?rulesDefinition=Listings}
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
     upsert-hearingPart:
-      - ${SNL_RULES_URL/msg/rulesDefinition=Listings:http://localhost:8091/msg?rulesDefinition=Listings}
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
     upsert-room:
-      - ${SNL_RULES_URL/msg/rulesDefinition=Sessions:http://localhost:8091/msg?rulesDefinition=Sessions}
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
     upsert-judge:
-      - ${SNL_RULES_URL/msg/rulesDefinition=Sessions:http://localhost:8091/msg?rulesDefinition=Sessions}
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
     upsert-availability:
-      - ${SNL_RULES_URL/msg/rulesDefinition=Sessions:http://localhost:8091/msg?rulesDefinition=Sessions}
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
 
 liquibase:
   enabled: true
