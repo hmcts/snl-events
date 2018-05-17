@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -16,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -35,6 +39,9 @@ public class SessionService {
 
     @Autowired
     private PersonRepository personRepository;
+
+    @Autowired
+    private HearingPartRepository hearingPartRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -72,6 +79,22 @@ public class SessionService {
             .setParameter("dateEnd", toDate)
             .setParameter("judgeUsername", judgeUsername)
             .getResultList();
+    }
+
+    public SessionWithHearings getSessionJudgeDiaryForDates(String judgeUsername, LocalDate startDate, LocalDate endDate) {
+        OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
+        OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
+
+        List<Session> sessions = sessionRepository.findSessionByStartBetweenAndPerson_UsernameEquals(fromDate,
+            toDate, judgeUsername);
+
+        List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(sessions);
+
+        SessionWithHearings sessionWithHearings = new SessionWithHearings();
+        sessionWithHearings.setSessions(sessions);
+        sessionWithHearings.setHearingParts(hearingParts);
+
+        return sessionWithHearings;
     }
 
     public void save(Session session) {

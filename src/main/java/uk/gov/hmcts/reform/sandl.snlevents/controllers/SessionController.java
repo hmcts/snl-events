@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 
@@ -66,10 +67,10 @@ public class SessionController {
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<SessionInfo> getJudgeDiary(
+    @ResponseBody public SessionWithHearings getJudgeDiary(
         @RequestParam("judge") String judge,
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
-        return sessionService.getJudgeDiaryForDates(judge, startDate, endDate);
+        return sessionService.getSessionJudgeDiaryForDates(judge, startDate, endDate);
     }
 }
