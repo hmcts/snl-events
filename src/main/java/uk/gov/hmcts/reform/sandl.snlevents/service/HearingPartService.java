@@ -42,8 +42,10 @@ public class HearingPartService {
 
         Session session = (assignment.getSessionId() == null) ? null :
             sessionRepository.findOne(assignment.getSessionId());
+        UUID sessionId = (session == null) ? null : session.getId();
 
         hearingPart.setSession(session);
+        hearingPart.setSessionId(sessionId);
         hearingPart.setStart(assignment.getStart());
 
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
