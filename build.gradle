@@ -51,7 +51,8 @@ sonarqube {
     property "sonar.projectName", "Reform :: Send Letter Service 2.0"
     property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
     property "sonar.jacoco.itReportPath", "${project.buildDir}/jacoco/integration.exec"
-    property 'sonar.coverage.exclusions', "**/config/**"
+    property 'sonar.coverage.exclusions', "/**/*"
+    property 'sonar.exclusions', '/**/*'
   }
 }
 
