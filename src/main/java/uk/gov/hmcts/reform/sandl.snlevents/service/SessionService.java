@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -81,7 +80,8 @@ public class SessionService {
             .getResultList();
     }
 
-    public SessionWithHearings getSessionJudgeDiaryForDates(String judgeUsername, LocalDate startDate, LocalDate endDate) {
+    public SessionWithHearings getSessionJudgeDiaryForDates(String judgeUsername, LocalDate startDate,
+                                                            LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
 
