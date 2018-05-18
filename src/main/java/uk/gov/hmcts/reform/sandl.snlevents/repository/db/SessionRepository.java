@@ -16,4 +16,8 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
     @Query("FROM Session WHERE start BETWEEN :dateStart AND :dateEnd")
     List<Session> findSessionByStartDate(@Param("dateStart") OffsetDateTime dateStart,
                                                 @Param("dateEnd") OffsetDateTime dateEnd);
+
+    List<Session> findSessionByStartBetweenAndPerson_UsernameEquals(OffsetDateTime startDate,
+                                                               OffsetDateTime endDate,
+                                                               String judge);
 }
