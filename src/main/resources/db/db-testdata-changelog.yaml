@@ -5,12 +5,14 @@ databaseChangeLog:
   - changeSet:
       id: insert-test-sessions
       author: rkruk
+      validCheckSum: ANY
       changes:
         - sqlFile:
             path: db/fixtures/insert-testdata.sql
             splitStatements: false
   - changeSet:
       id: insert-sample-hearings
+      validCheckSum: ANY
       author: rkruk
       changes:
         - sqlFile:
