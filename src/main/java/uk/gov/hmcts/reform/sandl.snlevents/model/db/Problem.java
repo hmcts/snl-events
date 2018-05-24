@@ -21,6 +21,7 @@ public class Problem {
     private String id;
     private String type;
     private String severity;
+    private String message;
 
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProblemReference> references;
