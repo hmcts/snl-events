@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+        id: SL-871-change-schema-of-problem-table
+        author: lgurniewicz
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: type
+                  type: varchar(255)
+              - column:
+                  name: severity
+                  type: varchar(255)
+              tableName: problem
+  - changeSet:
+        id: SL-871-problem-reference-table
+        author: lgurniewicz
+        changes:
+          - createTable:
+              tableName: problem_reference
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: varchar(100)
+              - column:
+                  name: type
+                  type: varchar(100)
+              - column:
+                  name: description
+                  type: varchar(500)
+              - column:
+                  name: problem_id
+                  type: varchar(100)
+          - addForeignKeyConstraint:
+              baseColumnNames: problem_id
+              baseTableName: problem_reference
+              constraintName: fk_problem_reference_problem
+              referencedColumnNames: id
+              referencedTableName: problem
+  - changeSet:
+        id: SL-871-remove-message-from-problem-table
+        author: lgurniewicz
+        changes:
+          - dropColumn:
+              columnName: message
+              tableName: problem

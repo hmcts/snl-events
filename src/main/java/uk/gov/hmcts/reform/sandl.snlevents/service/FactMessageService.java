@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblem;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ public class FactMessageService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    private ProblemRepository problemRepository;
+    private ProblemService problemService;
 
     public FactMessageService() {
         objectMapper = new ObjectMapper();
@@ -30,24 +30,19 @@ public class FactMessageService {
         }
     }
 
-    private void handleProblem(JsonNode item) {
-        Problem problem = new Problem();
-
+    private void handleProblem(JsonNode item) throws IOException {
         JsonNode newFact = item.get("newFact");
         JsonNode oldFact = item.get("oldFact");
 
         if (oldFact != null && !oldFact.isNull()) {
             String id = oldFact.get("id").asText();
-            if (problemRepository.exists(id)) {
-                problemRepository.delete(id);
-            }
+            problemService.removeIfExist(id);
         }
 
         if (newFact != null && !newFact.isNull()) {
-            problem.setId(newFact.get("id").asText());
-            problem.setMessage(newFact.get("message").asText());
-
-            problemRepository.save(problem);
+            CreateProblem createProblem = objectMapper.readValue(newFact.traverse(), CreateProblem.class);
+            Problem problem = problemService.problemCreateToDb.apply(createProblem);
+            problemService.save(problem);
         }
     }
 }
