@@ -1,0 +1,55 @@
+{
+	"info": {
+		"_postman_id": "eaa01fa5-0279-457b-be91-bcba40a9cb77",
+		"name": "HMCTS S&L Events - Problems",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add new problem (body change)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"0819b1f7-d3f2-425d-b48b-5e91b6e356ff\",\n\t\"type\": \"Session_double_booking\",\n\t\"severity\": \"WARN\",\n\t\"references\": [\n\t\t{\n\t\t\t\"id\": \"e7b7bea4-f83f-4a92-b30a-c15282fb6725\",\n\t\t\t\"type\": \"SESSION\",\n\t\t\t\"description\": \"Fake description of S1\"\n\t\t},{\n\t\t\t\"id\": \"98f6a0bf-2646-408e-a270-f44c6e45e748\",\n\t\t\t\"type\": \"SESSION\",\n\t\t\t\"description\": \"Fake description of S2\"\n\t\t}\n\t]\n}"
+				},
+				"url": {
+					"raw": "localhost:8092/problems",
+					"host": [
+						"localhost"
+					],
+					"port": "8092",
+					"path": [
+						"problems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Problem getAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:8092/problems",
+					"host": [
+						"localhost"
+					],
+					"port": "8092",
+					"path": [
+						"problems"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
