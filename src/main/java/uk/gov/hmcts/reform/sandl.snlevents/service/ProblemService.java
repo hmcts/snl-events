@@ -9,13 +9,20 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblemReference;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemReferenceResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ProblemQueries;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 public class ProblemService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private ProblemRepository problemRepository;
@@ -25,6 +32,7 @@ public class ProblemService {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
             response.setId(pr.getId());
             response.setType(pr.getType());
+            response.setTypeId(pr.getTypeId());
             response.setDescription(pr.getDescription());
             response.setProblemId(pr.getProblem().getId());
             return response;
@@ -47,15 +55,16 @@ public class ProblemService {
     private Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
-            transformed.setId(cpr.getId().toString());
+            transformed.setId(UUID.randomUUID().toString());
             transformed.setType(cpr.getType());
+            transformed.setTypeId(cpr.getId());
             transformed.setDescription(cpr.getDescription());
             return transformed;
         };
 
     public Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
-        transformed.setId(cp.getId().toString());
+        transformed.setId(cp.getId());
         transformed.setType(cp.getType());
         transformed.setSeverity(cp.getSeverity());
         transformed.setReferences(
@@ -85,4 +94,16 @@ public class ProblemService {
             problemRepository.delete(id);
         }
     }
+
+    public List<ProblemResponse> getProblemsByReferenceTypeId(String referenceTypeId) {
+        List<Problem> problems = entityManager
+            .createQuery(ProblemQueries.FIND_PROBLEMS_BY_REFERENCE_TYPE_ID_SQL, Problem.class)
+            .setParameter("type_id", referenceTypeId)
+            .getResultList();
+
+        return problems.stream()
+            .map(problemDbToResponse)
+            .collect(Collectors.toList());
+    }
+
 }

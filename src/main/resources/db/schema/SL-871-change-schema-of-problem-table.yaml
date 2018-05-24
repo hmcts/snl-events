@@ -25,6 +25,9 @@ databaseChangeLog:
                   name: id
                   type: varchar(100)
               - column:
+                  name: type_id
+                  type: varchar(100)
+              - column:
                   name: type
                   type: varchar(100)
               - column:
@@ -33,16 +36,16 @@ databaseChangeLog:
               - column:
                   name: problem_id
                   type: varchar(100)
+          - createIndex:
+              columns:
+              - column:
+                  name: type_id
+                  type: varchar(100)
+              indexName: idx_type_id
+              tableName: problem_reference
           - addForeignKeyConstraint:
               baseColumnNames: problem_id
               baseTableName: problem_reference
               constraintName: fk_problem_reference_problem
               referencedColumnNames: id
               referencedTableName: problem
-  - changeSet:
-        id: SL-871-remove-message-from-problem-table
-        author: lgurniewicz
-        changes:
-          - dropColumn:
-              columnName: message
-              tableName: problem
