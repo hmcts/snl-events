@@ -67,6 +67,7 @@ public class ProblemService {
         transformed.setId(cp.getId());
         transformed.setType(cp.getType());
         transformed.setSeverity(cp.getSeverity());
+        transformed.setMessage(cp.getMessage());
         transformed.setReferences(
             cp.getReferences()
                 .stream()
