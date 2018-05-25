@@ -49,3 +49,4 @@ databaseChangeLog:
               constraintName: fk_problem_reference_problem
               referencedColumnNames: id
               referencedTableName: problem
+              onDelete: CASCADE
