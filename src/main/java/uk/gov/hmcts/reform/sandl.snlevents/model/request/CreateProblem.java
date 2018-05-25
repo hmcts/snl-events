@@ -13,5 +13,6 @@ public class CreateProblem {
     private String id;
     private String type;
     private String severity;
+    private String message;
     private List<CreateProblemReference> references;
 }
