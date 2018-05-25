@@ -6,5 +6,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 
 @Repository
 public interface ProblemRepository extends JpaRepository<Problem, String> {
-
+    String FIND_PROBLEMS_BY_REFERENCE_TYPE_ID_SQL =
+        "SELECT problem "
+            + "FROM Problem problem LEFT OUTER JOIN problem.references as pr "
+            + "WHERE pr.typeId = :type_id";
 }

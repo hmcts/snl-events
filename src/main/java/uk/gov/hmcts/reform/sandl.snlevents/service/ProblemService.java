@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblemReference;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemReferenceResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ProblemQueries;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -97,7 +96,7 @@ public class ProblemService {
 
     public List<ProblemResponse> getProblemsByReferenceTypeId(String referenceTypeId) {
         List<Problem> problems = entityManager
-            .createQuery(ProblemQueries.FIND_PROBLEMS_BY_REFERENCE_TYPE_ID_SQL, Problem.class)
+            .createQuery(problemRepository.FIND_PROBLEMS_BY_REFERENCE_TYPE_ID_SQL, Problem.class)
             .setParameter("type_id", referenceTypeId)
             .getResultList();
 
