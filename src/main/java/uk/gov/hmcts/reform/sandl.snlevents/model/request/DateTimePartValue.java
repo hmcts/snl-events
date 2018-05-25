@@ -9,8 +9,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Time implements Serializable {
+public class DateTimePartValue implements Serializable {
     String timeType;
-    String id;
     int value;
 }

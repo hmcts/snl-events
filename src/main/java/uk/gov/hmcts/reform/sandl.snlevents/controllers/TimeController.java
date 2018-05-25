@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.Time;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.io.IOException;
@@ -21,9 +21,10 @@ public class TimeController {
     FactsMapper factsMapper;
 
     @PutMapping("/time")
-    public ResponseEntity upsertTime(@RequestBody Time time) throws IOException {
+    public ResponseEntity upsert(@RequestBody DateTimePartValue dateTimePartValue) throws IOException {
 
-        rulesService.postMessage(time.getTimeType(), factsMapper.mapTimeToRuleJsonMessage(time));
+        rulesService.postMessage(String.format("upsert-%s", dateTimePartValue.getTimeType()),
+            factsMapper.mapTimeToRuleJsonMessage(dateTimePartValue));
 
         return ResponseEntity.ok("OK");
     }

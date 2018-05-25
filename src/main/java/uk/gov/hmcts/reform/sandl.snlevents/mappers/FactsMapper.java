@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.Time;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactPerson;
@@ -139,10 +139,9 @@ public class FactsMapper {
         return objectMapper.writeValueAsString(factAvailability);
     }
 
-    public String mapTimeToRuleJsonMessage(Time time) throws JsonProcessingException {
+    public String mapTimeToRuleJsonMessage(DateTimePartValue dateTimePartValue) throws JsonProcessingException {
         FactTime factTime = new FactTime();
-        factTime.setId(time.getId());
-        factTime.setValue(time.getValue());
+        factTime.setValue(dateTimePartValue.getValue());
 
         return objectMapper.writeValueAsString(factTime);
     }
