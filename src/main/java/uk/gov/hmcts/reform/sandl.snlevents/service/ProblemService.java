@@ -27,7 +27,7 @@ public class ProblemService {
     @Autowired
     private ProblemRepository problemRepository;
 
-    private Function<ProblemReference, ProblemReferenceResponse> problemReferenceDbToResponse =
+    private final Function<ProblemReference, ProblemReferenceResponse> problemReferenceDbToResponse =
         (ProblemReference pr) -> {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
             response.setId(pr.getId());
@@ -38,7 +38,7 @@ public class ProblemService {
             return response;
         };
 
-    public Function<Problem, ProblemResponse> problemDbToResponse = (Problem p) -> {
+    public final Function<Problem, ProblemResponse> problemDbToResponse = (Problem p) -> {
         ProblemResponse response = new ProblemResponse();
         response.setId(p.getId());
         response.setType(p.getType());
@@ -52,7 +52,7 @@ public class ProblemService {
         return response;
     };
 
-    private Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
+    private final Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
             transformed.setId(UUID.randomUUID().toString());
@@ -62,7 +62,7 @@ public class ProblemService {
             return transformed;
         };
 
-    public Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
+    public final Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
         transformed.setId(cp.getId());
         transformed.setType(cp.getType());
