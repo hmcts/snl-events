@@ -15,17 +15,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 @Service
 public class ProblemService {
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @Autowired
-    private ProblemRepository problemRepository;
 
     private final Function<ProblemReference, ProblemReferenceResponse> problemReferenceDbToResponse =
         (ProblemReference pr) -> {
@@ -37,7 +29,6 @@ public class ProblemService {
             response.setProblemId(pr.getProblem().getId());
             return response;
         };
-
     public final Function<Problem, ProblemResponse> problemDbToResponse = (Problem p) -> {
         ProblemResponse response = new ProblemResponse();
         response.setId(p.getId());
@@ -51,7 +42,6 @@ public class ProblemService {
         );
         return response;
     };
-
     private final Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
@@ -61,7 +51,6 @@ public class ProblemService {
             transformed.setDescription(cpr.getDescription());
             return transformed;
         };
-
     public final Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
         transformed.setId(cp.getId());
@@ -77,6 +66,8 @@ public class ProblemService {
         transformed.getReferences().forEach(pr -> pr.setProblem(transformed));
         return transformed;
     };
+    @Autowired
+    private ProblemRepository problemRepository;
 
     public List<ProblemResponse> getProblems() {
         final List<Problem> problems = problemRepository.findAll();
@@ -97,11 +88,7 @@ public class ProblemService {
     }
 
     public List<ProblemResponse> getProblemsByReferenceTypeId(String referenceEntityId) {
-        List<Problem> problems = entityManager
-            .createQuery(problemRepository.FIND_PROBLEMS_BY_REFERENCE_TYPE_ID_SQL, Problem.class)
-            .setParameter("entity_id", referenceEntityId)
-            .getResultList();
-
+        List<Problem> problems = problemRepository.getProblemsByReferenceEntityId(referenceEntityId);
         return problems.stream()
             .map(problemDbToResponse)
             .collect(Collectors.toList());
