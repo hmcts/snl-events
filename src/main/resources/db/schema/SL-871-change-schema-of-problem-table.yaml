@@ -25,10 +25,10 @@ databaseChangeLog:
                   name: id
                   type: varchar(100)
               - column:
-                  name: type_id
+                  name: entity_id
                   type: varchar(100)
               - column:
-                  name: type
+                  name: entity
                   type: varchar(100)
               - column:
                   name: description
@@ -39,9 +39,9 @@ databaseChangeLog:
           - createIndex:
               columns:
               - column:
-                  name: type_id
+                  name: entity_id
                   type: varchar(100)
-              indexName: idx_type_id
+              indexName: idx_entity_id
               tableName: problem_reference
           - addForeignKeyConstraint:
               baseColumnNames: problem_id

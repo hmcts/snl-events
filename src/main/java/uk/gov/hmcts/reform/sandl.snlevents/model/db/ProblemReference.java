@@ -20,9 +20,9 @@ import javax.persistence.ManyToOne;
 public class ProblemReference {
     @Id
     private String id;
-    private String type;
-    @Column(name = "type_id")
-    private String typeId;
+    private String entity;
+    @Column(name = "entity_id")
+    private String entityId;
     private String description;
 
     @Getter

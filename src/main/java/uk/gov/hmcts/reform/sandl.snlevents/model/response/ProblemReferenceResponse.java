@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProblemReferenceResponse {
     private String id;
-    private String type;
-    @JsonProperty("type_id")
-    private String typeId;
+    private String entity;
+    @JsonProperty("entity_id")
+    private String entityId;
     private String description;
     @JsonProperty("problem_id")
     private String problemId;

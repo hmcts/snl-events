@@ -25,9 +25,9 @@ public class ProblemController {
         return problemService.getProblems();
     }
 
-    @GetMapping(path = "by-reference-type-id", params = "id", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "by-entity-id", params = "id", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    List<ProblemResponse> getProblemsByReferenceTypeId(@RequestParam("id") String id) {
+    List<ProblemResponse> getProblemsByReferenceEntityId(@RequestParam("id") String id) {
         return problemService.getProblemsByReferenceTypeId(id);
     }
 }

@@ -9,13 +9,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblemReference;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemReferenceResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.transformers.FactTransformer;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 @Service
 public class ProblemService {
@@ -30,8 +31,8 @@ public class ProblemService {
         (ProblemReference pr) -> {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
             response.setId(pr.getId());
-            response.setType(pr.getType());
-            response.setTypeId(pr.getTypeId());
+            response.setEntity(pr.getEntity());
+            response.setEntityId(pr.getEntityId());
             response.setDescription(pr.getDescription());
             response.setProblemId(pr.getProblem().getId());
             return response;
@@ -55,8 +56,8 @@ public class ProblemService {
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
             transformed.setId(UUID.randomUUID().toString());
-            transformed.setType(cpr.getType());
-            transformed.setTypeId(cpr.getId());
+            transformed.setEntity(FactTransformer.transformToEntityName(cpr.getFact()));
+            transformed.setEntityId(cpr.getFactId());
             transformed.setDescription(cpr.getDescription());
             return transformed;
         };
@@ -95,15 +96,16 @@ public class ProblemService {
         }
     }
 
-    public List<ProblemResponse> getProblemsByReferenceTypeId(String referenceTypeId) {
+    public List<ProblemResponse> getProblemsByReferenceTypeId(String referenceEntityId) {
         List<Problem> problems = entityManager
             .createQuery(problemRepository.FIND_PROBLEMS_BY_REFERENCE_TYPE_ID_SQL, Problem.class)
-            .setParameter("type_id", referenceTypeId)
+            .setParameter("entity_id", referenceEntityId)
             .getResultList();
 
         return problems.stream()
             .map(problemDbToResponse)
             .collect(Collectors.toList());
     }
+
 
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateProblemReference {
-    private String id; // type id
-    private String type;
+    private String factId; // type id
+    private String fact;
     private String description;
 }
