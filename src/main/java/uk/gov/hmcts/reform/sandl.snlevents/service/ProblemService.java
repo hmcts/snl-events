@@ -23,7 +23,6 @@ public class ProblemService {
         (ProblemReference pr) -> {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
 
-            response.setId(pr.getId());
             response.setEntity(pr.getEntity());
             response.setEntityId(pr.getEntityId());
             response.setDescription(pr.getDescription());
@@ -50,7 +49,6 @@ public class ProblemService {
     private final Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
-            transformed.setId(UUID.randomUUID().toString());
             transformed.setEntity(FactTransformer.transformToEntityName(cpr.getFact()));
             transformed.setEntityId(cpr.getFactId());
             transformed.setDescription(cpr.getDescription());
