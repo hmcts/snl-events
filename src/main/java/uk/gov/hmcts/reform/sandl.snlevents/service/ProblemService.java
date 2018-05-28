@@ -22,15 +22,19 @@ public class ProblemService {
     private final Function<ProblemReference, ProblemReferenceResponse> problemReferenceDbToResponse =
         (ProblemReference pr) -> {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
+
             response.setId(pr.getId());
             response.setEntity(pr.getEntity());
             response.setEntityId(pr.getEntityId());
             response.setDescription(pr.getDescription());
-            response.setProblemId(pr.getProblem().getId());
+            // response.setProblemId(pr.getProblem().getId());
+
             return response;
         };
+
     public final Function<Problem, ProblemResponse> problemDbToResponse = (Problem p) -> {
         ProblemResponse response = new ProblemResponse();
+
         response.setId(p.getId());
         response.setType(p.getType());
         response.setSeverity(p.getSeverity());
@@ -40,8 +44,10 @@ public class ProblemService {
                 .map(problemReferenceDbToResponse)
                 .collect(Collectors.<ProblemReferenceResponse>toList())
         );
+
         return response;
     };
+
     private final Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
@@ -49,10 +55,13 @@ public class ProblemService {
             transformed.setEntity(FactTransformer.transformToEntityName(cpr.getFact()));
             transformed.setEntityId(cpr.getFactId());
             transformed.setDescription(cpr.getDescription());
+
             return transformed;
         };
+
     public final Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
+
         transformed.setId(cp.getId());
         transformed.setType(cp.getType());
         transformed.setSeverity(cp.getSeverity());
@@ -63,9 +72,11 @@ public class ProblemService {
                 .map(problemReferenceCreateToDb)
                 .collect(Collectors.<ProblemReference>toList())
         );
-        transformed.getReferences().forEach(pr -> pr.setProblem(transformed));
+        // transformed.getReferences().forEach(pr -> pr.setProblem(transformed));
+
         return transformed;
     };
+
     @Autowired
     private ProblemRepository problemRepository;
 
