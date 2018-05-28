@@ -27,7 +27,6 @@ public class ProblemService {
             response.setEntity(pr.getEntity());
             response.setEntityId(pr.getEntityId());
             response.setDescription(pr.getDescription());
-            // response.setProblemId(pr.getProblem().getId());
 
             return response;
         };
@@ -72,7 +71,6 @@ public class ProblemService {
                 .map(problemReferenceCreateToDb)
                 .collect(Collectors.<ProblemReference>toList())
         );
-        // transformed.getReferences().forEach(pr -> pr.setProblem(transformed));
 
         return transformed;
     };
