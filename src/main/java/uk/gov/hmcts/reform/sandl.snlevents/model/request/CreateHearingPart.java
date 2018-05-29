@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -25,7 +25,9 @@ public class CreateHearingPart {
 
     private Duration duration;
 
-    private LocalDate scheduleStart;
+    private OffsetDateTime scheduleStart;
 
-    private LocalDate scheduleEnd;
+    private OffsetDateTime scheduleEnd;
+
+    private OffsetDateTime createdAt;
 }

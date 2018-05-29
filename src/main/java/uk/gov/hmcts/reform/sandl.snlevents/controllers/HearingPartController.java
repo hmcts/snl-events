@@ -56,6 +56,7 @@ public class HearingPartController {
         hearingPart.setDuration(createHearingPart.getDuration());
         hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
+        hearingPart.setCreatedAt(createHearingPart.getCreatedAt());
 
         return ok(hearingPartService.save(hearingPart));
     }

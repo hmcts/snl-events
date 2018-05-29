@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+        id: SL-934-change-date-to-date-time
+        author: rkruk
+        changes:
+          - modifyDataType:
+              columnName: schedule_start
+              newDataType: timestamp with time zone
+              tableName: hearing_part
+          - modifyDataType:
+              columnName: schedule_end
+              newDataType: timestamp with time zone
+              tableName: hearing_part
+  - changeSet:
+          id: SL-934-add-created-at-column-to-hearing
+          author: rkruk
+          changes:
+            - addColumn:
+                columns:
+                - column:
+                    name: created_at
+                    type: timestamp with time zone
+                tableName: hearing_part

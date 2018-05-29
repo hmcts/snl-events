@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -51,11 +50,11 @@ public class HearingPart implements Serializable {
 
     @Getter
     @Setter
-    private LocalDate scheduleStart;
+    private OffsetDateTime scheduleStart;
 
     @Getter
     @Setter
-    private LocalDate scheduleEnd;
+    private OffsetDateTime scheduleEnd;
 
     @Getter
     @Setter
@@ -72,4 +71,8 @@ public class HearingPart implements Serializable {
     @Getter
     @Setter
     private OffsetDateTime start;
+
+    @Getter
+    @Setter
+    private OffsetDateTime createdAt;
 }

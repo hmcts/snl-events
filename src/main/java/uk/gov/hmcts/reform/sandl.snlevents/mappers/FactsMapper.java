@@ -69,6 +69,9 @@ public class FactsMapper {
         factHearingPart.setId(createHearingPart.getId().toString());
         factHearingPart.setDuration(createHearingPart.getDuration());
         factHearingPart.setCaseType(createHearingPart.getCaseType());
+        factHearingPart.setScheduleStart(createHearingPart.getScheduleStart());
+        factHearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
+        factHearingPart.setCreatedAt(createHearingPart.getCreatedAt());
 
         return objectMapper.writeValueAsString(factHearingPart);
     }
@@ -101,6 +104,9 @@ public class FactsMapper {
         factHearingPart.setId(hearingPart.getId().toString());
         factHearingPart.setDuration(hearingPart.getDuration());
         factHearingPart.setCaseType(hearingPart.getCaseType());
+        factHearingPart.setScheduleStart(hearingPart.getScheduleStart());
+        factHearingPart.setScheduleEnd(hearingPart.getScheduleEnd());
+        factHearingPart.setCreatedAt(hearingPart.getCreatedAt());
         if (hearingPart.getSession() != null) {
             factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
         }
