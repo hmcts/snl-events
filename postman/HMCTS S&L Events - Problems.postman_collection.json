@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "e96f1cec-c68f-4bf4-a4bf-81b0dd821f42",
+		"name": "HMCTS S&L Events - Problems",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Problem getAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8092/problems",
+					"host": [
+						"localhost"
+					],
+					"port": "8092",
+					"path": [
+						"problems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Problem for given entity id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:8092/problems/by-entity-id?id=b5bc80ec-8306-4f0f-8c6e-af218bb116c2",
+					"host": [
+						"localhost"
+					],
+					"port": "8092",
+					"path": [
+						"problems",
+						"by-entity-id"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "b5bc80ec-8306-4f0f-8c6e-af218bb116c2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

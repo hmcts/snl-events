@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -47,6 +48,10 @@ public class SessionService {
 
     public List getSessions() {
         return sessionRepository.findAll();
+    }
+
+    public Session getSessionById(UUID id) {
+        return sessionRepository.findOne(id);
     }
 
     public List getSessionsFromDate(LocalDate localDate) {
