@@ -11,7 +11,6 @@ import javax.persistence.Embeddable;
 @NoArgsConstructor
 @Embeddable
 public class ProblemReference {
-    private String id;
     private String entity;
     private String entityId;
     private String description;
