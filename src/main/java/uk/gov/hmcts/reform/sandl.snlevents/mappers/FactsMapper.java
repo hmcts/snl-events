@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 
 import static com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES;
 import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
@@ -71,7 +72,11 @@ public class FactsMapper {
         factHearingPart.setCaseType(createHearingPart.getCaseType());
         factHearingPart.setScheduleStart(createHearingPart.getScheduleStart());
         factHearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
-        factHearingPart.setCreatedAt(createHearingPart.getCreatedAt());
+        if (createHearingPart.getCreatedAt() == null) {
+            factHearingPart.setCreatedAt(OffsetDateTime.now());
+        } else {
+            factHearingPart.setCreatedAt(createHearingPart.getCreatedAt());
+        }
 
         return objectMapper.writeValueAsString(factHearingPart);
     }
