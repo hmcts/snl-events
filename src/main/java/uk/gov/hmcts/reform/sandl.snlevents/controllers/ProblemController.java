@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.List;
 
@@ -26,5 +27,10 @@ public class ProblemController {
     @GetMapping(path = "by-entity-id", params = "id", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ProblemResponse> getProblemsByReferenceEntityId(@RequestParam("id") String id) {
         return problemService.getProblemsByReferenceTypeId(id);
+    }
+
+    @GetMapping(path = "by-user-transaction-id", params = "id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ProblemResponse> getProblemsByUserTransactionId(@RequestParam("id") String id) {
+        return problemService.getProblemsByUserTransactionId(id);
     }
 }

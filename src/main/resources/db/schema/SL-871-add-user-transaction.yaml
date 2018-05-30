@@ -19,3 +19,35 @@ databaseChangeLog:
               - column:
                   name: original_data
                   type: VARCHAR(5000)
+  - changeSet:
+        id: add-rulesprocessingstatus-to-user-transaction-table
+        author: kpakur
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: rules_processing_status
+                  type: varchar(20)
+              tableName: user_transaction
+
+  - changeSet:
+        id: add-transactionid-to-problem-table
+        author: kpakur
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: user_transaction_id
+                  type: UUID
+              tableName: problem
+
+  - changeSet:
+        id: addfk-transaction-to-problem-table
+        author: kpakur
+        changes:
+          - addForeignKeyConstraint:
+              baseColumnNames: user_transaction_id
+              baseTableName: problem
+              constraintName: fk_problem_user_transaction
+              referencedColumnNames: id
+              referencedTableName: user_transaction

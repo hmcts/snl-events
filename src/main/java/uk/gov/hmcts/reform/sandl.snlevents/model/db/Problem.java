@@ -5,12 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-
 
 @Entity
 @Data
@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 public class Problem {
     @Id
     private String id;
+    private UUID userTransactionId;
     private String type;
     private String severity;
     private String message;

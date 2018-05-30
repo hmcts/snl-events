@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -27,6 +27,11 @@ public class UserTransaction implements Serializable {
     @Setter
     @Enumerated(EnumType.STRING)
     private UserTransactionStatus status;
+
+    @Getter
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private UserTransactionRulesProcessingStatus rulesProcessingStatus;
 
     @Getter
     @Setter

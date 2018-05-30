@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -36,6 +37,9 @@ public class SessionController {
 
     @Autowired
     private RulesService rulesService;
+
+    @Autowired
+    private UserTransactionService userTransactionService;
 
     @Autowired
     private FactsMapper factsMapper;
@@ -67,10 +71,16 @@ public class SessionController {
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
-        rulesService.postMessage(RulesService.INSERT_SESSION, msg);
-        UserTransaction us = sessionService.save(createSession);
 
-        return ok(us.getId());
+        UserTransaction ut = userTransactionService.startTransaction(
+            createSession.getUserTransactionId());
+        Session s = sessionService.save(createSession);
+
+        rulesService.postMessage(ut.getId(), RulesService.INSERT_SESSION, msg);
+
+        ut = userTransactionService.rulesProcessed(ut);
+
+        return ok(ut.getId());
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)

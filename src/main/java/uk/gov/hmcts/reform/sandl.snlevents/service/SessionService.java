@@ -2,13 +2,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -27,7 +24,6 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_FOR_JUDGE_DIARY_SQL;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_INFO_SQL;
@@ -113,8 +109,7 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-    @Transactional
-    public UserTransaction save(CreateSession createSession) {
+    public Session save(CreateSession createSession) {
         Session session = new Session();
         session.setId(createSession.getId());
         session.setDuration(createSession.getDuration());
@@ -131,9 +126,6 @@ public class SessionService {
             session.setPerson(person);
         }
 
-        UserTransaction ut = new UserTransaction(createSession.getId(), UserTransactionStatus.COMMITTED, null);
-
-        this.save(session);
-        return userTransactionRepository.save(ut);
+        return this.save(session);
     }
 }
