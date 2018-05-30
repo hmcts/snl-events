@@ -102,11 +102,11 @@ public class SessionService {
         return sessionWithHearings;
     }
 
-    public void save(Session session) {
-        sessionRepository.save(session);
+    public Session save(Session session) {
+        return sessionRepository.save(session);
     }
 
-    public void save(CreateSession createSession) {
+    public Session save(CreateSession createSession) {
         Session session = new Session();
         session.setId(createSession.getId());
         session.setDuration(createSession.getDuration());
@@ -123,6 +123,6 @@ public class SessionService {
             session.setPerson(person);
         }
 
-        this.save(session);
+        return this.save(session);
     }
 }

@@ -67,9 +67,9 @@ public class SessionController {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
         rulesService.postMessage(RulesService.INSERT_SESSION, msg);
-        sessionService.save(createSession);
+        Session s = sessionService.save(createSession);
 
-        return ok("OK");
+        return ok(s.getId());
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
