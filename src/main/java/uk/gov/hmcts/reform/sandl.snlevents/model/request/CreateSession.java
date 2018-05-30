@@ -14,6 +14,8 @@ import java.util.UUID;
 public class CreateSession {
     private UUID id;
 
+    private UUID userTransactionId;
+
     private OffsetDateTime start;
 
     private Duration duration;
@@ -23,9 +25,4 @@ public class CreateSession {
     private UUID personId;
 
     private UUID roomId;
-
-    public UUID getUserTransactionId() {
-        // temporary solution to use session id
-        return this.id;
-    }
 }
