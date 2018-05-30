@@ -6,9 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.UUID;
@@ -19,12 +17,6 @@ public class UserTransactionController {
 
     @Autowired
     private UserTransactionService userTransactionService;
-
-    @Autowired
-    private RulesService rulesService;
-
-    @Autowired
-    private FactsMapper factsMapper;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserTransaction getUserTransactionById(@PathVariable("id") UUID id) {

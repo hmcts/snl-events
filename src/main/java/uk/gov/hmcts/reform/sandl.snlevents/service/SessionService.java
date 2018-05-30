@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -42,9 +40,6 @@ public class SessionService {
 
     @Autowired
     private HearingPartRepository hearingPartRepository;
-
-    @Autowired
-    private UserTransactionRepository userTransactionRepository;
 
     @PersistenceContext
     EntityManager entityManager;

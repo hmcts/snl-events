@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
-import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.List;
 import java.util.UUID;

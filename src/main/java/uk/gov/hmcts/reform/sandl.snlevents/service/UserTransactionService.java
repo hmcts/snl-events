@@ -5,10 +5,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionRulesProcessingStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionStatus;
-import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service

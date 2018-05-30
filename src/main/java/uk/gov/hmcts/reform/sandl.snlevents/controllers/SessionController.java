@@ -74,7 +74,7 @@ public class SessionController {
 
         UserTransaction ut = userTransactionService.startTransaction(
             createSession.getUserTransactionId());
-        Session s = sessionService.save(createSession);
+        sessionService.save(createSession);
 
         rulesService.postMessage(ut.getId(), RulesService.INSERT_SESSION, msg);
 

@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
