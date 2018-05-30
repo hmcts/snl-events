@@ -131,7 +131,7 @@ public class SessionService {
             session.setPerson(person);
         }
 
-        UserTransaction ut = new UserTransaction(createSession.getId(), UserTransactionStatus.STARTED, null);
+        UserTransaction ut = new UserTransaction(createSession.getId(), UserTransactionStatus.COMMITTED, null);
 
         this.save(session);
         return userTransactionRepository.save(ut);
