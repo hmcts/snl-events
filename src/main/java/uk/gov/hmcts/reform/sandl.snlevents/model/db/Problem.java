@@ -18,7 +18,7 @@ import javax.persistence.JoinColumn;
 @NoArgsConstructor
 public class Problem {
     @Id
-    private String id;
+    private String id; // This is MD5 Hash, NOT UUID! It is to handle the deterministic nature of our rules
     private UUID userTransactionId;
     private String type;
     private String severity;

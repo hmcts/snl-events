@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface ProblemRepository extends JpaRepository<Problem, String> {
@@ -17,7 +18,7 @@ public interface ProblemRepository extends JpaRepository<Problem, String> {
     List<Problem> getProblemsByReferenceEntityId(@Param("entity_id") String entityId);
 
     @Query("SELECT problem "
-        + "FROM Problem problem LEFT OUTER JOIN problem.references as pr "
+        + "FROM Problem problem "
         + "WHERE problem.userTransactionId = :user_transaction_id")
-    List<Problem> getProblemsByUserTransactionId(@Param("user_transaction_id") String userTransactionId);
+    List<Problem> getProblemsByUserTransactionId(@Param("user_transaction_id") UUID userTransactionId);
 }

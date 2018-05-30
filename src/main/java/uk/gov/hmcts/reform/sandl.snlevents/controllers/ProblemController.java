@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/problems")
@@ -30,7 +31,7 @@ public class ProblemController {
     }
 
     @GetMapping(path = "by-user-transaction-id", params = "id", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ProblemResponse> getProblemsByUserTransactionId(@RequestParam("id") String id) {
+    public List<ProblemResponse> getProblemsByUserTransactionId(@RequestParam("id") UUID id) {
         return problemService.getProblemsByUserTransactionId(id);
     }
 }

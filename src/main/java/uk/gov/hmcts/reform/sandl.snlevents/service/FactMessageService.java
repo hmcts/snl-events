@@ -44,7 +44,7 @@ public class FactMessageService {
             CreateProblem createProblem = objectMapper.readValue(newFact.traverse(), CreateProblem.class);
             Problem problem = problemService.problemCreateToDb.apply(createProblem);
             if (userTransactionId != null) {
-                // connect transaction with problem
+                problem.setUserTransactionId(userTransactionId);
             }
             problemService.save(problem);
         }

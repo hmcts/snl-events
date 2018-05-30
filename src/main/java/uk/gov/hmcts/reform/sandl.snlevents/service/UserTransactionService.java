@@ -18,7 +18,7 @@ public class UserTransactionService {
     private UserTransactionRepository userTransactionRepository;
 
     public UserTransaction getUserTransactionById(UUID id) {
-        return userTransactionRepository.getOne(id);
+        return userTransactionRepository.findOne(id);
     }
 
     public UserTransaction startTransaction(UUID transactionId) {

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.transformers.FactTransformer;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ public class ProblemService {
     }
 
 
-    public List<ProblemResponse> getProblemsByUserTransactionId(String userTransactionId) {
+    public List<ProblemResponse> getProblemsByUserTransactionId(UUID userTransactionId) {
         List<Problem> problems = problemRepository.getProblemsByUserTransactionId(userTransactionId);
         return problems.stream()
             .map(problemDbToResponse)
