@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 
 import static com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES;
 import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
@@ -69,6 +70,13 @@ public class FactsMapper {
         factHearingPart.setId(createHearingPart.getId().toString());
         factHearingPart.setDuration(createHearingPart.getDuration());
         factHearingPart.setCaseType(createHearingPart.getCaseType());
+        factHearingPart.setScheduleStart(createHearingPart.getScheduleStart());
+        factHearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
+        if (createHearingPart.getCreatedAt() == null) {
+            factHearingPart.setCreatedAt(OffsetDateTime.now());
+        } else {
+            factHearingPart.setCreatedAt(createHearingPart.getCreatedAt());
+        }
 
         return objectMapper.writeValueAsString(factHearingPart);
     }
@@ -101,6 +109,9 @@ public class FactsMapper {
         factHearingPart.setId(hearingPart.getId().toString());
         factHearingPart.setDuration(hearingPart.getDuration());
         factHearingPart.setCaseType(hearingPart.getCaseType());
+        factHearingPart.setScheduleStart(hearingPart.getScheduleStart());
+        factHearingPart.setScheduleEnd(hearingPart.getScheduleEnd());
+        factHearingPart.setCreatedAt(hearingPart.getCreatedAt());
         if (hearingPart.getSession() != null) {
             factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
         }

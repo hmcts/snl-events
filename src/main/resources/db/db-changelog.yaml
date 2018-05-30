@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/schema/SL-871-change-schema-of-problem-table.yaml
   - include:
       file: db/schema/SL-934-additional-rules.yaml
+  - include:
+      file: db/schema/SL-934-new-rules-db-changes.yaml
