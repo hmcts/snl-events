@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -67,9 +68,9 @@ public class SessionController {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
         rulesService.postMessage(RulesService.INSERT_SESSION, msg);
-        Session s = sessionService.save(createSession);
+        UserTransaction us = sessionService.save(createSession);
 
-        return ok(s.getId());
+        return ok(us.getId());
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,6 +27,7 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_FOR_JUDGE_DIARY_SQL;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_INFO_SQL;
@@ -42,6 +46,9 @@ public class SessionService {
 
     @Autowired
     private HearingPartRepository hearingPartRepository;
+
+    @Autowired
+    private UserTransactionRepository userTransactionRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -106,7 +113,8 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-    public Session save(CreateSession createSession) {
+    @Transactional
+    public UserTransaction save(CreateSession createSession) {
         Session session = new Session();
         session.setId(createSession.getId());
         session.setDuration(createSession.getDuration());
@@ -123,6 +131,9 @@ public class SessionService {
             session.setPerson(person);
         }
 
-        return this.save(session);
+        UserTransaction ut = new UserTransaction(createSession.getId(), UserTransactionStatus.STARTED, null);
+
+        this.save(session);
+        return userTransactionRepository.save(ut);
     }
 }

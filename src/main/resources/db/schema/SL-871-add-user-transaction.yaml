@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+        id: create-user-transaction-table
+        author: kpakur
+        changes:
+          - createTable:
+              tableName: user_transaction
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: status
+                  type: VARCHAR(20)
+              - column:
+                  name: original_data
+                  type: VARCHAR(5000)

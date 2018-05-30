@@ -23,4 +23,9 @@ public class CreateSession {
     private UUID personId;
 
     private UUID roomId;
+
+    public UUID getUserTransactionId() {
+        // temporary solution to use session id
+        return this.id;
+    }
 }
