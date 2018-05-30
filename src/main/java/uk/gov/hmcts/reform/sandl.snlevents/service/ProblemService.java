@@ -35,6 +35,7 @@ public class ProblemService {
 
         response.setId(p.getId());
         response.setType(p.getType());
+        response.setMessage(p.getMessage());
         response.setSeverity(p.getSeverity());
         response.setReferences(
             p.getReferences()
