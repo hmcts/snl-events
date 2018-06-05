@@ -1,12 +1,13 @@
 package uk.gov.hmcts.reform.sandl.snlevents.transformers;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
-public class FactTransformer {
-    private FactTransformer(){} // for checkstyle compliance
-
+public final class FactTransformer {
     private static Map<String, String> nonDirectFactsToEntityMap;
+
+    private FactTransformer(){} // for checkstyle compliance
 
     static {
         nonDirectFactsToEntityMap = new HashMap<>();
@@ -14,11 +15,11 @@ public class FactTransformer {
     }
 
     public static String transformToEntityName(String fact) {
-        fact = fact.toLowerCase();
-        String entityName = FactTransformer.nonDirectFactsToEntityMap.get(fact);
+        String factForEntity = fact.toLowerCase(Locale.ENGLISH);
+        String entityName = FactTransformer.nonDirectFactsToEntityMap.get(factForEntity);
         if (entityName == null) {
             //system will map only special cases
-            entityName = fact;
+            entityName = factForEntity;
         }
         return entityName;
     }

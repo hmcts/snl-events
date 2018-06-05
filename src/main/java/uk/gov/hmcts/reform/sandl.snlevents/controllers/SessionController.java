@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -35,6 +37,9 @@ public class SessionController {
 
     @Autowired
     private RulesService rulesService;
+
+    @Autowired
+    private UserTransactionService userTransactionService;
 
     @Autowired
     private FactsMapper factsMapper;
@@ -66,10 +71,16 @@ public class SessionController {
     public ResponseEntity insertSession(@RequestBody CreateSession createSession) throws IOException {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(createSession);
-        rulesService.postMessage(RulesService.INSERT_SESSION, msg);
-        Session s = sessionService.save(createSession);
 
-        return ok(s.getId());
+        UserTransaction ut = userTransactionService.startTransaction(
+            createSession.getUserTransactionId());
+        sessionService.save(createSession);
+
+        rulesService.postMessage(ut.getId(), RulesService.INSERT_SESSION, msg);
+
+        ut = userTransactionService.rulesProcessed(ut);
+
+        return ok(ut.getId());
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)

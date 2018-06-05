@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class RulesService {
@@ -33,10 +34,15 @@ public class RulesService {
     private SubscribersConfiguration subscribersConfiguration;
 
     public void postMessage(String msgType, String msgData) throws IOException {
-        postToSubscribers(new FactMessage(msgType, msgData));
+        postToSubscribers(null, new FactMessage(msgType, msgData));
     }
 
-    private void postToSubscribers(FactMessage msg) throws IOException {
+    public void postMessage(UUID userTransactionId,
+                            String msgType, String msgData) throws IOException {
+        postToSubscribers(userTransactionId, new FactMessage(msgType, msgData));
+    }
+
+    private void postToSubscribers(UUID userTransactionId, FactMessage msg) throws IOException {
         Map<String, List<String>> subscribers = subscribersConfiguration.getSubscribers();
 
         if (subscribers.containsKey(msg.getType())) {
@@ -44,7 +50,7 @@ public class RulesService {
             for (String endpoint : subscribersEndpoints) {
                 logger.debug("Sending message type {} to {}", msg.getType(), endpoint);
                 ResponseEntity<String> factMsg = restTemplate.postForEntity(endpoint, msg, String.class);
-                factMessageService.handle(factMsg.getBody());
+                factMessageService.handle(userTransactionId, factMsg.getBody());
             }
         }
     }

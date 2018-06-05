@@ -103,4 +103,10 @@ public class ProblemService {
     }
 
 
+    public List<ProblemResponse> getProblemsByUserTransactionId(UUID userTransactionId) {
+        List<Problem> problems = problemRepository.getProblemsByUserTransactionId(userTransactionId);
+        return problems.stream()
+            .map(problemDbToResponse)
+            .collect(Collectors.toList());
+    }
 }

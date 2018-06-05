@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblem;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Service
 public class FactMessageService {
@@ -20,17 +21,17 @@ public class FactMessageService {
         objectMapper = new ObjectMapper();
     }
 
-    public void handle(String factMsg) throws IOException {
+    public void handle(UUID userTransactionId, String factMsg) throws IOException {
         JsonNode modifications = objectMapper.readTree(factMsg);
 
         for (JsonNode item : modifications) {
             if (item.get("type").asText().equals("Problem")) {
-                handleProblem(item);
+                handleProblem(userTransactionId, item);
             }
         }
     }
 
-    private void handleProblem(JsonNode item) throws IOException {
+    private void handleProblem(UUID userTransactionId, JsonNode item) throws IOException {
         JsonNode newFact = item.get("newFact");
         JsonNode oldFact = item.get("oldFact");
 
@@ -42,6 +43,9 @@ public class FactMessageService {
         if (newFact != null && !newFact.isNull()) {
             CreateProblem createProblem = objectMapper.readValue(newFact.traverse(), CreateProblem.class);
             Problem problem = problemService.problemCreateToDb.apply(createProblem);
+            if (userTransactionId != null) {
+                problem.setUserTransactionId(userTransactionId);
+            }
             problemService.save(problem);
         }
     }
