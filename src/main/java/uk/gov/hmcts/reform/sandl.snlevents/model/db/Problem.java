@@ -5,12 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-
 
 @Entity
 @Data
@@ -18,7 +18,8 @@ import javax.persistence.JoinColumn;
 @NoArgsConstructor
 public class Problem {
     @Id
-    private String id;
+    private String id; // This is MD5 Hash, NOT UUID! It is to handle the deterministic nature of our rules
+    private UUID userTransactionId;
     private String type;
     private String severity;
     private String message;

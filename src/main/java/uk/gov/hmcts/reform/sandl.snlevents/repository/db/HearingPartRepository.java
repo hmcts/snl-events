@@ -12,5 +12,5 @@ import java.util.UUID;
 @Repository
 public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> {
 
-    public List<HearingPart> findBySessionIn(Collection<Session> sessions);
+    List<HearingPart> findBySessionIn(Collection<Session> sessions);
 }

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +57,11 @@ public class HearingPartController {
         hearingPart.setDuration(createHearingPart.getDuration());
         hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
+        if (createHearingPart.getCreatedAt() == null) {
+            hearingPart.setCreatedAt(OffsetDateTime.now());
+        } else {
+            hearingPart.setCreatedAt(createHearingPart.getCreatedAt());
+        }
 
         return ok(hearingPartService.save(hearingPart));
     }

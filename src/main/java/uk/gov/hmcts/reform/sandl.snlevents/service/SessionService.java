@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
@@ -21,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -102,11 +100,11 @@ public class SessionService {
         return sessionWithHearings;
     }
 
-    public void save(Session session) {
-        sessionRepository.save(session);
+    public Session save(Session session) {
+        return sessionRepository.save(session);
     }
 
-    public void save(CreateSession createSession) {
+    public Session save(CreateSession createSession) {
         Session session = new Session();
         session.setId(createSession.getId());
         session.setDuration(createSession.getDuration());
@@ -123,6 +121,6 @@ public class SessionService {
             session.setPerson(person);
         }
 
-        this.save(session);
+        return this.save(session);
     }
 }

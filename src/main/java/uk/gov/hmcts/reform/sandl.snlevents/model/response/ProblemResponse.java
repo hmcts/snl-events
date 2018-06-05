@@ -12,6 +12,7 @@ import java.util.List;
 public class ProblemResponse {
     private String id;
     private String type;
+    private String message;
     private String severity;
     private List<ProblemReferenceResponse> references;
 }

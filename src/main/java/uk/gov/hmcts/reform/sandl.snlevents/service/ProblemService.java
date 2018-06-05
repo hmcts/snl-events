@@ -23,7 +23,6 @@ public class ProblemService {
         (ProblemReference pr) -> {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
 
-            response.setId(pr.getId());
             response.setEntity(pr.getEntity());
             response.setEntityId(pr.getEntityId());
             response.setDescription(pr.getDescription());
@@ -36,6 +35,7 @@ public class ProblemService {
 
         response.setId(p.getId());
         response.setType(p.getType());
+        response.setMessage(p.getMessage());
         response.setSeverity(p.getSeverity());
         response.setReferences(
             p.getReferences()
@@ -50,7 +50,6 @@ public class ProblemService {
     private final Function<CreateProblemReference, ProblemReference> problemReferenceCreateToDb =
         (CreateProblemReference cpr) -> {
             ProblemReference transformed = new ProblemReference();
-            transformed.setId(UUID.randomUUID().toString());
             transformed.setEntity(FactTransformer.transformToEntityName(cpr.getFact()));
             transformed.setEntityId(cpr.getFactId());
             transformed.setDescription(cpr.getDescription());
@@ -104,4 +103,10 @@ public class ProblemService {
     }
 
 
+    public List<ProblemResponse> getProblemsByUserTransactionId(UUID userTransactionId) {
+        List<Problem> problems = problemRepository.getProblemsByUserTransactionId(userTransactionId);
+        return problems.stream()
+            .map(problemDbToResponse)
+            .collect(Collectors.toList());
+    }
 }
