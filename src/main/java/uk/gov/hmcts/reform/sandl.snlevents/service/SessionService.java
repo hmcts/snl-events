@@ -138,7 +138,6 @@ public class SessionService {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("session", session.getId(), null, "insert", "delete", 0));
 
-
         return userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
     }
 }

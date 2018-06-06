@@ -1,0 +1,48 @@
+package uk.gov.hmcts.reform.sandl.snlevents.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import javax.xml.ws.WebServiceException;
+
+@Service
+public class RevertChangesManager {
+    @Autowired
+    private SessionRepository sessionRepository;
+
+    @Autowired
+    private RulesService rulesService;
+
+    @Autowired
+    private FactsMapper factsMapper;
+
+    public void revertChanges(UserTransaction ut) throws IOException {
+        for (UserTransactionData utd :ut.getUserTransactionDataList()
+                .stream().sorted(Comparator.comparing(UserTransactionData::getCounterActionOrder))
+                .collect(Collectors.toList())) {
+            handleSession(utd);
+        }
+    }
+
+    public void handleSession(UserTransactionData utd) throws IOException {
+        if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
+            Session session = sessionRepository.findOne(utd.getEntityId());
+
+            if (session == null) {
+                throw new WebServiceException("session not found");
+            }
+
+            sessionRepository.delete(utd.getEntityId());
+            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+        }
+    }
+}

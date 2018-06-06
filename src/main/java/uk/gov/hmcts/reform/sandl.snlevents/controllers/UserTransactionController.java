@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController()
@@ -32,7 +33,7 @@ public class UserTransactionController {
 
     @PostMapping(path = "/{id}/rollback", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserTransaction rollback(@PathVariable("id") UUID id) {
+    public UserTransaction rollback(@PathVariable("id") UUID id) throws IOException {
         return userTransactionService.rollback(id);
     }
 }
