@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+        id: drop_usertransaction_original_data
+        author: kpakur
+        changes:
+          - dropColumn:
+              tableName: user_transaction
+              columnName: original_data
+  - changeSet:
+        id: create-user-transaction-data-table
+        author: kpakur
+        changes:
+          - createTable:
+              tableName: user_transaction_data
+              columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: UUID
+              - column:
+                  name: user_transaction_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: entity
+                  type: VARCHAR(30)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: action
+                  type: VARCHAR(30)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: counter_action
+                  type: VARCHAR(30)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: counter_action_order
+                  type: int
+          - addForeignKeyConstraint:
+              baseColumnNames: user_transaction_id
+              baseTableName: user_transaction_data
+              constraintName: fk_user_transaction_data_user_transaction
+              referencedColumnNames: id
+              referencedTableName: user_transaction
+  - changeSet:
+        id: add-beforedata-to-usertransactiondata-table
+        author: kpakur
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: before_data
+                  type: VARCHAR(5000)
+              tableName: user_transaction_data
+  - changeSet:
+        id: add-entityid-to-usertransactiondata-table
+        author: kpakur
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: entity_id
+                  type: UUID
+              tableName: user_transaction_data

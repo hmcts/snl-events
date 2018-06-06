@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionRulesProcessingStatus;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
+import java.util.List;
 import java.util.UUID;
 import javax.transaction.Transactional;
 
@@ -22,11 +24,12 @@ public class UserTransactionService {
     }
 
     @Transactional
-    public UserTransaction startTransaction(UUID transactionId) {
+    public UserTransaction startTransaction(UUID transactionId, List<UserTransactionData> userTransactionDataList) {
         UserTransaction ut = new UserTransaction(transactionId,
             UserTransactionStatus.STARTED,
-            UserTransactionRulesProcessingStatus.IN_PROGRESS,
-            null);
+            UserTransactionRulesProcessingStatus.IN_PROGRESS);
+
+        ut.addUserTransactionData(userTransactionDataList);
 
         return userTransactionRepository.save(ut);
     }
