@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 public enum UserTransactionStatus {
     STARTED,
-    PESSIMISTIC_LOCK,
+    PESSIMISTICLY_LOCKED,
     COMMITTED,
-    ROLLBACK,
+    ROLLEDBACK,
 }
