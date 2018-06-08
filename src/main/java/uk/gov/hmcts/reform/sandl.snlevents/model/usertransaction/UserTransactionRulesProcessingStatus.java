@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.model.db;
+package uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction;
 
 public enum UserTransactionRulesProcessingStatus {
     NOT_STARTED,

@@ -6,6 +6,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -18,10 +20,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_FOR_JUDGE_DIARY_SQL;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_INFO_SQL;
@@ -40,6 +44,9 @@ public class SessionService {
 
     @Autowired
     private HearingPartRepository hearingPartRepository;
+
+    @Autowired
+    private UserTransactionService userTransactionService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -122,5 +129,15 @@ public class SessionService {
         }
 
         return this.save(session);
+    }
+
+    @Transactional
+    public UserTransaction saveWithTransaction(CreateSession createSession) {
+        Session session = save(createSession);
+
+        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+        userTransactionDataList.add(new UserTransactionData("session", session.getId(), null, "insert", "delete", 0));
+
+        return userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
     }
 }

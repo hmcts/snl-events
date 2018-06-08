@@ -3,15 +3,19 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 @Data
@@ -20,22 +24,40 @@ import javax.persistence.Id;
 public class UserTransaction {
 
     @Id
-    @Getter
-    @Setter
     private UUID id;
 
-    @Getter
-    @Setter
     @Enumerated(EnumType.STRING)
     private UserTransactionStatus status;
 
-    @Getter
-    @Setter
     @Enumerated(EnumType.STRING)
     private UserTransactionRulesProcessingStatus rulesProcessingStatus;
 
-    @Getter
-    @Setter
+    @OneToMany(mappedBy = "userTransaction", cascade = CascadeType.ALL)
     @JsonIgnore
-    private String originalData;
+    private List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+
+    //TODO: version, optimistic locking
+
+    public UserTransaction(UUID id, UserTransactionStatus status,
+                           UserTransactionRulesProcessingStatus rulesProcessingStatus) {
+        this.id = id;
+        this.status = status;
+        this.rulesProcessingStatus = rulesProcessingStatus;
+    }
+
+    public void addUserTransactionData(UserTransactionData userTransactionData) {
+        userTransactionDataList.add(userTransactionData);
+        userTransactionData.setUserTransaction(this);
+    }
+
+    public void addUserTransactionData(List<UserTransactionData> userTransactionDataList) {
+        for (UserTransactionData utd : userTransactionDataList) {
+            this.addUserTransactionData(utd);
+        }
+    }
+
+    public void removeUserTransactionData(UserTransactionData userTransactionData) {
+        userTransactionDataList.remove(userTransactionData);
+        userTransactionData.setUserTransaction(null);
+    }
 }

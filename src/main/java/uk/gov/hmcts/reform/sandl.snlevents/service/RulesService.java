@@ -22,6 +22,7 @@ public class RulesService {
     public static final String UPSERT_ROOM = "upsert-room";
     public static final String UPSERT_JUDGE = "upsert-judge";
     public static final String UPSERT_AVAILABILITY = "upsert-availability";
+    public static final String DELETE_SESSION = "delete-session";
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
