@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.ws.WebServiceException;
 
@@ -25,9 +26,11 @@ public class RevertChangesManager {
     private FactsMapper factsMapper;
 
     public void revertChanges(UserTransaction ut) throws IOException {
-        for (UserTransactionData utd :ut.getUserTransactionDataList()
-                .stream().sorted(Comparator.comparing(UserTransactionData::getCounterActionOrder))
-                .collect(Collectors.toList())) {
+        List<UserTransactionData> sortedUserTransactionDataList = ut.getUserTransactionDataList()
+            .stream().sorted(Comparator.comparing(UserTransactionData::getCounterActionOrder))
+            .collect(Collectors.toList());
+
+        for (UserTransactionData utd : sortedUserTransactionDataList) {
             handleSession(utd);
         }
     }
