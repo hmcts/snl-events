@@ -12,6 +12,14 @@
         </encoder>
     </appender>
 
+    <appender name="aiAppender"
+              class="com.microsoft.applicationinsights.logback.ApplicationInsightsAppender">
+    </appender>
+
+    <root level="trace">
+      <appender-ref ref="aiAppender" />
+    </root>
+
     <logger name="uk.gov.hmcts.reform.sandl" level="INFO" />
     <root level="INFO">
         <appender-ref ref="STDOUT" />
