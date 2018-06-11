@@ -20,7 +20,8 @@
       <appender-ref ref="aiAppender" />
     </root>
 
-    <logger name="uk.gov.hmcts.reform.sandl" level="INFO" />
+    <logger name="uk.gov.hmcts.reform.sandl" level="DEBUG" />
+
     <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
