@@ -62,7 +62,7 @@ public class HearingPartService {
         Session targetSession = (assignment.getSessionId() == null) ? null :
             sessionRepository.findOne(assignment.getSessionId());
 
-        return userTransactionService.isBeingTransacted(assignment.getSessionId())?
+        return userTransactionService.isBeingTransacted(assignment.getSessionId()) ?
                 this.transactionCancelled(assignment.getUserTransactionId()) :
                 this.assignHearingPartToSession(hearingPart, targetSession, assignment);
     }
