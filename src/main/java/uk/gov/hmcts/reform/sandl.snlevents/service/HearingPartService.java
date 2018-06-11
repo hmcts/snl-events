@@ -62,7 +62,7 @@ public class HearingPartService {
         Session targetSession = (assignment.getSessionId() == null) ? null :
             sessionRepository.findOne(assignment.getSessionId());
 
-        return userTransactionService.isBeingTransacted(assignment.getSessionId()) ?
+        return areTransactionsInProgress(hearingPart, assignment) ?
                 this.transactionCancelled(assignment.getUserTransactionId()) :
                 this.assignHearingPartToSession(hearingPart, targetSession, assignment);
     }
@@ -86,7 +86,17 @@ public class HearingPartService {
         UserTransaction ut = saveWithTransaction(hearingPart, assignment.getUserTransactionId());
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
 
-        return userTransactionService.rulesProcessed(ut);
+        ut = userTransactionService.rulesProcessed(ut);
+        return userTransactionService.commit(ut.getId());
     }
+
+    private boolean areTransactionsInProgress(HearingPart hearingPart, HearingPartSessionRelationship assignment) {
+        boolean isHearingPartTransacted = userTransactionService.isBeingTransacted(hearingPart.getId());
+        boolean isCurrentSessionTransacted = userTransactionService.isBeingTransacted(hearingPart.getSessionId());
+        boolean isTargetSessionTransacted = userTransactionService.isBeingTransacted(assignment.getSessionId());
+
+        return isHearingPartTransacted || isCurrentSessionTransacted || isTargetSessionTransacted;
+    }
+
 
 }
