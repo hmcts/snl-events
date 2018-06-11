@@ -16,7 +16,7 @@
               class="com.microsoft.applicationinsights.logback.ApplicationInsightsAppender">
     </appender>
 
-    <root level="trace">
+    <root level="DEBUG">
       <appender-ref ref="aiAppender" />
     </root>
 
