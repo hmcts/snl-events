@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -71,8 +72,8 @@ public class HearingPartController {
         @PathVariable UUID hearingPartId,
         @RequestBody HearingPartSessionRelationship assignment) throws IOException {
 
-        HearingPart hearingPart = hearingPartService.assignHearingPartToSession(hearingPartId, assignment);
+        UserTransaction ut = hearingPartService.assignHearingPartToSession(hearingPartId, assignment);
 
-        return ok(hearingPart);
+        return ok(ut);
     }
 }

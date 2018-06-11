@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionReposito
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.transaction.Transactional;
 
 @Service
@@ -58,5 +59,20 @@ public class UserTransactionService {
         ut.setStatus(UserTransactionStatus.ROLLEDBACK);
 
         return userTransactionRepository.save(ut);
+    }
+
+    public boolean isBeingTransacted(UUID entityId) {
+        if(entityId == null) {
+            return false;
+        } else {
+            return false;
+            // TODO: REMEK
+            // Get records from UserTransactionData, join with UserTransaction, check for TransactionStatus 'STARTED'
+        }
+    }
+
+    public boolean areBeingTransacted(List<UUID> entityIds) {
+        // TODO: REMEK
+        return false;
     }
 }
