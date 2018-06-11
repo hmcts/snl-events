@@ -13,11 +13,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import javax.transaction.Transactional;
 
 @Service
 public class HearingPartService {
@@ -50,7 +51,13 @@ public class HearingPartService {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPart);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("hearingPart", savedHearingPart.getId(), null, "update", "update", 0));
+        userTransactionDataList.add(new UserTransactionData("hearingPart",
+                savedHearingPart.getId(),
+                null,
+                "update",
+                "update",
+                0)
+        );
 
         return userTransactionService.startTransaction(transactionId, userTransactionDataList);
     }
@@ -62,15 +69,9 @@ public class HearingPartService {
         Session targetSession = (assignment.getSessionId() == null) ? null :
             sessionRepository.findOne(assignment.getSessionId());
 
-        return areTransactionsInProgress(hearingPart, assignment) ?
-                this.transactionCancelled(assignment.getUserTransactionId()) :
-                this.assignHearingPartToSession(hearingPart, targetSession, assignment);
-    }
-
-    private UserTransaction transactionCancelled(UUID transactionId) {
-        return new UserTransaction(transactionId,
-                UserTransactionStatus.CANCELLED,
-                UserTransactionRulesProcessingStatus.NOT_STARTED);
+        return areTransactionsInProgress(hearingPart, assignment)
+                ? transactionCancelled(assignment.getUserTransactionId())
+                : assignHearingPartToSession(hearingPart, targetSession, assignment);
     }
 
     private UserTransaction assignHearingPartToSession(HearingPart hearingPart,
@@ -88,6 +89,12 @@ public class HearingPartService {
 
         ut = userTransactionService.rulesProcessed(ut);
         return userTransactionService.commit(ut.getId());
+    }
+
+    private UserTransaction transactionCancelled(UUID transactionId) {
+        return new UserTransaction(transactionId,
+                UserTransactionStatus.CANCELLED,
+                UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 
     private boolean areTransactionsInProgress(HearingPart hearingPart, HearingPartSessionRelationship assignment) {

@@ -38,7 +38,12 @@ public class UserTransactionData {
     @JsonProperty("userTransaction")
     private UUID userTransactionId;
 
-    public UserTransactionData(String entity, UUID entityId, String beforeData, String action, String counterAction, int counterActionOrder) {
+    public UserTransactionData(String entity,
+                               UUID entityId,
+                               String beforeData,
+                               String action,
+                               String counterAction,
+                               int counterActionOrder) {
         this.entity = entity;
         this.entityId = entityId;
         this.beforeData = beforeData;

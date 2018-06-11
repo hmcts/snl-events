@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionReposito
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import javax.transaction.Transactional;
 
 @Service
@@ -66,11 +65,11 @@ public class UserTransactionService {
     }
 
     public boolean isBeingTransacted(UUID entityId) {
-        if(entityId == null) {
+        if (entityId == null) {
             return false;
         } else {
-            List<UserTransactionData> utd = userTransactionDataRepository.
-                    findByEntityIdEqualsAndUserTransaction_StatusEquals(entityId, UserTransactionStatus.STARTED);
+            List<UserTransactionData> utd = userTransactionDataRepository
+                    .findByEntityIdEqualsAndUserTransaction_StatusEquals(entityId, UserTransactionStatus.STARTED);
             return utd.size() > 0;
         }
     }
