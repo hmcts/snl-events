@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
 import java.io.IOException;
@@ -19,6 +20,9 @@ public class UserTransactionService {
 
     @Autowired
     private UserTransactionRepository userTransactionRepository;
+
+    @Autowired
+    private UserTransactionDataRepository userTransactionDataRepository;
 
     @Autowired
     private RevertChangesManager revertChangesManager;
@@ -65,14 +69,9 @@ public class UserTransactionService {
         if(entityId == null) {
             return false;
         } else {
-            return false;
-            // TODO: REMEK
-            // Get records from UserTransactionData, join with UserTransaction, check for TransactionStatus 'STARTED'
+            List<UserTransactionData> utd = userTransactionDataRepository.
+                    findByEntityIdEqualsAndUserTransaction_StatusEquals(entityId, UserTransactionStatus.STARTED);
+            return utd.size() > 0;
         }
-    }
-
-    public boolean areBeingTransacted(List<UUID> entityIds) {
-        // TODO: REMEK
-        return false;
     }
 }
