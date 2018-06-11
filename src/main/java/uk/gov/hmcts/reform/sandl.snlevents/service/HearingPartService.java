@@ -98,12 +98,8 @@ public class HearingPartService {
     }
 
     private boolean areTransactionsInProgress(HearingPart hearingPart, HearingPartSessionRelationship assignment) {
-        boolean isHearingPartTransacted = userTransactionService.isBeingTransacted(hearingPart.getId());
-        boolean isCurrentSessionTransacted = userTransactionService.isBeingTransacted(hearingPart.getSessionId());
-        boolean isTargetSessionTransacted = userTransactionService.isBeingTransacted(assignment.getSessionId());
-
-        return isHearingPartTransacted || isCurrentSessionTransacted || isTargetSessionTransacted;
+        return userTransactionService.isAnyBeingTransacted(hearingPart.getId(),
+                hearingPart.getSessionId(),
+                assignment.getSessionId());
     }
-
-
 }

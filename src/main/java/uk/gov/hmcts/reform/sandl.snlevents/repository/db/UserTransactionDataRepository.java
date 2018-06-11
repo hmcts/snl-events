@@ -10,6 +10,9 @@ import java.util.UUID;
 
 @Repository
 public interface UserTransactionDataRepository extends JpaRepository<UserTransactionData, UUID> {
+    public List<UserTransactionData> findByEntityIdInAndUserTransaction_StatusEquals(List<UUID> id,
+                                                                                         UserTransactionStatus status);
+
     public List<UserTransactionData> findByEntityIdEqualsAndUserTransaction_StatusEquals(UUID id,
                                                                                          UserTransactionStatus status);
 }
