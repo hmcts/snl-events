@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 @Service
@@ -77,7 +78,8 @@ public class UserTransactionService {
 
     public boolean isAnyBeingTransacted(UUID... entityIds) {
         List<UserTransactionData> transactedEntities = userTransactionDataRepository
-                .findByEntityIdInAndUserTransaction_StatusEquals(Arrays.asList(entityIds),
+                .findByEntityIdInAndUserTransaction_StatusEquals(
+                        Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
                         UserTransactionStatus.STARTED);
         return transactedEntities.size() > 0;
     }
