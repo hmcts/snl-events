@@ -66,21 +66,10 @@ public class UserTransactionService {
         return userTransactionRepository.save(ut);
     }
 
-    public boolean isBeingTransacted(UUID entityId) {
-        if (entityId == null) {
-            return false;
-        } else {
-            List<UserTransactionData> utd = userTransactionDataRepository
-                    .findByEntityIdEqualsAndUserTransaction_StatusEquals(entityId, UserTransactionStatus.STARTED);
-            return utd.size() > 0;
-        }
-    }
-
     public boolean isAnyBeingTransacted(UUID... entityIds) {
-        List<UserTransactionData> transactedEntities = userTransactionDataRepository
-                .findByEntityIdInAndUserTransaction_StatusEquals(
+        return userTransactionDataRepository
+                .existsByEntityIdInAndUserTransaction_StatusEquals(
                         Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
                         UserTransactionStatus.STARTED);
-        return transactedEntities.size() > 0;
     }
 }

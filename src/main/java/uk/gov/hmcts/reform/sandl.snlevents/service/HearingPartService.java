@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -66,10 +67,9 @@ public class HearingPartService {
                                                   HearingPartSessionRelationship assignment) throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
 
-        Session targetSession = (assignment.getSessionId() == null) ? null :
-            sessionRepository.findOne(assignment.getSessionId());
+        Session targetSession = sessionRepository.findOne(assignment.getSessionId());
 
-        return areTransactionsInProgress(hearingPart, assignment)
+        return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
                 ? transactionConflicted(assignment.getUserTransactionId())
                 : assignHearingPartToSession(hearingPart, targetSession, assignment);
     }
