@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
@@ -38,6 +40,9 @@ public class HearingPartService {
     @Autowired
     private FactsMapper factsMapper;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public List<HearingPart> getAllHearingParts() {
         return hearingPartRepository.findAll();
     }
@@ -47,35 +52,44 @@ public class HearingPartService {
     }
 
     @Transactional
-    public UserTransaction saveWithTransaction(HearingPart hearingPart, UUID transactionId) {
+    public UserTransaction assignWithTransaction(HearingPart hearingPart, UUID transactionId,
+                                                 Session currentSession,
+                                                 Session targetSession) throws JsonProcessingException {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPart);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearingPart",
                 savedHearingPart.getId(),
-                null,
+                objectMapper.writeValueAsString(hearingPart),
                 "update",
                 "update",
                 0)
         );
 
+        if (currentSession != null) {
+            userTransactionDataList.add(getLockedSessionTransactionData(currentSession.getId()));
+        }
+        userTransactionDataList.add(getLockedSessionTransactionData(targetSession.getId()));
+
         return userTransactionService.startTransaction(transactionId, userTransactionDataList);
     }
 
-    public UserTransaction assignHearingPartToSession(UUID hearingPartId,
-                                                  HearingPartSessionRelationship assignment) throws IOException {
+    public UserTransaction assignHearingPartToSessionWithTransaction(UUID hearingPartId,
+                                                                     HearingPartSessionRelationship assignment)
+                                                                        throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
 
         Session targetSession = sessionRepository.findOne(assignment.getSessionId());
 
         return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
                 ? transactionConflicted(assignment.getUserTransactionId())
-                : assignHearingPartToSession(hearingPart, targetSession, assignment);
+                : assignHearingPartToSessionWithTransaction(hearingPart, targetSession, assignment);
     }
 
-    private UserTransaction assignHearingPartToSession(HearingPart hearingPart,
-                                                       Session targetSession,
-                                                       HearingPartSessionRelationship assignment) throws IOException {
+    private UserTransaction assignHearingPartToSessionWithTransaction(HearingPart hearingPart,
+                                                                      Session targetSession,
+                                                                      HearingPartSessionRelationship assignment)
+                                                                        throws IOException {
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
 
         hearingPart.setSession(targetSession);
@@ -83,22 +97,34 @@ public class HearingPartService {
         hearingPart.setStart(assignment.getStart());
 
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
-        UserTransaction ut = saveWithTransaction(hearingPart, assignment.getUserTransactionId());
+        UserTransaction ut = assignWithTransaction(hearingPart,
+                assignment.getUserTransactionId(),
+                hearingPart.getSession(),
+                targetSession);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
 
         ut = userTransactionService.rulesProcessed(ut);
         return userTransactionService.commit(ut.getId());
     }
 
-    private UserTransaction transactionConflicted(UUID transactionId) {
-        return new UserTransaction(transactionId,
-                UserTransactionStatus.CONFLICT,
-                UserTransactionRulesProcessingStatus.NOT_STARTED);
-    }
-
     private boolean areTransactionsInProgress(HearingPart hearingPart, HearingPartSessionRelationship assignment) {
         return userTransactionService.isAnyBeingTransacted(hearingPart.getId(),
                 hearingPart.getSessionId(),
                 assignment.getSessionId());
+    }
+
+    private UserTransactionData getLockedSessionTransactionData(UUID id) {
+        return new UserTransactionData("session",
+                id,
+                null,
+                "lock",
+                "unlock",
+                0);
+    }
+
+    private UserTransaction transactionConflicted(UUID transactionId) {
+        return new UserTransaction(transactionId,
+                UserTransactionStatus.CONFLICT,
+                UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 }
