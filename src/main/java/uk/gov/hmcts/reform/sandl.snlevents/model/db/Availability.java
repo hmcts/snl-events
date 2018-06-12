@@ -29,6 +29,11 @@ public class Availability implements Serializable {
     @Setter
     private Person person;
 
+    @ManyToOne
+    @Getter
+    @Setter
+    private Room room;
+
     @NotNull
     @Getter
     @Setter
