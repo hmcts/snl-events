@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
