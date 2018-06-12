@@ -70,7 +70,7 @@ public class HearingPartService {
             sessionRepository.findOne(assignment.getSessionId());
 
         return areTransactionsInProgress(hearingPart, assignment)
-                ? transactionCancelled(assignment.getUserTransactionId())
+                ? transactionConflicted(assignment.getUserTransactionId())
                 : assignHearingPartToSession(hearingPart, targetSession, assignment);
     }
 
@@ -91,9 +91,9 @@ public class HearingPartService {
         return userTransactionService.commit(ut.getId());
     }
 
-    private UserTransaction transactionCancelled(UUID transactionId) {
+    private UserTransaction transactionConflicted(UUID transactionId) {
         return new UserTransaction(transactionId,
-                UserTransactionStatus.CANCELLED,
+                UserTransactionStatus.CONFLICT,
                 UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 

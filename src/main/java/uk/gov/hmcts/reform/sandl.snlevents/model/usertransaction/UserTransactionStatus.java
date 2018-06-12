@@ -5,5 +5,5 @@ public enum UserTransactionStatus {
     INPROGRESS, // PESSIMISTICLY_LOCKED,
     COMMITTED,
     ROLLEDBACK,
-    CANCELLED
+    CONFLICT
 }
