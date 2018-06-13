@@ -7,6 +7,7 @@ import java.util.UUID;
 
 @Data
 public class HearingPartSessionRelationship {
+    UUID userTransactionId;
     UUID sessionId;
     OffsetDateTime start;
 }
