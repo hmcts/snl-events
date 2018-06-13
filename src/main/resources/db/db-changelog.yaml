@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/schema/SL-957-user-transaction-rollback.yaml
   - include:
       file: db/schema/SL-982-change-availability-table.yaml
+  - include:
+      file: db/fixtures/SL-964-set-started-transactions-to-comitted.yaml
