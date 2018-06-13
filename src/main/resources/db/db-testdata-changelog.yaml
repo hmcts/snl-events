@@ -33,3 +33,4 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/fixtures/SL-982-add-availabilities-for-judges-rooms.sql
+            splitStatements: false
