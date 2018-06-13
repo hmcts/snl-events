@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+        id: SL-964-set-all-transactions-to-comitted
+        author: radoslawlandowskikainos
+        changes:
+        - update:
+            columns:
+            - column:
+                name: status
+                value: "COMMITTED"
+            schemaName: public
+            tableName: user_transaction
+            where: status='STARTED'
