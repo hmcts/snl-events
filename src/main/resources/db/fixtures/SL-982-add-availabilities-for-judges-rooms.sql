@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DO $$
-DECLARE startDateTime timestamp with time zone = '2018-03-1 07:00:00+00';
+DECLARE startDateTime timestamp with time zone = '2018-03-01 07:00:00+00';
 BEGIN
   FOR counter IN 1..365 LOOP
   	IF (extract(dow from startDateTime) NOT IN (0,6)) THEN
