@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-        id: SL-964-set-all-transactions-to-comitted
+        id: SL-964-set-started-transactions-to-comitted
         author: radoslawlandowskikainos
         changes:
         - update:

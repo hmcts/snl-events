@@ -26,4 +26,4 @@ databaseChangeLog:
   - include:
       file: db/schema/SL-982-change-availability-table.yaml
   - include:
-      file: db/schema/SL-964-set-all-transactions-to-comitted.yaml
+      file: db/fixtures/SL-964-set-started-transactions-to-comitted.yaml
