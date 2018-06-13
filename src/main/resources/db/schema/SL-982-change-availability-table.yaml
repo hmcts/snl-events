@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+        id: change-availability-table
+        author: rkruk
+        changes:
+          - addColumn:
+              tableName: availability
+              columns:
+              - column:
+                  name: room_id
+                  type: UUID
+          - addForeignKeyConstraint:
+              baseColumnNames: room_id
+              baseTableName: availability
+              constraintName: fk_room_availability
+              referencedColumnNames: id
+              referencedTableName: room
+          - sql:
+                splitStatements: false
+                dbms: postgresql
+                sql: ALTER TABLE availability ADD CONSTRAINT check_person_or_room_set CHECK ((person_id is null or room_id is null) and not (person_id is null and room_id is null) )

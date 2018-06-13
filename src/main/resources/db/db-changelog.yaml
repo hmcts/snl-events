@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/schema/SL-871-add-user-transaction.yaml
   - include:
       file: db/schema/SL-957-user-transaction-rollback.yaml
+  - include:
+      file: db/schema/SL-982-change-availability-table.yaml

@@ -152,6 +152,9 @@ public class FactsMapper {
         if (availability.getPerson() != null) {
             factAvailability.setJudgeId(availability.getPerson().getId().toString());
         }
+        if (availability.getRoom() != null) {
+            factAvailability.setRoomId(availability.getRoom().getId().toString());
+        }
 
         return objectMapper.writeValueAsString(factAvailability);
     }
