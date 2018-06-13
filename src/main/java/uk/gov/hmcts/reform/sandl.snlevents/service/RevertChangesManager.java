@@ -31,11 +31,11 @@ public class RevertChangesManager {
             .collect(Collectors.toList());
 
         for (UserTransactionData utd : sortedUserTransactionDataList) {
-            handleSession(utd);
+            handleTransactionData(utd);
         }
     }
 
-    public void handleSession(UserTransactionData utd) throws IOException {
+    public void handleTransactionData(UserTransactionData utd) throws IOException {
         if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
             Session session = sessionRepository.findOne(utd.getEntityId());
 
@@ -46,6 +46,13 @@ public class RevertChangesManager {
             sessionRepository.delete(utd.getEntityId());
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+        } else if (utd.getEntity().equals("hearingPart") && utd.getCounterAction().equals("update")) {
+            handleHearingPart(utd);
         }
     }
+
+    public void handleHearingPart(UserTransactionData utd) throws IOException {
+        throw new WebServiceException("session not found");
+    }
+
 }

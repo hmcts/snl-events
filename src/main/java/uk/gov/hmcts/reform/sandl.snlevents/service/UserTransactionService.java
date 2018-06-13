@@ -6,11 +6,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 @Service
@@ -18,6 +21,9 @@ public class UserTransactionService {
 
     @Autowired
     private UserTransactionRepository userTransactionRepository;
+
+    @Autowired
+    private UserTransactionDataRepository userTransactionDataRepository;
 
     @Autowired
     private RevertChangesManager revertChangesManager;
@@ -58,5 +64,12 @@ public class UserTransactionService {
         ut.setStatus(UserTransactionStatus.ROLLEDBACK);
 
         return userTransactionRepository.save(ut);
+    }
+
+    public boolean isAnyBeingTransacted(UUID... entityIds) {
+        return userTransactionDataRepository
+                .existsByEntityIdInAndUserTransaction_StatusEquals(
+                        Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
+                        UserTransactionStatus.STARTED);
     }
 }
