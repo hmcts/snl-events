@@ -23,6 +23,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -33,23 +35,28 @@ import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQuer
 @Service
 public class SessionService {
 
-    @Autowired
-    private SessionRepository sessionRepository;
-
-    @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private HearingPartRepository hearingPartRepository;
-
-    @Autowired
-    private UserTransactionService userTransactionService;
+    private final Function<Session, SessionInfo> sessionDbToSessionInfo =
+        (Session s) -> new SessionInfo(
+            s.getId(),
+            s.getStart(),
+            s.getDuration(),
+            s.getPerson(),
+            s.getRoom(),
+            s.getCaseType()
+        );
 
     @PersistenceContext
     EntityManager entityManager;
+    @Autowired
+    private SessionRepository sessionRepository;
+    @Autowired
+    private RoomRepository roomRepository;
+    @Autowired
+    private PersonRepository personRepository;
+    @Autowired
+    private HearingPartRepository hearingPartRepository;
+    @Autowired
+    private UserTransactionService userTransactionService;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -69,14 +76,21 @@ public class SessionService {
             .getResultList();
     }
 
-    public List<SessionInfo> getSessionsForDates(LocalDate startDate, LocalDate endDate) {
+    public SessionWithHearings getSessionsWithHearingsForDates(LocalDate startDate, LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
 
-        return entityManager.createQuery(GET_SESSION_INFO_SQL, SessionInfo.class)
-            .setParameter("dateStart", fromDate)
-            .setParameter("dateEnd", toDate)
-            .getResultList();
+        List<Session> sessions = sessionRepository.findSessionByStartDate(fromDate, toDate);
+
+        List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(sessions);
+
+        SessionWithHearings sessionsWithHearings = new SessionWithHearings();
+        sessionsWithHearings.setSessions(
+            sessions.stream().map(this.sessionDbToSessionInfo).collect(Collectors.toList())
+        );
+        sessionsWithHearings.setHearingParts(hearingParts);
+
+        return sessionsWithHearings;
     }
 
     public List<SessionInfo> getJudgeDiaryForDates(String judgeUsername, LocalDate startDate, LocalDate endDate) {
@@ -101,7 +115,9 @@ public class SessionService {
         List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(sessions);
 
         SessionWithHearings sessionWithHearings = new SessionWithHearings();
-        sessionWithHearings.setSessions(sessions);
+        sessionWithHearings.setSessions(
+            sessions.stream().map(this.sessionDbToSessionInfo).collect(Collectors.toList())
+        );
         sessionWithHearings.setHearingParts(hearingParts);
 
         return sessionWithHearings;
