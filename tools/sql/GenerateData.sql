@@ -93,11 +93,12 @@ BEGIN
 				values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
 			END LOOP;
 		
-			temp_dt = temp_dt + interval '1' day;
+			
 			
 		end loop;
 		close cur_judges;
 		close cur_rooms;
+		temp_dt = temp_dt + interval '1' day;
 		i_days := i_days + 1;
 	end loop;
 	
