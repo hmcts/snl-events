@@ -11,7 +11,7 @@ DECLARE
 	numberOfJudges int := 5;
 	numberOfRooms int := numberOfJudges; -- at present the number of rooms and judges needs to be the same
 
-	startDateTime timestamp with time zone := '2018-03-05 07:00:00+00';
+	startDateTime timestamp with time zone := '2018-06-01 07:00:00+00';
 	numberOfWorkingDaysToGenerate int := 3;
 	availaiblitySecondsPerDay int := 8 * 60 * 60; --8h
 
