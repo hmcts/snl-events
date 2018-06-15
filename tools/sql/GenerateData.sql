@@ -12,7 +12,7 @@ DECLARE
 	numberOfRooms int := numberOfJudges; -- at present the number of rooms and judges needs to be the same
 
 	startDateTime timestamp with time zone := '2018-06-01 07:00:00+00';
-	numberOfWorkingDaysToGenerate int := 3;
+	numberOfWorkingDaysToGenerate int := 30;
 	availaiblitySecondsPerDay int := 8 * 60 * 60; --8h
 
 	numberOfSessionsPerDay int := 2;
@@ -28,6 +28,7 @@ DECLARE
 	temp_dt timestamp with time zone;
 	temp_dt2 timestamp with time zone;
 	temp_dt3 timestamp with time zone;
+	i_days int;
     cur_judges cursor for
 		select id from person where person_type = 'judge';
 	rec_judge record;
@@ -76,21 +77,28 @@ BEGIN
 	-- add sessions, all session will have judge and room provided, so it is not double booked.
 	-- for each judge create session for each day
 	temp_dt := startDateTime;
-	open cur_judges;
-	open cur_rooms;
-	loop
-		fetch cur_judges into rec_judge;
-		exit when not found;
-		fetch cur_rooms into rec_room;
-		exit when not found;
+	i_days := 1;
+	while i_days < numberOfWorkingDaysToGenerate LOOP
+		open cur_judges;
+		open cur_rooms;
+		loop
+			fetch cur_judges into rec_judge;
+			exit when not found;
+			fetch cur_rooms into rec_room;
+			exit when not found;
 		
-		FOR counter IN 1..numberOfSessionsPerDay LOOP
-			temp_dt2 := temp_dt + interval '1' second * durationOfSessionInSeconds * counter;
-			insert into session (id, person_id, room_id, start, duration, case_type)
-			values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
-		END LOOP;
+			FOR counter IN 1..numberOfSessionsPerDay LOOP
+				temp_dt2 := temp_dt + interval '1' second * durationOfSessionInSeconds * counter;
+				insert into session (id, person_id, room_id, start, duration, case_type)
+				values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
+			END LOOP;
 		
-		temp_dt = temp_dt + interval '1' day;
+			temp_dt = temp_dt + interval '1' day;
+			
+		end loop;
+		close cur_judges;
+		close cur_rooms;
+		i_days := i_days + 1;
 	end loop;
 	
 	RAISE NOTICE 'add hearing parts';
@@ -110,4 +118,5 @@ BEGIN
 		
 		temp_dt = temp_dt + interval '1' day;
 	end loop;
+	close cur_sessions;
 END; $$
