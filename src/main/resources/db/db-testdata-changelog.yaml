@@ -18,3 +18,19 @@ databaseChangeLog:
         - sqlFile:
             path: db/fixtures/SL-907-add-sample-hearings.sql
             splitStatements: false
+  - changeSet:
+      id: SL-904-new-rooms-and-judges
+      validCheckSum: ANY
+      author: lgurniewicz
+      changes:
+        - sqlFile:
+            path: db/fixtures/SL-904-rooms-and-judges.sql
+            splitStatements: false
+  - changeSet:
+      id: insert-availabilities-for-judge-room-whole-year
+      validCheckSum: ANY
+      author: rkruk
+      changes:
+        - sqlFile:
+            path: db/fixtures/SL-982-add-availabilities-for-judges-rooms.sql
+            splitStatements: false

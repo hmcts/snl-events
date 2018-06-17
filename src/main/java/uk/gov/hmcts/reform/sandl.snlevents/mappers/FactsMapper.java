@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 
+import javax.xml.ws.WebServiceException;
+
 import static com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES;
 import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
 
@@ -85,7 +87,7 @@ public class FactsMapper {
         return mapDbHearingPartToRuleJsonMessage(hearingPart);
     }
 
-    public String mapDbSessionToRuleJsonMessage(Session session) throws JsonProcessingException {
+    public String mapDbSessionToRuleJsonMessage(Session session) {
         FactSession factSession = new FactSession();
 
         factSession.setId(session.getId().toString());
@@ -100,7 +102,11 @@ public class FactsMapper {
             factSession.setRoomId(session.getRoom().getId().toString());
         }
 
-        return objectMapper.writeValueAsString(factSession);
+        try {
+            return objectMapper.writeValueAsString(factSession);
+        } catch (JsonProcessingException e) {
+            throw new WebServiceException("Cannot map session to fact", e);
+        }
     }
 
     public String mapDbHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
@@ -145,6 +151,9 @@ public class FactsMapper {
         factAvailability.setStart(availability.getStart());
         if (availability.getPerson() != null) {
             factAvailability.setJudgeId(availability.getPerson().getId().toString());
+        }
+        if (availability.getRoom() != null) {
+            factAvailability.setRoomId(availability.getRoom().getId().toString());
         }
 
         return objectMapper.writeValueAsString(factAvailability);

@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 public class FactAvailability implements Serializable {
     private String id;
     private String judgeId;
+    private String roomId;
     private OffsetDateTime start;
     private Duration duration;
 }

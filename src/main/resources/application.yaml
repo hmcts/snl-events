@@ -10,17 +10,26 @@ fact-propagation:
     insert-session:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
     upsert-session:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
+    delete-session:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
     upsert-hearingPart:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
     upsert-room:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
     upsert-judge:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
     upsert-availability:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
     upsert-year:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
