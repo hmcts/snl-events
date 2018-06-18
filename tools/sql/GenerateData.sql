@@ -8,11 +8,11 @@ DO $$
 
 -- settings
 DECLARE 
-	numberOfJudges int := 50;
+	numberOfJudges int := 10;
 	numberOfRooms int := numberOfJudges; -- at present the number of rooms and judges needs to be the same
 
 	startDateTime timestamp with time zone := '2018-06-01 07:00:00+00';
-	numberOfWorkingDaysToGenerate int := 3;
+	numberOfWorkingDaysToGenerate int := 7;
 	availaiblitySecondsPerDay int := 8 * 60 * 60; --8h
 
 	numberOfSessionsPerDay int := 2;
@@ -78,7 +78,7 @@ BEGIN
 	-- for each judge create session for each day
 	temp_dt := startDateTime;
 	i_days := 1;
-	while i_days < numberOfWorkingDaysToGenerate LOOP
+	while i_days <= numberOfWorkingDaysToGenerate LOOP
 		open cur_judges;
 		open cur_rooms;
 		loop
@@ -89,12 +89,11 @@ BEGIN
 		
 			FOR counter IN 1..numberOfSessionsPerDay LOOP
 				temp_dt2 := temp_dt + interval '1' second * durationOfSessionInSeconds * counter;
-				insert into session (id, person_id, room_id, start, duration, case_type)
-				values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
+				IF (extract(dow from temp_dt2) NOT IN (0,6)) THEN
+					insert into session (id, person_id, room_id, start, duration, case_type)
+					values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
+				END IF;
 			END LOOP;
-		
-			
-			
 		end loop;
 		close cur_judges;
 		close cur_rooms;
