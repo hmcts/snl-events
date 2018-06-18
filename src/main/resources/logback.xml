@@ -12,7 +12,7 @@
         </encoder>
     </appender>
 
-  <appender name="ROLLIN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>snl-events</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 
@@ -29,12 +29,12 @@
               class="com.microsoft.applicationinsights.logback.ApplicationInsightsAppender">
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
       <appender-ref ref="aiAppender" />
-      <appender-ref ref="ROLLIN" />
+      <appender-ref ref="rolling" />
     </root>
 
-    <logger name="uk.gov.hmcts.reform.sandl" level="DEBUG" />
+    <logger name="uk.gov.hmcts.reform.sandl" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
