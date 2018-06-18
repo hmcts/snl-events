@@ -176,7 +176,29 @@ public class SessionService {
         session = updateSessionTime(session, createSession);
         save(session);
 
+        List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
+
+        UserTransaction ut = userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
+
+        String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
+
+        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, msg);
+
+        ut = userTransactionService.rulesProcessed(ut);
+
+        return userTransactionService.commit(ut.getId());
+    }
+
+    private Session updateSessionTime(Session session, CreateSession createSession) {
+        Optional.ofNullable(createSession.getDuration()).ifPresent((d) -> session.setDuration(d));
+        Optional.ofNullable(createSession.getStart()).ifPresent((s) -> session.setStart(s));
+
+        return session;
+    }
+
+    private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts) throws JsonProcessingException {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+
         userTransactionDataList.addAll(Arrays.asList(new UserTransactionData("session",
             session.getId(),
             objectMapper.writeValueAsString(session),
@@ -200,22 +222,5 @@ public class SessionService {
                 0)
             );
         });
-
-        UserTransaction ut = userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
-
-        String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
-
-        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, msg);
-
-        ut = userTransactionService.rulesProcessed(ut);
-
-        return userTransactionService.commit(ut.getId());
-    }
-
-    private Session updateSessionTime(Session session, CreateSession createSession) {
-        Optional.ofNullable(createSession.getDuration()).ifPresent((d) -> session.setDuration(d));
-        Optional.ofNullable(createSession.getStart()).ifPresent((s) -> session.setStart(s));
-
-        return session;
     }
 }
