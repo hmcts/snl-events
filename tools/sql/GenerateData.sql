@@ -48,7 +48,7 @@ BEGIN
 		-- add availability for it
 		temp_dt := startDateTime;
 		FOR counter IN 1..numberOfWorkingDaysToGenerate LOOP
-			IF (extract(dow from startDateTime) NOT IN (0,6)) THEN
+			IF (extract(dow from startDateTime) NOT IN (0,5,6)) THEN
 				INSERT INTO availability (id, start, duration, person_id, room_id ) 
 				values (uuid_generate_v4(), temp_dt, availaiblitySecondsPerDay, temp_id, null);
 			END IF;
@@ -65,7 +65,7 @@ BEGIN
 		-- add availability for it
 		temp_dt := startDateTime;
 		FOR counter IN 1..numberOfWorkingDaysToGenerate LOOP
-			IF (extract(dow from startDateTime) NOT IN (0,6)) THEN
+			IF (extract(dow from startDateTime) NOT IN (0,5,6)) THEN
 				INSERT INTO availability (id, start, duration, person_id, room_id ) 
 				values (uuid_generate_v4(), temp_dt, availaiblitySecondsPerDay, null, temp_id);
 			END IF;
@@ -89,7 +89,7 @@ BEGIN
 		
 			FOR counter IN 1..numberOfSessionsPerDay LOOP
 				temp_dt2 := temp_dt + interval '1' second * durationOfSessionInSeconds * counter;
-				IF (extract(dow from temp_dt2) NOT IN (0,6)) THEN
+				IF (extract(dow from temp_dt2) NOT IN (0,5,6)) THEN
 					insert into session (id, person_id, room_id, start, duration, case_type)
 					values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
 				END IF;
