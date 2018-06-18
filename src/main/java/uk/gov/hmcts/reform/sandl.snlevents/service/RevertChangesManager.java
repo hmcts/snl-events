@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -52,7 +53,7 @@ public class RevertChangesManager {
     }
 
     public void handleHearingPart(UserTransactionData utd) throws IOException {
-        throw new WebServiceException("session not found");
+        throw new NotImplementedException();
     }
 
 }

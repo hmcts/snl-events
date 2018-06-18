@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import javax.xml.ws.WebServiceException;
 
@@ -61,6 +62,19 @@ public class FactsMapper {
         if (createSession.getRoomId() != null) {
             factSession.setRoomId(createSession.getRoomId().toString());
         }
+
+        return objectMapper.writeValueAsString(factSession);
+    }
+
+    public String mapUpdateSessionToRuleJsonMessage(Session session) throws JsonProcessingException {
+        FactSession factSession = new FactSession();
+
+        factSession.setId(session.getId().toString());
+        factSession.setDuration(session.getDuration());
+        factSession.setStart(session.getStart());
+        factSession.setCaseType(session.getCaseType());
+        factSession.setJudgeId(session.getPerson().getId().toString());
+        factSession.setRoomId(session.getRoom().getId().toString());
 
         return objectMapper.writeValueAsString(factSession);
     }
@@ -121,6 +135,8 @@ public class FactsMapper {
         if (hearingPart.getSession() != null) {
             factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
         }
+
+        Optional.ofNullable(hearingPart.getSession()).ifPresent((s) -> factHearingPart.setSessionId(s.getId().toString()));
 
         return objectMapper.writeValueAsString(factHearingPart);
     }

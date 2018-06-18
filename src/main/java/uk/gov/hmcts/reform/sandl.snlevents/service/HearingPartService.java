@@ -82,7 +82,7 @@ public class HearingPartService {
         Session targetSession = sessionRepository.findOne(assignment.getSessionId());
 
         return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
-                ? transactionConflicted(assignment.getUserTransactionId())
+                ? userTransactionService.transactionConflicted(assignment.getUserTransactionId())
                 : assignHearingPartToSessionWithTransaction(hearingPart, targetSession, assignment);
     }
 
@@ -120,11 +120,5 @@ public class HearingPartService {
                 "lock",
                 "unlock",
                 0);
-    }
-
-    private UserTransaction transactionConflicted(UUID transactionId) {
-        return new UserTransaction(transactionId,
-                UserTransactionStatus.CONFLICT,
-                UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 }

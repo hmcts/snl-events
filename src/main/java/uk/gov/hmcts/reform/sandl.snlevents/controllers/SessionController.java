@@ -81,6 +81,14 @@ public class SessionController {
         return ok(ut.getId());
     }
 
+    @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateSession(@RequestBody CreateSession createSession) throws IOException {
+
+        UserTransaction ut = sessionService.updateSession(createSession);
+
+        return ok(ut);
+    }
+
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
     public SessionWithHearings getJudgeDiary(
         @RequestParam("judge") String judge,

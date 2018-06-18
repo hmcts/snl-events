@@ -72,4 +72,10 @@ public class UserTransactionService {
                         Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
                         UserTransactionStatus.STARTED);
     }
+
+    public UserTransaction transactionConflicted(UUID transactionId) {
+        return new UserTransaction(transactionId,
+            UserTransactionStatus.CONFLICT,
+            UserTransactionRulesProcessingStatus.NOT_STARTED);
+    }
 }

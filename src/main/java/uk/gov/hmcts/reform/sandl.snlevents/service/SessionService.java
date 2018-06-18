@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
@@ -16,13 +19,13 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -47,6 +50,15 @@ public class SessionService {
 
     @Autowired
     private UserTransactionService userTransactionService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private FactsMapper factsMapper;
+
+    @Autowired
+    private RulesService rulesService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -139,5 +151,71 @@ public class SessionService {
         userTransactionDataList.add(new UserTransactionData("session", session.getId(), null, "insert", "delete", 0));
 
         return userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
+    }
+
+    public UserTransaction updateSession(CreateSession createSession) throws IOException {
+
+        Session session = getSessionById(createSession.getId());
+
+        List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(Arrays.asList(session));
+
+        return areTransactionsInProgress(session, hearingParts)
+            ? userTransactionService.transactionConflicted(createSession.getUserTransactionId())
+            : updateWithTransaction(session, createSession, hearingParts);
+    }
+
+    private boolean areTransactionsInProgress(Session session, List<HearingPart> hearingParts) {
+        List<UUID> entityIds = hearingParts.stream().map(HearingPart::getId).collect(Collectors.toList());
+        entityIds.add(session.getId());
+
+        return userTransactionService.isAnyBeingTransacted(entityIds.stream().toArray(UUID[]::new));
+    }
+
+    @Transactional
+    public UserTransaction updateWithTransaction(Session session, CreateSession createSession, List<HearingPart> hearingParts) throws IOException {
+        session = updateSessionTime(session, createSession);
+        save(session);
+
+        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+        userTransactionDataList.addAll(Arrays.asList(new UserTransactionData("session",
+            session.getId(),
+            objectMapper.writeValueAsString(session),
+            "update",
+            "update",
+            0)
+        ));
+        hearingParts.forEach((hp) -> {
+
+            String beforeData = null;
+            try {
+                beforeData = objectMapper.writeValueAsString(hp);
+            } catch(JsonProcessingException e ) {
+                throw new RuntimeException(e);
+            }
+            userTransactionDataList.add(new UserTransactionData("session",
+                hp.getId(),
+                beforeData,
+                "lock",
+                "unlock",
+                0)
+            );
+        });
+
+        UserTransaction ut = userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
+
+        String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
+
+        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, msg);
+
+        ut = userTransactionService.rulesProcessed(ut);
+
+        return userTransactionService.commit(ut.getId());
+    }
+
+    private Session updateSessionTime(Session session, CreateSession createSession) {
+        Optional.ofNullable(createSession.getDuration()).ifPresent((d) -> session.setDuration(d));
+        Optional.ofNullable(createSession.getStart()).ifPresent((s) -> session.setStart(s));
+
+        return session;
     }
 }
