@@ -102,6 +102,8 @@ dependencies {
 
   compile group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
   compile group: 'ch.qos.logback', name: 'logback-core', version: versions.logback
+  compile group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.0.+'
+
 
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
   compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.1'
