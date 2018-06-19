@@ -78,7 +78,7 @@ public class SessionController {
 
         ut = userTransactionService.rulesProcessed(ut);
 
-        return ok(ut.getId());
+        return ok(ut);
     }
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)

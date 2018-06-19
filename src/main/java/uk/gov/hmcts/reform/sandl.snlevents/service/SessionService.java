@@ -233,22 +233,15 @@ public class SessionService {
             "update",
             0)
         ));
-        hearingParts.forEach((hp) -> {
-
-            String beforeData = null;
-            try {
-                beforeData = objectMapper.writeValueAsString(hp);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+        for (HearingPart hp : hearingParts) {
             userTransactionDataList.add(new UserTransactionData("session",
                 hp.getId(),
-                beforeData,
+                objectMapper.writeValueAsString(hp),
                 "lock",
                 "unlock",
                 0)
             );
-        });
+        }
 
         return userTransactionDataList;
     }

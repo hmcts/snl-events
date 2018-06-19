@@ -55,13 +55,9 @@ public class FactsMapper {
         factSession.setDuration(upsertSession.getDuration());
         factSession.setStart(upsertSession.getStart());
         factSession.setCaseType(upsertSession.getCaseType());
-        if (upsertSession.getPersonId() != null) {
-            factSession.setJudgeId(upsertSession.getPersonId().toString());
-        }
 
-        if (upsertSession.getRoomId() != null) {
-            factSession.setRoomId(upsertSession.getRoomId().toString());
-        }
+        Optional.ofNullable(upsertSession.getRoomId()).ifPresent(r -> factSession.setRoomId(r.toString()));
+        Optional.ofNullable(upsertSession.getPersonId()).ifPresent(p -> factSession.setJudgeId(p.toString()));
 
         return objectMapper.writeValueAsString(factSession);
     }
