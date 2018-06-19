@@ -8,18 +8,18 @@ DO $$
 
 -- settings
 DECLARE 
-	numberOfJudges int := 10;
+	numberOfJudges int := 50;
 	numberOfRooms int := numberOfJudges; -- at present the number of rooms and judges needs to be the same
 
 	startDateTime timestamp with time zone := '2018-06-01 07:00:00+00';
-	numberOfWorkingDaysToGenerate int := 7;
+	numberOfWorkingDaysToGenerate int := 92;
 	availaiblitySecondsPerDay int := 8 * 60 * 60; --8h
 
 	numberOfSessionsPerDay int := 2;
 	durationOfSessionInSeconds int := 3 * 60 * 60; --3h
 
-	numberOfHearingsPartsPerSession int := 6;
-	durationOfHearingsPartInSeconds int := 0.5 * 60 * 60; --0.5h
+	numberOfHearingsPartsPerSession int := 3;
+	durationOfHearingsPartInSeconds int := 1 * 60 * 60; --1h
 -- so we have 8h availability, 2-3h sessions in, and then in session 6-0.5h hearings === means "perfectly 100% booked"
 
 -- temp variables below
@@ -48,7 +48,7 @@ BEGIN
 		-- add availability for it
 		temp_dt := startDateTime;
 		FOR counter IN 1..numberOfWorkingDaysToGenerate LOOP
-			IF (extract(dow from startDateTime) NOT IN (0,5,6)) THEN
+			IF (extract(dow from temp_dt) NOT IN (0,5,6)) THEN
 				INSERT INTO availability (id, start, duration, person_id, room_id ) 
 				values (uuid_generate_v4(), temp_dt, availaiblitySecondsPerDay, temp_id, null);
 			END IF;
@@ -65,7 +65,7 @@ BEGIN
 		-- add availability for it
 		temp_dt := startDateTime;
 		FOR counter IN 1..numberOfWorkingDaysToGenerate LOOP
-			IF (extract(dow from startDateTime) NOT IN (0,5,6)) THEN
+			IF (extract(dow from temp_dt) NOT IN (0,5,6)) THEN
 				INSERT INTO availability (id, start, duration, person_id, room_id ) 
 				values (uuid_generate_v4(), temp_dt, availaiblitySecondsPerDay, null, temp_id);
 			END IF;
