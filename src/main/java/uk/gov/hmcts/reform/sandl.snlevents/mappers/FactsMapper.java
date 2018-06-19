@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
@@ -48,19 +48,19 @@ public class FactsMapper {
         objectMapper.registerModule(simpleModule);
     }
 
-    public String mapCreateSessionToRuleJsonMessage(CreateSession createSession) throws JsonProcessingException {
+    public String mapCreateSessionToRuleJsonMessage(UpsertSession upsertSession) throws JsonProcessingException {
         FactSession factSession = new FactSession();
 
-        factSession.setId(createSession.getId().toString());
-        factSession.setDuration(createSession.getDuration());
-        factSession.setStart(createSession.getStart());
-        factSession.setCaseType(createSession.getCaseType());
-        if (createSession.getPersonId() != null) {
-            factSession.setJudgeId(createSession.getPersonId().toString());
+        factSession.setId(upsertSession.getId().toString());
+        factSession.setDuration(upsertSession.getDuration());
+        factSession.setStart(upsertSession.getStart());
+        factSession.setCaseType(upsertSession.getCaseType());
+        if (upsertSession.getPersonId() != null) {
+            factSession.setJudgeId(upsertSession.getPersonId().toString());
         }
 
-        if (createSession.getRoomId() != null) {
-            factSession.setRoomId(createSession.getRoomId().toString());
+        if (upsertSession.getRoomId() != null) {
+            factSession.setRoomId(upsertSession.getRoomId().toString());
         }
 
         return objectMapper.writeValueAsString(factSession);
@@ -73,8 +73,9 @@ public class FactsMapper {
         factSession.setDuration(session.getDuration());
         factSession.setStart(session.getStart());
         factSession.setCaseType(session.getCaseType());
-        factSession.setJudgeId(session.getPerson().getId().toString());
-        factSession.setRoomId(session.getRoom().getId().toString());
+
+        Optional.ofNullable(session.getRoom()).ifPresent(r -> factSession.setRoomId(r.getId().toString()));
+        Optional.ofNullable(session.getPerson()).ifPresent(p -> factSession.setJudgeId(p.getId().toString()));
 
         return objectMapper.writeValueAsString(factSession);
     }
