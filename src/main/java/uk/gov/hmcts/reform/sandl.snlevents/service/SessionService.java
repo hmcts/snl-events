@@ -24,7 +24,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -36,32 +40,24 @@ import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQuer
 @Service
 public class SessionService {
 
-    @Autowired
-    private SessionRepository sessionRepository;
-
-    @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private HearingPartRepository hearingPartRepository;
-
-    @Autowired
-    private UserTransactionService userTransactionService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private FactsMapper factsMapper;
-
-    @Autowired
-    private RulesService rulesService;
-
     @PersistenceContext
     EntityManager entityManager;
+    @Autowired
+    private SessionRepository sessionRepository;
+    @Autowired
+    private RoomRepository roomRepository;
+    @Autowired
+    private PersonRepository personRepository;
+    @Autowired
+    private HearingPartRepository hearingPartRepository;
+    @Autowired
+    private UserTransactionService userTransactionService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private FactsMapper factsMapper;
+    @Autowired
+    private RulesService rulesService;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -148,7 +144,14 @@ public class SessionService {
         Session session = save(upsertSession);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("session", session.getId(), null, "insert", "delete", 0));
+        userTransactionDataList.add(new UserTransactionData(
+            "session",
+            session.getId(),
+            null,
+            "insert",
+            "delete",
+            0)
+        );
 
         return userTransactionService.startTransaction(upsertSession.getUserTransactionId(), userTransactionDataList);
     }
@@ -172,13 +175,16 @@ public class SessionService {
     }
 
     @Transactional
-    public UserTransaction updateWithTransaction(Session session, UpsertSession upsertSession, List<HearingPart> hearingParts) throws IOException {
+    public UserTransaction updateWithTransaction(Session session,
+                                                 UpsertSession upsertSession,
+                                                 List<HearingPart> hearingParts) throws IOException {
         session = updateSessionTime(session, upsertSession);
         save(session);
 
         List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
 
-        UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(), userTransactionDataList);
+        UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(),
+            userTransactionDataList);
 
         String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
 
@@ -196,7 +202,8 @@ public class SessionService {
         return session;
     }
 
-    private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts) throws JsonProcessingException {
+    private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts)
+        throws JsonProcessingException {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
         userTransactionDataList.addAll(Arrays.asList(new UserTransactionData("session",
@@ -211,7 +218,7 @@ public class SessionService {
             String beforeData = null;
             try {
                 beforeData = objectMapper.writeValueAsString(hp);
-            } catch(JsonProcessingException e ) {
+            } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
             userTransactionDataList.add(new UserTransactionData("session",

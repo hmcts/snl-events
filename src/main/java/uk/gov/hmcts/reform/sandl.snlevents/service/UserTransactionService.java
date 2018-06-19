@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -57,7 +56,7 @@ public class UserTransactionService {
     }
 
     @Transactional
-    public UserTransaction rollback(UUID id) throws IOException {
+    public UserTransaction rollback(UUID id) throws Exception {
         UserTransaction ut = userTransactionRepository.findOne(id);
 
         revertChangesManager.revertChanges(ut);

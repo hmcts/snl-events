@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactPerson;
@@ -137,7 +137,8 @@ public class FactsMapper {
             factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
         }
 
-        Optional.ofNullable(hearingPart.getSession()).ifPresent((s) -> factHearingPart.setSessionId(s.getId().toString()));
+        Optional.ofNullable(hearingPart.getSession()).ifPresent(
+            (s) -> factHearingPart.setSessionId(s.getId().toString()));
 
         return objectMapper.writeValueAsString(factHearingPart);
     }
