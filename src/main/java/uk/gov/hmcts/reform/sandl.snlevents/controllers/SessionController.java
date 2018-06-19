@@ -61,10 +61,10 @@ public class SessionController {
     }
 
     @GetMapping(path = "", params = {"startDate", "endDate"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SessionInfo> fetchSessionsForDates(
+    public SessionWithHearings fetchSessionsWithHearingsForDates(
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
-        return sessionService.getSessionsForDates(startDate, endDate);
+        return sessionService.getSessionsWithHearingsForDates(startDate, endDate);
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)

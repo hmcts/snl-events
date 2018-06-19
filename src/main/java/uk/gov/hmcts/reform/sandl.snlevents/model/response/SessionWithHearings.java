@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SessionWithHearings implements Serializable {
 
-    List<Session> sessions;
+    List<SessionInfo> sessions;
 
     List<HearingPart> hearingParts;
 }
