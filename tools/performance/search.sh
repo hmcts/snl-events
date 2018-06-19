@@ -14,7 +14,7 @@ echo "start $(date -d "$startDate" +%Y-%m-%d)"
 echo "weeks $weeks"
 
 
-for ((i_week=1; i_week<$weeks; i_week++)); do
+for ((i_week=1; i_week<=$weeks; i_week++)); do
     echo "$i_week WEEK"
     endDate=`date -d "$startDate +$i_week weeks"`
 curl -o /dev/null -s -w '%{time_total} :%{http_code} %{url_effective}\n' "http://localhost:8091/search?from=$(date -d "$startDate" +%Y-%m-%d)%2010:00&to=$(date -d "$endDate" +%Y-%m-%d)%2012:00&duration=600"

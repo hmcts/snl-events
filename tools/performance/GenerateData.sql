@@ -88,7 +88,7 @@ BEGIN
 			exit when not found;
 		
 			FOR counter IN 1..numberOfSessionsPerDay LOOP
-				temp_dt2 := temp_dt + interval '1' second * durationOfSessionInSeconds * counter;
+				temp_dt2 := temp_dt + interval '1' second * (durationOfSessionInSeconds * (counter -1));
 				IF (extract(dow from temp_dt2) NOT IN (0,5,6)) THEN
 					insert into session (id, person_id, room_id, start, duration, case_type)
 					values (uuid_generate_v4(), rec_judge.id, rec_room.id,  temp_dt2, durationOfSessionInSeconds, 'FTRACK');
@@ -110,8 +110,8 @@ BEGIN
 		exit when not found;
 		
 		FOR counter IN 1..numberOfHearingsPartsPerSession LOOP
-			temp_dt2 := rec_session.start + interval '1' second * durationOfHearingsPartInSeconds * counter;
-			temp_dt3 := rec_session.start + interval '1' second * (durationOfHearingsPartInSeconds * counter + durationOfHearingsPartInSeconds);
+			temp_dt2 := rec_session.start + interval '1' second * durationOfHearingsPartInSeconds * (counter -1);
+			temp_dt3 := rec_session.start + interval '1' second * (durationOfHearingsPartInSeconds * (counter -1) + durationOfHearingsPartInSeconds);
 			insert into hearing_part (id, session_id, case_number, case_title, case_type, hearing_type, duration, schedule_start, schedule_end, start, created_at)
 			values (uuid_generate_v4(), rec_session.id, 'cn' || counter,  'ct' || counter, 'FTRACK', 'Preliminary Hearing', durationOfHearingsPartInSeconds, temp_dt2, temp_dt3, temp_dt2, startDateTime);
 		END LOOP;
