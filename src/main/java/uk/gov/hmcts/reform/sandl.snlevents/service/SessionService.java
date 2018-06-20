@@ -1,14 +1,17 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -16,12 +19,15 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,6 +63,12 @@ public class SessionService {
     private HearingPartRepository hearingPartRepository;
     @Autowired
     private UserTransactionService userTransactionService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private FactsMapper factsMapper;
+    @Autowired
+    private RulesService rulesService;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -127,20 +139,20 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-    public Session save(CreateSession createSession) {
+    public Session save(UpsertSession upsertSession) {
         Session session = new Session();
-        session.setId(createSession.getId());
-        session.setDuration(createSession.getDuration());
-        session.setStart(createSession.getStart());
-        session.setCaseType(createSession.getCaseType());
+        session.setId(upsertSession.getId());
+        session.setDuration(upsertSession.getDuration());
+        session.setStart(upsertSession.getStart());
+        session.setCaseType(upsertSession.getCaseType());
 
-        if (createSession.getRoomId() != null) {
-            Room room = roomRepository.findOne(createSession.getRoomId());
+        if (upsertSession.getRoomId() != null) {
+            Room room = roomRepository.findOne(upsertSession.getRoomId());
             session.setRoom(room);
         }
 
-        if (createSession.getPersonId() != null) {
-            Person person = personRepository.findOne(createSession.getPersonId());
+        if (upsertSession.getPersonId() != null) {
+            Person person = personRepository.findOne(upsertSession.getPersonId());
             session.setPerson(person);
         }
 
@@ -148,12 +160,89 @@ public class SessionService {
     }
 
     @Transactional
-    public UserTransaction saveWithTransaction(CreateSession createSession) {
-        Session session = save(createSession);
+    public UserTransaction saveWithTransaction(UpsertSession upsertSession) {
+        Session session = save(upsertSession);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("session", session.getId(), null, "insert", "delete", 0));
+        userTransactionDataList.add(new UserTransactionData(
+            "session",
+            session.getId(),
+            null,
+            "insert",
+            "delete",
+            0)
+        );
 
-        return userTransactionService.startTransaction(createSession.getUserTransactionId(), userTransactionDataList);
+        return userTransactionService.startTransaction(upsertSession.getUserTransactionId(), userTransactionDataList);
+    }
+
+    public UserTransaction updateSession(UpsertSession upsertSession) throws IOException {
+
+        Session session = getSessionById(upsertSession.getId());
+
+        List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(Arrays.asList(session));
+
+        return areTransactionsInProgress(session, hearingParts)
+            ? userTransactionService.transactionConflicted(upsertSession.getUserTransactionId())
+            : updateWithTransaction(session, upsertSession, hearingParts);
+    }
+
+    private boolean areTransactionsInProgress(Session session, List<HearingPart> hearingParts) {
+        List<UUID> entityIds = hearingParts.stream().map(HearingPart::getId).collect(Collectors.toList());
+        entityIds.add(session.getId());
+
+        return userTransactionService.isAnyBeingTransacted(entityIds.stream().toArray(UUID[]::new));
+    }
+
+    @Transactional
+    public UserTransaction updateWithTransaction(Session session,
+                                                 UpsertSession upsertSession,
+                                                 List<HearingPart> hearingParts) throws IOException {
+        session = updateSessionTime(session, upsertSession);
+        save(session);
+
+        List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
+
+        UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(),
+            userTransactionDataList);
+
+        String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
+
+        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, msg);
+
+        ut = userTransactionService.rulesProcessed(ut);
+
+        return ut;
+    }
+
+    private Session updateSessionTime(Session session, UpsertSession upsertSession) {
+        Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
+        Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
+
+        return session;
+    }
+
+    private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts)
+        throws JsonProcessingException {
+        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+
+        userTransactionDataList.addAll(Arrays.asList(new UserTransactionData("session",
+            session.getId(),
+            objectMapper.writeValueAsString(session),
+            "update",
+            "update",
+            0)
+        ));
+        for (HearingPart hp : hearingParts) {
+            userTransactionDataList.add(new UserTransactionData("session",
+                hp.getId(),
+                objectMapper.writeValueAsString(hp),
+                "lock",
+                "unlock",
+                0)
+            );
+        }
+
+        return userTransactionDataList;
     }
 }

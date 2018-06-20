@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactPerson;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import javax.xml.ws.WebServiceException;
 
@@ -47,20 +48,30 @@ public class FactsMapper {
         objectMapper.registerModule(simpleModule);
     }
 
-    public String mapCreateSessionToRuleJsonMessage(CreateSession createSession) throws JsonProcessingException {
+    public String mapCreateSessionToRuleJsonMessage(UpsertSession upsertSession) throws JsonProcessingException {
         FactSession factSession = new FactSession();
 
-        factSession.setId(createSession.getId().toString());
-        factSession.setDuration(createSession.getDuration());
-        factSession.setStart(createSession.getStart());
-        factSession.setCaseType(createSession.getCaseType());
-        if (createSession.getPersonId() != null) {
-            factSession.setJudgeId(createSession.getPersonId().toString());
-        }
+        factSession.setId(upsertSession.getId().toString());
+        factSession.setDuration(upsertSession.getDuration());
+        factSession.setStart(upsertSession.getStart());
+        factSession.setCaseType(upsertSession.getCaseType());
 
-        if (createSession.getRoomId() != null) {
-            factSession.setRoomId(createSession.getRoomId().toString());
-        }
+        Optional.ofNullable(upsertSession.getRoomId()).ifPresent(r -> factSession.setRoomId(r.toString()));
+        Optional.ofNullable(upsertSession.getPersonId()).ifPresent(p -> factSession.setJudgeId(p.toString()));
+
+        return objectMapper.writeValueAsString(factSession);
+    }
+
+    public String mapUpdateSessionToRuleJsonMessage(Session session) throws JsonProcessingException {
+        FactSession factSession = new FactSession();
+
+        factSession.setId(session.getId().toString());
+        factSession.setDuration(session.getDuration());
+        factSession.setStart(session.getStart());
+        factSession.setCaseType(session.getCaseType());
+
+        Optional.ofNullable(session.getRoom()).ifPresent(r -> factSession.setRoomId(r.getId().toString()));
+        Optional.ofNullable(session.getPerson()).ifPresent(p -> factSession.setJudgeId(p.getId().toString()));
 
         return objectMapper.writeValueAsString(factSession);
     }
@@ -121,6 +132,9 @@ public class FactsMapper {
         if (hearingPart.getSession() != null) {
             factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
         }
+
+        Optional.ofNullable(hearingPart.getSession()).ifPresent(
+            (s) -> factHearingPart.setSessionId(s.getId().toString()));
 
         return objectMapper.writeValueAsString(factHearingPart);
     }

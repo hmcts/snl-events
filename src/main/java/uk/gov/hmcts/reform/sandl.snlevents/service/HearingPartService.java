@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
-import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
-import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
@@ -82,7 +80,7 @@ public class HearingPartService {
         Session targetSession = sessionRepository.findOne(assignment.getSessionId());
 
         return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
-                ? transactionConflicted(assignment.getUserTransactionId())
+                ? userTransactionService.transactionConflicted(assignment.getUserTransactionId())
                 : assignHearingPartToSessionWithTransaction(hearingPart, targetSession, assignment);
     }
 
@@ -120,11 +118,5 @@ public class HearingPartService {
                 "lock",
                 "unlock",
                 0);
-    }
-
-    private UserTransaction transactionConflicted(UUID transactionId) {
-        return new UserTransaction(transactionId,
-                UserTransactionStatus.CONFLICT,
-                UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 }
