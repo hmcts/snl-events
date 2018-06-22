@@ -239,7 +239,7 @@ public class SessionService {
     }
 
     private UUID getUuidFromString(String id) {
-        return id.equals("empty") ? null : UUID.fromString(id);
+        return "empty".equals(id) ? null : UUID.fromString(id);
     }
 
     private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts)
