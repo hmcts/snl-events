@@ -187,6 +187,16 @@ public class SessionService {
             : updateWithTransaction(session, upsertSession, hearingParts);
     }
 
+    private Session updateSession(Session session, UpsertSession upsertSession) {
+        Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
+        Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
+        Optional.ofNullable(upsertSession.getCaseType()).ifPresent((ct) -> session.setCaseType(ct));
+
+        setResources(session, upsertSession);
+
+        return session;
+    }
+
     private boolean areTransactionsInProgress(Session session, List<HearingPart> hearingParts) {
         List<UUID> entityIds = hearingParts.stream().map(HearingPart::getId).collect(Collectors.toList());
         entityIds.add(session.getId());
@@ -213,16 +223,6 @@ public class SessionService {
         ut = userTransactionService.rulesProcessed(ut);
 
         return ut;
-    }
-
-    private Session updateSession(Session session, UpsertSession upsertSession) {
-        Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
-        Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
-        Optional.ofNullable(upsertSession.getCaseType()).ifPresent((ct) -> session.setCaseType(ct));
-
-        setResources(session, upsertSession);
-
-        return session;
     }
 
     private void setResources(Session session, UpsertSession upsertSession) {
