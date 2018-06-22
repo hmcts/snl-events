@@ -198,7 +198,7 @@ public class SessionService {
     public UserTransaction updateWithTransaction(Session session,
                                                  UpsertSession upsertSession,
                                                  List<HearingPart> hearingParts) throws IOException {
-        session = updateSessionTime(session, upsertSession);
+        session = updateSession(session, upsertSession);
         save(session);
 
         List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
@@ -215,11 +215,25 @@ public class SessionService {
         return ut;
     }
 
-    private Session updateSessionTime(Session session, UpsertSession upsertSession) {
+    private Session updateSession(Session session, UpsertSession upsertSession) {
         Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
         Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
+        Optional.ofNullable(upsertSession.getCaseType()).ifPresent((ct) -> session.setCaseType(ct));
+
+        setResources(session, upsertSession);
 
         return session;
+    }
+
+    private void setResources(Session session, UpsertSession upsertSession) {
+        Optional.ofNullable(upsertSession.getRoomId()).ifPresent((id) -> {
+            Room room = roomRepository.findOne(id);
+            session.setRoom(room);
+        });
+        Optional.ofNullable(upsertSession.getPersonId()).ifPresent((id) -> {
+            Person person = personRepository.findOne(id);
+            session.setPerson(person);
+        });
     }
 
     private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts)
