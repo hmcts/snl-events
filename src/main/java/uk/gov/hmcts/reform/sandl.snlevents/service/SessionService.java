@@ -135,7 +135,7 @@ public class SessionService {
         return sessionWithHearings;
     }
 
-    public Session save(Session session) {
+    private Session save(Session session) {
         return sessionRepository.save(session);
     }
 
@@ -147,12 +147,12 @@ public class SessionService {
         session.setCaseType(upsertSession.getCaseType());
 
         if (upsertSession.getRoomId() != null) {
-            Room room = roomRepository.findOne(upsertSession.getRoomId());
+            Room room = roomRepository.findOne(getUuidFromString(upsertSession.getRoomId()));
             session.setRoom(room);
         }
 
         if (upsertSession.getPersonId() != null) {
-            Person person = personRepository.findOne(upsertSession.getPersonId());
+            Person person = personRepository.findOne(getUuidFromString(upsertSession.getPersonId()));
             session.setPerson(person);
         }
 
@@ -227,13 +227,19 @@ public class SessionService {
 
     private void setResources(Session session, UpsertSession upsertSession) {
         Optional.ofNullable(upsertSession.getRoomId()).ifPresent((id) -> {
-            Room room = roomRepository.findOne(id);
+            UUID roomId = getUuidFromString(upsertSession.getRoomId());
+            Room room = (roomId == null) ? null : roomRepository.findOne(roomId);
             session.setRoom(room);
         });
         Optional.ofNullable(upsertSession.getPersonId()).ifPresent((id) -> {
-            Person person = personRepository.findOne(id);
+            UUID personId = getUuidFromString(upsertSession.getPersonId());
+            Person person = (personId == null) ? null : personRepository.findOne(personId);
             session.setPerson(person);
         });
+    }
+
+    private UUID getUuidFromString(String id) {
+        return id.equals("empty") ? null : UUID.fromString(id);
     }
 
     private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts)

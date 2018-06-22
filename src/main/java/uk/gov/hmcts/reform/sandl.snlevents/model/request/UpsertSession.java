@@ -23,7 +23,7 @@ public class UpsertSession implements UserTransactional {
 
     private String caseType;
 
-    private UUID personId;
+    private String personId;
 
-    private UUID roomId;
+    private String roomId;
 }
