@@ -29,15 +29,16 @@ public class SearchController {
     }
 
     private String buildParams(String from, String to, int duration, String judgeId, String roomId) {
-        String params = String.format("?from=%s&to=%s&durationInSeconds=%s", from, to, duration);
+        StringBuilder paramsBuilder = new StringBuilder();
+        paramsBuilder.append(String.format("?from=%s&to=%s&durationInSeconds=%s", from, to, duration));
 
         if (judgeId != null) {
-            params += String.format("&judge=%s", judgeId);
+            paramsBuilder.append(String.format("&judge=%s", judgeId));
         }
 
         if (roomId != null) {
-            params += String.format("&room=%s", roomId);
+            paramsBuilder.append(String.format("&room=%s", roomId));
         }
-        return params;
+        return paramsBuilder.toString();
     }
 }
