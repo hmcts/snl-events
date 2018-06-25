@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -57,7 +56,7 @@ public class UserTransactionService {
     }
 
     @Transactional
-    public UserTransaction rollback(UUID id) throws IOException {
+    public UserTransaction rollback(UUID id) throws Exception {
         UserTransaction ut = userTransactionRepository.findOne(id);
 
         revertChangesManager.revertChanges(ut);
@@ -71,5 +70,11 @@ public class UserTransactionService {
                 .existsByEntityIdInAndUserTransaction_StatusEquals(
                         Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
                         UserTransactionStatus.STARTED);
+    }
+
+    public UserTransaction transactionConflicted(UUID transactionId) {
+        return new UserTransaction(transactionId,
+            UserTransactionStatus.CONFLICT,
+            UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 }

@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ public class RevertChangesManager {
     @Autowired
     private FactsMapper factsMapper;
 
-    public void revertChanges(UserTransaction ut) throws IOException {
+    public void revertChanges(UserTransaction ut) throws Exception {
         List<UserTransactionData> sortedUserTransactionDataList = ut.getUserTransactionDataList()
             .stream().sorted(Comparator.comparing(UserTransactionData::getCounterActionOrder))
             .collect(Collectors.toList());
@@ -35,7 +34,7 @@ public class RevertChangesManager {
         }
     }
 
-    public void handleTransactionData(UserTransactionData utd) throws IOException {
+    public void handleTransactionData(UserTransactionData utd) throws Exception {
         if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
             Session session = sessionRepository.findOne(utd.getEntityId());
 
@@ -51,8 +50,8 @@ public class RevertChangesManager {
         }
     }
 
-    public void handleHearingPart(UserTransactionData utd) throws IOException {
-        throw new WebServiceException("session not found");
+    public void handleHearingPart(UserTransactionData utd) throws Exception {
+        throw new Exception("Not implemented!");
     }
 
 }
