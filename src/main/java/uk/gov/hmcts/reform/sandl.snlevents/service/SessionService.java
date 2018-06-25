@@ -135,7 +135,7 @@ public class SessionService {
         return sessionWithHearings;
     }
 
-    public Session save(Session session) {
+    private Session save(Session session) {
         return sessionRepository.save(session);
     }
 
@@ -147,12 +147,12 @@ public class SessionService {
         session.setCaseType(upsertSession.getCaseType());
 
         if (upsertSession.getRoomId() != null) {
-            Room room = roomRepository.findOne(upsertSession.getRoomId());
+            Room room = roomRepository.findOne(getUuidFromString(upsertSession.getRoomId()));
             session.setRoom(room);
         }
 
         if (upsertSession.getPersonId() != null) {
-            Person person = personRepository.findOne(upsertSession.getPersonId());
+            Person person = personRepository.findOne(getUuidFromString(upsertSession.getPersonId()));
             session.setPerson(person);
         }
 
@@ -187,6 +187,16 @@ public class SessionService {
             : updateWithTransaction(session, upsertSession, hearingParts);
     }
 
+    private Session updateSession(Session session, UpsertSession upsertSession) {
+        Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
+        Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
+        Optional.ofNullable(upsertSession.getCaseType()).ifPresent((ct) -> session.setCaseType(ct));
+
+        setResources(session, upsertSession);
+
+        return session;
+    }
+
     private boolean areTransactionsInProgress(Session session, List<HearingPart> hearingParts) {
         List<UUID> entityIds = hearingParts.stream().map(HearingPart::getId).collect(Collectors.toList());
         entityIds.add(session.getId());
@@ -198,7 +208,7 @@ public class SessionService {
     public UserTransaction updateWithTransaction(Session givenSession,
                                                  UpsertSession upsertSession,
                                                  List<HearingPart> hearingParts) throws IOException {
-        Session session = updateSessionTime(givenSession, upsertSession);
+        Session session = updateSession(givenSession, upsertSession);
         save(session);
 
         List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
@@ -215,11 +225,21 @@ public class SessionService {
         return ut;
     }
 
-    private Session updateSessionTime(Session session, UpsertSession upsertSession) {
-        Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
-        Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
+    private void setResources(Session session, UpsertSession upsertSession) {
+        Optional.ofNullable(upsertSession.getRoomId()).ifPresent((id) -> {
+            UUID roomId = getUuidFromString(upsertSession.getRoomId());
+            Room room = (roomId == null) ? null : roomRepository.findOne(roomId);
+            session.setRoom(room);
+        });
+        Optional.ofNullable(upsertSession.getPersonId()).ifPresent((id) -> {
+            UUID personId = getUuidFromString(upsertSession.getPersonId());
+            Person person = (personId == null) ? null : personRepository.findOne(personId);
+            session.setPerson(person);
+        });
+    }
 
-        return session;
+    private UUID getUuidFromString(String id) {
+        return "empty".equals(id) ? null : UUID.fromString(id);
     }
 
     private List<UserTransactionData> generateUserTransactionDataList(Session session, List<HearingPart> hearingParts)
