@@ -18,7 +18,7 @@ public class ReportController {
     private ReportService reportService;
 
     @GetMapping(path = "unlisted-hearing-requests", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<UnlistedHearingRequestsReportResult> getProblems() {
+    public List<UnlistedHearingRequestsReportResult> getUnlistedHearingRequests() {
         return reportService.reportUnlistedHearingRequests();
     }
 
