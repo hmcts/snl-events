@@ -9,11 +9,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 
 @Service
 public class UserTransactionService {
@@ -56,7 +56,7 @@ public class UserTransactionService {
     }
 
     @Transactional
-    public UserTransaction rollback(UUID id) throws Exception {
+    public UserTransaction rollback(UUID id) {
         UserTransaction ut = userTransactionRepository.findOne(id);
 
         revertChangesManager.revertChanges(ut);
@@ -67,9 +67,9 @@ public class UserTransactionService {
 
     public boolean isAnyBeingTransacted(UUID... entityIds) {
         return userTransactionDataRepository
-                .existsByEntityIdInAndUserTransaction_StatusEquals(
-                        Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
-                        UserTransactionStatus.STARTED);
+            .existsByEntityIdInAndUserTransaction_StatusEquals(
+                Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
+                UserTransactionStatus.STARTED);
     }
 
     public UserTransaction transactionConflicted(UUID transactionId) {

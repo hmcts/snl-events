@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class RevertChangesManager {
     @Autowired
     private FactsMapper factsMapper;
 
-    public void revertChanges(UserTransaction ut) throws Exception {
+    public void revertChanges(UserTransaction ut) {
         List<UserTransactionData> sortedUserTransactionDataList = ut.getUserTransactionDataList()
             .stream().sorted(Comparator.comparing(UserTransactionData::getCounterActionOrder))
             .collect(Collectors.toList());
@@ -34,7 +35,7 @@ public class RevertChangesManager {
         }
     }
 
-    public void handleTransactionData(UserTransactionData utd) throws Exception {
+    public void handleTransactionData(UserTransactionData utd) {
         if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
             Session session = sessionRepository.findOne(utd.getEntityId());
 
@@ -44,14 +45,18 @@ public class RevertChangesManager {
 
             sessionRepository.delete(utd.getEntityId());
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+            try {
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+            } catch (IOException ioex) {
+                throw new RuntimeException(ioex);
+            }
         } else if (utd.getEntity().equals("hearingPart") && utd.getCounterAction().equals("update")) {
             handleHearingPart(utd);
         }
     }
 
-    public void handleHearingPart(UserTransactionData utd) throws Exception {
-        throw new Exception("Not implemented!");
+    public void handleHearingPart(UserTransactionData utd) {
+        throw new RuntimeException("Not implemented!");
     }
 
 }
