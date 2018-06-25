@@ -205,10 +205,10 @@ public class SessionService {
     }
 
     @Transactional
-    public UserTransaction updateWithTransaction(Session session,
+    public UserTransaction updateWithTransaction(Session givenSession,
                                                  UpsertSession upsertSession,
                                                  List<HearingPart> hearingParts) throws IOException {
-        session = updateSession(session, upsertSession);
+        Session session = updateSession(givenSession, upsertSession);
         save(session);
 
         List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
@@ -254,13 +254,14 @@ public class SessionService {
             0)
         ));
         for (HearingPart hp : hearingParts) {
-            userTransactionDataList.add(new UserTransactionData("session",
+            UserTransactionData transactionData = new UserTransactionData("session",//NOPMD
                 hp.getId(),
                 objectMapper.writeValueAsString(hp),
                 "lock",
                 "unlock",
-                0)
+                0
             );
+            userTransactionDataList.add(transactionData);
         }
 
         return userTransactionDataList;

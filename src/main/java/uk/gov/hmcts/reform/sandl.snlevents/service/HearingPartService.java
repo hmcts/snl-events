@@ -99,10 +99,9 @@ public class HearingPartService {
                 assignment.getUserTransactionId(),
                 hearingPart.getSession(),
                 targetSession);
-        rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
+        rulesService.postMessage(assignment.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
-        ut = userTransactionService.rulesProcessed(ut);
-        return userTransactionService.commit(ut.getId());
+        return userTransactionService.rulesProcessed(ut);
     }
 
     private boolean areTransactionsInProgress(HearingPart hearingPart, HearingPartSessionRelationship assignment) {

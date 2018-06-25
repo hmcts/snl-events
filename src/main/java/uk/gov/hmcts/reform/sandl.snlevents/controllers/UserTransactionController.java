@@ -32,7 +32,7 @@ public class UserTransactionController {
 
     @PostMapping(path = "/{id}/rollback", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserTransaction rollback(@PathVariable("id") UUID id) throws Exception {
+    public UserTransaction rollback(@PathVariable("id") UUID id) {
         return userTransactionService.rollback(id);
     }
 }
