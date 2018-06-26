@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -76,6 +77,8 @@ public class HearingPartService {
                                                                      HearingPartSessionRelationship assignment)
                                                                         throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
+        hearingPartRepository.flush();
+        hearingPart.setVersion(1L);
 
         Session targetSession = sessionRepository.findOne(assignment.getSessionId());
 

@@ -7,21 +7,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class HearingPart implements Serializable {
+public class HearingPart extends VersionedEntity implements Serializable {
 
     @Id
     @Getter

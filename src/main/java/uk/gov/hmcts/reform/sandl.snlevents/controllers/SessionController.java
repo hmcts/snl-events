@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -84,9 +86,16 @@ public class SessionController {
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateSession(@RequestBody UpsertSession upsertSession) throws IOException {
 
-        UserTransaction ut = sessionService.updateSession(upsertSession);
 
-        return ok(ut);
+        try {
+            UserTransaction ut = sessionService.updateSession(upsertSession);
+            return ok(ut);
+        } catch (ObjectOptimisticLockingFailureException optimisticLockException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(optimisticLockException.getPersistentClassName());
+        }
+
+
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
