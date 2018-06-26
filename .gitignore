@@ -19,3 +19,4 @@
 *.ipr
 
 .DS_store
+*.log
