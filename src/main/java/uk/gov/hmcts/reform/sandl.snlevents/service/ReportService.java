@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.report.ListedHearingRequestRepo
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -18,7 +19,7 @@ public class ReportService {
         return hearingQPartRepository.reportUnlistedHearingRequests();
     }
 
-    public List<ListedHearingRequestReportResult> reportListedHearingRequests() {
-        return hearingQPartRepository.reportListedHearingRequests();
+    public List<ListedHearingRequestReportResult> reportListedHearingRequests(LocalDate startDate, LocalDate endDate) {
+        return hearingQPartRepository.reportListedHearingRequests(startDate, endDate);
     }
 }

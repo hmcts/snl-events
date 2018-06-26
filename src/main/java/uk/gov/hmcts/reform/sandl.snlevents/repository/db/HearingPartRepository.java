@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.ListedHearingRequestReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -55,5 +56,5 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
     List<UnlistedHearingRequestsReportResult> reportUnlistedHearingRequests();
 
     @Query(value = "select hp.caseType as caseType from HearingPart hp")
-    List<ListedHearingRequestReportResult> reportListedHearingRequests();
+    List<ListedHearingRequestReportResult> reportListedHearingRequests(LocalDate startDate, LocalDate endDate);
 }
