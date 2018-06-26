@@ -56,7 +56,7 @@ public class UserTransactionService {
     }
 
     @Transactional
-    public UserTransaction rollback(UUID id) throws Exception {
+    public UserTransaction rollback(UUID id) {
         UserTransaction ut = userTransactionRepository.findOne(id);
 
         revertChangesManager.revertChanges(ut);
@@ -67,9 +67,9 @@ public class UserTransactionService {
 
     public boolean isAnyBeingTransacted(UUID... entityIds) {
         return userTransactionDataRepository
-                .existsByEntityIdInAndUserTransaction_StatusEquals(
-                        Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
-                        UserTransactionStatus.STARTED);
+            .existsByEntityIdInAndUserTransaction_StatusEquals(
+                Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
+                UserTransactionStatus.STARTED);
     }
 
     public UserTransaction transactionConflicted(UUID transactionId) {
