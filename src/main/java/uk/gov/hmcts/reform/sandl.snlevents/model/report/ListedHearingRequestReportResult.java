@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.report;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
+
 public interface ListedHearingRequestReportResult {
      String getCaseId();
      String getCaseName();
-     String getJudgeName();
+     String getJudge();
      String getHearingType();
      String getCaseType();
-     String getDuration();
-     String getDate();
-     String getStartTime();
-     String getRoomName();
+     Duration getDuration();
+     OffsetDateTime getStartTime();
+     String getRoom();
 }
