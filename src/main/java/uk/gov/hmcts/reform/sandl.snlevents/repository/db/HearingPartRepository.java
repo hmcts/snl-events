@@ -56,14 +56,9 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
     )
     List<UnlistedHearingRequestsReportResult> reportUnlistedHearingRequests();
 
-    @Query(value = "select hp.caseType as caseType, s.start as startTime, hp.caseNumber as caseId, hp.caseTitle as caseName, hp.duration as duration, r.name as room, p.name as judge, hp.hearingType as hearingType from HearingPart hp JOIN hp.session as s  LEFT OUTER JOIN s.room as r LEFT OUTER JOIN s.person as p WHERE s.start BETWEEN ?1 AND ?2")
+    @Query(value = "select hp.caseType as caseType, s.start as startTime, hp.caseNumber "
+        + "as caseId, hp.caseTitle as caseName, hp.duration as duration, r.name as room, "
+        + "p.name as judge, hp.hearingType as hearingType from HearingPart hp JOIN hp.session as s "
+        + "LEFT OUTER JOIN s.room as r LEFT OUTER JOIN s.person as p WHERE s.start BETWEEN ?1 AND ?2")
     List<ListedHearingRequestReportResult> reportListedHearingRequests(OffsetDateTime startDate, OffsetDateTime endDate);
 }
-/*
-        "SELECT NEW uk.gov.hmcts.reform.sandl.snlevents.model.response."
-            + "SessionInfo(s.id, s.start, s.duration, p, r, s.caseType) "
-            + "FROM Session s LEFT OUTER JOIN s.person as p LEFT OUTER JOIN s.room as r "
-            + "WHERE s.start BETWEEN :dateStart AND :dateEnd "
-            + "AND p.personType = 'JUDGE' AND p.username = :judgeUsername";
-*/
-
