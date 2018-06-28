@@ -26,7 +26,9 @@ public class ReportController {
         return reportService.reportUnlistedHearingRequests();
     }
 
-    @GetMapping(path = "listed-hearing-requests", params = {"startDate", "endDate"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "listed-hearing-requests",
+        params = {"startDate", "endDate"},
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ListedHearingRequestReportResult> getListedHearingRequests(
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {

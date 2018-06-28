@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.ListedHearingRequestReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -60,5 +59,6 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
         + "as caseId, hp.caseTitle as caseName, hp.duration as duration, r.name as room, "
         + "p.name as judge, hp.hearingType as hearingType from HearingPart hp JOIN hp.session as s "
         + "LEFT OUTER JOIN s.room as r LEFT OUTER JOIN s.person as p WHERE s.start BETWEEN ?1 AND ?2")
-    List<ListedHearingRequestReportResult> reportListedHearingRequests(OffsetDateTime startDate, OffsetDateTime endDate);
+    List<ListedHearingRequestReportResult> reportListedHearingRequests(OffsetDateTime startDate,
+                                                                       OffsetDateTime endDate);
 }
