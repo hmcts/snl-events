@@ -8,7 +8,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
 @MappedSuperclass
-class VersionedEntity {
+public class VersionedEntity {
 
     @Version
     @Column(name = "version", columnDefinition = "integer DEFAULT 0", nullable = false)

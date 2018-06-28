@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
+import javax.persistence.OptimisticLockException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -85,17 +86,12 @@ public class SessionController {
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateSession(@RequestBody UpsertSession upsertSession) throws IOException {
-
-
         try {
             UserTransaction ut = sessionService.updateSession(upsertSession);
             return ok(ut);
-        } catch (ObjectOptimisticLockingFailureException optimisticLockException) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(optimisticLockException.getPersistentClassName());
+        } catch (ObjectOptimisticLockingFailureException | OptimisticLockException optimisticLockException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-
-
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)
