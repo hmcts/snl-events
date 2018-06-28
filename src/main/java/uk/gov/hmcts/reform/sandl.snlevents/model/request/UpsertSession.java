@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateSession implements UserTransactional {
+public class UpsertSession implements UserTransactional {
     private UUID id;
 
     private UUID userTransactionId;
@@ -23,7 +23,7 @@ public class CreateSession implements UserTransactional {
 
     private String caseType;
 
-    private UUID personId;
+    private String personId;
 
-    private UUID roomId;
+    private String roomId;
 }

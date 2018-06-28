@@ -25,7 +25,7 @@ public class RevertChangesManager {
     @Autowired
     private FactsMapper factsMapper;
 
-    public void revertChanges(UserTransaction ut) throws IOException {
+    public void revertChanges(UserTransaction ut) {
         List<UserTransactionData> sortedUserTransactionDataList = ut.getUserTransactionDataList()
             .stream().sorted(Comparator.comparing(UserTransactionData::getCounterActionOrder))
             .collect(Collectors.toList());
@@ -35,7 +35,7 @@ public class RevertChangesManager {
         }
     }
 
-    public void handleTransactionData(UserTransactionData utd) throws IOException {
+    public void handleTransactionData(UserTransactionData utd) {
         if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
             Session session = sessionRepository.findOne(utd.getEntityId());
 
@@ -45,14 +45,18 @@ public class RevertChangesManager {
 
             sessionRepository.delete(utd.getEntityId());
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+            try {
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+            } catch (IOException ioex) {
+                throw new RuntimeException(ioex);
+            }
         } else if (utd.getEntity().equals("hearingPart") && utd.getCounterAction().equals("update")) {
             handleHearingPart(utd);
         }
     }
 
-    public void handleHearingPart(UserTransactionData utd) throws IOException {
-        throw new WebServiceException("session not found");
+    public void handleHearingPart(UserTransactionData utd) {
+        throw new RuntimeException("Not implemented!");
     }
 
 }
