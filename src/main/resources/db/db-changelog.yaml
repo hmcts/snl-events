@@ -28,4 +28,4 @@ databaseChangeLog:
   - include:
       file: db/fixtures/SL-964-set-started-transactions-to-comitted.yaml
   - include:
-      file: db/schema/SL-XXX-add-versioning.yaml
+      file: db/schema/SL-975-add-versioning.yaml
