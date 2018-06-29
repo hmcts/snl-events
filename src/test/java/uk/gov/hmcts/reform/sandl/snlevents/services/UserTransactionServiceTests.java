@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class UserTransactionServiceTests {
 
     @TestConfiguration
-    static class EmployeeServiceImplTestContextConfiguration {
+    static class UserTransactionServiceTestContextConfiguration {
 
         @Bean
         public UserTransactionService userTransactionService() {
