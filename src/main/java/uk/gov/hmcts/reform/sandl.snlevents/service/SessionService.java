@@ -48,7 +48,8 @@ public class SessionService {
             s.getDuration(),
             s.getPerson(),
             s.getRoom(),
-            s.getCaseType()
+            s.getCaseType(),
+            s.getVersion()
         );
 
     @PersistenceContext
@@ -179,6 +180,8 @@ public class SessionService {
     public UserTransaction updateSession(UpsertSession upsertSession) throws IOException {
 
         Session session = getSessionById(upsertSession.getId());
+        entityManager.detach(session);
+        session.setVersion(upsertSession.getVersion());
 
         List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(Arrays.asList(session));
 

@@ -26,4 +26,6 @@ public class UpsertSession implements UserTransactional {
     private String personId;
 
     private String roomId;
+
+    private Long version;
 }
