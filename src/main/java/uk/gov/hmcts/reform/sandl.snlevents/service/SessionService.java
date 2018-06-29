@@ -70,8 +70,6 @@ public class SessionService {
     private FactsMapper factsMapper;
     @Autowired
     private RulesService rulesService;
-    @Autowired
-    private VersionCheckService versionCheck;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -182,7 +180,8 @@ public class SessionService {
     public UserTransaction updateSession(UpsertSession upsertSession) throws IOException {
 
         Session session = getSessionById(upsertSession.getId());
-        versionCheck.checkVersion(session, upsertSession.getVersion());
+        entityManager.detach(session);
+        session.setVersion(upsertSession.getVersion());
 
         List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(Arrays.asList(session));
 
