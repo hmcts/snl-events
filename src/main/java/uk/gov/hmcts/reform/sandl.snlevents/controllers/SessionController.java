@@ -83,9 +83,7 @@ public class SessionController {
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateSession(@RequestBody UpsertSession upsertSession) throws IOException {
-
         UserTransaction ut = sessionService.updateSession(upsertSession);
-
         return ok(ut);
     }
 

@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+        id: SL-975-add-versioning
+        author: lgurniewicz
+        changes:
+          - addColumn:
+              tableName: session
+              columns:
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false

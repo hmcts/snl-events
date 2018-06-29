@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Session implements Serializable {
+public class Session extends VersionedEntity implements Serializable {
 
     @Id
     @Getter

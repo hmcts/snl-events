@@ -26,4 +26,6 @@ public class SessionInfo implements Serializable {
     Room room;
 
     String caseType;
+
+    Long version;
 }
