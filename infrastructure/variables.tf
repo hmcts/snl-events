@@ -36,3 +36,15 @@ variable "external_host_name" {
   default = "snl-events.reform.hmcts.net"
 }
 variable "subscription" {}
+
+variable "db_user" {
+  type        = "string"
+  default     = "snlevents"
+  description = "Database user name"
+}
+
+variable "db_name" {
+  type        = "string"
+  default     = "snleventsdb"
+  description = "Database name"
+}
