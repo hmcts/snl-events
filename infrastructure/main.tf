@@ -24,9 +24,11 @@ module "snl-events" {
 }
 
 module "postgres-snl-events" {
-  source              = "git@github.com:contino/moj-module-postgres?ref=master"
+  source              = "git@github.com:hmcts/moj-module-postgres?ref=master"
   product             = "${var.product}-${var.component}"
-  location            = "West Europe"
   env                 = "${var.env}"
-  postgresql_user     = "snlevents"
+  location            = "${var.location}"
+  postgresql_user     = "${module.postgres-snl-events.user_name}"
+  database_name       = "${module.postgres-snl-events.postgresql_database}"
+  postgresql_version  = "10"
 }
