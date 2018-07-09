@@ -10,6 +10,7 @@ module "snl-events" {
   is_frontend          = false
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
+  appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
 
   app_settings = {
     SNL_EVENTS_DB_HOST = "${module.postgres-snl-events.host_name}"
