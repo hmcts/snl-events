@@ -28,7 +28,7 @@ module "postgres-snl-events" {
   product             = "${var.product}-${var.component}"
   env                 = "${var.env}"
   location            = "${var.location}"
-  postgresql_user     = "${module.postgres-snl-events.user_name}"
-  database_name       = "${module.postgres-snl-events.postgresql_database}"
+  postgresql_user     = "${var.db_user}"
+  database_name       = "${var.db_name}"
   postgresql_version  = "10"
 }
