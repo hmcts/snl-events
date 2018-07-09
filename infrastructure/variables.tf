@@ -41,3 +41,15 @@ variable "appinsights_instrumentation_key" {
   description = "Instrumentation key of the App Insights instance this webapp should use. Module will create own App Insights resource if this is not provided."
   default = ""
 }
+
+variable "db_user" {
+  type        = "string"
+  default     = "snlevents"
+  description = "Database user name"
+}
+
+variable "db_name" {
+  type        = "string"
+  default     = "snleventsdb"
+  description = "Database name"
+}
