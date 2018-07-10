@@ -17,6 +17,7 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
     List<Session> findSessionByStartDate(@Param("dateStart") OffsetDateTime dateStart,
                                                 @Param("dateEnd") OffsetDateTime dateEnd);
 
+    @SuppressWarnings("squid:S00100")
     List<Session> findSessionByStartBetweenAndPerson_UsernameEquals(OffsetDateTime startDate,
                                                                OffsetDateTime endDate,
                                                                String judge);

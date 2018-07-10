@@ -10,5 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface UserTransactionDataRepository extends JpaRepository<UserTransactionData, UUID> {
+    @SuppressWarnings("squid:S00100")
     boolean existsByEntityIdInAndUserTransaction_StatusEquals(List<UUID> id, UserTransactionStatus status);
 }

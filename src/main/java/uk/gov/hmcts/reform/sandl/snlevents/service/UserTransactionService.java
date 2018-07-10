@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionReposito
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -68,7 +69,7 @@ public class UserTransactionService {
     public boolean isAnyBeingTransacted(UUID... entityIds) {
         return userTransactionDataRepository
             .existsByEntityIdInAndUserTransaction_StatusEquals(
-                Arrays.asList(entityIds).stream().filter(value -> value != null).collect(Collectors.toList()),
+                Arrays.stream(entityIds).filter(Objects::nonNull).collect(Collectors.toList()),
                 UserTransactionStatus.STARTED);
     }
 

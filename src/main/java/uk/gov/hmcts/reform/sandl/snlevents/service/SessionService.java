@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQuer
 @Service
 public class SessionService {
 
+    public static final String SESSION_ENTITY_NAME = "session";
     private final Function<Session, SessionInfo> sessionDbToSessionInfo =
         (Session s) -> new SessionInfo(
             s.getId(),
@@ -166,7 +167,7 @@ public class SessionService {
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData(
-            "session",
+            SESSION_ENTITY_NAME,
             session.getId(),
             null,
             "insert",
@@ -191,9 +192,9 @@ public class SessionService {
     }
 
     private Session updateSession(Session session, UpsertSession upsertSession) {
-        Optional.ofNullable(upsertSession.getDuration()).ifPresent((d) -> session.setDuration(d));
-        Optional.ofNullable(upsertSession.getStart()).ifPresent((s) -> session.setStart(s));
-        Optional.ofNullable(upsertSession.getCaseType()).ifPresent((ct) -> session.setCaseType(ct));
+        Optional.ofNullable(upsertSession.getDuration()).ifPresent(session::setDuration);
+        Optional.ofNullable(upsertSession.getStart()).ifPresent(session::setStart);
+        Optional.ofNullable(upsertSession.getCaseType()).ifPresent(session::setCaseType);
 
         setResources(session, upsertSession);
 
@@ -229,12 +230,12 @@ public class SessionService {
     }
 
     private void setResources(Session session, UpsertSession upsertSession) {
-        Optional.ofNullable(upsertSession.getRoomId()).ifPresent((id) -> {
+        Optional.ofNullable(upsertSession.getRoomId()).ifPresent(id -> {
             UUID roomId = getUuidFromString(upsertSession.getRoomId());
             Room room = (roomId == null) ? null : roomRepository.findOne(roomId);
             session.setRoom(room);
         });
-        Optional.ofNullable(upsertSession.getPersonId()).ifPresent((id) -> {
+        Optional.ofNullable(upsertSession.getPersonId()).ifPresent(id -> {
             UUID personId = getUuidFromString(upsertSession.getPersonId());
             Person person = (personId == null) ? null : personRepository.findOne(personId);
             session.setPerson(person);
@@ -249,7 +250,7 @@ public class SessionService {
         throws JsonProcessingException {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        userTransactionDataList.addAll(Arrays.asList(new UserTransactionData("session",
+        userTransactionDataList.addAll(Arrays.asList(new UserTransactionData(SESSION_ENTITY_NAME,
             session.getId(),
             objectMapper.writeValueAsString(session),
             "update",
@@ -257,7 +258,7 @@ public class SessionService {
             0)
         ));
         for (HearingPart hp : hearingParts) {
-            UserTransactionData transactionData = new UserTransactionData("session",//NOPMD
+            UserTransactionData transactionData = new UserTransactionData(SESSION_ENTITY_NAME,//NOPMD
                 hp.getId(),
                 objectMapper.writeValueAsString(hp),
                 "lock",
