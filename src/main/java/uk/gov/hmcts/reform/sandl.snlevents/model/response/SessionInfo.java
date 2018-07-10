@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang.builder.EqualsBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 
@@ -13,6 +15,8 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
+//not sure
+@NoArgsConstructor
 public class SessionInfo implements Serializable {
 
     UUID id;
@@ -28,4 +32,5 @@ public class SessionInfo implements Serializable {
     String caseType;
 
     Long version;
+
 }

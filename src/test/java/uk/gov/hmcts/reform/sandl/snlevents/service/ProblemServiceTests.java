@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -95,7 +96,6 @@ public class ProblemServiceTests {
     public void getProblemsByReferenceTypeIdReturnsProblemResponsesFromRepository() {
         when(problemRepository.getProblemsByReferenceEntityId(ENTITY_ID)).thenReturn(createProblems());
 
-        // todo what is reference entity id and reference type id?
         List<ProblemResponse> problems = problemService.getProblemsByReferenceTypeId(ENTITY_ID);
         assertThat(problems).isEqualTo(createProblemResponses());
     }
@@ -120,10 +120,7 @@ public class ProblemServiceTests {
         problemReference.setEntity(ENTITY);
         problemReference.setEntityId(ENTITY_ID);
 
-        List<ProblemReference> problemReferences = new ArrayList<>();
-        problemReferences.add(problemReference);
-
-        problem.setReferences(problemReferences);
+        problem.setReferences(new ArrayList<>(Arrays.asList(problemReference)));
 
         return problem;
     }
@@ -146,9 +143,7 @@ public class ProblemServiceTests {
         problemReference.setEntity(ENTITY);
         problemReference.setEntityId(ENTITY_ID);
 
-        List<ProblemReferenceResponse> problemReferences = new ArrayList<>();
-        problemReferences.add(problemReference);
-        problemResponse.setReferences(problemReferences);
+        problemResponse.setReferences(new ArrayList<>(Arrays.asList(problemReference)));
 
         return problemResponse;
     }
