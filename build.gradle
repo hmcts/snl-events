@@ -11,7 +11,7 @@ plugins {
   id 'org.sonarqube' version '2.6.1'
 }
 
-group = 'uk.gov.hmcts.reform.sandl.snlapi'
+group = 'uk.gov.hmcts.reform.sandl'
 version = '0.0.1'
 
 sourceCompatibility = 1.8
@@ -48,11 +48,13 @@ jacocoTestReport {
 project.tasks['sonarqube'].dependsOn test
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: Send Letter Service 2.0"
+    property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
     property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
     property "sonar.jacoco.itReportPath", "${project.buildDir}/jacoco/integration.exec"
-    property 'sonar.coverage.exclusions', "/**/*"
-    property 'sonar.exclusions', '/**/*'
+    property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+    property "sonar.exclusions", ""
+    property "sonar.test.exclusions", ""
+    property 'sonar.coverage.exclusions', "**/config/**"
   }
 }
 
