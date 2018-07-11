@@ -24,8 +24,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -65,8 +63,9 @@ public class UserTransactionServiceTests {
 
     @Test
     public void getUserTransactionById_should_call_findOne_on_userTransactionRepository() {
+        when(userTransactionRepository.findOne(any(UUID.class))).thenReturn(ut);
         this.userTransactionService.getUserTransactionById(someId);
-        verify(this.userTransactionRepository, times(1)).findOne(any(UUID.class));
+        assertThat(this.userTransactionService.getUserTransactionById(someId)).isEqualTo(ut);
     }
 
     @Test
