@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import lombok.experimental.var;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
@@ -57,7 +59,8 @@ public class ProblemService {
             return transformed;
         };
 
-    public final Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
+    //todo removed final, can't mock final function, discuss how we should handle that
+    public Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
 
         transformed.setId(cp.getId());
