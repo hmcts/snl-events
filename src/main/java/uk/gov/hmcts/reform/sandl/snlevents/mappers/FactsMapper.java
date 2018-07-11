@@ -56,8 +56,8 @@ public class FactsMapper {
         factSession.setStart(upsertSession.getStart());
         factSession.setCaseType(upsertSession.getCaseType());
 
-        Optional.ofNullable(upsertSession.getRoomId()).ifPresent(r -> factSession.setRoomId(r.toString()));
-        Optional.ofNullable(upsertSession.getPersonId()).ifPresent(p -> factSession.setJudgeId(p.toString()));
+        Optional.ofNullable(upsertSession.getRoomId()).ifPresent(factSession::setRoomId);
+        Optional.ofNullable(upsertSession.getPersonId()).ifPresent(factSession::setJudgeId);
 
         return objectMapper.writeValueAsString(factSession);
     }
@@ -134,7 +134,7 @@ public class FactsMapper {
         }
 
         Optional.ofNullable(hearingPart.getSession()).ifPresent(
-            (s) -> factHearingPart.setSessionId(s.getId().toString()));
+            s -> factHearingPart.setSessionId(s.getId().toString()));
 
         return objectMapper.writeValueAsString(factHearingPart);
     }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -48,7 +49,7 @@ public class RevertChangesManager {
             try {
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
             } catch (IOException ioex) {
-                throw new RuntimeException(ioex);
+                throw new SnlEventsException(ioex);
             }
         } else if (utd.getEntity().equals("hearingPart") && utd.getCounterAction().equals("update")) {
             handleHearingPart(utd);
@@ -56,7 +57,7 @@ public class RevertChangesManager {
     }
 
     public void handleHearingPart(UserTransactionData utd) {
-        throw new RuntimeException("Not implemented!");
+        throw new SnlEventsException("Not implemented!");
     }
 
 }

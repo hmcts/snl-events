@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SessionWithHearings implements Serializable {
 
-    List<SessionInfo> sessions;
+    private List<SessionInfo> sessions;
 
-    List<HearingPart> hearingParts;
+    private List<HearingPart> hearingParts;
 }

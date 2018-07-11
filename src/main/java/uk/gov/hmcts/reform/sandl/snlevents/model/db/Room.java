@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ import javax.persistence.OneToMany;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Room {
+public class Room implements Serializable {
 
     @Id
     @Getter
@@ -30,5 +31,5 @@ public class Room {
 
     @JsonIgnore
     @OneToMany(mappedBy = "room")
-    List<Session> sessionList;
+    private List<Session> sessionList;
 }

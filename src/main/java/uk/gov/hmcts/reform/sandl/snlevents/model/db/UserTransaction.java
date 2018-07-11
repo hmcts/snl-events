@@ -36,8 +36,7 @@ public class UserTransaction {
     @JsonIgnore
     private List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-    //TODO: version, optimistic locking
-
+    //IN FUTURE add here also version, optimistic locking
     public UserTransaction(UUID id, UserTransactionStatus status,
                            UserTransactionRulesProcessingStatus rulesProcessingStatus) {
         this.id = id;
