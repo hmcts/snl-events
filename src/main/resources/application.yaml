@@ -54,6 +54,10 @@ liquibase:
   enabled: true
   change-log: classpath:db/db-testdata-changelog.yaml
 
+azure:
+  application-insights:
+    instrumentation-key: ${APPINSIGHTS_INSTRUMENTATIONKEY:dummy}
+
 #If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:
   application:

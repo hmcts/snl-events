@@ -10,6 +10,7 @@ module "snl-events" {
   is_frontend          = false
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
+  appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   common_tags          = "${var.common_tags}"
 
   app_settings = {
