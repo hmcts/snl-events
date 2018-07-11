@@ -11,6 +11,7 @@ module "snl-events" {
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
+  common_tags          = "${var.common_tags}"
 
   app_settings = {
     SNL_EVENTS_DB_HOST = "${module.postgres-snl-events.host_name}"
@@ -32,4 +33,5 @@ module "postgres-snl-events" {
   postgresql_user     = "${var.db_user}"
   database_name       = "${var.db_name}"
   postgresql_version  = "10"
+  common_tags         = "${var.common_tags}"
 }

@@ -53,3 +53,7 @@ variable "db_name" {
   default     = "snleventsdb"
   description = "Database name"
 }
+
+variable "common_tags" {
+  type = "map"
+}
