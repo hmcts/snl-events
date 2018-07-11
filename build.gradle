@@ -94,7 +94,7 @@ def versions = [
 ]
 
 dependencies {
-  compileOnly 'org.projectlombok:lombok:1.16.20'
+  compile 'org.projectlombok:lombok:1.16.20'
   apt "org.projectlombok:lombok:1.16.20"
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
