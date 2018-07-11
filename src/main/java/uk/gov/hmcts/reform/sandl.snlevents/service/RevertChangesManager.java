@@ -35,7 +35,7 @@ public class RevertChangesManager {
         }
     }
 
-    public void handleTransactionData(UserTransactionData utd) {
+    private void handleTransactionData(UserTransactionData utd) {
         if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
             Session session = sessionRepository.findOne(utd.getEntityId());
 
@@ -55,7 +55,7 @@ public class RevertChangesManager {
         }
     }
 
-    public void handleHearingPart(UserTransactionData utd) {
+    private void handleHearingPart(UserTransactionData utd) {
         throw new RuntimeException("Not implemented!");
     }
 

@@ -15,8 +15,6 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-//not sure
-@NoArgsConstructor
 public class SessionInfo implements Serializable {
 
     UUID id;
@@ -32,5 +30,4 @@ public class SessionInfo implements Serializable {
     String caseType;
 
     Long version;
-
 }
