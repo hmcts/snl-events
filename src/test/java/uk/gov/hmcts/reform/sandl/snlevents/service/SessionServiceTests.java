@@ -11,7 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
+import config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
@@ -52,6 +52,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @Import(JpaTestConfiguration.class)
 public class SessionServiceTests {
+    public static final long VERSION = 1L;
     @Mock
     EntityManager entityManager;
 
@@ -99,7 +100,7 @@ public class SessionServiceTests {
 
     @Test
     public void getSessions_returnsSessionsFromRepository() {
-        List<Session> repositorySessions = createSessions();
+        List<Session> repositorySessions = createSessions(null);
         when(sessionRepository.findAll()).thenReturn(repositorySessions);
 
         List serviceSessions = sessionService.getSessions();
@@ -135,7 +136,7 @@ public class SessionServiceTests {
     @Test
     public void getSessionsWithHearingsForDates_returnsSessionsWithHearingsFromRepository() {
         List<HearingPart> hearingParts = createHearingParts();
-        List<Session> sessions = createSessions();
+        List<Session> sessions = createSessions(VERSION);
 
         when(sessionRepository.findSessionByStartDate(any(OffsetDateTime.class), any(OffsetDateTime.class)))
             .thenReturn(sessions);
@@ -153,7 +154,7 @@ public class SessionServiceTests {
     @Test
     public void getSessionJudgeDiaryForDates_returnsSessionsWithHearingsFromRepository() {
         List<HearingPart> hearingParts = createHearingParts();
-        List<Session> sessions = createSessions();
+        List<Session> sessions = createSessions(VERSION);
 
         when(sessionRepository.findSessionByStartBetweenAndPerson_UsernameEquals(
             any(OffsetDateTime.class), any(OffsetDateTime.class), eq(JUDGE_NAME))
@@ -239,6 +240,10 @@ public class SessionServiceTests {
     }
 
     private Session createSession() {
+        return createSession(null);
+    }
+
+    private Session createSession(Long version) {
         Session session = new Session();
         session.setCaseType(CASE_TYPE);
         session.setDuration(createDuration());
@@ -246,6 +251,7 @@ public class SessionServiceTests {
         session.setPerson(getPerson());
         session.setRoom(getRoom());
         session.setStart(OFFSET_DATE_TIME);
+        session.setVersion(version);
 
         return session;
     }
@@ -266,18 +272,20 @@ public class SessionServiceTests {
         return Duration.ofDays(DURATION);
     }
 
-    private List<Session> createSessions() {
-        return new ArrayList<>(Arrays.asList(createSession()));
+    private List<Session> createSessions(Long version) {
+        return new ArrayList<>(Arrays.asList(createSession(version)));
     }
 
     private SessionInfo createSessionInfo() {
-        SessionInfo sessionInfo = new SessionInfo();
-        sessionInfo.setCaseType(CASE_TYPE);
-        sessionInfo.setDuration(createDuration());
-        sessionInfo.setId(createUuid());
-        sessionInfo.setPerson(getPerson());
-        sessionInfo.setRoom(getRoom());
-        sessionInfo.setStart(OFFSET_DATE_TIME);
+        SessionInfo sessionInfo = new SessionInfo(
+            createUuid(),
+            OFFSET_DATE_TIME,
+            createDuration(),
+            getPerson(),
+            getRoom(),
+            CASE_TYPE,
+            VERSION
+        );
 
         return sessionInfo;
     }
@@ -303,6 +311,7 @@ public class SessionServiceTests {
         session.setStart(OFFSET_DATE_TIME);
         session.setRoomId(UUID_STRING);
         session.setPersonId(UUID_STRING);
+        session.setVersion(VERSION);
 
         return session;
     }
