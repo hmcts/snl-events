@@ -55,6 +55,7 @@ public class UserTransaction {
         }
     }
 
+    @SuppressWarnings("squid:S2250")
     public void removeUserTransactionData(UserTransactionData userTransactionData) {
         userTransactionDataList.remove(userTransactionData);
         userTransactionData.setUserTransaction(null);

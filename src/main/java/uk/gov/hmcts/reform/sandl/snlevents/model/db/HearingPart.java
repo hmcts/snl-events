@@ -20,6 +20,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("squid:S3437")
 public class HearingPart implements Serializable {
 
     @Id

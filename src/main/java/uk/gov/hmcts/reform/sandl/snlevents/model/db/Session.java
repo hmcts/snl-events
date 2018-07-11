@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("squid:S3437")
 public class Session extends VersionedEntity implements Serializable {
 
     @Id

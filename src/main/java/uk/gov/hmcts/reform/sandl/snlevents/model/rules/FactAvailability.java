@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("squid:S3437")
 public class FactAvailability implements Serializable {
     private String id;
     private String judgeId;
