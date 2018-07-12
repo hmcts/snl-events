@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ProblemReference;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblem;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateProblemReference;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemReferenceResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
@@ -35,9 +38,9 @@ public class ProblemServiceTests {
     public static final String PROBLEM_ID = "problem-id";
 
     @TestConfiguration
-    static class ProblemServiceTestContextConfiguration {
+    static class Configuration {
         @Bean
-        public ProblemService problemService() {
+        public ProblemService createSut() {
             return new ProblemService();
         }
     }
@@ -107,6 +110,27 @@ public class ProblemServiceTests {
 
         List<ProblemResponse> problems = problemService.getProblemsByUserTransactionId(uuid);
         assertThat(problems).isEqualTo(createProblemResponses());
+    }
+
+    @Test
+    public void problemCreateToDb_tranformsCreateProblemToProblem() {
+        val problem = problemService.problemCreateToDb.apply(createCreateProblem());
+    }
+
+    private CreateProblem createCreateProblem() {
+        val cp = new CreateProblem();
+        cp.setReferences(
+            new ArrayList<>(Arrays.asList(createCreateProblemReference()))
+        );
+
+        return cp;
+    }
+
+    private CreateProblemReference createCreateProblemReference() {
+        val cpr = new CreateProblemReference();
+        cpr.setFact("judge");
+
+        return cpr;
     }
 
     private Problem createProblem() {

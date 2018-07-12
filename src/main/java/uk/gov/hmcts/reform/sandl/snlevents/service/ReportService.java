@@ -16,16 +16,16 @@ import java.util.List;
 public class ReportService {
 
     @Autowired
-    private HearingPartRepository hearingQPartRepository;
+    private HearingPartRepository hearingPartRepository;
 
     public List<UnlistedHearingRequestsReportResult> reportUnlistedHearingRequests() {
-        return hearingQPartRepository.reportUnlistedHearingRequests();
+        return hearingPartRepository.reportUnlistedHearingRequests();
     }
 
     public List<ListedHearingRequestReportResult> reportListedHearingRequests(LocalDate startDate, LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
 
-        return hearingQPartRepository.reportListedHearingRequests(fromDate, toDate);
+        return hearingPartRepository.reportListedHearingRequests(fromDate, toDate);
     }
 }
