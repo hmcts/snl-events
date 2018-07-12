@@ -25,7 +25,7 @@ public class FactMessageService {
         JsonNode modifications = objectMapper.readTree(factMsg);
 
         for (JsonNode item : modifications) {
-            if (item.get("type").asText().equals("Problem")) {
+            if ("Problem".equals(item.get("type").asText())) {
                 handleProblem(userTransactionId, item);
             }
         }

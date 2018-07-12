@@ -13,6 +13,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
+@SuppressWarnings("squid:S3437")
 public class SessionInfo implements Serializable {
 
     UUID id;

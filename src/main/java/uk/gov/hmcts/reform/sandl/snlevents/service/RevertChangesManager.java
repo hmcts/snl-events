@@ -37,7 +37,7 @@ public class RevertChangesManager {
     }
 
     public void handleTransactionData(UserTransactionData utd) {
-        if (utd.getEntity().equals("session") && utd.getCounterAction().equals("delete")) {
+        if ("session".equals(utd.getEntity()) && "delete".equals(utd.getCounterAction())) {
             Session session = sessionRepository.findOne(utd.getEntityId());
 
             if (session == null) {
@@ -51,7 +51,7 @@ public class RevertChangesManager {
             } catch (IOException ioex) {
                 throw new SnlEventsException(ioex);
             }
-        } else if (utd.getEntity().equals("hearingPart") && utd.getCounterAction().equals("update")) {
+        } else if ("hearingPart".equals(utd.getEntity()) && "update".equals(utd.getCounterAction())) {
             handleHearingPart(utd);
         }
     }
