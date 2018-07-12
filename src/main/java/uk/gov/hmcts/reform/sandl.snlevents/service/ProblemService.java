@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
-import lombok.experimental.var;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
