@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
@@ -72,30 +74,24 @@ public class SessionServiceTests {
     public static final LocalDate START_DATE = LocalDate.MIN;
     public static final LocalDate END_DATE = LocalDate.MAX;
 
-    @TestConfiguration
-    static class SessionServiceTestContextConfiguration {
-        @Bean
-        public SessionService sessionService() { return new SessionService(); }
-    }
-
-    @Autowired
+    @InjectMocks
     private SessionService sessionService;
 
-    @MockBean
+    @Mock
     private SessionRepository sessionRepository;
-    @MockBean
+    @Mock
     private RoomRepository roomRepository;
-    @MockBean
+    @Mock
     private PersonRepository personRepository;
-    @MockBean
+    @Mock
     private HearingPartRepository hearingPartRepository;
-    @MockBean
+    @Mock
     private UserTransactionService userTransactionService;
-    @MockBean
+    @Mock
     private ObjectMapper objectMapper;
-    @MockBean
+    @Mock
     private FactsMapper factsMapper;
-    @MockBean
+    @Mock
     private RulesService rulesService;
 
     @Test
