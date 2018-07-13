@@ -10,7 +10,7 @@ withPipeline("java", product, component) {
     echo 'sln-events checked out'
   }
 
-  before('buildinfra:aat') {
-    error 'This is PoC project for Scheduling and Listing therefore the environments will not be built'
+  before('buildinfra:prod') {
+    error 'This is PoC project for Scheduling and Listing therefore the prod environment will not be built'
   }
 }
