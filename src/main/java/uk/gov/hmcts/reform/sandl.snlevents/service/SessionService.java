@@ -109,18 +109,6 @@ public class SessionService {
         return sessionsWithHearings;
     }
 
-    //todo never used, remove?
-    public List<SessionInfo> getJudgeDiaryForDates(String judgeUsername, LocalDate startDate, LocalDate endDate) {
-        OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
-        OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
-
-        return entityManager.createQuery(GET_SESSION_FOR_JUDGE_DIARY_SQL, SessionInfo.class)
-            .setParameter("dateStart", fromDate)
-            .setParameter("dateEnd", toDate)
-            .setParameter("judgeUsername", judgeUsername)
-            .getResultList();
-    }
-
     public SessionWithHearings getSessionJudgeDiaryForDates(String judgeUsername, LocalDate startDate,
                                                             LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
