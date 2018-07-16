@@ -80,7 +80,7 @@ public class SessionService {
     }
 
 
-    //todo move entity manager to repository
+    //nottodo move entity manager to repository
     public List getSessionsFromDate(LocalDate localDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(localDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(localDate, LocalTime.MAX, ZoneOffset.UTC);
@@ -91,7 +91,7 @@ public class SessionService {
             .getResultList();
     }
 
-    //todo check if we can do this matching on repository level
+    //nottodo check if we can do this matching on repository level
     public SessionWithHearings getSessionsWithHearingsForDates(LocalDate startDate, LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);

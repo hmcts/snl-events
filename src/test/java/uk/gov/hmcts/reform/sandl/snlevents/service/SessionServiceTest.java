@@ -110,7 +110,7 @@ public class SessionServiceTest {
     }
 
     //@Test
-    //todo something wrong with mocking typed query
+    //nottodo something wrong with mocking typed query
     public void getSessionsFromDate_returnsSessionsInfoFromRepository() {
         TypedQuery query = mock(TypedQuery.class);
         List<SessionInfo> repositorySessionInfos = createSessionInfos();
