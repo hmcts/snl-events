@@ -31,7 +31,7 @@ public class PersonControllerTest {
     @MockBean
     private PersonService personService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void fetchAllPersons_returnsPersonsFromService() throws Exception {
