@@ -3,10 +3,8 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
@@ -20,19 +18,10 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class RoomServiceTests {
-
-    @TestConfiguration
-    static class Configuration {
-        @Bean
-        public RoomService createSut() {
-            return new RoomService();
-        }
-    }
-
-    @Autowired
+    @InjectMocks
     RoomService roomService;
 
-    @MockBean
+    @Mock
     RoomRepository roomRepository;
 
     @Test

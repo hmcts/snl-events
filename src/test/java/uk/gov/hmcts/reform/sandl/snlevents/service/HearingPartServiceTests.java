@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -37,33 +35,25 @@ public class HearingPartServiceTests {
         when(hearingPartRepository.save(any(HearingPart.class))).then(returnsFirstArg());
     }
 
-    @TestConfiguration
-    static class HearingPartServiceTestContextConfiguration {
-        @Bean
-        public HearingPartService hearingPartService() {
-            return new HearingPartService();
-        }
-    }
-
-    @Autowired
+    @InjectMocks
     HearingPartService hearingPartService;
 
-    @MockBean
+    @Mock
     HearingPartRepository hearingPartRepository;
 
-    @MockBean
+    @Mock
     UserTransactionService userTransactionService;
 
-    @MockBean
+    @Mock
     SessionRepository sessionRepository;
 
-    @MockBean
+    @Mock
     private RulesService rulesService;
 
-    @MockBean
+    @Mock
     private FactsMapper factsMapper;
 
-    @MockBean
+    @Mock
     private ObjectMapper objectMapper;
 
     @Test

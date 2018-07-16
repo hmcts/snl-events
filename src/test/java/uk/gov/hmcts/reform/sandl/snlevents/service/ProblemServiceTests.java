@@ -3,10 +3,8 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ProblemReference;
@@ -37,18 +35,10 @@ public class ProblemServiceTests {
     public static final String ENTITY_ID = "eid";
     public static final String PROBLEM_ID = "problem-id";
 
-    @TestConfiguration
-    static class Configuration {
-        @Bean
-        public ProblemService createSut() {
-            return new ProblemService();
-        }
-    }
-
-    @Autowired
+    @InjectMocks
     private ProblemService problemService;
 
-    @MockBean
+    @Mock
     private ProblemRepository problemRepository;
 
     @Test
