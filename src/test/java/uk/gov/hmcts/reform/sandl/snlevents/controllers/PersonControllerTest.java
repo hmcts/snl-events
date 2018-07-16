@@ -32,12 +32,7 @@ public class PersonControllerTest {
     @MockBean
     private PersonService personService;
 
-    private ObjectMapper objectMapper;
-
-    @Before
-    public void setup() {
-        objectMapper = new ObjectMapper();
-    }
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void fetchAllPersons_returnsPersonsFromService() throws Exception {
