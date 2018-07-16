@@ -29,32 +29,29 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class HearingPartServiceTests {
-
-    @Before
-    public void init() {
-        when(hearingPartRepository.save(any(HearingPart.class))).then(returnsFirstArg());
-    }
-
     @InjectMocks
     HearingPartService hearingPartService;
 
     @Mock
     HearingPartRepository hearingPartRepository;
-
     @Mock
     UserTransactionService userTransactionService;
-
     @Mock
     SessionRepository sessionRepository;
-
     @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
-
     @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private FactsMapper factsMapper;
-
     @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private ObjectMapper objectMapper;
+
+    @Before
+    public void init() {
+        when(hearingPartRepository.save(any(HearingPart.class))).then(returnsFirstArg());
+    }
 
     @Test
     public void getAllHearingParts_returnsHearingPartsFromRepository() {
@@ -85,7 +82,8 @@ public class HearingPartServiceTests {
     }
 
     @Test
-    public void assignHearingPartToSessionWithTransaction_assignsHearingPartToSession_whenTheresNoTransactionInProgress() throws IOException {
+    public void assignHearingPartToSessionWithTransaction_assignsThemSession_whenTheresNoTransactionInProgress()
+        throws IOException {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
         //target session exists
@@ -100,14 +98,16 @@ public class HearingPartServiceTests {
     }
 
     @Test
-    public void assignHearingPartToSessionWithTransaction_indicatesConflict_whenTransactionIsInProgress() throws IOException {
+    public void assignHearingPartToSessionWithTransaction_indicatesConflict_whenTransactionIsInProgress()
+        throws IOException {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
         //target session exists
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         //there's transaction in progress
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class))).thenReturn(true);
+        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class)))
+            .thenReturn(true);
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
@@ -117,7 +117,8 @@ public class HearingPartServiceTests {
     }
 
     @Test
-    public void assignHearingPartToSessionWithTransaction_indicatesConflict_whenTargetSessionDoesNotExist() throws IOException {
+    public void assignHearingPartToSessionWithTransaction_indicatesConflict_whenTargetSessionDoesNotExist()
+        throws IOException {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
         //target session doesn't exist
@@ -139,9 +140,7 @@ public class HearingPartServiceTests {
     }
 
     private HearingPart createHearingPart() {
-        HearingPart hearingPart = new HearingPart();
-
-        return hearingPart;
+        return new HearingPart();
     }
 
     private Session createSession() {

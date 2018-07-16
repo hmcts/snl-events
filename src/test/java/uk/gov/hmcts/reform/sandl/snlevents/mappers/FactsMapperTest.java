@@ -44,9 +44,16 @@ public class FactsMapperTest {
     FactsMapper factsMapper = new FactsMapper();
 
     @Test
-    public void  mapCreateSessionToRuleJsonMessage_mapsOk() throws JsonProcessingException {
+    public void mapCreateSessionToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapCreateSessionToRuleJsonMessage(createUpsertSession());
-        val expected = "{\"id\":\""+ ID + "\",\"judgeId\":\"" + PERSON_ID + "\",\"start\":\"" + START_MAPPED + "\",\"duration\":" + DURATION_MAPPED + ",\"roomId\":\"" + ROOM_ID + "\",\"caseType\":\"" + CASE_TYPE + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"judgeId\":\"" + PERSON_ID + "\","
+            + "\"start\":\"" + START_MAPPED + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"roomId\":\"" + ROOM_ID + "\","
+            + "\"caseType\":\"" + CASE_TYPE + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
@@ -54,7 +61,14 @@ public class FactsMapperTest {
     @Test
     public void mapUpdateSessionToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapUpdateSessionToRuleJsonMessage(createSession());
-        val expected = "{\"id\":\""+ ID + "\",\"judgeId\":\"" + PERSON_ID + "\",\"start\":\"" + START_MAPPED + "\",\"duration\":" + DURATION_MAPPED + ",\"roomId\":\"" + ROOM_ID + "\",\"caseType\":\"" + CASE_TYPE + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"judgeId\":\"" + PERSON_ID + "\","
+            + "\"start\":\"" + START_MAPPED + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"roomId\":\"" + ROOM_ID + "\","
+            + "\"caseType\":\"" + CASE_TYPE + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
@@ -62,14 +76,22 @@ public class FactsMapperTest {
     @Test
     public void mapCreateHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapCreateHearingPartToRuleJsonMessage(createCreateHearingPart());
-        val expected = "{\"id\":\"" + ID + "\",\"sessionId\":null,\"caseType\":\"" + CASE_TYPE + "\",\"duration\":" + DURATION_MAPPED + ",\"scheduleStart\":\"" + START_MAPPED + "\",\"scheduleEnd\":\"" + END_MAPPED + "\",\"createdAt\":\"" + START_MAPPED + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"sessionId\":null,"
+            + "\"caseType\":\"" + CASE_TYPE + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"scheduleStart\":\"" + START_MAPPED + "\","
+            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
+            + "\"createdAt\":\"" + START_MAPPED + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
 
     private CreateHearingPart createCreateHearingPart() {
         val chp = new CreateHearingPart();
-        chp.setId(createUUID());
+        chp.setId(createUuid());
         chp.setDuration(createDuration());
         chp.setCaseType(CASE_TYPE);
         chp.setScheduleStart(START);
@@ -82,14 +104,22 @@ public class FactsMapperTest {
     @Test
     public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapHearingPartToRuleJsonMessage(createHearingPart());
-        val expected = "{\"id\":\"" + ID + "\",\"sessionId\":\"" + ID + "\",\"caseType\":\"case-type\",\"duration\":" + DURATION_MAPPED + ",\"scheduleStart\":\"" + START_MAPPED + "\",\"scheduleEnd\":\"" + END_MAPPED + "\",\"createdAt\":\"" + START_MAPPED + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"sessionId\":\"" + ID + "\","
+            + "\"caseType\":\"case-type\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"scheduleStart\":\"" + START_MAPPED + "\","
+            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
+            + "\"createdAt\":\"" + START_MAPPED + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
 
     private HearingPart createHearingPart() {
         val hp = new HearingPart();
-        hp.setId(createUUID());
+        hp.setId(createUuid());
         hp.setDuration(createDuration());
         hp.setCaseType(CASE_TYPE);
         hp.setScheduleStart(START);
@@ -103,15 +133,31 @@ public class FactsMapperTest {
     @Test
     public void mapDbSessionToRuleJsonMessage_mapsOk() {
         val mapped = factsMapper.mapDbSessionToRuleJsonMessage(createSession());
-        val expected = "{\"id\":\""+ ID + "\",\"judgeId\":\"" + PERSON_ID + "\",\"start\":\"" + START_MAPPED + "\",\"duration\":" + DURATION_MAPPED + ",\"roomId\":\"" + ROOM_ID + "\",\"caseType\":\"" + CASE_TYPE + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"judgeId\":\"" + PERSON_ID + "\","
+            + "\"start\":\"" + START_MAPPED + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"roomId\":\"" + ROOM_ID + "\","
+            + "\"caseType\":\"" + CASE_TYPE + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
+
     }
 
     @Test
     public void mapDbHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapDbHearingPartToRuleJsonMessage(createHearingPart());
-        val expected = "{\"id\":\"" + ID + "\",\"sessionId\":\"" + ID + "\",\"caseType\":\"" + CASE_TYPE + "\",\"duration\":" + DURATION_MAPPED + ",\"scheduleStart\":\"" + START_MAPPED + "\",\"scheduleEnd\":\"" + END_MAPPED + "\",\"createdAt\":\"" + START_MAPPED + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"sessionId\":\"" + ID + "\","
+            + "\"caseType\":\"" + CASE_TYPE + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"scheduleStart\":\"" + START_MAPPED + "\","
+            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
+            + "\"createdAt\":\"" + START_MAPPED + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
@@ -126,7 +172,7 @@ public class FactsMapperTest {
 
     private Room createRoom() {
         val r = new Room();
-        r.setId(createUUID(ROOM_ID));
+        r.setId(createUuid(ROOM_ID));
         r.setName(ROOM_NAME);
 
         return r;
@@ -135,14 +181,17 @@ public class FactsMapperTest {
     @Test
     public void mapDbPersonToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapDbPersonToRuleJsonMessage(createPerson());
-        val expected = "{\"id\":\"" + PERSON_ID + "\",\"name\":\"" + PERSON_NAME + "\"}";
+        val expected = "{"
+            + "\"id\":\"" + PERSON_ID + "\","
+            + "\"name\":\"" + PERSON_NAME + "\""
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
 
     private Person createPerson() {
         val p = new Person();
-        p.setId(createUUID(PERSON_ID));
+        p.setId(createUuid(PERSON_ID));
         p.setName(PERSON_NAME);
 
         return p;
@@ -151,14 +200,20 @@ public class FactsMapperTest {
     @Test
     public void mapDbAvailabilityToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapDbAvailabilityToRuleJsonMessage(createAvailability());
-        val expected = "{\"id\":\"" + ID + "\",\"judgeId\":\"" + PERSON_ID + "\",\"roomId\":\"" + ROOM_ID + "\",\"start\":\"" + START_MAPPED + "\",\"duration\":" + DURATION_MAPPED + "}";
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"judgeId\":\"" + PERSON_ID + "\","
+            + "\"roomId\":\"" + ROOM_ID + "\","
+            + "\"start\":\"" + START_MAPPED + "\","
+            + "\"duration\":" + DURATION_MAPPED
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
 
     private Availability createAvailability() {
         val a = new Availability();
-        a.setId(createUUID());
+        a.setId(createUuid());
         a.setDuration(createDuration());
         a.setStart(START);
         a.setPerson(createPerson());
@@ -170,7 +225,10 @@ public class FactsMapperTest {
     @Test
     public void mapTimeToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapTimeToRuleJsonMessage(createDateTimePartValue());
-        val expected = "{\"id\":null,\"value\":" + VALUE + "}";
+        val expected = "{"
+            + "\"id\":null,"
+            + "\"value\":" + VALUE
+            + "}";
 
         assertThat(mapped).isEqualTo(expected);
     }
@@ -185,19 +243,19 @@ public class FactsMapperTest {
 
     private UpsertSession createUpsertSession() {
         val us = new UpsertSession();
-        us.setId(createUUID());
+        us.setId(createUuid());
         us.setDuration(createDuration());
         us.setStart(START);
         us.setCaseType(CASE_TYPE);
-        us.setRoomId(createUUID(ROOM_ID).toString());
-        us.setPersonId(createUUID(PERSON_ID).toString());
+        us.setRoomId(createUuid(ROOM_ID).toString());
+        us.setPersonId(createUuid(PERSON_ID).toString());
 
         return us;
     }
 
     private Session createSession() {
         val s = new Session();
-        s.setId(createUUID());
+        s.setId(createUuid());
         s.setDuration(createDuration());
         s.setStart(START);
         s.setCaseType(CASE_TYPE);
@@ -207,12 +265,12 @@ public class FactsMapperTest {
         return s;
     }
 
-    private UUID createUUID() {
-        return createUUID(ID);
+    private UUID createUuid() {
+        return createUuid(ID);
     }
 
-    private UUID createUUID(String uuid) {
-        return java.util.UUID.fromString(uuid);
+    private UUID createUuid(String uuid) {
+        return UUID.fromString(uuid);
     }
 
     private Duration createDuration() {

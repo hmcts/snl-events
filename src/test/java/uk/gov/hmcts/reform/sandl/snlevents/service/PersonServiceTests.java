@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class PersonServiceTests {
-
     @InjectMocks
     PersonService personService;
 
@@ -30,7 +29,7 @@ public class PersonServiceTests {
     public void getPersons_returnsPersonFromRepository() {
         val persons = createPersons();
         when(personRepository.findAll()).thenReturn(persons);
-        val returnedPersons= personService.getPersons();
+        val returnedPersons = personService.getPersons();
 
         assertThat(returnedPersons).isEqualTo(persons);
     }
@@ -40,7 +39,7 @@ public class PersonServiceTests {
         val persons = createPersons();
         when(personRepository.findPeopleByPersonTypeEqualsIgnoreCase(anyString()))
             .thenReturn(persons);
-        val returnedPersons= personService.getPersonByType("");
+        val returnedPersons = personService.getPersonByType("");
 
         assertThat(returnedPersons).isEqualTo(persons);
     }

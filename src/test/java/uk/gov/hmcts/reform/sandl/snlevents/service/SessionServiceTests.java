@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import config.JpaTestConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
@@ -25,8 +25,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -35,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -49,18 +49,8 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @Import(JpaTestConfiguration.class)
 public class SessionServiceTests {
+
     public static final long VERSION = 1L;
-    @Mock
-    EntityManager entityManager;
-
-    @Before
-    public void init() {
-        EntityManager em = mock(EntityManager.class);
-        sessionService.entityManager = em;
-
-        when(sessionRepository.save(any(Session.class))).then(returnsFirstArg());
-    }
-
     private static final OffsetDateTime OFFSET_DATE_TIME = OffsetDateTime.MAX;
     private static final long DURATION = 1L;
     private static final String CASE_TYPE = "case-type";
@@ -72,6 +62,8 @@ public class SessionServiceTests {
     @InjectMocks
     private SessionService sessionService;
 
+    @Mock
+    EntityManager entityManager;
     @Mock
     private SessionRepository sessionRepository;
     @Mock
@@ -88,6 +80,14 @@ public class SessionServiceTests {
     private FactsMapper factsMapper;
     @Mock
     private RulesService rulesService;
+
+    @Before
+    public void init() {
+        EntityManager em = mock(EntityManager.class);
+        sessionService.entityManager = em;
+
+        when(sessionRepository.save(any(Session.class))).then(returnsFirstArg());
+    }
 
     @Test
     public void getSessions_returnsSessionsFromRepository() {
@@ -154,7 +154,8 @@ public class SessionServiceTests {
         when(hearingPartRepository.findBySessionIn(any(List.class)))
             .thenReturn(hearingParts);
 
-        SessionWithHearings sessionWithHearings = sessionService.getSessionJudgeDiaryForDates(JUDGE_NAME, START_DATE, END_DATE);
+        SessionWithHearings sessionWithHearings = sessionService
+            .getSessionJudgeDiaryForDates(JUDGE_NAME, START_DATE, END_DATE);
 
         List<SessionInfo> sessionInfos = createSessionInfos();
 
@@ -199,6 +200,7 @@ public class SessionServiceTests {
 
         UserTransaction transaction = sessionService.updateSession(createUpsertSession());
 
+        verify(objectMapper, times(1)).writeValueAsString(any());
         verify(rulesService, times(1)).postMessage(any(UUID.class), eq(RulesService.UPSERT_SESSION), eq(message));
         assertThat(transaction).isEqualToComparingFieldByFieldRecursively(createUserTransaction());
     }
@@ -268,7 +270,7 @@ public class SessionServiceTests {
     }
 
     private SessionInfo createSessionInfo() {
-        SessionInfo sessionInfo = new SessionInfo(
+        return new SessionInfo(
             createUuid(),
             OFFSET_DATE_TIME,
             createDuration(),
@@ -277,8 +279,6 @@ public class SessionServiceTests {
             CASE_TYPE,
             VERSION
         );
-
-        return sessionInfo;
     }
 
     private List<SessionInfo> createSessionInfos() {

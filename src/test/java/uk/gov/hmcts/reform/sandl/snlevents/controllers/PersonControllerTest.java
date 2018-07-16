@@ -60,9 +60,7 @@ public class PersonControllerTest {
     }
 
     private Person createPerson() {
-        val p = new Person();
-
-        return p;
+        return new Person();
     }
 
     @Test

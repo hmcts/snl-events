@@ -75,9 +75,8 @@ public class RulesServiceTests {
         verify(factMessageService, times(0)).handle(any(UUID.class), anyString());
     }
 
-    private <String> ResponseEntity<String> createResponseEntity() {
-        val response = new <String> ResponseEntity(BODY, HttpStatus.OK);
-        return response;
+    private <T> ResponseEntity<T> createResponseEntity() {
+        return new<T> ResponseEntity(BODY, HttpStatus.OK);
     }
 
     private Map<String,List<String>> createSubscribers(String type) {

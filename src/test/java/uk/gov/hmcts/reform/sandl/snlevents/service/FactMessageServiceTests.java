@@ -20,17 +20,16 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class FactMessageServiceTests {
-
-    @Before
-    public void init() {
-        problemService.problemCreateToDb = mock(Function.class);
-    }
-
     @InjectMocks
     private FactMessageService factMessageService;
 
     @Mock
     private ProblemService problemService;
+
+    @Before
+    public void init() {
+        problemService.problemCreateToDb = mock(Function.class);
+    }
 
     @Test
     public void handle_savesProblemToProblemService() throws IOException {
@@ -44,15 +43,14 @@ public class FactMessageServiceTests {
     }
 
     private String createFactMsgJson() {
-        return
-        "[" +
-            "{" +
-                "\"type\": \"Problem\"," +
-                "\"newFact\":" +
-                "{" +
-                    "\"id\":\"id\"" +
-                "}" +
-            "}" +
-        "]";
+        return "["
+            + "{"
+            + "\"type\": \"Problem\","
+            + "\"newFact\":"
+            + "{"
+            + "\"id\":\"id\""
+            + "}"
+            + "}"
+            + "]";
     }
 }

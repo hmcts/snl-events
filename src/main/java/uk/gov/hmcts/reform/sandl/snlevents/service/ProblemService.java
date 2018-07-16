@@ -57,7 +57,7 @@ public class ProblemService {
             return transformed;
         };
 
-    //todo removed final, can't mock final function, discuss how we should handle that
+    //nottodo removed final, can't mock final function, discuss how we should handle that
     public Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
 

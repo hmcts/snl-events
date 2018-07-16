@@ -27,6 +27,7 @@ public class SearchControllerTest {
     @MockBean
     private RulesService rulesService;
 
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private ObjectMapper objectMapper;
 
     @Before
