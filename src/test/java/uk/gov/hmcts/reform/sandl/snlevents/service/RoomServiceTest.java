@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class RoomServiceTests {
+public class RoomServiceTest {
     @InjectMocks
     RoomService roomService;
 

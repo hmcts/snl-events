@@ -18,7 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class ReportServiceTests {
+public class ReportServiceTest {
 
     @InjectMocks
     ReportService reportService;

@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class FactMessageServiceTests {
+public class FactMessageServiceTest {
     @InjectMocks
     private FactMessageService factMessageService;
 

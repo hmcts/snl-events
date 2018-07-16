@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class RulesServiceTests {
+public class RulesServiceTest {
 
     public static final String BODY = "body";
     public static final String TYPE = "1";

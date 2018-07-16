@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class ProblemServiceTests {
+public class ProblemServiceTest {
     public static final String ID = "id";
     public static final String MESSAGE = "msg";
     public static final String SEVERITY = "sev";

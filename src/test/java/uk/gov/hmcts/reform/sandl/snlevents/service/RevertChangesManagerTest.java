@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class RevertChangesManagerTests {
+public class RevertChangesManagerTest {
     @InjectMocks
     RevertChangesManager revertChangesManager;
 

@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @Import(JpaTestConfiguration.class)
-public class SessionServiceTests {
+public class SessionServiceTest {
 
     public static final long VERSION = 1L;
     private static final OffsetDateTime OFFSET_DATE_TIME = OffsetDateTime.MAX;

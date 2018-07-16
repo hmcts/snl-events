@@ -18,7 +18,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class PersonServiceTests {
+public class PersonServiceTest {
     @InjectMocks
     PersonService personService;
 
