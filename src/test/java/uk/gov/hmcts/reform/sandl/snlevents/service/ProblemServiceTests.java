@@ -34,6 +34,7 @@ public class ProblemServiceTests {
     public static final String ENTITY = "ent";
     public static final String ENTITY_ID = "eid";
     public static final String PROBLEM_ID = "problem-id";
+    private static final String TYPE = "type";
 
     @InjectMocks
     private ProblemService problemService;
@@ -104,7 +105,11 @@ public class ProblemServiceTests {
 
     @Test
     public void problemCreateToDb_tranformsCreateProblemToProblem() {
+        val expectedProblem = createProblem();
+
         val problem = problemService.problemCreateToDb.apply(createCreateProblem());
+
+        assertThat(problem).isEqualTo(expectedProblem);
     }
 
     private CreateProblem createCreateProblem() {
@@ -112,13 +117,19 @@ public class ProblemServiceTests {
         cp.setReferences(
             new ArrayList<>(Arrays.asList(createCreateProblemReference()))
         );
+        cp.setId(ID);
+        cp.setMessage(MESSAGE);
+        cp.setSeverity(SEVERITY);
+        cp.setType(TYPE);
 
         return cp;
     }
 
     private CreateProblemReference createCreateProblemReference() {
         val cpr = new CreateProblemReference();
-        cpr.setFact("judge");
+        cpr.setFact(ENTITY);
+        cpr.setFactId(ENTITY_ID);
+        cpr.setDescription(DESCRIPTION);
 
         return cpr;
     }
@@ -128,6 +139,7 @@ public class ProblemServiceTests {
         problem.setId(ID);
         problem.setMessage(MESSAGE);
         problem.setSeverity(SEVERITY);
+        problem.setType(TYPE);
 
         ProblemReference problemReference = new ProblemReference();
         problemReference.setDescription(DESCRIPTION);
@@ -151,6 +163,7 @@ public class ProblemServiceTests {
         problemResponse.setId(ID);
         problemResponse.setMessage(MESSAGE);
         problemResponse.setSeverity(SEVERITY);
+        problemResponse.setType(TYPE);
 
         ProblemReferenceResponse problemReference = new ProblemReferenceResponse();
         problemReference.setDescription(DESCRIPTION);

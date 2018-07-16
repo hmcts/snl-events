@@ -12,9 +12,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.util.UUID;
+import javax.xml.ws.WebServiceException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

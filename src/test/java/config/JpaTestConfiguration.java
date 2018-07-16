@@ -3,6 +3,8 @@ package config;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 
+import java.util.Map;
+
 import javax.persistence.Cache;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
@@ -12,7 +14,6 @@ import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
-import java.util.Map;
 
 public class JpaTestConfiguration {
     @Bean
@@ -62,7 +63,7 @@ public class JpaTestConfiguration {
 
             @Override
             public void close() {
-
+                //
             }
 
             @Override
@@ -82,7 +83,7 @@ public class JpaTestConfiguration {
 
             @Override
             public void addNamedQuery(String name, Query query) {
-
+                //
             }
 
             @Override
@@ -92,7 +93,7 @@ public class JpaTestConfiguration {
 
             @Override
             public <T> void addNamedEntityGraph(String graphName, EntityGraph<T> entityGraph) {
-
+                //
             }
         };
     }
