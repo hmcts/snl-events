@@ -3,10 +3,8 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
@@ -21,18 +19,11 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class PersonServiceTests {
-    @TestConfiguration
-    static class PersonServiceTestContextConfiguration {
-        @Bean
-        public PersonService personService() {
-            return new PersonService();
-        }
-    }
 
-    @Autowired
+    @InjectMocks
     PersonService personService;
 
-    @MockBean
+    @Mock
     PersonRepository personRepository;
 
     @Test
