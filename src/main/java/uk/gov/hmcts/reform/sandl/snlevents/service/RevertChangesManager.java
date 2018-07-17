@@ -56,6 +56,7 @@ public class RevertChangesManager {
         }
     }
 
+    @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
         throw new SnlEventsException("Not implemented!");
     }

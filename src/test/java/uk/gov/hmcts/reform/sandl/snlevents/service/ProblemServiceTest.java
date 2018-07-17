@@ -107,7 +107,7 @@ public class ProblemServiceTest {
     public void problemCreateToDb_tranformsCreateProblemToProblem() {
         val expectedProblem = createProblem();
 
-        val problem = problemService.problemCreateToDb.apply(createCreateProblem());
+        val problem = problemService.problemCreateToDb(createCreateProblem());
 
         assertThat(problem).isEqualTo(expectedProblem);
     }
