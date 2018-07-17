@@ -27,7 +27,7 @@ public class RulesService {
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Value("${communication.searchUrl:http://localhost:8091/search}")
     private String searchUrl;

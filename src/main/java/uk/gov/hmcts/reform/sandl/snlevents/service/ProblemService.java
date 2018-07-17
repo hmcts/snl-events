@@ -57,7 +57,8 @@ public class ProblemService {
             return transformed;
         };
 
-    public final Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
+    //nottodo removed final, can't mock final function, discuss how we should handle that
+    public Function<CreateProblem, Problem> problemCreateToDb = (CreateProblem cp) -> {
         Problem transformed = new Problem();
 
         transformed.setId(cp.getId());

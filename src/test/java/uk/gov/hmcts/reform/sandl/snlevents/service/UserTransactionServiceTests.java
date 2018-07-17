@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.services;
+package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -35,7 +35,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
-import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_FOR_JUDGE_DIARY_SQL;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_INFO_SQL;
 
 @Service
@@ -80,6 +79,8 @@ public class SessionService {
         return sessionRepository.findOne(id);
     }
 
+
+    //nottodo move entity manager to repository
     public List getSessionsFromDate(LocalDate localDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(localDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(localDate, LocalTime.MAX, ZoneOffset.UTC);
@@ -90,6 +91,7 @@ public class SessionService {
             .getResultList();
     }
 
+    //nottodo check if we can do this matching on repository level
     public SessionWithHearings getSessionsWithHearingsForDates(LocalDate startDate, LocalDate endDate) {
         OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
         OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
@@ -105,17 +107,6 @@ public class SessionService {
         sessionsWithHearings.setHearingParts(hearingParts);
 
         return sessionsWithHearings;
-    }
-
-    public List<SessionInfo> getJudgeDiaryForDates(String judgeUsername, LocalDate startDate, LocalDate endDate) {
-        OffsetDateTime fromDate = OffsetDateTime.of(startDate, LocalTime.MIN, ZoneOffset.UTC);
-        OffsetDateTime toDate = OffsetDateTime.of(endDate, LocalTime.MAX, ZoneOffset.UTC);
-
-        return entityManager.createQuery(GET_SESSION_FOR_JUDGE_DIARY_SQL, SessionInfo.class)
-            .setParameter("dateStart", fromDate)
-            .setParameter("dateEnd", toDate)
-            .setParameter("judgeUsername", judgeUsername)
-            .getResultList();
     }
 
     public SessionWithHearings getSessionJudgeDiaryForDates(String judgeUsername, LocalDate startDate,
