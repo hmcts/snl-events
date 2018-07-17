@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @SuppressWarnings("squid:S3437")
 public class SessionInfo implements Serializable {
 
