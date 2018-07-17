@@ -42,7 +42,7 @@ public class FactMessageService {
 
         if (newFact != null && !newFact.isNull()) {
             CreateProblem createProblem = objectMapper.readValue(newFact.traverse(), CreateProblem.class);
-            Problem problem = problemService.problemCreateToDb.apply(createProblem);
+            Problem problem = problemService.problemCreateToDb(createProblem);
             if (userTransactionId != null) {
                 problem.setUserTransactionId(userTransactionId);
             }

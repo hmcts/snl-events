@@ -26,14 +26,9 @@ public class FactMessageServiceTest {
     @Mock
     private ProblemService problemService;
 
-    @Before
-    public void init() {
-        problemService.problemCreateToDb = mock(Function.class);
-    }
-
     @Test
     public void handle_savesProblemToProblemService() throws IOException {
-        when(problemService.problemCreateToDb.apply(any())).thenReturn(createProblem());
+        when(problemService.problemCreateToDb(any())).thenReturn(createProblem());
         factMessageService.handle(UUID.randomUUID(), createFactMsgJson());
         verify(problemService, times(1)).save(any(Problem.class));
     }
