@@ -30,10 +30,10 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(SessionController.class)
@@ -174,8 +174,8 @@ public class SessionControllerTest {
         when(sessionService.getSessionJudgeDiaryForDates(any(String.class), any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(sessionWithHearings);
 
-        MvcResult result = mvc.perform(get(SESSION_URL +
-            "/judge-diary?judge=John&startDate=12-08-2018&endDate=12-08-2018"))
+        MvcResult result = mvc.perform(get(SESSION_URL
+            + "/judge-diary?judge=John&startDate=12-08-2018&endDate=12-08-2018"))
             .andExpect(status().isOk())
             .andReturn();
 
