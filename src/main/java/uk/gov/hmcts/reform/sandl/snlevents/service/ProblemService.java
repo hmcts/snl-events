@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class ProblemService {
 
+    @Autowired
+    private ProblemRepository problemRepository;
+
     private final Function<ProblemReference, ProblemReferenceResponse> problemReferenceDbToResponse =
         (ProblemReference pr) -> {
             ProblemReferenceResponse response = new ProblemReferenceResponse();
@@ -73,9 +76,6 @@ public class ProblemService {
 
         return transformed;
     }
-
-    @Autowired
-    private ProblemRepository problemRepository;
 
     public List<ProblemResponse> getProblems() {
         final List<Problem> problems = problemRepository.findAll();
