@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +26,6 @@ public class SearchControllerTest {
 
     @MockBean
     private RulesService rulesService;
-
-    @SuppressWarnings("PMD.UnusedPrivateField")
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void dataProvider_searchPossibleSessions_returnsSessions() throws Exception {
