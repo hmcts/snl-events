@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.common.ResponseAssertions;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
@@ -22,12 +23,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -62,9 +61,12 @@ public class HearingPartControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private ResponseAssertions responseAssertions;
+
     @Before
     public void setup() {
         JacksonTester.initFields(this, objectMapper);
+        responseAssertions = new ResponseAssertions(objectMapper);
     }
 
     @Test
@@ -77,13 +79,10 @@ public class HearingPartControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse();
 
-        val r = objectMapper.readValue(response.getContentAsString(), new TypeReference<List<HearingPart>>(){});
-        assertThat(r).isEqualToComparingFieldByFieldRecursively(hearingParts);
+        responseAssertions.assertResponseEquals(response, hearingParts, new TypeReference<List<HearingPart>>(){});
     }
 
-    private List<HearingPart> createHearingParts() {
-        return new ArrayList<>(Arrays.asList(createHearingPart()));
-    }
+    private List<HearingPart> createHearingParts() { return Arrays.asList(createHearingPart()); }
 
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
@@ -95,8 +94,7 @@ public class HearingPartControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse();
 
-        val r = objectMapper.readValue(response.getContentAsString(), HearingPart.class);
-        assertThat(r).isEqualToComparingFieldByFieldRecursively(createHearingPart());
+        responseAssertions.assertResponseEquals(response, createHearingPart(), HearingPart.class);
     }
 
     private CreateHearingPart createCreateHearingPart() {
