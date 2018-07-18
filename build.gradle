@@ -49,12 +49,13 @@ project.tasks['sonarqube'].dependsOn test
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
+    property "sonar.projectKey", "snl-events"
     property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
     property "sonar.jacoco.itReportPath", "${project.buildDir}/jacoco/integration.exec"
     property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     property "sonar.exclusions", ""
     property "sonar.test.exclusions", ""
-    property 'sonar.coverage.exclusions', "**/config/**"
+    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*"
   }
 }
 
