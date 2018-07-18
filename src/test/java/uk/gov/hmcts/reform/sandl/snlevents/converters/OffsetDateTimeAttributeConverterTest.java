@@ -26,7 +26,7 @@ public class OffsetDateTimeAttributeConverterTest {
     }
 
     @Test
-    public void convertToDatabaseColumn() {
+    public void convertToDatabaseColumn_shouldReturnProperTimestamp() {
         Timestamp result = converter.convertToDatabaseColumn(OFFSET_DATE_TIME);
 
         assertEquals(new Timestamp(TIME_IN_MILLISECONDS), result);
