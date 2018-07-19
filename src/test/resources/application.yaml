@@ -4,6 +4,12 @@ server:
 management:
   security:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
+    events:
+      jwtSecret: "FakeSecret1"
+      jwtExpirationInMs: 5000
+    rules:
+      jwtSecret: "FakeSecret2"
+      jwtExpirationInMs: 5000
 
 fact-propagation:
   subscribers:
