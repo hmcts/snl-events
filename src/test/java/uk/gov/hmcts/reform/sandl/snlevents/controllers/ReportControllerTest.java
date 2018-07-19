@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.ListedHearingRequestReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ReportService;
@@ -27,17 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ReportController.class)
+@Import(TestConfiguration.class)
 public class ReportControllerTest {
     public static final String URL = "/report";
-
-    @Autowired
-    private MockMvc mvc;
 
     @MockBean
     private ReportService reportService;
 
     @Autowired
-    ObjectMapper objectMapper;
+    MockMvc mvc;
 
     @Test
     public void getUnlistedHearingRequests_returnsResultsFromService() throws Exception {
@@ -91,7 +90,7 @@ public class ReportControllerTest {
     }
 
     private List<ListedHearingRequestReportResult> createListedHearingRequestReportResults() {
-        return Arrays.asList( new ListedHearingRequestReportResult() {
+        return Arrays.asList(new ListedHearingRequestReportResult() {
             @Override
             public String getCaseId() {
                 return null;

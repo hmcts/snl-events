@@ -3,15 +3,15 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -35,16 +35,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(SessionController.class)
+@Import(TestConfiguration.class)
 public class SessionControllerTest {
 
     private static final String SESSION_URL = "/sessions";
-    @Autowired
-    private MockMvc mockMvc;
 
     @MockBean
     private SessionService sessionService;
 
     @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
 
     @MockBean
@@ -56,12 +56,8 @@ public class SessionControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    OurMockMvc mvc;
-
-    @Before
-    public void init() {
-        mvc = new OurMockMvc(mockMvc, objectMapper);
-    }
+    @Autowired
+    private OurMockMvc mvc;
 
     @Test
     public void fetchAllSessions_returnsSessionsFromService() throws Exception {
@@ -89,14 +85,14 @@ public class SessionControllerTest {
         when(sessionService.getSessionsFromDate(any(LocalDate.class))).thenReturn(sessionsInfo);
 
         val response = mvc.getAndMapResponse(
-        SESSION_URL + "?date=15-05-2018", new TypeReference<List<SessionInfo>>(){}
+            SESSION_URL + "?date=15-05-2018", new TypeReference<List<SessionInfo>>(){}
         );
         assertEquals(sessionsInfo, response);
     }
 
     @Test
     public void fetchSessions_withInvalidDateFormat_shouldGiveBadRequest() throws Exception {
-        mockMvc.perform(get(SESSION_URL + "?date=2018-05-05"))
+        mvc.getMockMvc().perform(get(SESSION_URL + "?date=2018-05-05"))
             .andExpect(status().isBadRequest());
     }
 

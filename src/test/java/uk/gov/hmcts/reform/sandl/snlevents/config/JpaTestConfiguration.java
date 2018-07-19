@@ -1,4 +1,4 @@
-package config;
+package uk.gov.hmcts.reform.sandl.snlevents.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

@@ -1,17 +1,16 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
 
@@ -25,24 +24,15 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProblemController.class)
+@Import(TestConfiguration.class)
 public class ProblemControllerTest {
     public static final String URL = "/problems";
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @MockBean
     private ProblemService problemService;
 
     @Autowired
-    ObjectMapper objectMapper;
-
     OurMockMvc mvc;
-
-    @Before
-    public void init() {
-        mvc = new OurMockMvc(mockMvc, objectMapper);
-    }
 
     @Test
     public void getProblems_returnsProblemsFromService() throws Exception {
@@ -63,7 +53,7 @@ public class ProblemControllerTest {
         when(problemService.getProblemsByReferenceTypeId(eq(id))).thenReturn(createProblems());
 
         val response = mvc.getAndMapResponse(
-        URL + "/by-entity-id?id=" + id, new TypeReference<List<ProblemResponse>>(){}
+            URL + "/by-entity-id?id=" + id, new TypeReference<List<ProblemResponse>>(){}
         );
 
         assertThat(response).isEqualTo(problems);
@@ -76,7 +66,7 @@ public class ProblemControllerTest {
         when(problemService.getProblemsByUserTransactionId(eq(id))).thenReturn(createProblems());
 
         val response = mvc.getAndMapResponse(
-        URL + "/by-user-transaction-id?id=" + id.toString(), new TypeReference<List<ProblemResponse>>(){}
+            URL + "/by-user-transaction-id?id=" + id.toString(), new TypeReference<List<ProblemResponse>>(){}
         );
 
         assertThat(response).isEqualTo(problems);

@@ -3,15 +3,15 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
@@ -26,20 +26,20 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingPartController.class)
+@Import(TestConfiguration.class)
 public class HearingPartControllerTest {
     public static final String TYPE = "type";
     public static final String CASE_NUMBER = "90";
     public static final String TITLE = "title";
     public static final String HEARING_TYPE = "hearing-type";
     public static final String URL = "/hearing-part";
-    @Autowired
-    private MockMvc mockMvc;
 
     @MockBean
     private HearingPartService hearingPartService;
@@ -55,12 +55,8 @@ public class HearingPartControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
     OurMockMvc mvc;
-
-    @Before
-    public void init() {
-        mvc = new OurMockMvc(mockMvc, objectMapper);
-    }
 
     @Test
     public void fetchAllHeartingParts_returnHearingPartsFromService() throws Exception {
@@ -68,20 +64,20 @@ public class HearingPartControllerTest {
         when(hearingPartService.getAllHearingParts()).thenReturn(hearingParts);
 
         val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPart>>(){});
-
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(hearingParts);
+        assertEquals(response.size(), 1);
+        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
     }
 
-    private List<HearingPart> createHearingParts() { return Arrays.asList(createHearingPart()); }
+    private List<HearingPart> createHearingParts() {
+        return Arrays.asList(createHearingPart());
+    }
 
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
         when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
-
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
         val response = mvc.putAndMapResponse(URL, content, HearingPart.class);
-
         assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
     }
 
