@@ -40,15 +40,8 @@ public class TimeControllerTest {
     @MockBean
     private FactsMapper factsMapper;
 
-    private JacksonTester<DateTimePartValue> dateTimePartValueSerializer;
-
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Before
-    public void setup() {
-        JacksonTester.initFields(this, objectMapper);
-    }
 
     @Test
     public void upsert_postsTimeToRulesService() throws Exception {
@@ -57,7 +50,7 @@ public class TimeControllerTest {
 
         when(factsMapper.mapTimeToRuleJsonMessage(eq(time))).thenReturn(mappedTime);
 
-        val content = dateTimePartValueSerializer.write(time).getJson();
+        val content = objectMapper.writeValueAsString(time);
         mvc.perform(put(URL).contentType(MediaType.APPLICATION_JSON).content(content))
             .andExpect(status().isOk());
 

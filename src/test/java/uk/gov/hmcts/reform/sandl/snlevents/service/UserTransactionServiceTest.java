@@ -27,7 +27,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class UserTransactionServiceTests {
+public class UserTransactionServiceTest {
 
     @TestConfiguration
     static class UserTransactionServiceTestContextConfiguration {

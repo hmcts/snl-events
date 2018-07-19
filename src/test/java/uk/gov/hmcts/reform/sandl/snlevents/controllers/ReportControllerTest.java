@@ -91,7 +91,7 @@ public class ReportControllerTest {
     }
 
     private List<ListedHearingRequestReportResult> createListedHearingRequestReportResults() {
-        return new ArrayList<>(Arrays.asList( new ListedHearingRequestReportResult() {
+        return Arrays.asList( new ListedHearingRequestReportResult() {
             @Override
             public String getCaseId() {
                 return null;
@@ -131,6 +131,6 @@ public class ReportControllerTest {
             public String getRoom() {
                 return null;
             }
-        }));
+        });
     }
 }

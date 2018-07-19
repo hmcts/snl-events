@@ -8,12 +8,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.sandl.snlevents.common.ResponseAssertions;
+import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
@@ -27,12 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingPartController.class)
@@ -43,7 +39,7 @@ public class HearingPartControllerTest {
     public static final String HEARING_TYPE = "hearing-type";
     public static final String URL = "/hearing-part";
     @Autowired
-    private MockMvc mvc;
+    private MockMvc mockMvc;
 
     @MockBean
     private HearingPartService hearingPartService;
@@ -56,17 +52,14 @@ public class HearingPartControllerTest {
     @SuppressWarnings("PMD.UnusedPrivateField")
     private FactsMapper factsMapper;
 
-    private JacksonTester<CreateHearingPart> createHearingPartSerializer;
-
     @Autowired
     private ObjectMapper objectMapper;
 
-    private ResponseAssertions responseAssertions;
+    OurMockMvc mvc;
 
     @Before
-    public void setup() {
-        JacksonTester.initFields(this, objectMapper);
-        responseAssertions = new ResponseAssertions(objectMapper);
+    public void init() {
+        mvc = new OurMockMvc(mockMvc, objectMapper);
     }
 
     @Test
@@ -74,12 +67,9 @@ public class HearingPartControllerTest {
         val hearingParts = createHearingParts();
         when(hearingPartService.getAllHearingParts()).thenReturn(hearingParts);
 
-        val response = mvc
-            .perform(get(URL))
-            .andExpect(status().isOk())
-            .andReturn().getResponse();
+        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPart>>(){});
 
-        responseAssertions.assertResponseEquals(response, hearingParts, new TypeReference<List<HearingPart>>(){});
+        assertThat(response).isEqualToComparingFieldByFieldRecursively(hearingParts);
     }
 
     private List<HearingPart> createHearingParts() { return Arrays.asList(createHearingPart()); }
@@ -88,13 +78,11 @@ public class HearingPartControllerTest {
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
         when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
 
-        val content = createHearingPartSerializer.write(createCreateHearingPart()).getJson();
-        val response = mvc
-            .perform(put(URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(content))
-            .andExpect(status().isOk())
-            .andReturn().getResponse();
+        val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
-        responseAssertions.assertResponseEquals(response, createHearingPart(), HearingPart.class);
+        val response = mvc.putAndMapResponse(URL, content, HearingPart.class);
+
+        assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
     }
 
     private CreateHearingPart createCreateHearingPart() {
