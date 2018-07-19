@@ -36,7 +36,7 @@ public class ReportControllerTest {
     private ReportService reportService;
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     @Test
     public void getUnlistedHearingRequests_returnsResultsFromService() throws Exception {
