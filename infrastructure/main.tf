@@ -20,6 +20,9 @@ module "snl-events" {
     SNL_EVENTS_DB_USERNAME = "${module.postgres-snl-events.user_name}"
     SNL_EVENTS_DB_PASSWORD = "${module.postgres-snl-events.postgresql_password}"
     SNL_EVENTS_DB_PARAMS = "?ssl=true"
+
+    ENABLE_DB_MIGRATE = "false"
+
     SNL_RULES_URL = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   }
 
