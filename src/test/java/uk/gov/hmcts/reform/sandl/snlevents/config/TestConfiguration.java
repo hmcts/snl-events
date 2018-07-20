@@ -5,17 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 
 @Configuration
 public class TestConfiguration {
 
     @Bean
     @Autowired
-    public OurMockMvc ourMockMvc(
+    public EventsMockMvc eventsMockMvc(
         MockMvc mockMvc,
         ObjectMapper objectMapper
     ) {
-        return new OurMockMvc(mockMvc, objectMapper);
+        return new EventsMockMvc(mockMvc, objectMapper);
     }
 }

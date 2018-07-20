@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
@@ -39,7 +39,7 @@ public class TimeControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    OurMockMvc mvc;
+    private EventsMockMvc mvc;
 
     @Test
     public void upsert_postsTimeToRulesService() throws Exception {

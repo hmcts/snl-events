@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
@@ -32,7 +32,7 @@ public class ProblemControllerTest {
     private ProblemService problemService;
 
     @Autowired
-    OurMockMvc mvc;
+    private EventsMockMvc mvc;
 
     @Test
     public void getProblems_returnsProblemsFromService() throws Exception {

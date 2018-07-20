@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.common.OurMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RoomService;
@@ -27,7 +27,7 @@ public class RoomControllerTest {
     public static final String URL = "/room";
 
     @Autowired
-    private OurMockMvc mvc;
+    private EventsMockMvc mvc;
 
     @MockBean
     private RoomService roomService;
