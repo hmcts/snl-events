@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -266,7 +265,7 @@ public class SessionServiceTest {
     }
 
     private List<Session> createSessions(Long version) {
-        return new ArrayList<>(Arrays.asList(createSession(version)));
+        return Arrays.asList(createSession(version));
     }
 
     private SessionInfo createSessionInfo() {
@@ -282,7 +281,7 @@ public class SessionServiceTest {
     }
 
     private List<SessionInfo> createSessionInfos() {
-        return new ArrayList<>(Arrays.asList(createSessionInfo()));
+        return Arrays.asList(createSessionInfo());
     }
 
     private HearingPart createHearingPart() {
@@ -290,7 +289,7 @@ public class SessionServiceTest {
     }
 
     private List createHearingParts() {
-        return new ArrayList<>(Arrays.asList(createHearingPart()));
+        return Arrays.asList(createHearingPart());
     }
 
     private UpsertSession createUpsertSession() {
@@ -308,13 +307,13 @@ public class SessionServiceTest {
     }
 
     private List<UserTransactionData> createUserTransactionDataList() {
-        return new ArrayList<>(Arrays.asList(new UserTransactionData(
+        return Arrays.asList(new UserTransactionData(
             "session",
             createUuid(),
             null,
             "insert",
             "delete",
             0)
-        ));
+        );
     }
 }

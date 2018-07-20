@@ -114,9 +114,7 @@ public class ProblemServiceTest {
 
     private CreateProblem createCreateProblem() {
         val cp = new CreateProblem();
-        cp.setReferences(
-            new ArrayList<>(Arrays.asList(createCreateProblemReference()))
-        );
+        cp.setReferences(Arrays.asList(createCreateProblemReference()));
         cp.setId(ID);
         cp.setMessage(MESSAGE);
         cp.setSeverity(SEVERITY);
@@ -146,16 +144,13 @@ public class ProblemServiceTest {
         problemReference.setEntity(ENTITY);
         problemReference.setEntityId(ENTITY_ID);
 
-        problem.setReferences(new ArrayList<>(Arrays.asList(problemReference)));
+        problem.setReferences(Arrays.asList(problemReference));
 
         return problem;
     }
 
     private List<Problem> createProblems() {
-        List<Problem> problems = new ArrayList<>();
-        problems.add(createProblem());
-
-        return problems;
+        return Arrays.asList(createProblem());
     }
 
     private ProblemResponse createProblemResponse() {
@@ -170,15 +165,12 @@ public class ProblemServiceTest {
         problemReference.setEntity(ENTITY);
         problemReference.setEntityId(ENTITY_ID);
 
-        problemResponse.setReferences(new ArrayList<>(Arrays.asList(problemReference)));
+        problemResponse.setReferences(Arrays.asList(problemReference));
 
         return problemResponse;
     }
 
     private List<ProblemResponse> createProblemResponses() {
-        List<ProblemResponse> responses = new ArrayList<>();
-        responses.add(createProblemResponse());
-
-        return responses;
+        return Arrays.asList(createProblemResponse());
     }
 }

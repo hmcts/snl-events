@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.ReportService;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class ReportControllerTest {
     }
 
     private List<UnlistedHearingRequestsReportResult> createUnlistedHearingRequestReportResults() {
-        return new ArrayList<>(Arrays.asList(new UnlistedHearingRequestsReportResult() {
+        return Arrays.asList(new UnlistedHearingRequestsReportResult() {
             @Override
             public String getTitle() {
                 return null;
@@ -64,7 +63,7 @@ public class ReportControllerTest {
             public int getMinutes() {
                 return 0;
             }
-        }));
+        });
     }
 
     @Test

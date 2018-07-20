@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.service.PersonService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class PersonControllerTest {
     }
 
     private List<Person> createPersons() {
-        return new ArrayList<>(Arrays.asList(createPerson()));
+        return Arrays.asList(createPerson());
     }
 
     private Person createPerson() {
