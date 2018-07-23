@@ -8,7 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 
 // Add @TestPropertySource annotation to inject some values into config (ie Mocked service port)
-@AutoConfigureWireMock(port = 8092)
+@AutoConfigureWireMock(port = 8091)
 @Category(IntegrationTestWithFakeBackend.class)
 @DirtiesContext
 public abstract class BaseIntegrationTestWithFakeRules extends BaseIntegrationTest {

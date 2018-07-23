@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.FactMessageService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
@@ -20,6 +21,11 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 import javax.transaction.Transactional;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
@@ -27,6 +33,9 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @MockBean
     FactMessageService factMessageService;
+
+    @MockBean
+    RulesService rulesService;
 
     @Autowired
     SessionService sessionService;
@@ -51,6 +60,23 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
 
         session = sessionRepository.findOne(sessionUuid);
         assertThat(session).isNotNull();
+    }
+
+    @Test
+    public void rollback_shouldRevertTheChanges() throws Exception {
+        UUID sessionUuid = UUID.randomUUID();
+        Session session = createSession(sessionUuid, Duration.ofMinutes(30));
+        UpsertSession us = createUpserSession(session, Duration.ofMinutes(30), UUID.randomUUID());
+
+        UserTransaction ut = sessionService.saveWithTransaction(us);
+        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
+        assertThat(sessionRepository.findOne(sessionUuid)).isEqualTo(session);
+
+        ut = userTransactionService.rollback(ut.getId());
+        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.ROLLEDBACK);
+
+        session = sessionRepository.findOne(sessionUuid);
+        assertThat(session).isNull();
     }
 
     private Session createSession(UUID uuid, Duration duration) {
