@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.service;
+package uk.gov.hmcts.reform.sandl.snlevents.fakerules.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.FactMessageService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
