@@ -8,12 +8,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +29,7 @@ public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
     PersonRepository personRepository;
 
     @Test
-    public void sessions_createdSessionIsRetrievable() throws Exception {
+    public void sessions_createdSessionIsRetrievable() {
 
         Person djCope = getJudgeFromDb(judgeUserName);
 
@@ -66,7 +66,9 @@ public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
         return january(2017);
     }
 
-    private OffsetDateTime january2018() { return january(2018); }
+    private OffsetDateTime january2018() {
+        return january(2018);
+    }
 
     private OffsetDateTime january2019() {
         return january(2019);

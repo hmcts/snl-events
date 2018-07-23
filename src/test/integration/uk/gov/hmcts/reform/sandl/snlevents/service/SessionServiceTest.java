@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
-import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -11,12 +10,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,7 +73,9 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
         return us;
     }
 
-    private OffsetDateTime january2018() { return january(2018); }
+    private OffsetDateTime january2018() {
+        return january(2018);
+    }
 
     private OffsetDateTime january(int year) {
         return OffsetDateTime.of(LocalDateTime.of(year, 1, 1, 1, 1),
