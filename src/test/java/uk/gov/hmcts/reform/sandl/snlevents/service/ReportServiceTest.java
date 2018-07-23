@@ -9,7 +9,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,6 +40,6 @@ public class ReportServiceTest {
     private List<UnlistedHearingRequestsReportResult> createUnlistedHearingReportResults() {
         val result = mock(UnlistedHearingRequestsReportResult.class);
 
-        return new ArrayList<>(Arrays.asList(result));
+        return Arrays.asList(result);
     }
 }

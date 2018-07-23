@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -136,7 +135,7 @@ public class HearingPartServiceTest {
     }
 
     private List<HearingPart> createHearingParts() {
-        return new ArrayList<>(Arrays.asList(createHearingPart()));
+        return Arrays.asList(createHearingPart());
     }
 
     private HearingPart createHearingPart() {

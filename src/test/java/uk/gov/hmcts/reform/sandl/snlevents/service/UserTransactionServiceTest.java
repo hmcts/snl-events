@@ -3,10 +3,8 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -14,8 +12,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RevertChangesManager;
-import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,31 +23,23 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class UserTransactionServiceTests {
-
-    @TestConfiguration
-    static class UserTransactionServiceTestContextConfiguration {
-
-        @Bean
-        public UserTransactionService userTransactionService() {
-            return new UserTransactionService();
-        }
-    }
-
-    @Autowired
-    private UserTransactionService userTransactionService;
-
-    @MockBean
-    private UserTransactionRepository userTransactionRepository;
-
-    @MockBean
-    private UserTransactionDataRepository userTransactionDataRepository;
-
-    @MockBean
-    private RevertChangesManager revertChangesManager;
-
+public class UserTransactionServiceTest {
     private final UUID someId = new UUID(1, 1);
     UserTransaction ut;
+
+    @InjectMocks
+    private UserTransactionService userTransactionService;
+
+    @Mock
+    private UserTransactionRepository userTransactionRepository;
+
+    @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private UserTransactionDataRepository userTransactionDataRepository;
+
+    @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private RevertChangesManager revertChangesManager;
 
     @Before
     public void setUp() {
@@ -127,8 +115,8 @@ public class UserTransactionServiceTests {
             .isEqualTo(UserTransactionRulesProcessingStatus.NOT_STARTED);
     }
 
-    private ArrayList<UserTransactionData> generateUserTransactionsData(int size) {
-        ArrayList<UserTransactionData> userTransactions = new ArrayList<>();
+    private List<UserTransactionData> generateUserTransactionsData(int size) {
+        List<UserTransactionData> userTransactions = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             UserTransactionData ut = new UserTransactionData(
                 "some-entity",
