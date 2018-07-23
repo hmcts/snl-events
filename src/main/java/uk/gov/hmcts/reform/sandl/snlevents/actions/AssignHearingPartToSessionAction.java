@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class AssignHearingPartToSessionAction extends Action {
+public class AssignHearingPartToSessionAction extends Action implements RulesProcessable {
 
     protected HearingPartSessionRelationship hearingPartSessionRelationship;
     protected UUID hearingPartId;
@@ -22,22 +22,47 @@ public class AssignHearingPartToSessionAction extends Action {
     protected HearingPart hearingPart;
     protected Session targetSession;
 
-    @Autowired
     protected HearingPartRepository hearingPartRepository;
 
-    @Autowired
     protected SessionRepository sessionRepository;
 
     public AssignHearingPartToSessionAction(UUID hearingPartId,
-                                            HearingPartSessionRelationship hearingPartSessionRelationship) {
+                                            HearingPartSessionRelationship hearingPartSessionRelationship,
+                                            HearingPartRepository hearingPartRepository,
+                                            SessionRepository sessionRepository) {
         this.hearingPartSessionRelationship = hearingPartSessionRelationship;
         this.hearingPartId = hearingPartId;
+        this.hearingPartRepository = hearingPartRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
     public void initialize() {
         hearingPart = hearingPartRepository.findOne(hearingPartId);
         targetSession = sessionRepository.findOne(hearingPartSessionRelationship.getSessionId());
+    }
+
+    @Override
+    public void validate() throws Exception {
+        if(targetSession == null) {
+            throw new Exception("Target session cannot be null!");
+        } else if(hearingPart == null) {
+            throw new Exception("Hearing part cannot be null!");
+        }
+    }
+
+    @Override
+    public UUID[] getAssociatedEntitiesIds() {
+        return new UUID[] {hearingPart.getId(), hearingPart.getSessionId(), targetSession.getId()};
+    }
+
+    @Override
+    public void act() {
+        hearingPart.setSession(targetSession);
+        hearingPart.setSessionId(targetSession.getId());
+        hearingPart.setStart(hearingPartSessionRelationship.getStart());
+
+        hearingPartRepository.save(hearingPart); // TODO: Extract into a separate 'persist' method?
     }
 
     @Override
@@ -69,29 +94,6 @@ public class AssignHearingPartToSessionAction extends Action {
     @Override
     public UUID getUserTransactionId() {
         return hearingPartSessionRelationship.getUserTransactionId();
-    }
-
-    @Override
-    public void validate() throws Exception {
-        if(targetSession == null) {
-            throw new Exception("Target session cannot be null!");
-        } else if(hearingPart == null) {
-            throw new Exception("Hearing part cannot be null!");
-        }
-    }
-
-    @Override
-    public void act() {
-        hearingPart.setSession(targetSession);
-        hearingPart.setSessionId(targetSession.getId());
-        hearingPart.setStart(hearingPartSessionRelationship.getStart());
-
-        hearingPartRepository.save(hearingPart); // TODO: Extract into a separate 'persist' method?
-    }
-
-    @Override
-    public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {hearingPart.getId(), hearingPart.getSessionId(), targetSession.getId()};
     }
 
     private UserTransactionData getLockedSessionTransactionData(UUID id) {

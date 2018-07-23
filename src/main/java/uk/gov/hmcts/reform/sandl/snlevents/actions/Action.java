@@ -7,11 +7,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.Transactionable;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 
-public abstract class Action implements IAction, RulesProcessable, Transactionable {
+public abstract class Action implements IAction, Transactionable {
 
-    @Autowired
-    protected FactsMapper factsMapper;
+    protected FactsMapper factsMapper = new FactsMapper();
 
-    @Autowired
-    protected ObjectMapper objectMapper;
+    protected ObjectMapper objectMapper = new ObjectMapper();
 }
