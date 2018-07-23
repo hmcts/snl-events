@@ -47,6 +47,10 @@ public class RulesService {
         postToSubscribers(userTransactionId, new FactMessage(msgType, msgData));
     }
 
+    public void postMessage(UUID userTransactionId, FactMessage factMessage) throws IOException {
+        postToSubscribers(userTransactionId, factMessage);
+    }
+
     private void postToSubscribers(UUID userTransactionId, FactMessage msg) throws IOException {
         Map<String, List<String>> subscribers = subscribersConfiguration.getSubscribers();
 
