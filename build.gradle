@@ -151,11 +151,19 @@ sourceSets {
     compileClasspath += main.output + test.output
     runtimeClasspath += main.output + test.output
   }
+  integrationSources {
+    java.srcDir 'src/test/integration'
+    resources.srcDir 'src/test/resources'
+    compileClasspath += main.output + test.output
+    runtimeClasspath += main.output + test.output
+  }
 }
 
 configurations {
   functionalCompile.extendsFrom testCompile
   functionalRuntime.extendsFrom testRuntime
+  integrationSourcesCompile.extendsFrom testCompile
+  integrationSourcesRuntime.extendsFrom testRuntime
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
@@ -171,3 +179,14 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
   testClassesDirs = sourceSets.functional.output.classesDirs
   classpath = sourceSets.functional.runtimeClasspath
 }
+
+task integrationFakeRules(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+  testClassesDirs = sourceSets.integrationSources.output.classesDirs
+  classpath = sourceSets.integrationSources.runtimeClasspath
+
+  useJUnit {
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.fakerules.IntegrationTestWithFakeBackend'
+  }
+}
+
+test.finalizedBy integrationFakeRules

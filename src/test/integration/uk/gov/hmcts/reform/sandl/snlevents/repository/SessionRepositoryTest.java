@@ -1,11 +1,8 @@
-package integration.repository;
+package uk.gov.hmcts.reform.sandl.snlevents.repository;
 
-import integration.BaseIntegrationTest;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
@@ -21,7 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class SessionRepositoryTest extends BaseIntegrationTest {
+public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
 
     public final String judgeUserName = "djcope";
 

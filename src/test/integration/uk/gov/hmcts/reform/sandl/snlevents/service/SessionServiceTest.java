@@ -1,18 +1,15 @@
-package integration.service;
+package uk.gov.hmcts.reform.sandl.snlevents.service;
 
-import integration.BaseIntegrationTest;
-import org.apache.catalina.User;
+import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.FactMessageService;
-import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
-import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
@@ -24,7 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class SessionServiceTest extends BaseIntegrationTest {
+public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @MockBean
     FactMessageService factMessageService;
@@ -52,24 +49,6 @@ public class SessionServiceTest extends BaseIntegrationTest {
 
         session = sessionRepository.findOne(sessionUuid);
         assertThat(session).isNotNull();
-    }
-
-    @Test
-    public void updateWithTransaction_shouldUpdateTheSessionInTransactionalManner() throws Exception {
-        UUID sessionUuid = UUID.randomUUID();
-        Session session = createSession(sessionUuid, Duration.ofMinutes(30));
-        UpsertSession us = createUpserSession(session, Duration.ofMinutes(30), UUID.randomUUID());
-
-        UserTransaction ut = sessionService.saveWithTransaction(us);
-        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
-
-        ut = userTransactionService.commit(ut.getId());
-        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.COMMITTED);
-
-        us = createUpserSession(session, Duration.ofMinutes(60), UUID.randomUUID());
-
-        ut = sessionService.updateSession(us);
-        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
     }
 
     private Session createSession(UUID uuid, Duration duration) {
