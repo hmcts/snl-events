@@ -130,7 +130,7 @@ dependencies {
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.6'
   testCompile group: 'com.h2database', name: 'h2', version: '1.4.197'
-  testCompile "com.github.tomakehurst:wiremock:2.18.0"
+  testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0', ext: 'pom'
 }
 
 jar {
