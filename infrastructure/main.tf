@@ -45,6 +45,7 @@ module "postgres-snl-events" {
   common_tags         = "${var.common_tags}"
 }
 
+# region save DB details to Azure Key Vault
 module "snl-vault" {
   source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
   name = "snl-${var.env}"
@@ -56,37 +57,33 @@ module "snl-vault" {
   product_group_object_id = "70de400b-4f47-4f25-a4f0-45e1ee4e4ae3"
 }
 
-////////////////////////////////
-// Populate Vault with DB info
-////////////////////////////////
-
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
-  name = "${local.app_full_name}-POSTGRES-USER"
-  value = "${module.user-profile-db.user_name}"
-  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+  name      = "${var.component}-POSTGRES-USER"
+  value     = "${module.db.user_name}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
-  name = "${local.app_full_name}-POSTGRES-PASS"
-  value = "${module.user-profile-db.postgresql_password}"
-  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+  name      = "${var.component}-POSTGRES-PASS"
+  value     = "${module.db.postgresql_password}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_HOST" {
-  name = "${local.app_full_name}-POSTGRES-HOST"
-  value = "${module.user-profile-db.host_name}"
-  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+  name      = "${var.component}-POSTGRES-HOST"
+  value     = "${module.db.host_name}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_PORT" {
-  name = "${local.app_full_name}-POSTGRES-PORT"
-  value = "${module.user-profile-db.postgresql_listen_port}"
-  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+  name      = "${var.component}-POSTGRES-PORT"
+  value     = "${module.db.postgresql_listen_port}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
-  name = "${local.app_full_name}-POSTGRES-DATABASE"
-  value = "${module.user-profile-db.postgresql_database}"
-  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+  name      = "${var.component}-POSTGRES-DATABASE"
+  value     = "${module.db.postgresql_database}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
 }
-
+# endregion
