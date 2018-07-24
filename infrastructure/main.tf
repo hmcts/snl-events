@@ -2,6 +2,11 @@ locals {
   app_full_name = "${var.product}-${var.component}"
 }
 
+resource "azurerm_resource_group" "rg" {
+  name     = "${var.product}-${var.env}"
+  location = "${var.location}"
+}
+
 module "snl-events" {
   source               = "git@github.com:hmcts/moj-module-webapp"
   product              = "${var.product}-${var.component}"
