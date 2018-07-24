@@ -180,13 +180,22 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
   classpath = sourceSets.functional.runtimeClasspath
 }
 
-task integrationFakeRules(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationSources.output.classesDirs
   classpath = sourceSets.integrationSources.runtimeClasspath
 
   useJUnit {
-    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.fakerules.IntegrationTestWithFakeBackend'
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTestWithFakeRules'
   }
 }
 
-test.finalizedBy integrationFakeRules
+task integrationTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+  testClassesDirs = sourceSets.integrationSources.output.classesDirs
+  classpath = sourceSets.integrationSources.runtimeClasspath
+
+  useJUnit {
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTest'
+  }
+}
+
+test.finalizedBy integrationFakeRulesTests
