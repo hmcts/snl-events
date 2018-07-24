@@ -58,31 +58,31 @@ module "snl-vault" {
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
-  name      = "${var.component}-POSTGRES-USER"
+  name      = "${var.product}-${var.component}-POSTGRES-USER"
   value     = "${module.postgres-snl-events.user_name}"
   vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
-  name      = "${var.component}-POSTGRES-PASS"
+  name      = "${var.product}-${var.component}-POSTGRES-PASS"
   value     = "${module.postgres-snl-events.postgresql_password}"
   vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_HOST" {
-  name      = "${var.component}-POSTGRES-HOST"
+  name      = "${var.product}-${var.component}-POSTGRES-HOST"
   value     = "${module.postgres-snl-events.host_name}"
   vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_PORT" {
-  name      = "${var.component}-POSTGRES-PORT"
+  name      = "${var.product}-${var.component}-POSTGRES-PORT"
   value     = "${module.postgres-snl-events.postgresql_listen_port}"
   vault_uri = "${module.snl-vault.key_vault_uri}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
-  name      = "${var.component}-POSTGRES-DATABASE"
+  name      = "${var.product}-${var.component}-POSTGRES-DATABASE"
   value     = "${module.postgres-snl-events.postgresql_database}"
   vault_uri = "${module.snl-vault.key_vault_uri}"
 }
