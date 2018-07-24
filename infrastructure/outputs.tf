@@ -6,5 +6,5 @@ output "microserviceName" {
 }
 
 output "vaultName" {
-  value = "${local.vaultName}"
+  value = "${module.snl-vault.key_vault_name}"
 }

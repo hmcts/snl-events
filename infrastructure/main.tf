@@ -1,12 +1,7 @@
 locals {
   app_full_name = "${var.product}-${var.component}"
-
-  // Vault name
-  previewVaultName = "${var.product}-events"
-  # preview env contains pr number prefix, other envs need a suffix
-  nonPreviewVaultName = "${local.previewVaultName}-${var.env}"
-  vaultName = "${(var.env == "preview" || var.env == "spreview") ? local.previewVaultName : local.nonPreviewVaultName}"
 }
+
 module "snl-events" {
   source               = "git@github.com:hmcts/moj-module-webapp"
   product              = "${var.product}-${var.component}"
@@ -43,4 +38,49 @@ module "postgres-snl-events" {
   database_name       = "${var.db_name}"
   postgresql_version  = "10"
   common_tags         = "${var.common_tags}"
+}
+
+module "snl-vault" {
+  source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
+  name = "snl-${var.env}"
+  product = "${var.product}"
+  env = "${var.env}"
+  tenant_id = "${var.tenant_id}"
+  object_id = "${var.jenkins_AAD_objectId}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
+  product_group_object_id = "68839600-92da-4862-bb24-1259814d1384"
+}
+
+////////////////////////////////
+// Populate Vault with DB info
+////////////////////////////////
+
+resource "azurerm_key_vault_secret" "POSTGRES-USER" {
+  name = "${local.app_full_name}-POSTGRES-USER"
+  value = "${module.user-profile-db.user_name}"
+  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
+  name = "${local.app_full_name}-POSTGRES-PASS"
+  value = "${module.user-profile-db.postgresql_password}"
+  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_HOST" {
+  name = "${local.app_full_name}-POSTGRES-HOST"
+  value = "${module.user-profile-db.host_name}"
+  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_PORT" {
+  name = "${local.app_full_name}-POSTGRES-PORT"
+  value = "${module.user-profile-db.postgresql_listen_port}"
+  vault_uri = "${module.user-profile-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
+  name = "${local.app_full_name}-POSTGRES-DATABASE"
+  value = "${module.user-profile-db.postgresql_database}"
+  vault_uri = "${module.user-profile-vault.key_vault_uri}"
 }
