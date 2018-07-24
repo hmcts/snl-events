@@ -8,6 +8,9 @@ import java.util.UUID;
 @Data
 public class HearingPartSessionRelationship {
     UUID userTransactionId;
+    UUID hearingPartId;
+    int hearingPartVersion;
     UUID sessionId;
+    int sessionVersion;
     OffsetDateTime start;
 }

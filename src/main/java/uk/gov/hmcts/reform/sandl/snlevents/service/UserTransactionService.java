@@ -61,6 +61,7 @@ public class UserTransactionService {
         UserTransaction ut = userTransactionRepository.findOne(id);
 
         revertChangesManager.revertChanges(ut);
+        //todo implement and check optimistic locking using version, don't need to detach entity
         ut.setStatus(UserTransactionStatus.ROLLEDBACK);
 
         return userTransactionRepository.save(ut);

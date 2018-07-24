@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 
 @Service
@@ -76,8 +77,18 @@ public class HearingPartService {
                                                                      HearingPartSessionRelationship assignment)
                                                                         throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
+        if(hearingPart.getVersion() != assignment.getHearingPartVersion()) {
+            throw new OptimisticLockException(
+                "HearingPart version mismatch: " + assignment.getHearingPartVersion() + " vs " + hearingPart.getVersion()
+            );
+        }
 
         Session targetSession = sessionRepository.findOne(assignment.getSessionId());
+        if(targetSession.getVersion() != assignment.getSessionVersion()) {
+            throw new OptimisticLockException(
+                "Session version mismatch: " + assignment.getSessionVersion() + " vs " + targetSession.getVersion()
+            );
+        }
 
         return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
                 ? userTransactionService.transactionConflicted(assignment.getUserTransactionId())
