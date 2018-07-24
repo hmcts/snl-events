@@ -54,7 +54,7 @@ module "snl-vault" {
 ////////////////////////////////
 // Populate Vault with DB info
 ////////////////////////////////
-
+/*
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name = "${local.app_full_name}-POSTGRES-USER"
   value = "${module.user-profile-db.user_name}"
@@ -84,3 +84,4 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   value = "${module.user-profile-db.postgresql_database}"
   vault_uri = "${module.user-profile-vault.key_vault_uri}"
 }
+*/
