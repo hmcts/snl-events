@@ -1,5 +1,11 @@
 locals {
   app_full_name = "${var.product}-${var.component}"
+
+  // Vault name
+  previewVaultName = "${var.product}-events"
+  # preview env contains pr number prefix, other envs need a suffix
+  nonPreviewVaultName = "${local.previewVaultName}-${var.env}"
+  vaultName = "${(var.env == "preview" || var.env == "spreview") ? local.previewVaultName : local.nonPreviewVaultName}"
 }
 module "snl-events" {
   source               = "git@github.com:hmcts/moj-module-webapp"
