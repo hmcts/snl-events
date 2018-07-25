@@ -18,7 +18,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     protected HearingPartSessionRelationship hearingPartSessionRelationship;
     protected UUID hearingPartId;
-
     protected HearingPart hearingPart;
     protected Session targetSession;
 
@@ -34,10 +33,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         this.hearingPartId = hearingPartId;
         this.hearingPartRepository = hearingPartRepository;
         this.sessionRepository = sessionRepository;
-    }
 
-    @Override
-    public void initialize() {
         hearingPart = hearingPartRepository.findOne(hearingPartId);
         targetSession = sessionRepository.findOne(hearingPartSessionRelationship.getSessionId());
     }

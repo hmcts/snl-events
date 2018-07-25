@@ -26,7 +26,6 @@ public class ActionService {
     public UserTransaction execute(Action action) throws Exception {
         UUID transactionId = action.getUserTransactionId();
 
-        action.initialize();
         action.validate();
 
         if(userTransactionService.isAnyBeingTransacted(action.getAssociatedEntitiesIds())) {
@@ -40,7 +39,7 @@ public class ActionService {
             action.generateUserTransactionData());
 
         if(action instanceof RulesProcessable) {
-            rulesService.postMessage(transactionId, action.generateFactMessage());
+            rulesService.postMessage(transactionId,((RulesProcessable) action).generateFactMessage());
         }
 
         return userTransactionService.rulesProcessed(ut);
