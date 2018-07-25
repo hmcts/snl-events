@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.config.SubscribersConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +85,7 @@ public class RulesServiceTest {
     }
 
     private Map<String,List<String>> createSubscribers(String type) {
-        val subscriber = new ArrayList<String>();
-        subscriber.add(ENDPOINT);
+        val subscriber = Arrays.asList(ENDPOINT);
 
         val subscribers = new HashMap<String, List<String>>();
         subscribers.put(type, subscriber);

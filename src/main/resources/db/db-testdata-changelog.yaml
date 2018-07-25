@@ -30,6 +30,7 @@ databaseChangeLog:
       id: insert-availabilities-for-judge-room-whole-year
       validCheckSum: ANY
       author: rkruk
+      dbms: postgresql
       changes:
         - sqlFile:
             path: db/fixtures/SL-982-add-availabilities-for-judges-rooms.sql

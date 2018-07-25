@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ public class RulesService {
         postToSubscribers(userTransactionId, new FactMessage(msgType, msgData));
     }
 
+    @HystrixCommand
     private void postToSubscribers(UUID userTransactionId, FactMessage msg) throws IOException {
         Map<String, List<String>> subscribers = subscribersConfiguration.getSubscribers();
 
@@ -70,6 +72,7 @@ public class RulesService {
         }
     }
 
+    @HystrixCommand
     public String search(String params) {
         HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();
         HttpEntity<FactMessage> entity = new HttpEntity<>(headers);

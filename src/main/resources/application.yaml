@@ -12,8 +12,7 @@ management:
       jwtExpirationInMs: 5000
 
 communication:
-  searchUrl:
-    - ${SNL_RULES_URL:http://localhost:8091}/search
+  searchUrl: ${SNL_RULES_URL:http://localhost:8091}/search
 
 fact-propagation:
   subscribers:

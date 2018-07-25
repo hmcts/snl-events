@@ -9,7 +9,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +33,6 @@ public class RoomServiceTest {
     }
 
     private List<Room> createRooms() {
-        return new ArrayList<>(Arrays.asList(new Room()));
+        return Arrays.asList(new Room());
     }
 }
