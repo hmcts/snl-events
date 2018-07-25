@@ -6,10 +6,10 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.annotation.DirtiesContext;
 
 import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
+import uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTestWithFakeRules;
 
-// Add @TestPropertySource annotation to inject some values into config (ie Mocked service port)
-@AutoConfigureWireMock(port = 8091)
-@Category(IntegrationTestWithFakeBackend.class)
+@AutoConfigureWireMock(port = 8191)
+@Category(IntegrationTestWithFakeRules.class)
 @DirtiesContext
 public abstract class BaseIntegrationTestWithFakeRules extends BaseIntegrationTest {
 }
