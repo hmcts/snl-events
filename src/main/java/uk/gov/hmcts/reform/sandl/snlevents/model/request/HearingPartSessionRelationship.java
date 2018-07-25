@@ -9,8 +9,8 @@ import java.util.UUID;
 public class HearingPartSessionRelationship {
     UUID userTransactionId;
     UUID hearingPartId;
-    int hearingPartVersion;
+    long hearingPartVersion;
     UUID sessionId;
-    int sessionVersion;
+    long sessionVersion;
     OffsetDateTime start;
 }
