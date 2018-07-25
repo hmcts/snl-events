@@ -5,6 +5,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 public class OffsetDateTimeHelper {
+
+    private OffsetDateTimeHelper() {
+    }
+
     public static OffsetDateTime january2018() {
         return january(2018);
     }

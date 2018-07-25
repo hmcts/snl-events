@@ -14,8 +14,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 
-import javax.transaction.Transactional;
 import java.util.UUID;
+import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
