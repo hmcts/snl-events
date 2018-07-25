@@ -1,4 +1,3 @@
-
 configurations {
   liquibase
 }
@@ -10,22 +9,6 @@ dependencies {
 //loading properties file.
 Properties liquibaseProps = new Properties()
 liquibaseProps.load(new FileInputStream("$projectDir/src/main/resources/liquibase.properties"))
-
-task liquibaseDiffChangelog(type: JavaExec) {
-  group = "liquibase"
-
-  classpath sourceSets.main.runtimeClasspath
-  classpath configurations.liquibase
-  main = "liquibase.integration.commandline.Main"
-
-  args "--changeLogFile=" + "$projectDir/src/main/resources/db/db.changelog-diff-" + buildTimestamp() + ".yaml"
-  args "--referenceUrl=hibernate:spring:uk.gov.hmcts.ccd.data?dialect=org.hibernate.dialect.PostgreSQL94Dialect"
-  args "--username=" + liquibaseProps.getProperty('username')
-  args "--password=" + liquibaseProps.getProperty('password')
-  args "--url=" + liquibaseProps.getProperty('url')
-  args "--driver=" + liquibaseProps.getProperty('driver')
-  args "diffChangeLog"
-}
 
 task migratePostgresDatabase(type: JavaExec) {
   group = "liquibase"
@@ -46,8 +29,3 @@ task migratePostgresDatabase(type: JavaExec) {
   args "update"
 }
 
-def buildTimestamp() {
-  def date = new Date()
-  def formattedDate = date.format('yyyyMMdd-HHmm')
-  return formattedDate
-}
