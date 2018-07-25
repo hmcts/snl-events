@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
 
 import java.util.Arrays;
@@ -30,6 +31,9 @@ public class ProblemControllerTest {
 
     @MockBean
     private ProblemService problemService;
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private S2SAuthenticationService s2SAuthenticationService;
 
     @Autowired
     private EventsMockMvc mvc;

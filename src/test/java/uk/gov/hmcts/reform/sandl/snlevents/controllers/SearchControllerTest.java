@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +27,9 @@ public class SearchControllerTest {
 
     @MockBean
     private RulesService rulesService;
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private S2SAuthenticationService s2SAuthenticationService;
 
     @Test
     public void dataProvider_searchPossibleSessions_returnsSessions() throws Exception {

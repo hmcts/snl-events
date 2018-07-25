@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -47,6 +48,9 @@ public class HearingPartControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private S2SAuthenticationService s2SAuthenticationService;
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")

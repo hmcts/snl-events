@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RoomService;
 
 import java.util.Arrays;
@@ -31,6 +32,9 @@ public class RoomControllerTest {
 
     @MockBean
     private RoomService roomService;
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private S2SAuthenticationService s2SAuthenticationService;
 
     @Test
     public void fetchAllRooms_returnsRoomsFromService() throws Exception {

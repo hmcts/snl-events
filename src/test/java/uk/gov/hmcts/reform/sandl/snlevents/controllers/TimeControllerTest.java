@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import static org.mockito.Matchers.eq;
@@ -31,6 +32,9 @@ public class TimeControllerTest {
 
     @MockBean
     private RulesService rulesService;
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private S2SAuthenticationService s2SAuthenticationService;
 
     @MockBean
     private FactsMapper factsMapper;

@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.ListedHearingRequestReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ReportService;
 
 import java.time.Duration;
@@ -33,7 +34,9 @@ public class ReportControllerTest {
 
     @MockBean
     private ReportService reportService;
-
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private S2SAuthenticationService s2SAuthenticationService;
     @Autowired
     private MockMvc mvc;
 
