@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.PersonService;
 
 import java.util.ArrayList;
@@ -25,13 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(PersonController.class)
 public class PersonControllerTest {
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private MockMvc mvc;
-
     @MockBean
     private PersonService personService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @MockBean
+    private S2SAuthenticationService s2sAuthService;
 
     @Test
     public void fetchAllPersons_returnsPersonsFromService() throws Exception {
@@ -44,7 +45,8 @@ public class PersonControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse();
 
-        val r = objectMapper.readValue(response.getContentAsString(), new TypeReference<List<Person>>(){});
+        val r = objectMapper.readValue(response.getContentAsString(), new TypeReference<List<Person>>() {
+        });
 
         assertThat(r).isEqualTo(persons);
     }
@@ -68,7 +70,8 @@ public class PersonControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse();
 
-        val r = objectMapper.readValue(response.getContentAsString(), new TypeReference<List<Person>>(){});
+        val r = objectMapper.readValue(response.getContentAsString(), new TypeReference<List<Person>>() {
+        });
 
         assertThat(r).isEqualTo(persons);
     }

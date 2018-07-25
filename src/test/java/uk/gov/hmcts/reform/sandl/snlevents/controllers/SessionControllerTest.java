@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
@@ -40,22 +41,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SessionControllerTest {
 
     private static final String SESSION_URL = "/sessions";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private MockMvc mvc;
-
     @MockBean
     private SessionService sessionService;
-
+    @MockBean
+    private S2SAuthenticationService s2sAuthService;
     @MockBean
     private RulesService rulesService;
-
     @MockBean
     private UserTransactionService userTransactionService;
-
     @MockBean
     private FactsMapper factsMapper;
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void fetchAllSessions_returnsSessionsFromService() throws Exception {
@@ -68,7 +66,8 @@ public class SessionControllerTest {
             .andReturn();
 
         val response = objectMapper.readValue(result.getResponse().getContentAsString(),
-            new TypeReference<List<Session>>(){});
+            new TypeReference<List<Session>>() {
+            });
 
         assertEquals(sessions, response);
     }
@@ -100,7 +99,8 @@ public class SessionControllerTest {
             .andReturn();
 
         val response = objectMapper.readValue(result.getResponse().getContentAsString(),
-            new TypeReference<List<SessionInfo>>(){});
+            new TypeReference<List<SessionInfo>>() {
+            });
 
         assertEquals(sessionsInfo, response);
     }
@@ -135,7 +135,7 @@ public class SessionControllerTest {
         when(sessionService.updateSession(upsertSession)).thenReturn(userTransaction);
 
         MvcResult result = mvc.perform(
-                put(SESSION_URL + "/update")
+            put(SESSION_URL + "/update")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(upsertSession)))
             .andExpect(status().isOk())

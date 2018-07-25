@@ -5,31 +5,24 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class S2SAuthenticationService {
 
-    private static final Set<String> approvedServicesNames = Collections.singleton("snl-api");
-    private static final String thisServiceName = "snl-events";
     static final String HEADER_NAME = "Authorization";
     static final String HEADER_CONTENT_PREFIX = "Bearer ";
-
+    private static final Set<String> approvedServicesNames = Collections.singleton("snl-api");
+    private static final String thisServiceName = "snl-events";
     private final String localJwtSecret;
     private final int localJwtExpirationInMs;
     private final String rulesJwtSecret;
