@@ -66,6 +66,7 @@ public class S2SJwtAuthenticationFilterIntegrationTest extends BaseIntegrationTe
 
         Assert.assertEquals(expectedStatusCode, response.getStatusCode());
     }
+
     private String getTestUrl() {
         return "http://localhost:" + port + "/room"; // because it's simple endpoint to use
     }

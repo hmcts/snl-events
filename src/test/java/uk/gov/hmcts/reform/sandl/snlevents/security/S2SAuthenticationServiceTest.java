@@ -27,8 +27,10 @@ public class S2SAuthenticationServiceTest {
     @Before
     public void setup() {
         val s2sConfig = Mockito.mock(S2SAuthenticationConfig.class);
-        when(s2sConfig.getEvents()).thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS, DEFAULT_EXPIRY));
-        when(s2sConfig.getRules()).thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_RULES, 1001));
+        when(s2sConfig.getEvents())
+            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS, DEFAULT_EXPIRY));
+        when(s2sConfig.getRules())
+            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_RULES, 1001));
         config = s2sConfig;
 
         s2SAuthenticationService = new S2SAuthenticationService(config);
@@ -77,7 +79,7 @@ public class S2SAuthenticationServiceTest {
             .createToken();
 
         when(config.getEvents())
-            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS, DEFAULT_EXPIRY-1));
+            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS, DEFAULT_EXPIRY - 1));
         boolean result = this.s2SAuthenticationService.validateToken(token);
 
         assertThat(result).isFalse();
@@ -90,7 +92,8 @@ public class S2SAuthenticationServiceTest {
             .createToken();
 
         when(config.getEvents())
-            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS+"A", DEFAULT_EXPIRY-1));
+            .thenReturn(new S2SAuthenticationConfig
+                .JwtCredentials(SECRET_EVENTS + "A", DEFAULT_EXPIRY - 1));
         this.s2SAuthenticationService.validateToken(token);
     }
 
@@ -101,12 +104,12 @@ public class S2SAuthenticationServiceTest {
             .createToken();
 
         when(config.getEvents())
-            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS+"A", DEFAULT_EXPIRY));
+            .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS + "A", DEFAULT_EXPIRY));
         this.s2SAuthenticationService.validateToken(token);
     }
 
     @Test
-    public void TokenCreator_createToken_forRules_containsProperFields() {
+    public void tokenCreator_createToken_forRules_containsProperFields() {
         final String token = s2SAuthenticationService.new TokenCreator(
             SECRET_RULES, DEFAULT_EXPIRY, "snl-events")
             .createToken();
@@ -118,7 +121,7 @@ public class S2SAuthenticationServiceTest {
                 .setSigningKey(config.getRules().getJwtSecret())
                 .parseClaimsJws(token)
                 .getBody();
-        } catch (SignatureException ex){
+        } catch (SignatureException ex) {
             exceptionThrown = true;
         }
         assertThat(exceptionThrown).isFalse();
@@ -128,6 +131,5 @@ public class S2SAuthenticationServiceTest {
 
         long millisDifference = claims.getExpiration().getTime() - claims.getIssuedAt().getTime();
         assertThat(config.getEvents().getJwtExpirationInMs()).isEqualTo(millisDifference);
-
     }
 }

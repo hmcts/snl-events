@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.security;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
