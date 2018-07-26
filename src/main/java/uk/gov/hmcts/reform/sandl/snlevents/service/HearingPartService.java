@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
-import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 
 @Service
@@ -92,16 +91,17 @@ public class HearingPartService {
                                                                       Session targetSession,
                                                                       HearingPartSessionRelationship assignment)
                                                                         throws IOException {
-        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
-
         entityManager.detach(hearingPart);
         hearingPart.setVersion(assignment.getHearingPartVersion());
 
-        entityManager.detach(targetSession);
-        targetSession.setVersion(assignment.getSessionVersion());
+        if (targetSession != null) {
+            entityManager.detach(targetSession);
+            targetSession.setVersion(assignment.getSessionVersion());
+        }
 
-        hearingPart.setSession(targetSession);
+        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
+        hearingPart.setSession(targetSession);
         hearingPart.setStart(assignment.getStart());
 
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
