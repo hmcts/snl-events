@@ -91,7 +91,7 @@ def versions = [
   logback: '1.2.3',
   reformLogging: '1.5.0',
   springBoot: springBoot.class.package.implementationVersion,
-  springHystrix: '1.4.2.RELEASE',
+  springHystrix: '1.4.5.RELEASE',
   springfoxSwagger: '2.8.0'
 ]
 
@@ -124,11 +124,14 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-httpcomponents', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'http-proxy-spring-boot-autoconfigure', version: '1.1.0'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: versions.springHystrix
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix-dashboard', version: versions.springHystrix
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.springHystrix
+
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '1.2.5.RELEASE'
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.6'
+  testCompile group: 'com.h2database', name: 'h2', version: '1.4.197'
+  testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0', ext: 'pom'
 }
 
 jar {
@@ -149,11 +152,19 @@ sourceSets {
     compileClasspath += main.output + test.output
     runtimeClasspath += main.output + test.output
   }
+  integrationSources {
+    java.srcDir 'src/test/integration'
+    resources.srcDir 'src/test/resources'
+    compileClasspath += main.output + test.output
+    runtimeClasspath += main.output + test.output
+  }
 }
 
 configurations {
   functionalCompile.extendsFrom testCompile
   functionalRuntime.extendsFrom testRuntime
+  integrationSourcesCompile.extendsFrom testCompile
+  integrationSourcesRuntime.extendsFrom testRuntime
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
@@ -169,3 +180,23 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
   testClassesDirs = sourceSets.functional.output.classesDirs
   classpath = sourceSets.functional.runtimeClasspath
 }
+
+task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+  testClassesDirs = sourceSets.integrationSources.output.classesDirs
+  classpath = sourceSets.integrationSources.runtimeClasspath
+
+  useJUnit {
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTestWithFakeRules'
+  }
+}
+
+task integrationTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+  testClassesDirs = sourceSets.integrationSources.output.classesDirs
+  classpath = sourceSets.integrationSources.runtimeClasspath
+
+  useJUnit {
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTest'
+  }
+}
+
+test.finalizedBy integrationFakeRulesTests
