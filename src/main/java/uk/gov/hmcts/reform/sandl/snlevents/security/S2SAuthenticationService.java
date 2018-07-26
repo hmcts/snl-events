@@ -7,7 +7,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -21,42 +21,34 @@ public class S2SAuthenticationService {
 
     static final String HEADER_NAME = "Authorization";
     static final String HEADER_CONTENT_PREFIX = "Bearer ";
-    private static final Set<String> approvedServicesNames = Collections.singleton("snl-api");
-    private static final String thisServiceName = "snl-events";
-    private final String localJwtSecret;
-    private final int localJwtExpirationInMs;
-    private final String rulesJwtSecret;
-    private final int rulesJwtExpirationInMs;
+    static final Set<String> approvedServicesNames = Collections.singleton("snl-api");
+    private final S2SAuthenticationConfig config;
+    private final TokenCreator tokenCreator;
 
-    public S2SAuthenticationService(
-        @Value("${management.security.events.jwtSecret}") final String localJwtSecret,
-        @Value("${management.security.events.jwtExpirationInMs}") final int localJwtExpirationInMs,
-        @Value("${management.security.rules.jwtSecret}") final String rulesJwtSecret,
-        @Value("${management.security.rules.jwtExpirationInMs}") final int rulesJwtExpirationInMs
-    ) {
-        this.localJwtSecret = localJwtSecret;
-        this.localJwtExpirationInMs = localJwtExpirationInMs;
-        this.rulesJwtSecret = rulesJwtSecret;
-        this.rulesJwtExpirationInMs = rulesJwtExpirationInMs;
+    @Autowired
+    S2SAuthenticationService(S2SAuthenticationConfig config) {
+        this.config = config;
+        this.tokenCreator = new TokenCreator(
+            config.getRules().getJwtSecret(), config.getRules().getJwtExpirationInMs(), "snl-events");
     }
 
     public HttpHeaders createRulesAuthenticationHeader() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HEADER_NAME, HEADER_CONTENT_PREFIX + this.createRulesToken());
+        headers.add(HEADER_NAME, HEADER_CONTENT_PREFIX + this.tokenCreator.createToken());
         return headers;
     }
 
     public boolean validateToken(String authToken) {
         try {
             final Claims claims = Jwts.parser()
-                .setSigningKey(localJwtSecret)
+                .setSigningKey(config.getEvents().getJwtSecret())
                 .parseClaimsJws(authToken)
                 .getBody();
             final String serviceName = (String) claims
                 .get("service");
             boolean valid = approvedServicesNames.contains(serviceName);
             long millisDifference = claims.getExpiration().getTime() - claims.getIssuedAt().getTime();
-            return valid && localJwtExpirationInMs == millisDifference;
+            return valid && config.getEvents().getJwtExpirationInMs() == millisDifference;
         } catch (MalformedJwtException ex) {
             log.error("Invalid JWT token", ex);
         } catch (ExpiredJwtException ex) {
@@ -69,15 +61,28 @@ public class S2SAuthenticationService {
         return false;
     }
 
-    private String createRulesToken() {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + rulesJwtExpirationInMs);
+    class TokenCreator {
+        private String secret;
+        private long expiration;
+        private String serviceName;
 
-        return Jwts.builder()
-            .claim("service", thisServiceName)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(SignatureAlgorithm.HS512, rulesJwtSecret)
-            .compact();
+        TokenCreator(String secret, long expiration, String serviceName) {
+            this.secret = secret;
+            this.expiration = expiration;
+            this.serviceName = serviceName;
+        }
+
+        String createToken() {
+            Date now = new Date();
+            Date expiryDate = new Date(now.getTime() + expiration);
+
+            return Jwts.builder()
+                .claim("service", serviceName)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
+        }
     }
+
 }
