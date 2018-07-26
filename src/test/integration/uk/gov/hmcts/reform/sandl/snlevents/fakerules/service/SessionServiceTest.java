@@ -2,12 +2,15 @@ package uk.gov.hmcts.reform.sandl.snlevents.fakerules.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.FactMessageService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
@@ -19,6 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
+
+    @MockBean
+    RulesService rulesService;
+
+    @MockBean
+    FactMessageService factMessageService;
 
     @Autowired
     SessionService sessionService;

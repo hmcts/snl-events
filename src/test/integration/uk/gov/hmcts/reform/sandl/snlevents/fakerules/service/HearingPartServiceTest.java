@@ -34,8 +34,8 @@ import static org.mockito.Mockito.when;
 public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     private static final Map<String, List<String>> subscribers;
-    static
-    {
+
+    static {
         subscribers = new HashMap<>();
         subscribers.put("upsert-hearingPart", Arrays.asList("http://localhost:8191/msg?rulesDefinition=Listings"));
     }
