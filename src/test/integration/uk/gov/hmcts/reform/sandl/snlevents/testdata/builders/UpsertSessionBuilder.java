@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.sandl.snlevents.testdata.builders;
 
 import org.springframework.boot.test.context.TestComponent;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @TestComponent
@@ -18,6 +20,7 @@ public class UpsertSessionBuilder {
     private String caseType = "SCLAIMS";
     private String personId = null;
     private String roomId = null;
+    private Long version = 0L;
 
     public UpsertSessionBuilder fromSession(Session session) {
         id = session.getId();
@@ -26,7 +29,7 @@ public class UpsertSessionBuilder {
         caseType = session.getCaseType();
         personId = session.getPerson() == null ? null : session.getPerson().getId().toString();
         roomId = session.getRoom() == null ? null : session.getRoom().getId().toString();
-
+        version = session.getVersion();
         return this;
     }
 
