@@ -6,6 +6,7 @@ def product = "snl"
 def component = "events"
 
 withPipeline("java", product, component) {
+  enableDbMigration()
   after('checkout') {
     echo 'sln-events checked out'
   }

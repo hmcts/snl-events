@@ -50,7 +50,7 @@ fact-propagation:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
 
 liquibase:
-  enabled: true
+  enabled: ${ENABLE_DB_MIGRATE_IN_SERVICE:true}
   change-log: classpath:db/db-testdata-changelog.yaml
 
 azure:
