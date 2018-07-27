@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.sandl.snlevents.fakerules.repository;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.FactMessageService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -22,6 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
 
     public static final String JUDGE_USER_NAME = "djcope";
+
+    @MockBean
+    public FactMessageService factMessageService;
+
+    @MockBean
+    public RulesService rulesService;
 
     @Autowired
     SessionRepository sessionRepository;

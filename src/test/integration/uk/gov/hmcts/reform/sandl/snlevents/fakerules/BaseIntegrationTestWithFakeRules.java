@@ -12,4 +12,5 @@ import uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTestWithFak
 @Category(IntegrationTestWithFakeRules.class)
 @DirtiesContext
 public abstract class BaseIntegrationTestWithFakeRules extends BaseIntegrationTest {
+
 }
