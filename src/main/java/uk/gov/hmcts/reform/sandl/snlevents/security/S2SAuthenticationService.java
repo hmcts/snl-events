@@ -22,7 +22,7 @@ public class S2SAuthenticationService {
 
     static final String HEADER_NAME = "Authorization";
     static final String HEADER_CONTENT_PREFIX = "Bearer ";
-    static final Set<String> approvedServicesNames = Collections.singleton("snl-api");
+    private static final Set<String> approvedServicesNames = Collections.singleton("snl-api");
     private final S2SAuthenticationConfig config;
     private final TokenCreator tokenCreator;
 

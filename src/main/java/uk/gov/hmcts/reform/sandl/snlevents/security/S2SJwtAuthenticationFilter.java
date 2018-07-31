@@ -21,12 +21,11 @@ import javax.servlet.http.HttpServletResponse;
 public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final S2SAuthenticationService s2sAuth;
-    private final List<String> jwtFreeEndpoints;
+    private final List<String> jwtFreeEndpoints = Arrays.asList("/health", "/error", "/info", "/", "");
 
     @Autowired
     public S2SJwtAuthenticationFilter(S2SAuthenticationService s2sauth) {
         this.s2sAuth = s2sauth;
-        this.jwtFreeEndpoints = Arrays.asList("/health", "/error", "/info", "/", "");
     }
 
     @Override
@@ -45,11 +44,11 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
                 throw new AuthenticationException("No Token provided");
             }
         } catch (AuthenticationException | SignatureException e) {
-            logger.error("Responding with unauthorized error. Message - " + e.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            logger.error("Responding with unauthorized error. Message - " + e);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         } catch (Exception ex) {
             logger.error("JWT token is invalid", ex);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 

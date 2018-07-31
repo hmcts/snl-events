@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.security;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,14 +7,12 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
-import java.util.Date;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,7 +45,7 @@ public class S2SJwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED), anyString());
+        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED));
     }
 
     @Test
@@ -62,7 +58,7 @@ public class S2SJwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED), anyString());
+        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED));
     }
 
     @Test
@@ -75,7 +71,7 @@ public class S2SJwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED), anyString());
+        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED));
     }
 
     @Test
@@ -88,18 +84,6 @@ public class S2SJwtAuthenticationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED), anyString());
-    }
-
-    private String createToken(String secret, long expiryInMs, String serviceName) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiryInMs);
-
-        return Jwts.builder()
-            .claim("service", serviceName)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(SignatureAlgorithm.HS512, secret)
-            .compact();
+        verify(response).sendError(eq(HttpServletResponse.SC_UNAUTHORIZED));
     }
 }
