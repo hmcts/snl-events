@@ -94,11 +94,6 @@ public class HearingPartService {
         entityManager.detach(hearingPart);
         hearingPart.setVersion(assignment.getHearingPartVersion());
 
-        if (targetSession != null) {
-            entityManager.detach(targetSession);
-            targetSession.setVersion(assignment.getSessionVersion());
-        }
-
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
         hearingPart.setSession(targetSession);

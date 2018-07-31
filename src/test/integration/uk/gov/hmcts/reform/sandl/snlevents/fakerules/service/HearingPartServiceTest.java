@@ -84,15 +84,23 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
             savedSession.getId(), UUID.randomUUID()
         );
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+        //do what assignHearingPartToSessionWithTransaction does but without doing detach
+        //detach makes using this method second time throw 'possible non-threadsafe access to session'
+        //we want to set started transaction state without detaching hearingPart we are going to use in next step
+        UserTransaction ut = hearingPartService.assignWithTransaction(
+            savedHearingPart,
+            hearingPartSessionRelationship.getUserTransactionId(),
+            savedHearingPart.getSession(),
+            savedSession
+        );
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
+        hearingPartSessionRelationship.setHearingPartVersion(savedHearingPart.getVersion());
         UserTransaction conflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+            hearingPartSessionRelationship
+        );
 
         assertThat(conflictingUt.getStatus()).isEqualTo(UserTransactionStatus.CONFLICT);
 
@@ -100,7 +108,8 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
         UserTransaction nonConflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+            hearingPartSessionRelationship
+        );
 
         assertThat(nonConflictingUt.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
@@ -111,6 +120,8 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearingPartSessionRelationship.setSessionId(sessionUuid);
         hearingPartSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
         hearingPartSessionRelationship.setUserTransactionId(userTransactionId);
+        hearingPartSessionRelationship.setSessionVersion(0);
+        hearingPartSessionRelationship.setHearingPartVersion(0);
 
         return hearingPartSessionRelationship;
     }
