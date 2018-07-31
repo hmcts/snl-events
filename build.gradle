@@ -84,6 +84,7 @@ repositories {
   jcenter()
 }
 
+apply from: 'liquibase.gradle'
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [

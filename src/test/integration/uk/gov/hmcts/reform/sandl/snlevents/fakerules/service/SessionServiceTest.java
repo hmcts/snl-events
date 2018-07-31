@@ -15,9 +15,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.UUID;
 import javax.transaction.Transactional;
 
@@ -27,10 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @MockBean
-    FactMessageService factMessageService;
+    RulesService rulesService;
 
     @MockBean
-    RulesService rulesService;
+    FactMessageService factMessageService;
 
     @Autowired
     SessionService sessionService;
@@ -42,10 +39,13 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
     UserTransactionService userTransactionService;
 
     @Test
-    public void saveWithTransaction_shouldSaveTheSessionInTransactionalManner() throws Exception {
+    public void saveWithTransaction_shouldSaveTheSessionInTransactionalManner() {
         UUID sessionUuid = UUID.randomUUID();
-        Session session = createSession(sessionUuid, Duration.ofMinutes(30));
-        UpsertSession us = createUpserSession(session, Duration.ofMinutes(30), UUID.randomUUID());
+        Session session = sessionBuilder.withId(sessionUuid).build();
+        UpsertSession us = upsertSessionBuilder.fromSession(session)
+            .withDuration(Duration.ofMinutes(30))
+            .withTransactionId(UUID.randomUUID())
+            .build();
 
         UserTransaction ut = sessionService.saveWithTransaction(us);
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
@@ -58,10 +58,13 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
     }
 
     @Test
-    public void rollback_shouldRevertTheChanges() throws Exception {
+    public void rollback_shouldRevertTheChanges() {
         UUID sessionUuid = UUID.randomUUID();
-        Session session = createSession(sessionUuid, Duration.ofMinutes(30));
-        UpsertSession us = createUpserSession(session, Duration.ofMinutes(30), UUID.randomUUID());
+        Session session = sessionBuilder.withId(sessionUuid).build();
+        UpsertSession us = upsertSessionBuilder.fromSession(session)
+            .withDuration(Duration.ofMinutes(30))
+            .withTransactionId(UUID.randomUUID())
+            .build();
 
         UserTransaction ut = sessionService.saveWithTransaction(us);
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
@@ -72,37 +75,5 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
 
         session = sessionRepository.findOne(sessionUuid);
         assertThat(session).isNull();
-    }
-
-    private Session createSession(UUID uuid, Duration duration) {
-        Session session = new Session();
-        session.setId(uuid);
-        session.setStart(january2018());
-        session.setDuration(duration);
-        session.setCaseType("SCLAIMS");
-
-        return session;
-    }
-
-    private UpsertSession createUpserSession(Session session, Duration duration, UUID uuid) {
-        UpsertSession us = new UpsertSession();
-        us.setUserTransactionId(uuid);
-        us.setId(session.getId());
-        us.setDuration(duration);
-        us.setPersonId(session.getPerson() == null ? null : session.getPerson().getId().toString());
-        us.setRoomId(session.getRoom() == null ? null : session.getRoom().getId().toString());
-        us.setCaseType(session.getCaseType());
-        us.setStart(session.getStart());
-
-        return us;
-    }
-
-    private OffsetDateTime january2018() {
-        return january(2018);
-    }
-
-    private OffsetDateTime january(int year) {
-        return OffsetDateTime.of(LocalDateTime.of(year, 1, 1, 1, 1),
-            ZoneOffset.ofHoursMinutes(1, 0));
     }
 }

@@ -20,7 +20,7 @@ public class S2SAuthenticationServiceTest {
 
     private static final String SECRET_EVENTS = "SecretE";
     private static final String SECRET_RULES = "SecrerR";
-    private static final int DEFAULT_EXPIRY = 3000;
+    private static final int DEFAULT_EXPIRY = 5000;
     private static final String SERVICE_NAME_SNL_API = "snl-api";
     private S2SAuthenticationConfig config;
     private S2SAuthenticationService s2SAuthenticationService;
