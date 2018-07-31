@@ -84,13 +84,14 @@ repositories {
   jcenter()
 }
 
+apply from: 'liquibase.gradle'
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [
   logback: '1.2.3',
   reformLogging: '1.5.0',
   springBoot: springBoot.class.package.implementationVersion,
-  springHystrix: '1.4.2.RELEASE',
+  springHystrix: '1.4.5.RELEASE',
   springfoxSwagger: '2.8.0'
 ]
 
@@ -123,8 +124,8 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-httpcomponents', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'http-proxy-spring-boot-autoconfigure', version: '1.1.0'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: versions.springHystrix
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix-dashboard', version: versions.springHystrix
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.springHystrix
+
   compile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '1.2.5.RELEASE'
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot

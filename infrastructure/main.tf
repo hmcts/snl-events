@@ -1,6 +1,12 @@
 locals {
   app_full_name = "${var.product}-${var.component}"
 }
+
+resource "azurerm_resource_group" "rg" {
+  name     = "${var.product}-${var.env}"
+  location = "${var.location}"
+}
+
 module "snl-events" {
   source               = "git@github.com:hmcts/moj-module-webapp"
   product              = "${var.product}-${var.component}"
@@ -20,6 +26,9 @@ module "snl-events" {
     SNL_EVENTS_DB_USERNAME = "${module.postgres-snl-events.user_name}"
     SNL_EVENTS_DB_PASSWORD = "${module.postgres-snl-events.postgresql_password}"
     SNL_EVENTS_DB_PARAMS = "?ssl=true"
+
+    ENABLE_DB_MIGRATE_IN_SERVICE = "false"
+
     SNL_RULES_URL = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   }
 
@@ -35,3 +44,46 @@ module "postgres-snl-events" {
   postgresql_version  = "10"
   common_tags         = "${var.common_tags}"
 }
+
+# region save DB details to Azure Key Vault
+module "snl-vault" {
+  source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
+  name = "snl-${var.env}"
+  product = "${var.product}"
+  env = "${var.env}"
+  tenant_id = "${var.tenant_id}"
+  object_id = "${var.jenkins_AAD_objectId}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
+  product_group_object_id = "70de400b-4f47-4f25-a4f0-45e1ee4e4ae3"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES-USER" {
+  name      = "${var.product}-${var.component}-POSTGRES-USER"
+  value     = "${module.postgres-snl-events.user_name}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
+  name      = "${var.product}-${var.component}-POSTGRES-PASS"
+  value     = "${module.postgres-snl-events.postgresql_password}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_HOST" {
+  name      = "${var.product}-${var.component}-POSTGRES-HOST"
+  value     = "${module.postgres-snl-events.host_name}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_PORT" {
+  name      = "${var.product}-${var.component}-POSTGRES-PORT"
+  value     = "${module.postgres-snl-events.postgresql_listen_port}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
+  name      = "${var.product}-${var.component}-POSTGRES-DATABASE"
+  value     = "${module.postgres-snl-events.postgresql_database}"
+  vault_uri = "${module.snl-vault.key_vault_uri}"
+}
+# endregion
