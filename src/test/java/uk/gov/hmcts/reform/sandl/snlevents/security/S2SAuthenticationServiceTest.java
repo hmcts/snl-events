@@ -21,6 +21,7 @@ public class S2SAuthenticationServiceTest {
     private static final String SECRET_EVENTS = "SecretE";
     private static final String SECRET_RULES = "SecrerR";
     private static final int DEFAULT_EXPIRY = 3000;
+    private static final String SERVICE_NAME_SNL_API = "snl-api";
     private S2SAuthenticationConfig config;
     private S2SAuthenticationService s2SAuthenticationService;
 
@@ -34,6 +35,13 @@ public class S2SAuthenticationServiceTest {
         config = s2sConfig;
 
         s2SAuthenticationService = new S2SAuthenticationService(config);
+    }
+
+    @Test
+    public void validateToken_returnsFalse_forMissingToken() {
+        final String token = "";
+        boolean result = this.s2SAuthenticationService.validateToken(token);
+        assertThat(result).isFalse();
     }
 
     @Test
@@ -51,7 +59,7 @@ public class S2SAuthenticationServiceTest {
             .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS, DEFAULT_EXPIRY));
 
         final String token = s2SAuthenticationService.new TokenCreator(
-            SECRET_EVENTS, DEFAULT_EXPIRY, "snl-api")
+            SECRET_EVENTS, DEFAULT_EXPIRY, SERVICE_NAME_SNL_API)
             .createToken();
 
         boolean result = this.s2SAuthenticationService.validateToken(token);
@@ -75,7 +83,7 @@ public class S2SAuthenticationServiceTest {
     @Test
     public void validateToken_returnsFalse_forValidSecretAndWrongTimeout() {
         final String token = s2SAuthenticationService.new TokenCreator(
-            SECRET_EVENTS, DEFAULT_EXPIRY, "snl-api")
+            SECRET_EVENTS, DEFAULT_EXPIRY, SERVICE_NAME_SNL_API)
             .createToken();
 
         when(config.getEvents())
@@ -88,7 +96,7 @@ public class S2SAuthenticationServiceTest {
     @Test(expected = SignatureException.class)
     public void validateToken_throwsException_forInValidSecretAndWrongTimeout() {
         final String token = s2SAuthenticationService.new TokenCreator(
-            SECRET_EVENTS, DEFAULT_EXPIRY, "snl-api")
+            SECRET_EVENTS, DEFAULT_EXPIRY, SERVICE_NAME_SNL_API)
             .createToken();
 
         when(config.getEvents())
@@ -100,7 +108,7 @@ public class S2SAuthenticationServiceTest {
     @Test(expected = SignatureException.class)
     public void validateToken_throwsException_forInValidSecretAndGoodTimeout() {
         final String token = s2SAuthenticationService.new TokenCreator(
-            SECRET_EVENTS, DEFAULT_EXPIRY, "snl-api")
+            SECRET_EVENTS, DEFAULT_EXPIRY, SERVICE_NAME_SNL_API)
             .createToken();
 
         when(config.getEvents())
@@ -132,4 +140,5 @@ public class S2SAuthenticationServiceTest {
         long millisDifference = claims.getExpiration().getTime() - claims.getIssuedAt().getTime();
         assertThat(config.getEvents().getJwtExpirationInMs()).isEqualTo(millisDifference);
     }
+
 }

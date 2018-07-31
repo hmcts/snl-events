@@ -26,7 +26,7 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     public S2SJwtAuthenticationFilter(S2SAuthenticationService s2sauth) {
         this.s2sAuth = s2sauth;
-        this.jwtFreeEndpoints = Arrays.asList("/health", "/error", "/info", "/");
+        this.jwtFreeEndpoints = Arrays.asList("/health", "/error", "/info", "/", "");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
     private void s2sTokenCheck(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            if (!(StringUtils.hasText(jwt) && s2sAuth.validateToken(jwt))) {
+            if (!s2sAuth.validateToken(jwt)) {
                 throw new AuthenticationException("No Token provided");
             }
         } catch (AuthenticationException | SignatureException e) {
@@ -53,10 +53,9 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-
     private boolean shouldDoTokenCheck(String urlPath) {
         for (String element : this.jwtFreeEndpoints) {
-            if (urlPath.startsWith(element)) {
+            if (urlPath.equalsIgnoreCase(element)) {
                 return false;
             }
         }

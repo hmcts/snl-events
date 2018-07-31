@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.val;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -35,6 +37,11 @@ public class RoomControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private S2SAuthenticationService s2SAuthenticationService;
+
+    @Before
+    public void setupMock() {
+        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
+    }
 
     @Test
     public void fetchAllRooms_returnsRoomsFromService() throws Exception {

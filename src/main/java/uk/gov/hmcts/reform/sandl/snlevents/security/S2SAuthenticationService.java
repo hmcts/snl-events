@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +40,9 @@ public class S2SAuthenticationService {
     }
 
     public boolean validateToken(String authToken) {
+        if (!StringUtils.hasText(authToken)) {
+            return false;
+        }
         try {
             final Claims claims = Jwts.parser()
                 .setSigningKey(config.getEvents().getJwtSecret())

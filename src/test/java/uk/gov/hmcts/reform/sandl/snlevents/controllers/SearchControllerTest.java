@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import lombok.val;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,6 +32,11 @@ public class SearchControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private S2SAuthenticationService s2SAuthenticationService;
+
+    @Before
+    public void setupMock() {
+        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
+    }
 
     @Test
     public void dataProvider_searchPossibleSessions_returnsSessions() throws Exception {

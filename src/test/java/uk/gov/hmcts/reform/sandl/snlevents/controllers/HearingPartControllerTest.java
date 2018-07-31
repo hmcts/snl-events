@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,11 @@ public class HearingPartControllerTest {
 
     @Autowired
     private EventsMockMvc mvc;
+
+    @Before
+    public void setupMock() {
+        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
+    }
 
     @Test
     public void fetchAllHeartingParts_returnHearingPartsFromService() throws Exception {

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class SessionControllerTest {
     @MockBean
     private SessionService sessionService;
     @MockBean
-    private S2SAuthenticationService s2sAuthService;
+    private S2SAuthenticationService s2SAuthenticationService;
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
@@ -58,6 +59,11 @@ public class SessionControllerTest {
 
     @Autowired
     private EventsMockMvc mvc;
+
+    @Before
+    public void setupMock() {
+        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
+    }
 
     @Test
     public void fetchAllSessions_returnsSessionsFromService() throws Exception {
