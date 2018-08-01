@@ -2,7 +2,7 @@
 
 cd hooks
 
-HOOK_DIR=../.git/hooks
+HOOK_DIR=../../.git/hooks
 mkdir -p $HOOK_DIR
 
 for i in * ; do 
