@@ -6,8 +6,7 @@ management:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
 
 communication:
-  searchUrl:
-    - ${SNL_RULES_URL:http://localhost:8091}/search
+  searchUrl: ${SNL_RULES_URL:http://localhost:8091}/search
 
 fact-propagation:
   subscribers:
@@ -51,8 +50,12 @@ fact-propagation:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
 
 liquibase:
-  enabled: true
+  enabled: ${ENABLE_DB_MIGRATE_IN_SERVICE:true}
   change-log: classpath:db/db-testdata-changelog.yaml
+
+azure:
+  application-insights:
+    instrumentation-key: ${APPINSIGHTS_INSTRUMENTATIONKEY:dummy}
 
 #If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:

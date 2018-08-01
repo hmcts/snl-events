@@ -1,4 +1,4 @@
-FROM postgres:9.6.7-alpine
+FROM postgres:10-alpine
 
 ENV LANG en_US.utf8
 

@@ -11,7 +11,7 @@ plugins {
   id 'org.sonarqube' version '2.6.1'
 }
 
-group = 'uk.gov.hmcts.reform.sandl.snlapi'
+group = 'uk.gov.hmcts.reform.sandl'
 version = '0.0.1'
 
 sourceCompatibility = 1.8
@@ -48,11 +48,14 @@ jacocoTestReport {
 project.tasks['sonarqube'].dependsOn test
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: Send Letter Service 2.0"
+    property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
+    property "sonar.projectKey", "snl-events"
     property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
     property "sonar.jacoco.itReportPath", "${project.buildDir}/jacoco/integration.exec"
-    property 'sonar.coverage.exclusions', "/**/*"
-    property 'sonar.exclusions', '/**/*'
+    property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+    property "sonar.exclusions", ""
+    property "sonar.test.exclusions", ""
+    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*"
   }
 }
 
@@ -81,18 +84,19 @@ repositories {
   jcenter()
 }
 
+apply from: 'liquibase.gradle'
 // it is important to specify logback classic and core packages explicitly as libraries like spring boot
 // enforces it's own (older) version which is not recommended.
 def versions = [
   logback: '1.2.3',
   reformLogging: '1.5.0',
   springBoot: springBoot.class.package.implementationVersion,
-  springHystrix: '1.4.2.RELEASE',
+  springHystrix: '1.4.5.RELEASE',
   springfoxSwagger: '2.8.0'
 ]
 
 dependencies {
-  compileOnly 'org.projectlombok:lombok:1.16.20'
+  compile 'org.projectlombok:lombok:1.16.20'
   apt "org.projectlombok:lombok:1.16.20"
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
@@ -103,7 +107,8 @@ dependencies {
   compile group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
   compile group: 'ch.qos.logback', name: 'logback-core', version: versions.logback
   compile group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.0.+'
-
+  compile group: 'com.microsoft.azure', name: 'applicationinsights-web', version: '2.+'
+  compile group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '1.0.0-BETA'
 
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
   compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.1'
@@ -119,11 +124,14 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-httpcomponents', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'http-proxy-spring-boot-autoconfigure', version: '1.1.0'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: versions.springHystrix
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix-dashboard', version: versions.springHystrix
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.springHystrix
+
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '1.2.5.RELEASE'
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.6'
+  testCompile group: 'com.h2database', name: 'h2', version: '1.4.197'
+  testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0', ext: 'pom'
 }
 
 jar {
@@ -144,11 +152,19 @@ sourceSets {
     compileClasspath += main.output + test.output
     runtimeClasspath += main.output + test.output
   }
+  integrationSources {
+    java.srcDir 'src/test/integration'
+    resources.srcDir 'src/test/resources'
+    compileClasspath += main.output + test.output
+    runtimeClasspath += main.output + test.output
+  }
 }
 
 configurations {
   functionalCompile.extendsFrom testCompile
   functionalRuntime.extendsFrom testRuntime
+  integrationSourcesCompile.extendsFrom testCompile
+  integrationSourcesRuntime.extendsFrom testRuntime
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
@@ -164,3 +180,23 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
   testClassesDirs = sourceSets.functional.output.classesDirs
   classpath = sourceSets.functional.runtimeClasspath
 }
+
+task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+  testClassesDirs = sourceSets.integrationSources.output.classesDirs
+  classpath = sourceSets.integrationSources.runtimeClasspath
+
+  useJUnit {
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTestWithFakeRules'
+  }
+}
+
+task integrationTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+  testClassesDirs = sourceSets.integrationSources.output.classesDirs
+  classpath = sourceSets.integrationSources.runtimeClasspath
+
+  useJUnit {
+    includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTest'
+  }
+}
+
+test.finalizedBy integrationFakeRulesTests
