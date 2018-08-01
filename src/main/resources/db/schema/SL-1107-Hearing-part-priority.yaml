@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+        id: hearing_part-priority-field
+        author: lgurniewicz
+        changes:
+          - addColumn:
+              tableName: hearing_part
+              columns:
+              - column:
+                  name: priority
+                  type: varchar

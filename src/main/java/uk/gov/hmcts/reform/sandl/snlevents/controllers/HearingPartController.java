@@ -63,6 +63,7 @@ public class HearingPartController {
         } else {
             hearingPart.setCreatedAt(createHearingPart.getCreatedAt());
         }
+        hearingPart.setPriority(createHearingPart.getPriority());
 
         return ok(hearingPartService.save(hearingPart));
     }

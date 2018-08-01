@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -30,4 +31,6 @@ public class CreateHearingPart {
     private OffsetDateTime scheduleEnd;
 
     private OffsetDateTime createdAt;
+
+    private Priority priority;
 }
