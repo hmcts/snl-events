@@ -17,6 +17,7 @@ public class HearingPartBuilder {
     private String caseType = "SCLAIMS";
     private String caseNumber = "case number";
     private String caseTitle = "case title";
+    private Long version;
 
     public HearingPartBuilder withId(UUID id) {
         this.id = id;
@@ -38,6 +39,11 @@ public class HearingPartBuilder {
         return this;
     }
 
+    public HearingPartBuilder withVersion(Long version) {
+        this.version = version;
+        return this;
+    }
+
     public HearingPart build() {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(id);
@@ -46,8 +52,8 @@ public class HearingPartBuilder {
         hearingPart.setCaseType(caseType);
         hearingPart.setCaseNumber(caseNumber);
         hearingPart.setCaseTitle(caseTitle);
+        hearingPart.setVersion(version);
 
         return hearingPart;
     }
-
 }
