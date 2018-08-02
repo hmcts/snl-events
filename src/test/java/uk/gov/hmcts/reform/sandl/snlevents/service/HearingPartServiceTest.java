@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -32,6 +33,9 @@ public class HearingPartServiceTest {
     @InjectMocks
     HearingPartService hearingPartService;
 
+    @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    EntityManager entityManager;
     @Mock
     HearingPartRepository hearingPartRepository;
     @Mock

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 @Service
@@ -25,6 +26,9 @@ public class HearingPartService {
 
     @Autowired
     HearingPartRepository hearingPartRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Autowired
     UserTransactionService userTransactionService;
@@ -76,7 +80,6 @@ public class HearingPartService {
                                                                      HearingPartSessionRelationship assignment)
                                                                         throws IOException {
         HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
-
         Session targetSession = sessionRepository.findOne(assignment.getSessionId());
 
         return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
@@ -88,10 +91,12 @@ public class HearingPartService {
                                                                       Session targetSession,
                                                                       HearingPartSessionRelationship assignment)
                                                                         throws IOException {
-        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
+        entityManager.detach(hearingPart);
+        hearingPart.setVersion(assignment.getHearingPartVersion());
 
-        hearingPart.setSession(targetSession);
+        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
+        hearingPart.setSession(targetSession);
         hearingPart.setStart(assignment.getStart());
 
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
