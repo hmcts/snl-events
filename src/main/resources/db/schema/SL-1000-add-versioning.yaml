@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+        id: SL-1000-add-versioning
+        author: sfilipczyk
+        changes:
+          - addColumn:
+              tableName: hearing_part
+              columns:
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false

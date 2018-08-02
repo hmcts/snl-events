@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.fakerules.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -14,7 +15,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 
+import java.io.IOException;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -37,6 +40,9 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @Autowired
     UserTransactionService userTransactionService;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Test
     public void assignHearingPartToSessionWithTransaction_shouldWorkInTransactionalManner() throws Exception {
@@ -84,15 +90,23 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
             savedSession.getId(), UUID.randomUUID()
         );
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+        //do what assignHearingPartToSessionWithTransaction does but without doing detach
+        //detach makes using this method second time throw 'possible non-threadsafe access to session'
+        //we want to set started transaction state without detaching hearingPart we are going to use in next step
+        UserTransaction ut = hearingPartService.assignWithTransaction(
+            savedHearingPart,
+            hearingPartSessionRelationship.getUserTransactionId(),
+            savedHearingPart.getSession(),
+            savedSession
+        );
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
+        hearingPartSessionRelationship.setHearingPartVersion(savedHearingPart.getVersion());
         UserTransaction conflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+            hearingPartSessionRelationship
+        );
 
         assertThat(conflictingUt.getStatus()).isEqualTo(UserTransactionStatus.CONFLICT);
 
@@ -100,10 +114,38 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
         UserTransaction nonConflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+            hearingPartSessionRelationship
+        );
 
         assertThat(nonConflictingUt.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
+    }
+
+    @Test(expected = OptimisticLockingFailureException.class)
+    public void assignHearingPartToSessionWithTransaction_throwsException_whenHearingPartIsLocked() throws IOException {
+        stubFor(post(urlEqualTo("/msg?rulesDefinition=Listings"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")));
+
+        //GIVEN latest version of HearingPart is 2
+        HearingPart savedHearingPart = hearingPartRepository.save(
+            hearingPartBuilder.withId(UUID.randomUUID()).withVersion(2L).build()
+        );
+        Session savedSession = sessionRepository.save(sessionBuilder.build());
+        entityManager.flush();
+
+        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
+            savedSession.getId(), UUID.randomUUID()
+        );
+
+        //WHEN we try to assign Session to HearingPart with older version
+        hearingPartSessionRelationship.setHearingPartVersion(1L);
+        hearingPartService.assignHearingPartToSessionWithTransaction(
+            savedHearingPart.getId(), hearingPartSessionRelationship
+        );
+        //THEN Optimistic Locking prevents us to do so
     }
 
     private HearingPartSessionRelationship createRelationship(UUID sessionUuid, UUID userTransactionId) {
@@ -111,6 +153,8 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearingPartSessionRelationship.setSessionId(sessionUuid);
         hearingPartSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
         hearingPartSessionRelationship.setUserTransactionId(userTransactionId);
+        hearingPartSessionRelationship.setSessionVersion(0);
+        hearingPartSessionRelationship.setHearingPartVersion(0);
 
         return hearingPartSessionRelationship;
     }
