@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
@@ -42,14 +44,13 @@ public class SessionControllerTest {
 
     @MockBean
     private SessionService sessionService;
-
+    @MockBean
+    private S2SAuthenticationService s2SAuthenticationService;
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
-
     @MockBean
     private UserTransactionService userTransactionService;
-
     @MockBean
     private FactsMapper factsMapper;
 
@@ -58,6 +59,11 @@ public class SessionControllerTest {
 
     @Autowired
     private EventsMockMvc mvc;
+
+    @Before
+    public void setupMock() {
+        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
+    }
 
     @Test
     public void fetchAllSessions_returnsSessionsFromService() throws Exception {
