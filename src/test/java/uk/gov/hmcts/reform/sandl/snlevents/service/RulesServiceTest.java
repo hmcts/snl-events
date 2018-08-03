@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.sandl.snlevents.config.SubscribersConfiguration;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,6 +45,9 @@ public class RulesServiceTest {
 
     @Mock
     private SubscribersConfiguration subscribersConfiguration;
+
+    @Mock
+    private S2SAuthenticationService s2SAuthenticationService;
 
     @Mock
     private RestTemplate restTemplate = mock(RestTemplate.class);
@@ -75,8 +80,8 @@ public class RulesServiceTest {
         verify(factMessageService, times(0)).handle(any(UUID.class), anyString());
     }
 
-    private <T> ResponseEntity<T> createResponseEntity() {
-        return new<T> ResponseEntity(BODY, HttpStatus.OK);
+    private ResponseEntity createResponseEntity() {
+        return new ResponseEntity<>(BODY, HttpStatus.OK);
     }
 
     private Map<String,List<String>> createSubscribers(String type) {
@@ -91,7 +96,8 @@ public class RulesServiceTest {
     @Test
     public void search_returnsEntity() {
         val response = createResponseEntity();
-        when(restTemplate.getForEntity(anyString(), any()))
+
+        when(restTemplate.exchange(anyString(), any(), any(), isA(Class.class)))
             .thenReturn(response);
 
         val returnedResponse = rulesService.search("");
