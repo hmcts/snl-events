@@ -8,4 +8,4 @@ databaseChangeLog:
               columns:
               - column:
                   name: priority
-                  type: varchar
+                  type: int

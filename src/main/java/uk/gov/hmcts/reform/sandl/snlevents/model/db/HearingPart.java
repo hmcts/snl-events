@@ -81,6 +81,6 @@ public class HearingPart extends VersionedEntity implements Serializable {
 
     @Getter
     @Setter
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private Priority priority;
 }
