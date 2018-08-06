@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
@@ -103,6 +104,7 @@ public class HearingPartControllerTest {
         chp.setHearingType(HEARING_TYPE);
         chp.setDuration(createDuration());
         chp.setCreatedAt(createOffsetDateTime());
+        chp.setPriority(Priority.Low);
 
         return chp;
     }
@@ -127,6 +129,7 @@ public class HearingPartControllerTest {
         hp.setHearingType(HEARING_TYPE);
         hp.setDuration(createDuration());
         hp.setCreatedAt(createOffsetDateTime());
+        hp.setPriority(Priority.Low);
 
         return hp;
     }
