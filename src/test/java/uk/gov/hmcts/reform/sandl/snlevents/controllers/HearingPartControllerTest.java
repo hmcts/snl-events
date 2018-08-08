@@ -43,6 +43,8 @@ public class HearingPartControllerTest {
     public static final String TITLE = "title";
     public static final String HEARING_TYPE = "hearing-type";
     public static final String URL = "/hearing-part";
+    public static final String COMMUNICATION_FACILITATOR = "Interpreter";
+    public static final UUID RESERVED_JUDGE_ID = UUID.randomUUID();
 
     @MockBean
     private HearingPartService hearingPartService;
@@ -105,6 +107,8 @@ public class HearingPartControllerTest {
         chp.setDuration(createDuration());
         chp.setCreatedAt(createOffsetDateTime());
         chp.setPriority(Priority.Low);
+        chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
+        chp.setReservedJudgeId(RESERVED_JUDGE_ID);
 
         return chp;
     }
@@ -130,6 +134,8 @@ public class HearingPartControllerTest {
         hp.setDuration(createDuration());
         hp.setCreatedAt(createOffsetDateTime());
         hp.setPriority(Priority.Low);
+        hp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
+        hp.setReservedJudgeId(RESERVED_JUDGE_ID);
 
         return hp;
     }
