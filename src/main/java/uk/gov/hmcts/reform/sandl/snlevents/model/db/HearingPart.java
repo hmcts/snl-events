@@ -19,7 +19,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -70,6 +69,14 @@ public class HearingPart extends VersionedEntity implements Serializable {
     @Setter
     @JsonProperty("session")
     private UUID sessionId;
+
+    @Getter
+    @Setter
+    private UUID reservedJudgeId;
+
+    @Getter
+    @Setter
+    private String communicationFacilitator;
 
     @Getter
     @Setter

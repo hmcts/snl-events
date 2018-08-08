@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/schema/SL-1000-add-versioning.yaml
   - include:
       file: db/schema/SL-1107-Hearing-part-priority.yaml
+  - include:
+      file: db/schema/SL-1108-add-columns-to-hearing-part-table.yaml

@@ -33,4 +33,8 @@ public class CreateHearingPart {
     private OffsetDateTime createdAt;
 
     private Priority priority;
+
+    private UUID reservedJudgeId;
+
+    private String communicationFacilitator;
 }

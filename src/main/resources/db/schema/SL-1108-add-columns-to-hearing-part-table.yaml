@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+        id: add-two-columns-to-hearing-part-table
+        author: kzielinski
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: reserved_judge_id
+                  type: UUID
+              - column:
+                  name: communication_facilitator
+                  type: varchar(255)
+              tableName: hearing_part
+          - addForeignKeyConstraint:
+              baseColumnNames: reserved_judge_id
+              baseTableName: hearing_part
+              constraintName: fk_reserved_judge_id_to_person_id
+              referencedColumnNames: id
+              referencedTableName: person

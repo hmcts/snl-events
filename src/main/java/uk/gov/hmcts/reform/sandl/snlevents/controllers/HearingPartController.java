@@ -58,6 +58,9 @@ public class HearingPartController {
         hearingPart.setDuration(createHearingPart.getDuration());
         hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
+        hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
+        hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
+
         if (createHearingPart.getCreatedAt() == null) {
             hearingPart.setCreatedAt(OffsetDateTime.now());
         } else {
