@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -39,7 +41,11 @@ public class HearingPartController {
     private FactsMapper factsMapper;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<HearingPart> fetchAllHearingParts() {
+    @ResponseBody public List<HearingPart> fetchAllHearingParts(@RequestParam("isListed") Optional<Boolean> isListed) {
+        if (isListed.isPresent()) {
+            return hearingPartService.getAllHearingPartsThat(isListed.get());
+        }
+
         return hearingPartService.getAllHearingParts();
     }
 

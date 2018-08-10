@@ -49,6 +49,14 @@ public class HearingPartService {
         return hearingPartRepository.findAll();
     }
 
+    public List<HearingPart> getAllHearingPartsThat(Boolean areListed) {
+        if (areListed) {
+            return hearingPartRepository.findBySessionIsNotNull();
+        }
+
+        return hearingPartRepository.findBySessionIsNull();
+    }
+
     public HearingPart save(HearingPart hearingPart) {
         return hearingPartRepository.save(hearingPart);
     }
