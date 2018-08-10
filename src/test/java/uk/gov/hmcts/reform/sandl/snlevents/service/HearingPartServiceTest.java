@@ -69,6 +69,24 @@ public class HearingPartServiceTest {
     }
 
     @Test
+    public void getAllHearingPartsThat_whenAreListedIsFalse_returnsHearingPartsWithNoSessionAssignedFromRepository() {
+        when(hearingPartRepository.findBySessionIsNull()).thenReturn(createHearingParts());
+        List<HearingPart> hearingParts = hearingPartService.getAllHearingPartsThat(false);
+
+        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
+        assertThat(hearingParts.get(0).getSession()).isNull();
+    }
+
+    @Test
+    public void getAllHearingPartsThat_whenAreListedIsTrue_returnsHearingPartsWithSessionAssignedFromRepository() {
+        when(hearingPartRepository.findBySessionIsNotNull()).thenReturn(Arrays.asList(createHearingPartWithSession()));
+        List<HearingPart> hearingParts = hearingPartService.getAllHearingPartsThat(true);
+
+        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
+        assertThat(hearingParts.get(0).getSession()).isNotNull();
+    }
+
+    @Test
     public void save_savesHearingPartToRepository() {
         HearingPart hearingPart = createHearingPart();
         HearingPart savedHearingPart =  hearingPartService.save(hearingPart);
@@ -148,6 +166,13 @@ public class HearingPartServiceTest {
 
     private HearingPart createHearingPart() {
         return new HearingPart();
+    }
+
+    private HearingPart createHearingPartWithSession() {
+        HearingPart hp = new HearingPart();
+        hp.setSession(createSession());
+
+        return hp;
     }
 
     private Session createSession() {

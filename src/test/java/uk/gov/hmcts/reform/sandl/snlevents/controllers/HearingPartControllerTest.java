@@ -43,6 +43,7 @@ public class HearingPartControllerTest {
     public static final String TITLE = "title";
     public static final String HEARING_TYPE = "hearing-type";
     public static final String URL = "/hearing-part";
+    public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
     public static final UUID RESERVED_JUDGE_ID = UUID.randomUUID();
 
@@ -77,6 +78,16 @@ public class HearingPartControllerTest {
         when(hearingPartService.getAllHearingParts()).thenReturn(hearingParts);
 
         val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPart>>(){});
+        assertEquals(response.size(), 1);
+        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
+    }
+
+    @Test
+    public void fetchAllHeartingParts_whenPassIsListedAsFalse_returnUnlistedHearingPartsFromService() throws Exception {
+        val hearingParts = createHearingParts();
+        when(hearingPartService.getAllHearingPartsThat(any())).thenReturn(hearingParts);
+
+        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPart>>(){});
         assertEquals(response.size(), 1);
         assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
     }
