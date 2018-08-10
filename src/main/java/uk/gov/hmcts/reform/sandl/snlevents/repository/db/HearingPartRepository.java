@@ -17,7 +17,9 @@ import java.util.UUID;
 public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> {
 
     List<HearingPart> findBySessionIn(Collection<Session> sessions);
+
     List<HearingPart> findBySessionIsNotNull();
+
     List<HearingPart> findBySessionIsNull();
 
     @Query(nativeQuery = true,
