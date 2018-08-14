@@ -18,6 +18,10 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
 
     List<HearingPart> findBySessionIn(Collection<Session> sessions);
 
+    List<HearingPart> findBySessionIsNotNull();
+
+    List<HearingPart> findBySessionIsNull();
+
     @Query(nativeQuery = true,
         value = "select cast(title as varchar(100)) as title, cast(hearings as int) as hearings, \n"
             + "cast(minutes as int) as minutes \n"

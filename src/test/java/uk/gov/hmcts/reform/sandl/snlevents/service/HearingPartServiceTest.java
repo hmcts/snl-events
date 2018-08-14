@@ -15,11 +15,13 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -32,6 +34,9 @@ public class HearingPartServiceTest {
     HearingPartService hearingPartService;
 
     @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    EntityManager entityManager;
+    @Mock
     HearingPartRepository hearingPartRepository;
     @Mock
     UserTransactionService userTransactionService;
@@ -40,6 +45,9 @@ public class HearingPartServiceTest {
     @Mock
     @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
+    @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    S2SAuthenticationService s2SAuthenticationService;
     @Mock
     @SuppressWarnings("PMD.UnusedPrivateField")
     private FactsMapper factsMapper;
@@ -58,6 +66,24 @@ public class HearingPartServiceTest {
         List<HearingPart> hearingParts = hearingPartService.getAllHearingParts();
 
         assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
+    }
+
+    @Test
+    public void getAllHearingPartsThat_whenAreListedIsFalse_returnsHearingPartsWithNoSessionAssignedFromRepository() {
+        when(hearingPartRepository.findBySessionIsNull()).thenReturn(createHearingParts());
+        List<HearingPart> hearingParts = hearingPartService.getAllHearingPartsThat(false);
+
+        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
+        assertThat(hearingParts.get(0).getSession()).isNull();
+    }
+
+    @Test
+    public void getAllHearingPartsThat_whenAreListedIsTrue_returnsHearingPartsWithSessionAssignedFromRepository() {
+        when(hearingPartRepository.findBySessionIsNotNull()).thenReturn(Arrays.asList(createHearingPartWithSession()));
+        List<HearingPart> hearingParts = hearingPartService.getAllHearingPartsThat(true);
+
+        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
+        assertThat(hearingParts.get(0).getSession()).isNotNull();
     }
 
     @Test
@@ -140,6 +166,13 @@ public class HearingPartServiceTest {
 
     private HearingPart createHearingPart() {
         return new HearingPart();
+    }
+
+    private HearingPart createHearingPartWithSession() {
+        HearingPart hp = new HearingPart();
+        hp.setSession(createSession());
+
+        return hp;
     }
 
     private Session createSession() {

@@ -4,6 +4,12 @@ server:
 management:
   security:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
+    events:
+      jwtSecret: "sialaBabaMak"
+      jwtExpirationInMs: 5000
+    rules:
+      jwtSecret: "nieWiedzialaJak"
+      jwtExpirationInMs: 5000
 
 communication:
   searchUrl: ${SNL_RULES_URL:http://localhost:8091}/search

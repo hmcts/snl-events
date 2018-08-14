@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -13,15 +14,16 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("squid:S3437")
-public class HearingPart implements Serializable {
+public class HearingPart extends VersionedEntity implements Serializable {
 
     @Id
     @Getter
@@ -70,9 +72,22 @@ public class HearingPart implements Serializable {
 
     @Getter
     @Setter
+    private UUID reservedJudgeId;
+
+    @Getter
+    @Setter
+    private String communicationFacilitator;
+
+    @Getter
+    @Setter
     private OffsetDateTime start;
 
     @Getter
     @Setter
     private OffsetDateTime createdAt;
+
+    @Getter
+    @Setter
+    @Enumerated(EnumType.ORDINAL)
+    private Priority priority;
 }
