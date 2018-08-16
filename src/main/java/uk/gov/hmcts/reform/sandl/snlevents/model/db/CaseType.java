@@ -20,14 +20,14 @@ import javax.persistence.ManyToMany;
 @EqualsAndHashCode(exclude = "sessionTypes")
 public class CaseType implements Serializable {
 
-    @Getter
-    @Setter
-    private String description;
-
     @Id
     @Getter
     @Setter
     private String code;
+
+    @Getter
+    @Setter
+    private String description;
 
     @Getter
     @ManyToMany(cascade = {

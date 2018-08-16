@@ -21,6 +21,7 @@ import javax.persistence.ManyToMany;
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "caseTypes")
 public class HearingType implements Serializable {
+
     @Id
     @Getter
     @Setter
