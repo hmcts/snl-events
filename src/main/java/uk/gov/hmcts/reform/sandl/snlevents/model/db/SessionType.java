@@ -25,11 +25,11 @@ public class SessionType implements Serializable {
     @Id
     @Getter
     @Setter
-    String code;
+    private String code;
 
     @Getter
     @Setter
-    String description;
+    private String description;
 
     @Getter
     @ManyToMany(cascade = {

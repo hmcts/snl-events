@@ -37,5 +37,5 @@ public class Room implements Serializable {
     @Getter
     @Setter
     @ManyToOne
-    RoomType roomType;
+    private RoomType roomType;
 }

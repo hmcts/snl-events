@@ -22,12 +22,12 @@ public class CaseType implements Serializable {
 
     @Getter
     @Setter
-    String description;
+    private String description;
 
     @Id
     @Getter
     @Setter
-    String code;
+    private String code;
 
     @Getter
     @ManyToMany(cascade = {

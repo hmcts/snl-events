@@ -21,11 +21,11 @@ public class RoomType implements Serializable {
     @Id
     @Getter
     @Setter
-    String code;
+    private String code;
 
     @Getter
     @Setter
-    String description;
+    private String description;
 
     @OneToMany(mappedBy = "roomType")
     private List<Room> rooms;
