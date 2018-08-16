@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,10 +16,14 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "sessions")
 public class SessionType implements Serializable {
+
+    public SessionType(String code, String description) {
+        this.code = code;
+        this.description = description;
+    }
 
     @Id
     @Getter

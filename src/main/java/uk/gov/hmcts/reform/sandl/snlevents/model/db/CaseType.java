@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,10 +14,14 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "sessionTypes")
 public class CaseType implements Serializable {
+
+    public CaseType(String code, String description) {
+        this.code = code;
+        this.description = description;
+    }
 
     @Id
     @Getter
