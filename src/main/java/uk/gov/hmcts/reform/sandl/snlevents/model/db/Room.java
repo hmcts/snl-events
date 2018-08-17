@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -18,7 +19,7 @@ import javax.persistence.OneToMany;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "roomType")
 public class Room implements Serializable {
 
     @Id
@@ -36,6 +37,16 @@ public class Room implements Serializable {
 
     @Getter
     @Setter
-    @ManyToOne
+    @ManyToOne(cascade = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+    })
     private RoomType roomType;
+
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
+        if (roomType != null) {
+            roomType.getRooms().add(this);
+        }
+    }
 }

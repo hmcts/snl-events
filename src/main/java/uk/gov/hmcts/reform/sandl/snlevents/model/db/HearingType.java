@@ -35,7 +35,10 @@ public class HearingType implements Serializable {
     private String description;
 
     @Getter
-    @ManyToMany(mappedBy = "hearingTypes")
+    @ManyToMany(cascade = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+        }, mappedBy = "hearingTypes")
     private Set<SessionType> sessionTypes = new HashSet<>();
 
     @Getter
