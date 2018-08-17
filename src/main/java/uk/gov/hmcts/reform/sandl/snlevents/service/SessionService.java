@@ -142,11 +142,15 @@ public class SessionService {
         if (upsertSession.getRoomId() != null && !upsertSession.getRoomId().isEmpty()) {
             Room room = roomRepository.findOne(getUuidFromString(upsertSession.getRoomId()));
             session.setRoom(room);
+        } else {
+            session.setRoom(null);
         }
 
         if (upsertSession.getPersonId() != null && !upsertSession.getPersonId().isEmpty()) {
             Person person = personRepository.findOne(getUuidFromString(upsertSession.getPersonId()));
             session.setPerson(person);
+        } else {
+            session.setPerson(null);
         }
 
         return this.save(session);
