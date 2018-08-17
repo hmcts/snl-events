@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.ReferenceDataValidat
 import javax.transaction.Transactional;
 
 @Transactional
-public class SessionTypeTests extends BaseIntegrationModelTest  {
+public class CaseTypeTests extends BaseIntegrationModelTest {
     @Autowired
     SessionTypeRepository sessionTypeRepository;
     @Autowired
@@ -21,27 +21,26 @@ public class SessionTypeTests extends BaseIntegrationModelTest  {
     @Autowired
     HearingTypeRepository hearingTypeRepository;
 
-    HearingType hearingType = new HearingType(MAIN_TYPE_CODE, MAIN_TYPE_DESCRIPTION);
+    CaseType caseType = new CaseType(MAIN_TYPE_CODE, MAIN_TYPE_DESCRIPTION);
 
     @Test
-    public void addSessionType_shouldSetCorrespondentRelationInSessionType() {
+    public void addSessionType_shouldSetCorrespondentRelationInSessionType2() {
         SessionType sessionType = new SessionType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
-        hearingType.addSessionType(sessionType);
-
-        new ReferenceDataValidator<HearingType, SessionType, String, String>()
-            .save(hearingTypeRepository, hearingType)
+        caseType.addSessionType(sessionType);
+        new ReferenceDataValidator<CaseType, SessionType, String, String>()
+            .save(caseTypeRepository, caseType)
             .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, sessionTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(HearingType::getSessionTypes, SessionType::getHearingTypes);
+            .verifyThatRelationsBetweenObjAreSet(CaseType::getSessionTypes, SessionType::getCaseTypes);
     }
 
     @Test
-    public void addCaseType_shouldSetCorrespondentRelationInCaseType() {
-        CaseType caseType = new CaseType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
-        hearingType.addCaseType(caseType);
-
-        new ReferenceDataValidator<HearingType, CaseType, String, String>()
-            .save(hearingTypeRepository, hearingType)
-            .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, caseTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(HearingType::getCaseTypes, CaseType::getHearingTypes);
+    public void addHearingType_shouldSetCorrespondentRelationInHearingType2() {
+        HearingType hearingType = new HearingType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
+        this.caseType.addHearingType(hearingType);
+        new ReferenceDataValidator<CaseType, HearingType, String, String>()
+            .save(caseTypeRepository, caseType)
+            .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, hearingTypeRepository)
+            .verifyThatRelationsBetweenObjAreSet(CaseType::getHearingTypes, HearingType::getCaseTypes);
     }
 }
+
