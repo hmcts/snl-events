@@ -65,6 +65,7 @@ databaseChangeLog:
           - addNotNullConstraint:
               tableName: room
               columnName: room_type_code
+              columnDataType: varchar(255)
   - changeSet:
         id: add-session-type-table
         author: kzielinski
