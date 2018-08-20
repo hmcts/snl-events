@@ -36,7 +36,6 @@ public class Room implements Serializable {
     private List<Session> sessionList;
 
     @Getter
-    @Setter
     @ManyToOne(cascade = {
         CascadeType.PERSIST,
         CascadeType.MERGE

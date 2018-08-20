@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 @Entity
 @NoArgsConstructor
@@ -34,16 +36,12 @@ public class SessionType implements Serializable {
     @Setter
     private String description;
 
+    @JsonIgnore
     @Getter
-    @ManyToMany(cascade = {
+    @OneToMany(cascade = {
         CascadeType.PERSIST,
         CascadeType.MERGE
-    })
-    @JoinTable(
-        name = "session_session_type",
-        joinColumns = {@JoinColumn(name = "session_type_code")},
-        inverseJoinColumns = {@JoinColumn(name = "session_id")}
-    )
+        }, mappedBy = "sessionType")
     private Set<Session> sessions = new HashSet<>();
 
     @Getter
@@ -72,7 +70,7 @@ public class SessionType implements Serializable {
 
     public void addSession(Session session) {
         sessions.add(session);
-        session.getSessionTypes().add(this);
+        session.setSessionType(this);
     }
 
     public void addCaseType(CaseType caseType) {

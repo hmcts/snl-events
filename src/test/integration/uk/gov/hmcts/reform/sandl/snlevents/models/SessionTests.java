@@ -8,11 +8,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
-import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.ReferenceDataValidator;
 
 import java.time.Duration;
 import java.util.UUID;
 import javax.transaction.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 public class SessionTests extends BaseIntegrationModelTest  {
@@ -35,12 +36,14 @@ public class SessionTests extends BaseIntegrationModelTest  {
     @Test
     public void addSessionType_shouldSetCorrespondentRelationInSessionType() {
         SessionType sessionType = new SessionType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
-        session.addSessionType(sessionType);
+        session.setSessionType(sessionType);
 
-        new ReferenceDataValidator<Session, SessionType, UUID, String>()
-            .save(sessionRepository, session)
-            .fetchAgain(sessionId, REF_TYPE_CODE, sessionTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(Session::getSessionTypes, SessionType::getSessions);
+        sessionRepository.saveAndFlush(session);
+        SessionType savedRoomType = sessionTypeRepository.findOne(REF_TYPE_CODE);
+        Session savedSession = sessionRepository.findOne(sessionId);
+
+        assertThat(savedSession.getSessionType()).isEqualTo(sessionType);
+        assertThat(savedRoomType.getSessions().size()).isEqualTo(1);
     }
 
 }
