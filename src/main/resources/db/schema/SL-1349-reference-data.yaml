@@ -26,12 +26,12 @@ databaseChangeLog:
               columns:
                - column:
                   name: code
-                  value: 'dev_room'
+                  value: 'court_room'
                - column:
                   name: description
-                  value: 'Dev room'
+                  value: 'Court room'
   - changeSet:
-        id: add-room-type-to-room-with-default-values
+        id: add-room-type-column-to-room-table
         author: kzielinski
         changes:
           - addColumn:
@@ -40,15 +40,31 @@ databaseChangeLog:
               - column:
                   name: room_type_code
                   type: varchar(255)
-                  defaultValue: 'dev_room'
                   constraints:
-                    nullable: false
+                    nullable: true
           - addForeignKeyConstraint:
               baseColumnNames: room_type_code
               baseTableName: room
               constraintName: fk_room_type_code_room_type
               referencedColumnNames: code
               referencedTableName: room_type
+  - changeSet:
+        id: add-default-room-type-to-already-exiting-room
+        author: kzielinski
+        changes:
+          - update:
+              tableName: room
+              columns:
+              - column:
+                  name: room_type_code
+                  value: 'court_room'
+  - changeSet:
+        id: make-room-type-column-mandatory-in-room-table
+        author: kzielinski
+        changes:
+          - addNotNullConstraint:
+              tableName: room
+              columnName: room_type_code
   - changeSet:
         id: add-session-type-table
         author: kzielinski
@@ -67,39 +83,6 @@ databaseChangeLog:
                   constraints:
                     unique: true
                     nullable: false
-  - changeSet:
-        id: add-session-session-type-join-table
-        author: kzielinski
-        changes:
-          - createTable:
-              tableName: session_session_type
-              columns:
-              - column:
-                  name: session_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
-                  name: session_type_code
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-          - addPrimaryKey:
-                columnNames: session_id, session_type_code
-                constraintName: pk_session_id_session_type_code
-                tableName: session_session_type
-          - addForeignKeyConstraint:
-              baseColumnNames: session_id
-              baseTableName: session_session_type
-              constraintName: session__session_type_fk
-              referencedColumnNames: id
-              referencedTableName: session
-          - addForeignKeyConstraint:
-              baseColumnNames: session_type_code
-              baseTableName: session_session_type
-              constraintName: session_type__session_fk
-              referencedColumnNames: code
-              referencedTableName: session_type
   - changeSet:
         id: add-case-type-table
         author: kzielinski
@@ -202,6 +185,22 @@ databaseChangeLog:
               constraintName: case_type__hearing_type_fk
               referencedColumnNames: code
               referencedTableName: case_type
+  - changeSet:
+       id: add-session-type-code-to-session-table
+       author: kzielinski
+       changes:
+         - addColumn:
+             tableName: session
+             columns:
+             - column:
+                 name: session_type_code
+                 type: varchar(255)
+         - addForeignKeyConstraint:
+             baseColumnNames: session_type_code
+             baseTableName: session
+             constraintName: fk_session_type_code_session_type
+             referencedColumnNames: code
+             referencedTableName: session_type
   - changeSet:
         id: add-hearing-type-session-type-join-table
         author: kzielinski
