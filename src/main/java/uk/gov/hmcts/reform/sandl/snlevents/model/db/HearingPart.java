@@ -90,4 +90,8 @@ public class HearingPart extends VersionedEntity implements Serializable {
     @Setter
     @Enumerated(EnumType.ORDINAL)
     private Priority priority;
+
+    @Getter
+    @Setter
+    private boolean isDeleted;
 }
