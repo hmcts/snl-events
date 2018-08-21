@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +47,13 @@ public class EventsMockMvc {
     private String putResponseAsString(String url, String body) throws Exception {
         return mockMvc
             .perform(put(url).contentType(MediaType.APPLICATION_JSON_VALUE).content(body))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+    }
+
+    public String deleteAndReturnResponse(String url) throws Exception {
+        return mockMvc
+            .perform(delete(url))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
     }

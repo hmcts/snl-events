@@ -105,6 +105,19 @@ public class HearingPartControllerTest {
         assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
     }
 
+    @Test
+    public void deleteHearingPart_deletesHearingPart() throws Exception {
+        val id = UUID.randomUUID();
+
+        val serviceResult = createHearingPart();
+        serviceResult.setDeleted(true);
+        when(hearingPartService.deleteHearingPart(id)).thenReturn(serviceResult);
+
+        val response = mvc.deleteAndReturnResponse(URL + "/" + id);
+
+        assertThat(response).isEmpty();
+    }
+
     private CreateHearingPart createCreateHearingPart() {
         val chp = new CreateHearingPart();
         chp.setId(createUuid());

@@ -133,10 +133,10 @@ public class HearingPartService {
                 0);
     }
 
-    public void deleteHearingPart(UUID hearingPartId) {
+    public HearingPart deleteHearingPart(UUID hearingPartId) {
         val hearingPart = hearingPartRepository.findOne(hearingPartId);
         hearingPart.setDeleted(true);
 
-        save(hearingPart);
+        return save(hearingPart);
     }
 }
