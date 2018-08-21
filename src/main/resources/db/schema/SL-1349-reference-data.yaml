@@ -107,7 +107,7 @@ databaseChangeLog:
         author: kzielinski
         changes:
           - createTable:
-              tableName: case_types_session_type
+              tableName: case_type_session_type
               columns:
               - column:
                   name: case_type_code
@@ -122,16 +122,16 @@ databaseChangeLog:
           - addPrimaryKey:
                 columnNames: case_type_code, session_type_code
                 constraintName: pk_case_type_code_session_type_code
-                tableName: case_types_session_type
+                tableName: case_type_session_type
           - addForeignKeyConstraint:
               baseColumnNames: case_type_code
-              baseTableName: case_types_session_type
+              baseTableName: case_type_session_type
               constraintName: case_type__session_type_fk
               referencedColumnNames: code
               referencedTableName: case_type
           - addForeignKeyConstraint:
               baseColumnNames: session_type_code
-              baseTableName: case_types_session_type
+              baseTableName: case_type_session_type
               constraintName: session_type__case_type_fk
               referencedColumnNames: code
               referencedTableName: session_type

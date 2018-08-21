@@ -50,7 +50,7 @@ public class SessionType implements Serializable {
         CascadeType.MERGE
     })
     @JoinTable(
-        name = "case_types_session_type",
+        name = "case_type_session_type",
         joinColumns = {@JoinColumn(name = "session_type_code")},
         inverseJoinColumns = {@JoinColumn(name = "case_type_code")}
     )
