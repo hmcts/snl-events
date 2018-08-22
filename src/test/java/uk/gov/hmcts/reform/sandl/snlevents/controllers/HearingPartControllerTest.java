@@ -114,7 +114,6 @@ public class HearingPartControllerTest {
         when(hearingPartService.deleteHearingPart(id)).thenReturn(serviceResult);
 
         val response = mvc.deleteAndReturnResponse(URL + "/" + id);
-
         assertThat(response).isEmpty();
     }
 

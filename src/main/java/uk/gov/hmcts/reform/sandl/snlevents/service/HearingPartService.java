@@ -133,8 +133,9 @@ public class HearingPartService {
                 0);
     }
 
-    public HearingPart deleteHearingPart(UUID hearingPartId) {
+    public HearingPart deleteHearingPart(UUID hearingPartId) throws IOException {
         val hearingPart = hearingPartRepository.findOne(hearingPartId);
+        rulesService.postMessage(RulesService.DELETE_HEARING_PART, factsMapper.mapHearingPartToRuleJsonMessage(hearingPart));
         hearingPart.setDeleted(true);
 
         return save(hearingPart);
