@@ -3,35 +3,24 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 @Entity
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = "sessionTypes")
-public class CaseType implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class CaseType extends BaseReferenceData implements Serializable {
 
     public CaseType(String code, String description) {
-        this.code = code;
-        this.description = description;
+        super(code, description);
     }
 
-    @Id
-    @Getter
-    @Setter
-    private String code;
-
-    @Getter
-    @Setter
-    private String description;
-
+    @EqualsAndHashCode.Exclude
     @Getter
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
@@ -39,6 +28,7 @@ public class CaseType implements Serializable {
         }, mappedBy = "caseTypes")
     private Set<SessionType> sessionTypes = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
     @Getter
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
@@ -56,3 +46,4 @@ public class CaseType implements Serializable {
         hearingType.getCaseTypes().add(this);
     }
 }
+

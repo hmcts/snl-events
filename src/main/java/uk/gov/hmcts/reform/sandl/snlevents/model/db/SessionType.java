@@ -4,38 +4,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 @Entity
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = "sessions")
-public class SessionType implements Serializable {
+public class SessionType extends BaseReferenceData implements Serializable {
 
     public SessionType(String code, String description) {
-        this.code = code;
-        this.description = description;
+        super(code, description);
     }
 
-    @Id
-    @Getter
-    @Setter
-    private String code;
-
-    @Getter
-    @Setter
-    private String description;
-
+    @EqualsAndHashCode.Exclude
     @JsonIgnore
     @Getter
     @OneToMany(cascade = {
@@ -44,6 +33,7 @@ public class SessionType implements Serializable {
         }, mappedBy = "sessionType")
     private Set<Session> sessions = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
     @Getter
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
@@ -56,6 +46,7 @@ public class SessionType implements Serializable {
     )
     private Set<CaseType> caseTypes = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
     @Getter
     @ManyToMany(cascade = {
         CascadeType.PERSIST,

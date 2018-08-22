@@ -21,7 +21,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("squid:S3437")
@@ -56,11 +56,13 @@ public class Session extends VersionedEntity implements Serializable {
     @Setter
     private Room room;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "session")
     @JsonIgnore
     private List<HearingPart> hearingParts;
 
     @Getter
+    @EqualsAndHashCode.Exclude
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ManyToOne(cascade = {
         CascadeType.PERSIST,
