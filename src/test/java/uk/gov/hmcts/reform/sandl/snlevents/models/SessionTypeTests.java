@@ -6,31 +6,49 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.ReferenceData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-public class CaseTypeTests extends ReferenceData {
-    CaseType caseType = new CaseType(MAIN_TYPE_CODE, MAIN_TYPE_DESCRIPTION);
+public class SessionTypeTests extends ReferenceData {
+    SessionType sessionType = new SessionType(MAIN_TYPE_CODE, MAIN_TYPE_DESCRIPTION);
 
     @Test
-    public void addSessionType_addSessionTypeToSessionTypes() {
-        SessionType sessionType = new SessionType("code", "description");
+    public void addSession_addSessionToSessions() {
+        Session session = new Session();
+        session.setId(UUID.randomUUID());
+        session.setDuration(Duration.ofHours(1));
+        session.setStart(OffsetDateTime.now());
 
-        caseType.addSessionType(sessionType);
+        sessionType.addSession(session);
 
-        assertThat(caseType.getSessionTypes().size()).isEqualTo(1);
-        assertThat(caseType.getSessionTypes().contains(sessionType)).isTrue();
+        assertThat(sessionType.getSessions().size()).isEqualTo(1);
+        assertThat(sessionType.getSessions().contains(session)).isTrue();
     }
 
     @Test
     public void addHearingType_addHearingTypeToHearingTypes() {
-        HearingType hearingType = new HearingType("code", "description");
+        HearingType hearingType = new HearingType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
 
-        caseType.addHearingType(hearingType);
+        sessionType.addHearingType(hearingType);
 
-        assertThat(caseType.getHearingTypes().size()).isEqualTo(1);
-        assertThat(caseType.getHearingTypes().contains(hearingType)).isTrue();
+        assertThat(sessionType.getHearingTypes().size()).isEqualTo(1);
+        assertThat(sessionType.getHearingTypes().contains(hearingType)).isTrue();
+    }
+
+    @Test
+    public void addCaseType_addCaseTypeToCaseTypes() {
+        CaseType caseType = new CaseType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
+
+        sessionType.addCaseType(caseType);
+
+        assertThat(sessionType.getCaseTypes().size()).isEqualTo(1);
+        assertThat(sessionType.getCaseTypes().contains(caseType)).isTrue();
     }
 }
