@@ -34,7 +34,7 @@ public class SessionTests extends BaseIntegrationModelTest  {
     }
 
     @Test
-    public void addSessionType_shouldSetCorrespondentRelationInSessionType() {
+    public void setSessionType_shouldSetCorrespondentRelationInSessionType() {
         SessionType sessionType = new SessionType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
         session.setSessionType(sessionType);
 
