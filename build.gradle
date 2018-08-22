@@ -145,20 +145,25 @@ jar {
 }
 
 sourceSets {
+  common {
+    java.srcDir 'src/test/common'
+  }
   test {
     java.srcDir 'src/test/java'
+    compileClasspath += main.output + common.output
+    runtimeClasspath += main.output + common.output
   }
   functional {
     java.srcDir 'src/test/functional/java'
     resources.srcDir 'src/test/resources'
-    compileClasspath += main.output + test.output
-    runtimeClasspath += main.output + test.output
+    compileClasspath += main.output + test.output + common.output
+    runtimeClasspath += main.output + test.output + common.output
   }
   integrationSources {
     java.srcDir 'src/test/integration'
     resources.srcDir 'src/test/resources'
-    compileClasspath += main.output + test.output
-    runtimeClasspath += main.output + test.output
+    compileClasspath += main.output + test.output + common.output
+    runtimeClasspath += main.output + test.output + common.output
   }
 }
 
