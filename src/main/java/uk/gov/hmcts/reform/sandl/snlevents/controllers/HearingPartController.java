@@ -55,7 +55,10 @@ public class HearingPartController {
         String msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
 
-        HearingPart hearingPart = new HearingPart();
+        HearingPart hearingPart = hearingPartService.findOne(createHearingPart.getId());
+        if (hearingPart == null) {
+            hearingPart = new HearingPart();
+        }
         hearingPart.setId(createHearingPart.getId());
         hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
         hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
