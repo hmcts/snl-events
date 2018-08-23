@@ -19,7 +19,7 @@ import javax.persistence.OneToMany;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = "roomType")
+@EqualsAndHashCode
 public class Room implements Serializable {
 
     @Id
@@ -35,6 +35,7 @@ public class Room implements Serializable {
     @OneToMany(mappedBy = "room")
     private List<Session> sessionList;
 
+    @EqualsAndHashCode.Exclude
     @Getter
     @ManyToOne(cascade = {
         CascadeType.PERSIST,
