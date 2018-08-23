@@ -235,3 +235,17 @@ databaseChangeLog:
               constraintName: session_type__hearing_type_fk
               referencedColumnNames: code
               referencedTableName: session_type
+  - changeSet:
+       id: make-room-name-unique
+       author: kzielinski
+       changes:
+         - addUniqueConstraint:
+             columnNames: name
+             tableName: room
+  - changeSet:
+       id: make-person-name-unique
+       author: kzielinski
+       changes:
+         - addUniqueConstraint:
+             columnNames: name
+             tableName: person
