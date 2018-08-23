@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "rg" {
       )}"
 }
 
-module "snl-events" {
+module "snlevents" {
   source               = "git@github.com:hmcts/moj-module-webapp"
   product              = "${var.product}-${var.component}"
   location             = "${var.location}"
