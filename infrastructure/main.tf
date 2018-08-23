@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "rg" {
       )}"
 }
 
-module "snlevents" {
+module "snl-events" {
   source               = "git@github.com:hmcts/moj-module-webapp"
   product              = "${var.product}-${var.component}"
   location             = "${var.location}"
@@ -52,7 +52,7 @@ module "postgres-snl-events" {
 # region save DB details to Azure Key Vault
 module "snl-vault" {
   source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
-  name = "${var.product}-${var.component}-${var.env}"
+  name = ${substr(var.product, 3, length(var.product))}-${var.component}-${var.env}"
   product = "${var.product}"
   env = "${var.env}"
   tenant_id = "${var.tenant_id}"
