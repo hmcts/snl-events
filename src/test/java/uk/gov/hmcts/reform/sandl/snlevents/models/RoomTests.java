@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.RoomType;
 
 import static org.assertj.core.api.Assertions.assertThat;
-@RunWith(SpringRunner.class)
 
+@RunWith(SpringRunner.class)
 public class RoomTests extends ReferenceData {
     Room room = new Room();
 
