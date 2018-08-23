@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 
 import java.io.Serializable;
@@ -22,6 +23,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Where(clause = "is_deleted=false")
 @SuppressWarnings("squid:S3437")
 public class HearingPart extends VersionedEntity implements Serializable {
 
