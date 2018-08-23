@@ -158,7 +158,7 @@ public class HearingPartServiceTest {
     }
 
     @Test
-    public void deleteHearingPart_setsDeletedFlagOnHearingPartEntity() {
+    public void deleteHearingPart_setsDeletedFlagOnHearingPartEntity() throws IOException {
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
 
         val returnedHearingPart = hearingPartService.deleteHearingPart(UUID.randomUUID());

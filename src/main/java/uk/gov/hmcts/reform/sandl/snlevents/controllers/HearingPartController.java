@@ -89,7 +89,7 @@ public class HearingPartController {
     }
 
     @DeleteMapping(path = "/{hearingPartId}")
-    public ResponseEntity deleteHearingPart(@PathVariable UUID hearingPartId) {
+    public ResponseEntity deleteHearingPart(@PathVariable UUID hearingPartId) throws IOException {
         hearingPartService.deleteHearingPart(hearingPartId);
 
         return ok(null);
