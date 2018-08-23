@@ -52,7 +52,7 @@ module "postgres-snl-events" {
 # region save DB details to Azure Key Vault
 module "snl-vault" {
   source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
-  name = "snl-${var.env}"
+  name = "${var.env}-${var.product}"
   product = "${var.product}"
   env = "${var.env}"
   tenant_id = "${var.tenant_id}"
