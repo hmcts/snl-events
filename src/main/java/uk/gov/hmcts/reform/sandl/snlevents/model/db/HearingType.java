@@ -18,10 +18,6 @@ import javax.persistence.ManyToMany;
 @EqualsAndHashCode(callSuper = true)
 public class HearingType extends BaseReferenceData implements Serializable {
 
-    public HearingType(String code, String description) {
-        super(code, description);
-    }
-
     @EqualsAndHashCode.Exclude
     @Getter
     @ManyToMany(cascade = {
@@ -42,6 +38,10 @@ public class HearingType extends BaseReferenceData implements Serializable {
         inverseJoinColumns = {@JoinColumn(name = "case_type_code")}
     )
     private Set<CaseType> caseTypes = new HashSet<>();
+
+    public HearingType(String code, String description) {
+        super(code, description);
+    }
 
     public void addSessionType(SessionType sessionType) {
         sessionTypes.add(sessionType);

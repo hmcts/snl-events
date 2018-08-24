@@ -20,10 +20,6 @@ import javax.persistence.OneToMany;
 @NoArgsConstructor
 public class SessionType extends BaseReferenceData implements Serializable {
 
-    public SessionType(String code, String description) {
-        super(code, description);
-    }
-
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     @Getter
@@ -58,6 +54,10 @@ public class SessionType extends BaseReferenceData implements Serializable {
         inverseJoinColumns = {@JoinColumn(name = "hearing_type_code")}
     )
     private Set<HearingType> hearingTypes = new HashSet<>();
+
+    public SessionType(String code, String description) {
+        super(code, description);
+    }
 
     public void addSession(Session session) {
         sessions.add(session);

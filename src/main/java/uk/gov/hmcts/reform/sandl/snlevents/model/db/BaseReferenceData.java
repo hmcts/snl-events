@@ -12,11 +12,6 @@ import javax.persistence.MappedSuperclass;
 @EqualsAndHashCode
 @NoArgsConstructor
 public abstract class BaseReferenceData {
-    public BaseReferenceData(String code, String description) {
-        this.code = code;
-        this.description = description;
-    }
-
     @Id
     @Getter
     @Setter
@@ -25,4 +20,9 @@ public abstract class BaseReferenceData {
     @Getter
     @Setter
     private String description;
+
+    public BaseReferenceData(String code, String description) {
+        this.code = code;
+        this.description = description;
+    }
 }
