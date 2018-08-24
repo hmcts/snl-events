@@ -11,11 +11,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.AssignHearingPartToSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -36,6 +40,15 @@ public class HearingPartController {
 
     @Autowired
     private RulesService rulesService;
+
+    @Autowired
+    HearingPartRepository hearingPartRepository;
+
+    @Autowired
+    private SessionRepository sessionRepository;
+
+    @Autowired
+    private ActionService actionService;
 
     @Autowired
     private FactsMapper factsMapper;
@@ -83,10 +96,12 @@ public class HearingPartController {
     @PutMapping(path = "/{hearingPartId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity assignHearingPartToSession(
         @PathVariable UUID hearingPartId,
-        @RequestBody HearingPartSessionRelationship assignment) throws IOException {
+        @RequestBody HearingPartSessionRelationship assignment) throws Exception {
 
         UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingPartId, assignment);
 
+         // ut = actionService.execute(new AssignHearingPartToSessionAction(hearingPartId, assignment,
+         //    hearingPartRepository, sessionRepository));
         return ok(ut);
     }
 }
