@@ -1,0 +1,251 @@
+databaseChangeLog:
+  - changeSet:
+        id: add-room-type-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: room_type
+              columns:
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: description
+                  type: varchar(500)
+                  constraints:
+                    unique: true
+                    nullable: false
+  - changeSet:
+        id: insert-default-room-type
+        author: kzielinski
+        changes:
+          - insert:
+              tableName: room_type
+              columns:
+               - column:
+                  name: code
+                  value: 'court_room'
+               - column:
+                  name: description
+                  value: 'Court room'
+  - changeSet:
+        id: add-room-type-column-to-room-table
+        author: kzielinski
+        changes:
+          - addColumn:
+              tableName: room
+              columns:
+              - column:
+                  name: room_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+          - addForeignKeyConstraint:
+              baseColumnNames: room_type_code
+              baseTableName: room
+              constraintName: fk_room_type_code_room_type
+              referencedColumnNames: code
+              referencedTableName: room_type
+  - changeSet:
+        id: add-default-room-type-to-already-exiting-room
+        author: kzielinski
+        changes:
+          - update:
+              tableName: room
+              columns:
+              - column:
+                  name: room_type_code
+                  value: 'court_room'
+  - changeSet:
+        id: make-room-type-column-mandatory-in-room-table
+        author: kzielinski
+        changes:
+          - addNotNullConstraint:
+              tableName: room
+              columnName: room_type_code
+              columnDataType: varchar(255)
+  - changeSet:
+        id: add-session-type-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: session_type
+              columns:
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: description
+                  type: varchar(500)
+                  constraints:
+                    unique: true
+                    nullable: false
+  - changeSet:
+        id: add-case-type-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: case_type
+              columns:
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: description
+                  type: varchar(500)
+                  constraints:
+                    unique: true
+                    nullable: false
+  - changeSet:
+        id: add-case-types-session-type-join-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: case_type_session_type
+              columns:
+              - column:
+                  name: case_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: session_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+          - addPrimaryKey:
+                columnNames: case_type_code, session_type_code
+                constraintName: pk_case_type_code_session_type_code
+                tableName: case_type_session_type
+          - addForeignKeyConstraint:
+              baseColumnNames: case_type_code
+              baseTableName: case_type_session_type
+              constraintName: case_type__session_type_fk
+              referencedColumnNames: code
+              referencedTableName: case_type
+          - addForeignKeyConstraint:
+              baseColumnNames: session_type_code
+              baseTableName: case_type_session_type
+              constraintName: session_type__case_type_fk
+              referencedColumnNames: code
+              referencedTableName: session_type
+  - changeSet:
+        id: add-hearing-type-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: hearing_type
+              columns:
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: description
+                  type: varchar(500)
+                  constraints:
+                    unique: true
+                    nullable: false
+  - changeSet:
+        id: add-hearing-type-case-type-join-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: hearing_type_case_type
+              columns:
+              - column:
+                  name: hearing_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: case_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+          - addPrimaryKey:
+                columnNames: hearing_type_code, case_type_code
+                constraintName: pk_hearing_type_code_case_type_code
+                tableName: hearing_type_case_type
+          - addForeignKeyConstraint:
+              baseColumnNames: hearing_type_code
+              baseTableName: hearing_type_case_type
+              constraintName: hearing_type__case_type_fk
+              referencedColumnNames: code
+              referencedTableName: hearing_type
+          - addForeignKeyConstraint:
+              baseColumnNames: case_type_code
+              baseTableName: hearing_type_case_type
+              constraintName: case_type__hearing_type_fk
+              referencedColumnNames: code
+              referencedTableName: case_type
+  - changeSet:
+       id: add-session-type-code-to-session-table
+       author: kzielinski
+       changes:
+         - addColumn:
+             tableName: session
+             columns:
+             - column:
+                 name: session_type_code
+                 type: varchar(255)
+         - addForeignKeyConstraint:
+             baseColumnNames: session_type_code
+             baseTableName: session
+             constraintName: fk_session_type_code_session_type
+             referencedColumnNames: code
+             referencedTableName: session_type
+  - changeSet:
+        id: add-hearing-type-session-type-join-table
+        author: kzielinski
+        changes:
+          - createTable:
+              tableName: hearing_type_session_type
+              columns:
+              - column:
+                  name: hearing_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: session_type_code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+          - addPrimaryKey:
+                columnNames: hearing_type_code, session_type_code
+                constraintName: pk_hearing_type_code_session_type_code
+                tableName: hearing_type_session_type
+          - addForeignKeyConstraint:
+              baseColumnNames: hearing_type_code
+              baseTableName: hearing_type_session_type
+              constraintName: hearing_type__session_type_fk
+              referencedColumnNames: code
+              referencedTableName: hearing_type
+          - addForeignKeyConstraint:
+              baseColumnNames: session_type_code
+              baseTableName: hearing_type_session_type
+              constraintName: session_type__hearing_type_fk
+              referencedColumnNames: code
+              referencedTableName: session_type
+  - changeSet:
+       id: make-room-name-unique
+       author: kzielinski
+       changes:
+         - addUniqueConstraint:
+             columnNames: name
+             tableName: room
+  - changeSet:
+       id: make-person-name-unique
+       author: kzielinski
+       changes:
+         - addUniqueConstraint:
+             columnNames: name
+             tableName: person
