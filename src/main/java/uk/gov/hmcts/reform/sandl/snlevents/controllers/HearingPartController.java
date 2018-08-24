@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +20,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -50,7 +53,13 @@ public class HearingPartController {
     private SessionRepository sessionRepository;
 
     @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
     private ActionService actionService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private FactsMapper factsMapper;
@@ -79,10 +88,7 @@ public class HearingPartController {
         String msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
 
-        HearingPart hearingPart = hearingPartService.findOne(createHearingPart.getId());
-        if (hearingPart == null) {
-            hearingPart = new HearingPart();
-        }
+        HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createHearingPart.getId());
         hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
         hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
@@ -93,20 +99,16 @@ public class HearingPartController {
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
         hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
         hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
-
-        if (createHearingPart.getCreatedAt() == null) {
-            hearingPart.setCreatedAt(OffsetDateTime.now());
-        } else {
-            hearingPart.setCreatedAt(createHearingPart.getCreatedAt());
-        }
+        hearingPart.setCreatedAt(createHearingPart.getCreatedAt());
         hearingPart.setPriority(createHearingPart.getPriority());
 
         return ok(hearingPartService.save(hearingPart));
     }
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateHearingPart(@RequestBody CreateHearingPart createHearingPart) {
-        UserTransaction ut = actionService.execute(new UpdateListingRequestAction(createHearingPart, hearingPartRepository));
+    public ResponseEntity updateHearingPart(@RequestBody UpdateHearingPart updateHearingPart) {
+        Action action = new UpdateListingRequestAction(updateHearingPart, hearingPartRepository, entityManager, objectMapper);
+        UserTransaction ut = actionService.execute(action);
         return ok(ut);
     }
 
