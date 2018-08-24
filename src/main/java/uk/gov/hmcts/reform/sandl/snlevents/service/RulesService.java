@@ -55,12 +55,12 @@ public class RulesService {
         postToSubscribers(userTransactionId, new FactMessage(msgType, msgData));
     }
 
-    public void postMessage(UUID userTransactionId, FactMessage factMessage) throws IOException {
+    public void postMessage(UUID userTransactionId, FactMessage factMessage) {
         postToSubscribers(userTransactionId, factMessage);
     }
 
     @HystrixCommand
-    private void postToSubscribers(UUID userTransactionId, FactMessage msg) throws IOException {
+    private void postToSubscribers(UUID userTransactionId, FactMessage msg) {
         Map<String, List<String>> subscribers = subscribersConfiguration.getSubscribers();
 
         HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();

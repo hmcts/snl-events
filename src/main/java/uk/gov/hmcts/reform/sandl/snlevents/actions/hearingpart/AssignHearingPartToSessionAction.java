@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -34,17 +35,16 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         this.hearingPartId = hearingPartId;
         this.hearingPartRepository = hearingPartRepository;
         this.sessionRepository = sessionRepository;
-
-        hearingPart = hearingPartRepository.findOne(hearingPartId);
-        targetSession = sessionRepository.findOne(hearingPartSessionRelationship.getSessionId());
     }
 
     @Override
-    public void validate() throws Exception {
+    public void getAndValidateEntities() {
+        hearingPart = hearingPartRepository.findOne(hearingPartId);
+        targetSession = sessionRepository.findOne(hearingPartSessionRelationship.getSessionId());
         if(targetSession == null) {
-            throw new Exception("Target session cannot be null!");
+            throw new RuntimeException("Target session cannot be null!");
         } else if(hearingPart == null) {
-            throw new Exception("Hearing part cannot be null!");
+            throw new RuntimeException("Hearing part cannot be null!");
         }
     }
 
@@ -63,15 +63,20 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     }
 
     @Override
-    public List<UserTransactionData> generateUserTransactionData() throws Exception {
+    public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("hearingPart",
-            hearingPart.getId(),
-            objectMapper.writeValueAsString(hearingPart),
-            "update",
-            "update",
-            0)
-        );
+        try {
+            userTransactionDataList.add(new UserTransactionData("hearingPart",
+                hearingPart.getId(),
+                objectMapper.writeValueAsString(hearingPart),
+                "update",
+                "update",
+                0)
+            );
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
 
         if (hearingPart.getSession() != null) {
             userTransactionDataList.add(getLockedSessionTransactionData(hearingPart.getSession().getId()));
@@ -82,8 +87,13 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     }
 
     @Override
-    public FactMessage generateFactMessage() throws Exception {
-        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+    public FactMessage generateFactMessage() {
+        String msg = null;
+        try {
+            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
     }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -90,6 +91,12 @@ public class HearingPartController {
         hearingPart.setPriority(createHearingPart.getPriority());
 
         return ok(hearingPartService.save(hearingPart));
+    }
+
+    @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateHearingPart(@RequestBody CreateHearingPart createHearingPart) {
+        UserTransaction ut = actionService.execute(new UpdateListingRequestAction(createHearingPart, hearingPartRepository));
+        return ok(ut);
     }
 
     @PutMapping(path = "/{hearingPartId}", consumes = MediaType.APPLICATION_JSON_VALUE)

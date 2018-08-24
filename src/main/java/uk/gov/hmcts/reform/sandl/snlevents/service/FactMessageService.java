@@ -21,13 +21,17 @@ public class FactMessageService {
         objectMapper = new ObjectMapper();
     }
 
-    public void handle(UUID userTransactionId, String factMsg) throws IOException {
-        JsonNode modifications = objectMapper.readTree(factMsg);
+    public void handle(UUID userTransactionId, String factMsg) {
+        try {
+            JsonNode modifications = objectMapper.readTree(factMsg);
 
-        for (JsonNode item : modifications) {
-            if ("Problem".equals(item.get("type").asText())) {
-                handleProblem(userTransactionId, item);
+            for (JsonNode item : modifications) {
+                if ("Problem".equals(item.get("type").asText())) {
+                    handleProblem(userTransactionId, item);
+                }
             }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
