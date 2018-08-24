@@ -44,24 +44,29 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public void validate() {
-        // Some business logic for validation?
+    public void getAndValidateEntities() {
+
     }
 
     @Override
-    public FactMessage generateFactMessage() throws Exception {
-        String msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
+    public FactMessage generateFactMessage() {
+        String msg = null;
+        try {
+            msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
     }
 
     @Override
-    public List<UserTransactionData> generateUserTransactionData() throws Exception {
+    public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
         userTransactionDataList.add(new UserTransactionData("hearingPart",
             hearingPart.getId(),
-            objectMapper.writeValueAsString(hearingPart),
+            null,
             "create",
             "delete",
             0)

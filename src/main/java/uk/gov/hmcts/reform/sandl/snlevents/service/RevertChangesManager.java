@@ -51,14 +51,17 @@ public class RevertChangesManager {
             } catch (IOException ioex) {
                 throw new SnlEventsException(ioex);
             }
-        } else if ("hearingPart".equals(utd.getEntity()) && "update".equals(utd.getCounterAction())) {
+        } else if ("hearingPart".equals(utd.getEntity())) {
             handleHearingPart(utd);
         }
     }
 
     @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
-        throw new SnlEventsException("Not implemented!");
-    }
+        if("update".equals(utd.getCounterAction())) {
+            throw new SnlEventsException("Not implemented!");
+        } else if("delete".equals(utd.getCounterAction())) {
 
+        }
+    }
 }
