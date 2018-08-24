@@ -62,6 +62,10 @@ public class HearingPartService {
         return hearingPartRepository.save(hearingPart);
     }
 
+    public HearingPart findOne(UUID id) {
+        return hearingPartRepository.findOne(id);
+    }
+
     @Transactional
     public UserTransaction assignWithTransaction(HearingPart hearingPart, UUID transactionId,
                                                  Session currentSession,
