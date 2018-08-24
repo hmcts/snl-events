@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
@@ -19,6 +20,9 @@ import javax.xml.ws.WebServiceException;
 public class RevertChangesManager {
     @Autowired
     private SessionRepository sessionRepository;
+
+    @Autowired
+    private HearingPartRepository hearingPartRepository;
 
     @Autowired
     private RulesService rulesService;
@@ -61,7 +65,7 @@ public class RevertChangesManager {
         if("update".equals(utd.getCounterAction())) {
             throw new SnlEventsException("Not implemented!");
         } else if("delete".equals(utd.getCounterAction())) {
-
+            hearingPartRepository.delete(utd.getEntityId());
         }
     }
 }
