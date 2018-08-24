@@ -1,0 +1,13 @@
+{
+  "name": "reference-data-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate-sql.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.22.2",
+    "read-excel-file": "^2.0.2",
+    "uuid": "^3.3.2"
+  }
+}
