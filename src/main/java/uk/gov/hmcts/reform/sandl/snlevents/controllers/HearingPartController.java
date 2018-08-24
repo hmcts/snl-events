@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -59,6 +61,15 @@ public class HearingPartController {
         }
 
         return hearingPartService.getAllHearingParts();
+    }
+
+    @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity createHearingPartAction(@RequestBody CreateHearingPart createHearingPart) throws Exception {
+        Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
+
+        UserTransaction ut = actionService.execute(action);
+
+        return ok(ut);
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
