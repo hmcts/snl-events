@@ -1,5 +1,6 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart;
 
+import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
