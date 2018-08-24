@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -29,6 +31,9 @@ public class RevertChangesManager {
 
     @Autowired
     private FactsMapper factsMapper;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     public void revertChanges(UserTransaction ut) {
         List<UserTransactionData> sortedUserTransactionDataList = ut.getUserTransactionDataList()
@@ -63,7 +68,19 @@ public class RevertChangesManager {
     @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
         if("update".equals(utd.getCounterAction())) {
-            throw new SnlEventsException("Not implemented!");
+            HearingPart hp = hearingPartRepository.findOne(utd.getEntityId());
+
+            HearingPart previousHearingPart;
+
+            try {
+                previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            previousHearingPart.setVersion(hp.getVersion());
+
+            hearingPartRepository.save(previousHearingPart);
         } else if("delete".equals(utd.getCounterAction())) {
             hearingPartRepository.delete(utd.getEntityId());
         }
