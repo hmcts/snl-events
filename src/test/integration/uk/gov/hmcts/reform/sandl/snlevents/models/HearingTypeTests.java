@@ -8,9 +8,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.ReferenceDataValidator;
 
 import javax.transaction.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 public class HearingTypeTests extends BaseIntegrationModelTest  {
@@ -28,10 +29,13 @@ public class HearingTypeTests extends BaseIntegrationModelTest  {
         SessionType sessionType = new SessionType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
         hearingType.addSessionType(sessionType);
 
-        new ReferenceDataValidator<HearingType, SessionType, String, String>()
-            .save(hearingTypeRepository, hearingType)
-            .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, sessionTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(HearingType::getSessionTypes, SessionType::getHearingTypes);
+        hearingTypeRepository.saveAndFlush(hearingType);
+
+        SessionType savedSessionType = sessionTypeRepository.findOne(REF_TYPE_CODE);
+        HearingType savedHearingType = hearingTypeRepository.findOne(MAIN_TYPE_CODE);
+
+        assertThat(savedSessionType.getHearingTypes().size()).isEqualTo(1);
+        assertThat(savedHearingType.getSessionTypes().contains(sessionType)).isTrue();
     }
 
     @Test
@@ -39,9 +43,12 @@ public class HearingTypeTests extends BaseIntegrationModelTest  {
         CaseType caseType = new CaseType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
         hearingType.addCaseType(caseType);
 
-        new ReferenceDataValidator<HearingType, CaseType, String, String>()
-            .save(hearingTypeRepository, hearingType)
-            .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, caseTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(HearingType::getCaseTypes, CaseType::getHearingTypes);
+        hearingTypeRepository.saveAndFlush(hearingType);
+
+        CaseType savedCaseType = caseTypeRepository.findOne(REF_TYPE_CODE);
+        HearingType savedHearingType = hearingTypeRepository.findOne(MAIN_TYPE_CODE);
+
+        assertThat(savedCaseType.getHearingTypes().size()).isEqualTo(1);
+        assertThat(savedHearingType.getCaseTypes().contains(caseType)).isTrue();
     }
 }

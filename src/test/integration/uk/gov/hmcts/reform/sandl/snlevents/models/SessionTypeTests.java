@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
-import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.ReferenceDataValidator;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -56,10 +55,13 @@ public class SessionTypeTests extends BaseIntegrationModelTest  {
         CaseType caseType = new CaseType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
         sessionType.addCaseType(caseType);
 
-        new ReferenceDataValidator<SessionType, CaseType, String, String>()
-            .save(sessionTypeRepository, sessionType)
-            .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, caseTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(SessionType::getCaseTypes, CaseType::getSessionTypes);
+        sessionTypeRepository.saveAndFlush(sessionType);
+
+        CaseType savedCaseType = caseTypeRepository.findOne(REF_TYPE_CODE);
+        SessionType savedSessionType = sessionTypeRepository.findOne(MAIN_TYPE_CODE);
+
+        assertThat(savedSessionType.getCaseTypes().size()).isEqualTo(1);
+        assertThat(savedCaseType.getSessionTypes().contains(sessionType)).isTrue();
     }
 
     @Test
@@ -67,9 +69,12 @@ public class SessionTypeTests extends BaseIntegrationModelTest  {
         HearingType hearingType = new HearingType(REF_TYPE_CODE, REF_TYPE_DESCRIPTION);
         sessionType.addHearingType(hearingType);
 
-        new ReferenceDataValidator<SessionType, HearingType, String, String>()
-            .save(sessionTypeRepository, sessionType)
-            .fetchAgain(MAIN_TYPE_CODE, REF_TYPE_CODE, hearingTypeRepository)
-            .verifyThatRelationsBetweenObjAreSet(SessionType::getHearingTypes, HearingType::getSessionTypes);
+        sessionTypeRepository.saveAndFlush(sessionType);
+
+        HearingType savedHearingType = hearingTypeRepository.findOne(REF_TYPE_CODE);
+        SessionType savedSessionType = sessionTypeRepository.findOne(MAIN_TYPE_CODE);
+
+        assertThat(savedSessionType.getHearingTypes().size()).isEqualTo(1);
+        assertThat(savedHearingType.getSessionTypes().contains(sessionType)).isTrue();
     }
 }

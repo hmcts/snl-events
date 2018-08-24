@@ -39,11 +39,12 @@ public class SessionTests extends BaseIntegrationModelTest  {
         session.setSessionType(sessionType);
 
         sessionRepository.saveAndFlush(session);
-        SessionType savedRoomType = sessionTypeRepository.findOne(REF_TYPE_CODE);
+        SessionType savedSessionType = sessionTypeRepository.findOne(REF_TYPE_CODE);
         Session savedSession = sessionRepository.findOne(sessionId);
 
         assertThat(savedSession.getSessionType()).isEqualTo(sessionType);
-        assertThat(savedRoomType.getSessions().size()).isEqualTo(1);
+        assertThat(savedSessionType.getSessions().size()).isEqualTo(1);
+        assertThat(savedSessionType.getSessions().contains(session)).isTrue();
     }
 
 }
