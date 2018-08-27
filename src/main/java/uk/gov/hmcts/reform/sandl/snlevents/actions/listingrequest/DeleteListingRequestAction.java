@@ -39,7 +39,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public void getAndValidateEntities() {
-        hearingPart = hearingPartRepository.findOne(deleteListingRequest.getId());
+        hearingPart = hearingPartRepository.findOne(deleteListingRequest.getHearingPartId());
 
         if (hearingPart == null) {
             throw new EntityNotFoundException("Hearing part not found");
@@ -55,7 +55,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         }
 
         entityManager.detach(hearingPart);
-        hearingPart.setVersion(deleteListingRequest.getVersion());
+        hearingPart.setVersion(deleteListingRequest.getHearingPartVersion());
         hearingPart.setDeleted(true);
 
         hearingPartRepository.save(hearingPart);
@@ -95,6 +95,6 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] { deleteListingRequest.getId() };
+        return new UUID[] { deleteListingRequest.getHearingPartId() };
     }
 }

@@ -129,9 +129,8 @@ public class HearingPartController {
         return ok(ut);
     }
 
-    @PostMapping(path = "/{hearingPartId}")
+    @PostMapping(path = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteHearingPart(
-        @PathVariable UUID hearingPartId,
         @RequestBody DeleteListingRequest request
     ) {
         Action action = new DeleteListingRequestAction(
