@@ -9,9 +9,13 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -48,11 +52,21 @@ public class S2SAuthenticationService {
                 .setSigningKey(config.getEvents().getJwtSecret())
                 .parseClaimsJws(authToken)
                 .getBody();
-            final String serviceName = (String) claims
-                .get("service");
-            boolean valid = approvedServicesNames.contains(serviceName);
+            final String serviceName = (String) claims.get("service");
+            boolean validService = approvedServicesNames.contains(serviceName);
             long millisDifference = claims.getExpiration().getTime() - claims.getIssuedAt().getTime();
-            return valid && config.getEvents().getJwtExpirationInMs() == millisDifference;
+            if (config.getEvents().getJwtExpirationInMs() != millisDifference) {
+                throw new TokenExpirationInvalidException();
+            }
+
+            if (!validService) {
+                throw new TokenClientServiceInvalidException(serviceName);
+            }
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(serviceName, null, Arrays.asList());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            return true;
         } catch (MalformedJwtException ex) {
             log.error("Invalid JWT token", ex);
         } catch (ExpiredJwtException ex) {
@@ -61,6 +75,10 @@ public class S2SAuthenticationService {
             log.error("Unsupported JWT token", ex);
         } catch (IllegalArgumentException ex) {
             log.error("JWT claims string is empty.", ex);
+        } catch (TokenExpirationInvalidException ex) {
+            log.error("JWT token expiration not equal to service jwt expiration.", ex);
+        } catch (TokenClientServiceInvalidException ex) {
+            log.error("JWT token service unknown.", ex);
         }
         return false;
     }

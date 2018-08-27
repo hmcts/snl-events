@@ -45,10 +45,8 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (AuthenticationException | SignatureException e) {
             logger.error("Responding with unauthorized error. Message - " + e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         } catch (Exception ex) {
             logger.error("JWT token is invalid", ex);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 

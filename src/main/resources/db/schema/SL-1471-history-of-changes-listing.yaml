@@ -78,11 +78,14 @@ databaseChangeLog:
                 name: version
                 type: BIGINT
             - column:
-                name: updated_at
+                name: modified_at
                 type: TIMESTAMP WITH TIME ZONE
             - column:
                 name: created_at
                 type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: created_by
+                type: varchar(255)
             - column:
                 name: modified_by
                 type: varchar(255)
@@ -111,9 +114,12 @@ databaseChangeLog:
         - addColumn:
             columns:
             - column:
-                name: updated_at
+                name: modified_at
                 type: timestamp with time zone
             - column:
                 name: modified_by
+                type: varchar(255)
+            - column:
+                name: created_by
                 type: varchar(255)
             tableName: hearing_part
