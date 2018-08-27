@@ -74,6 +74,9 @@ readXlsxFile(fileName, { sheet: 1 }).then((rows) => {
         case "hearing_type_session_type":
           sqlStatement = generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
           break;
+        case "hearing_type_case_type":
+          sqlStatement = generateHearingTypeCaseTypeJoinTableSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
+          break;
         case "room":
           sqlStatement = generateRoomSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
           break;
@@ -92,6 +95,13 @@ function generateCaseTypeSessionTypeJoinTableSQL(tableNameA, descriptionA, table
   const sessionType = (tableNameA.toLowerCase().indexOf("session") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
 
   return `INSERT INTO case_type_session_type (case_type_code, session_type_code) values ((Select code from case_type where description = '${caseType[1]}'), (Select code from session_type where description = '${sessionType[1]}'));`;
+}
+
+function generateHearingTypeCaseTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
+  const hearingType = (tableNameA.toLowerCase().indexOf("hearing") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  const caseType = (tableNameA.toLowerCase().indexOf("case") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+
+  return `INSERT INTO hearing_type_case_type (hearing_type_code, case_type_code) values ((Select code from hearing_type where description = '${hearingType[1]}'), (Select code from case_type where description = '${caseType[1]}'));`;
 }
 
 function generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
@@ -118,6 +128,10 @@ function resolveTableName(tableName1, tableName2) {
     return (tableName === "session_type" || tableName === "hearing_type");
   }
 
+  function isHearingTypeOrCaseType(tableName) {
+    return (tableName === "hearing_type" || tableName === "case_type");
+  }
+
   function isRoomTypeOrRoom(tableName) {
     return (tableName === "room" || tableName === "room_type");
   }
@@ -128,6 +142,8 @@ function resolveTableName(tableName1, tableName2) {
     tableName = "case_type_session_type";
   } else if (isSessionTypeOrHearingType(tableName1) && isSessionTypeOrHearingType(tableName2)) {
     tableName = "hearing_type_session_type";
+  } else if (isHearingTypeOrCaseType(tableName1) && isHearingTypeOrCaseType(tableName2)) {
+    tableName = "hearing_type_case_type";
   } else if (isRoomTypeOrRoom(tableName1) && isRoomTypeOrRoom(tableName2)) {
     tableName = "room";
   } else {
@@ -178,7 +194,7 @@ function generateAvailabilitySQL(judgeIds, roomsIds) {
     function createRoomsValues(roomIds) {
         return roomIds.map(roomId => {
             return `((SELECT uuid_generate_v4()), startDateTime, 28800, null, '${roomId}')`;
-        }); 
+        });
     }
     const values = createJudgeAvailability(judgeIds).concat(createRoomsValues(roomsIds));
     return `

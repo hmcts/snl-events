@@ -6,10 +6,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -18,5 +18,5 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 public class CaseTypeWithHearingTypesResponse extends SimpleDictionaryData implements Serializable {
-    private List<HearingPart> hearingParts;
+    private Set<SimpleDictionaryData> hearingTypes;
 }
