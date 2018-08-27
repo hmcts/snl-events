@@ -40,9 +40,9 @@ public class ReferenceDataService {
             .stream()
             .map(caseType -> {
                 CaseTypeWithHearingTypesResponse mappedTo = new CaseTypeWithHearingTypesResponse();
-                final Set<SimpleDictionarySettable> associatedHearingTypes = caseType.getHearingTypes()
+                final Set<SimpleDictionaryData> associatedHearingTypes = caseType.getHearingTypes()
                     .stream()
-                    .map(toSimpleDictionaryData)
+                    .map(val -> new SimpleDictionaryData(val.getCode(), val.getDescription()))
                     .collect(Collectors.toSet());
 
                 mappedTo.setHearingTypes(associatedHearingTypes);

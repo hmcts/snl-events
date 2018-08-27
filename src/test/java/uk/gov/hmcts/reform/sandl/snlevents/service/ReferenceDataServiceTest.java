@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.interfaces.SimpleDictionarySettable;
+import uk.gov.hmcts.reform.sandl.snlevents.Utils;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.BaseReferenceData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
@@ -20,10 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +28,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class ReferenceDataServiceTest {
+    public static final String DEFAULT_CODE = "c1";
+    public static final String DEFAULT_DESCRIPTION = "desc";
     @InjectMocks
     ReferenceDataService service;
 
@@ -98,27 +97,19 @@ public class ReferenceDataServiceTest {
     }
 
     private List<CaseType> createCaseTypes() {
-        CaseType rv = new CaseType("c1", "desc");
-        rv.addHearingType(new HearingType("c1", "desc"));
+        CaseType rv = new CaseType(DEFAULT_CODE, DEFAULT_DESCRIPTION);
+        rv.addHearingType(new HearingType(DEFAULT_CODE, DEFAULT_DESCRIPTION));
 
         return Arrays.asList(rv);
     }
 
     private List<CaseTypeWithHearingTypesResponse> createCaseTypesResponse() {
-        val ct = new CaseTypeWithHearingTypesResponse();
-        Set<SimpleDictionarySettable> hts = new HashSet(
-            Arrays.asList(new SimpleDictionaryData("c1", "desc"))
-        );
-
-        ct.setCode("c1");
-        ct.setDescription("desc");
-        ct.setHearingTypes(hts);
-        return Arrays.asList(ct);
+        return Utils.getCaseTypeWithHearingTypesResponses(DEFAULT_CODE, DEFAULT_DESCRIPTION);
     }
 
     private List<SimpleDictionaryData> getSimpleDictionaryData(List<? extends BaseReferenceData> dbStubbedValues) {
         return dbStubbedValues.stream()
-            .map( val -> new SimpleDictionaryData(val.getCode(), val.getDescription()))
+            .map(val -> new SimpleDictionaryData(val.getCode(), val.getDescription()))
             .collect(Collectors.toList());
     }
 }
