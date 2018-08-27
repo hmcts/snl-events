@@ -14,6 +14,6 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class SimpleDictionaryData implements Serializable {
-    public String code;
-    public String description;
+    private String code;
+    private String description;
 }

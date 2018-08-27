@@ -33,6 +33,10 @@ public class ReferenceDataService {
         return getAllAsSimpleDictionaryData(caseTypeRepository);
     }
 
+//    public List<SimpleDictionaryData> getCaseTypes() {
+//        return getAllAsSimpleDictionaryData(caseTypeRepository);
+//    }
+
     public List<SimpleDictionaryData> getSessionTypes() {
         return getAllAsSimpleDictionaryData(sessionTypeRepository);
     }
