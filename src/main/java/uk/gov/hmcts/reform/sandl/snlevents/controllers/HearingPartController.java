@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,6 +62,11 @@ public class HearingPartController {
 
     @Autowired
     private FactsMapper factsMapper;
+
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public HearingPart getHearingPartById(@PathVariable("id") UUID id) {
+        return hearingPartRepository.findOne(id);
+    }
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody public List<HearingPart> fetchAllHearingParts(@RequestParam("isListed") Optional<Boolean> isListed) {
@@ -108,7 +112,9 @@ public class HearingPartController {
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateHearingPart(@RequestBody UpdateHearingPart updateHearingPart) {
         Action action = new UpdateListingRequestAction(updateHearingPart, hearingPartRepository, entityManager, objectMapper);
+
         UserTransaction ut = actionService.execute(action);
+
         return ok(ut);
     }
 
