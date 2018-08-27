@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 
 import java.io.Serializable;
@@ -86,7 +88,15 @@ public class HearingPart extends VersionedEntity implements Serializable {
 
     @Getter
     @Setter
+    @CreatedDate
+    @Column(updatable = false)
     private OffsetDateTime createdAt;
+
+    @Getter
+    @Setter
+    @LastModifiedDate
+    @Column(updatable = false)
+    private OffsetDateTime updatedAt;
 
     @Getter
     @Setter

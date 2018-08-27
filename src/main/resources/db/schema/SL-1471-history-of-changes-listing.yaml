@@ -1,0 +1,104 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-revinfo-table
+      author: kpakur
+      changes:
+        - createTable:
+            tableName: revinfo
+            columns:
+                - column:
+                    constraints:
+                      primaryKey: true
+                    name: rev
+                    type: int
+                - column:
+                    name: revtstmp
+                    type: bigint
+  - changeSet:
+      id: create-hearingpart-history-table
+      author: kpakur
+      changes:
+        - createTable:
+            tableName: hearing_part_aud
+            columns:
+            #audit columns
+            - column:
+                name: rev
+                type: int
+                constraints:
+                  foreignKeyName: fk_hearing_part_aud_revinfo
+                  references: revinfo(rev)
+            - column:
+                name: revtype
+                type: smallint
+            #hearingpart columns
+            - column:
+                name: id
+                type: UUID
+            - column:
+                name: case_number
+                type: VARCHAR(200)
+            - column:
+                name: case_title
+                type: VARCHAR(200)
+            - column:
+                name: case_type
+                type: VARCHAR(100)
+            - column:
+                name: hearing_type
+                type: VARCHAR(100)
+            - column:
+                name: duration
+                type: BIGINT
+            - column:
+                name: schedule_start
+                type: timestamp with time zone
+            - column:
+                name: schedule_end
+                type: timestamp with time zone
+            - column:
+                name: session_id
+                type: UUID
+            - column:
+                name: start
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: priority
+                type: int
+            - column:
+                name: reserved_judge_id
+                type: UUID
+            - column:
+                name: communication_facilitator
+                type: varchar(255)
+            - column:
+                name: is_deleted
+                type: boolean
+            - column:
+                name: version
+                type: BIGINT
+            - column:
+                name: updated_at
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: created_at
+                type: TIMESTAMP WITH TIME ZONE
+  - changeSet:
+      id: hearing_part_aud-primarykey
+      author: kpakur
+      changes:
+        - addPrimaryKey:
+            columnNames: id, rev
+            constraintName: pk_hearing_part_aud
+            schemaName: public
+            tableName: hearing_part_aud
+  - changeSet:
+      id: hearing_part-new-column-updatedat
+      author: kpakur
+      changes:
+        - addColumn:
+            columns:
+            - column:
+                name: updated_at
+                type: timestamp with time zone
+            tableName: hearing_part
