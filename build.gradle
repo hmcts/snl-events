@@ -122,6 +122,7 @@ dependencies {
   compile 'org.hibernate:hibernate-java8:5.2.11.Final'
   compile 'org.hibernate:hibernate-core:5.2.11.Final'
   compile 'org.hibernate:hibernate-entitymanager:5.2.11.Final'
+  compile group: 'org.hibernate', name: 'hibernate-envers', version: '5.2.11.Final'
 
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-httpcomponents', version: versions.reformLogging

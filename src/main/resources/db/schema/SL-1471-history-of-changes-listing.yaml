@@ -83,6 +83,9 @@ databaseChangeLog:
             - column:
                 name: created_at
                 type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: modified_by
+                type: varchar(255)
   - changeSet:
       id: hearing_part_aud-primarykey
       author: kpakur
@@ -93,7 +96,16 @@ databaseChangeLog:
             schemaName: public
             tableName: hearing_part_aud
   - changeSet:
-      id: hearing_part-new-column-updatedat
+      id: add-hibernate-sequence
+      author: kpakur
+      comment: Without this sequence hibernate complains and application would not start.
+      failOnError: false
+      changes:
+        - createSequence:
+            schemaName: public
+            sequenceName: hibernate_sequence
+  - changeSet:
+      id: hearing_part-new-columns-forhistory
       author: kpakur
       changes:
         - addColumn:
@@ -101,4 +113,7 @@ databaseChangeLog:
             - column:
                 name: updated_at
                 type: timestamp with time zone
+            - column:
+                name: modified_by
+                type: varchar(255)
             tableName: hearing_part
