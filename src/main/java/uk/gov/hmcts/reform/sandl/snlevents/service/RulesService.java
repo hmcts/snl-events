@@ -29,6 +29,7 @@ public class RulesService {
     public static final String UPSERT_JUDGE = "upsert-judge";
     public static final String UPSERT_AVAILABILITY = "upsert-availability";
     public static final String DELETE_SESSION = "delete-session";
+    public static final String DELETE_HEARING_PART = "delete-hearingPart";
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
@@ -46,12 +47,12 @@ public class RulesService {
     @Autowired
     private S2SAuthenticationService s2sAuthService;
 
-    public void postMessage(String msgType, String msgData) throws IOException {
+    public void postMessage(String msgType, String msgData) {
         postToSubscribers(null, new FactMessage(msgType, msgData));
     }
 
     public void postMessage(UUID userTransactionId,
-                            String msgType, String msgData) throws IOException {
+                            String msgType, String msgData) {
         postToSubscribers(userTransactionId, new FactMessage(msgType, msgData));
     }
 

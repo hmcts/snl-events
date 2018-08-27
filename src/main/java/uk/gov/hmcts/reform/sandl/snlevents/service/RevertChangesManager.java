@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,11 +56,8 @@ public class RevertChangesManager {
 
             sessionRepository.delete(utd.getEntityId());
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
-            try {
-                rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
-            } catch (IOException ioex) {
-                throw new SnlEventsException(ioex);
-            }
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+
         } else if ("hearingPart".equals(utd.getEntity())) {
             handleHearingPart(utd);
         }
@@ -67,22 +65,35 @@ public class RevertChangesManager {
 
     @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
-        if("update".equals(utd.getCounterAction())) {
-            HearingPart hp = hearingPartRepository.findOne(utd.getEntityId());
+        HearingPart hp = hearingPartRepository.findOne(utd.getEntityId());
 
+        if("update".equals(utd.getCounterAction())) {
             HearingPart previousHearingPart;
+            String msg;
 
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
+                msg = factsMapper.mapDbHearingPartToRuleJsonMessage(previousHearingPart);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
             previousHearingPart.setVersion(hp.getVersion());
 
             hearingPartRepository.save(previousHearingPart);
         } else if("delete".equals(utd.getCounterAction())) {
             hearingPartRepository.delete(utd.getEntityId());
+
+            String msg;
+            try {
+                msg = factsMapper.mapDbHearingPartToRuleJsonMessage(hp);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_HEARING_PART, msg);
         }
     }
 }
