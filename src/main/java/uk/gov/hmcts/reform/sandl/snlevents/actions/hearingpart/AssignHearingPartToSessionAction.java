@@ -41,9 +41,9 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     public void getAndValidateEntities() {
         hearingPart = hearingPartRepository.findOne(hearingPartId);
         targetSession = sessionRepository.findOne(hearingPartSessionRelationship.getSessionId());
-        if(targetSession == null) {
+        if (targetSession == null) {
             throw new RuntimeException("Target session cannot be null!");
-        } else if(hearingPart == null) {
+        } else if (hearingPart == null) {
             throw new RuntimeException("Hearing part cannot be null!");
         }
     }
@@ -59,7 +59,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         hearingPart.setSessionId(targetSession.getId());
         hearingPart.setStart(hearingPartSessionRelationship.getStart());
 
-        hearingPartRepository.save(hearingPart); // TODO: Extract into a separate 'persist' method?
+        hearingPartRepository.save(hearingPart);
     }
 
     @Override
@@ -76,7 +76,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-
 
         if (hearingPart.getSession() != null) {
             userTransactionDataList.add(getLockedSessionTransactionData(hearingPart.getSession().getId()));
@@ -104,12 +103,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     }
 
     private UserTransactionData getLockedSessionTransactionData(UUID id) {
-        return new UserTransactionData("session",
-            id,
-            null,
-            "lock",
-            "unlock",
-            0);
+        return new UserTransactionData("session", id, null, "lock", "unlock", 0);
     }
-
 }

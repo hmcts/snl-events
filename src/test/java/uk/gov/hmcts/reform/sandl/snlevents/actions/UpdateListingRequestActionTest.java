@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions;
 
-import lombok.val;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,11 +9,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -21,25 +21,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-public class CreateListingRequestActionTest {
+public class UpdateListingRequestActionTest {
 
-    private static final String ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String ID = "123e4567-e89b-12d3-a456-426655440001";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
 
-    private CreateListingRequestAction action;
-
-    private CreateHearingPart createHearingPart;
+    private UpdateListingRequestAction action;
+    private UpdateListingRequest ulr;
 
     @Mock
     private HearingPartRepository hearingPartRepository;
 
+    @Mock
+    private EntityManager entityManager;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
     @Before
     public void setup() {
-        this.createHearingPart = createCreateHearingPart();
-        this.action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
+        ulr = new UpdateListingRequest();
+        ulr.setId(createUuid(ID));
+        ulr.setCaseNumber("cn");
+        ulr.setUserTransactionId(createUuid(TRANSACTION_ID));
+
+        this.action = new UpdateListingRequestAction(ulr,
+            hearingPartRepository,
+            entityManager,
+            objectMapper);
+
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(createUuid(ID));
+        Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
     }
 
     @Test
@@ -64,6 +82,7 @@ public class CreateListingRequestActionTest {
 
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
+        action.getAndValidateEntities();
         FactMessage factMessage = action.generateFactMessage();
 
         assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
@@ -76,14 +95,14 @@ public class CreateListingRequestActionTest {
         action.act();
 
         ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
+
         Mockito.verify(hearingPartRepository).save(captor.capture());
 
         HearingPart expectedHearingPart = new HearingPart();
-        expectedHearingPart.setId(createHearingPart.getId());
-        expectedHearingPart.setCaseType(createHearingPart.getCaseType());
+
+        expectedHearingPart.setId(ulr.getId());
 
         assertThat(captor.getValue().getId()).isEqualTo(expectedHearingPart.getId());
-        assertThat(captor.getValue().getCaseType()).isEqualTo(expectedHearingPart.getCaseType());
     }
 
     @Test
@@ -91,12 +110,14 @@ public class CreateListingRequestActionTest {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
         expectedTransactionData.add(new UserTransactionData("hearingPart",
-            createUuid(ID),
-            null,
-            "create",
-            "delete",
+            ulr.getId(),
+            Mockito.any(),
+            "update",
+            "update",
             0)
         );
+
+        action.getAndValidateEntities();
 
         action.act();
 
@@ -105,14 +126,6 @@ public class CreateListingRequestActionTest {
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
     }
 
-    private CreateHearingPart createCreateHearingPart() {
-        val chp = new CreateHearingPart();
-        chp.setId(createUuid(ID));
-        chp.setCaseType("ct");
-        chp.setUserTransactionId(createUuid(TRANSACTION_ID));
-
-        return chp;
-    }
 
     private UUID createUuid(String uuid) {
         return UUID.fromString(uuid);

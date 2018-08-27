@@ -20,18 +20,18 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.persistence.EntityManager;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -47,9 +47,6 @@ public class HearingPartController {
 
     @Autowired
     HearingPartRepository hearingPartRepository;
-
-    @Autowired
-    private SessionRepository sessionRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -110,8 +107,9 @@ public class HearingPartController {
     }
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateHearingPart(@RequestBody UpdateHearingPart updateHearingPart) {
-        Action action = new UpdateListingRequestAction(updateHearingPart, hearingPartRepository, entityManager, objectMapper);
+    public ResponseEntity updateHearingPart(@RequestBody UpdateListingRequest updateListingRequest) {
+        Action action = new UpdateListingRequestAction(updateListingRequest,
+            hearingPartRepository, entityManager, objectMapper);
 
         UserTransaction ut = actionService.execute(action);
 
@@ -125,8 +123,6 @@ public class HearingPartController {
 
         UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingPartId, assignment);
 
-         // ut = actionService.execute(new AssignHearingPartToSessionAction(hearingPartId, assignment,
-         //    hearingPartRepository, sessionRepository));
         return ok(ut);
     }
 }

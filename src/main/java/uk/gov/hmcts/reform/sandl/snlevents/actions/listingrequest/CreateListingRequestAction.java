@@ -20,7 +20,8 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     protected HearingPartRepository hearingPartRepository;
 
-    public CreateListingRequestAction(CreateHearingPart createHearingPart, HearingPartRepository hearingPartRepository) {
+    public CreateListingRequestAction(CreateHearingPart createHearingPart,
+                                      HearingPartRepository hearingPartRepository) {
         this.createHearingPart = createHearingPart;
         this.hearingPartRepository = hearingPartRepository;
     }
@@ -53,7 +54,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         String msg = null;
         try {
             msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

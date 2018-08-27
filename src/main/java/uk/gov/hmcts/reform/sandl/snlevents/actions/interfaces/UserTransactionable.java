@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface UserTransactionable {
     List<UserTransactionData> generateUserTransactionData();
+
     UUID getUserTransactionId();
+
     UUID[] getAssociatedEntitiesIds();
 }

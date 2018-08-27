@@ -13,7 +13,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateHearingPart implements UserTransactional {
+public class UpdateListingRequest implements UserTransactional {
 
     private UUID id;
 

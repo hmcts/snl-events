@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -27,6 +29,8 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -46,6 +50,18 @@ public class HearingPartControllerTest {
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
     public static final UUID RESERVED_JUDGE_ID = UUID.randomUUID();
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private HearingPartRepository hearingPartRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private ActionService actionService;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private EntityManager entityManager;
 
     @MockBean
     private HearingPartService hearingPartService;

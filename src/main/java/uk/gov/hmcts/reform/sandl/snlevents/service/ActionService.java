@@ -6,8 +6,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 
-import javax.transaction.Transactional;
 import java.util.UUID;
+
+import javax.transaction.Transactional;
 
 @Service
 public class ActionService {
@@ -24,7 +25,7 @@ public class ActionService {
 
         action.getAndValidateEntities();
 
-        if(userTransactionService.isAnyBeingTransacted(action.getAssociatedEntitiesIds())) {
+        if (userTransactionService.isAnyBeingTransacted(action.getAssociatedEntitiesIds())) {
             return userTransactionService.transactionConflicted(transactionId);
         }
 
@@ -34,7 +35,7 @@ public class ActionService {
             transactionId,
             action.generateUserTransactionData());
 
-        if(action instanceof RulesProcessable) {
+        if (action instanceof RulesProcessable) {
             rulesService.postMessage(transactionId,((RulesProcessable) action).generateFactMessage());
         }
 

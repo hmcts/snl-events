@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -67,7 +65,7 @@ public class RevertChangesManager {
     private void handleHearingPart(UserTransactionData utd) {
         HearingPart hp = hearingPartRepository.findOne(utd.getEntityId());
 
-        if("update".equals(utd.getCounterAction())) {
+        if ("update".equals(utd.getCounterAction())) {
             HearingPart previousHearingPart;
             String msg;
 
@@ -83,7 +81,7 @@ public class RevertChangesManager {
             previousHearingPart.setVersion(hp.getVersion());
 
             hearingPartRepository.save(previousHearingPart);
-        } else if("delete".equals(utd.getCounterAction())) {
+        } else if ("delete".equals(utd.getCounterAction())) {
             hearingPartRepository.delete(utd.getEntityId());
 
             String msg;
