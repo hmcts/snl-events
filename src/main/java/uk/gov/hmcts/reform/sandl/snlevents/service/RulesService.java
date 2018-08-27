@@ -23,12 +23,12 @@ import java.util.UUID;
 public class RulesService {
     public static final String INSERT_SESSION = "insert-session";
     public static final String UPSERT_SESSION = "upsert-session";
+    public static final String DELETE_SESSION = "delete-session";
     public static final String UPSERT_HEARING_PART = "upsert-hearingPart";
+    public static final String DELETE_HEARING_PART = "delete-hearingPart";
     public static final String UPSERT_ROOM = "upsert-room";
     public static final String UPSERT_JUDGE = "upsert-judge";
     public static final String UPSERT_AVAILABILITY = "upsert-availability";
-    public static final String DELETE_SESSION = "delete-session";
-    public static final String DELETE_HEARING_PART = "delete-hearingPart";
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
