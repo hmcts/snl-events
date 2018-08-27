@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class ReferenceDataService {
 
-    private final Function<SimpleDictionarySettable, SimpleDictionaryData> toSimpleDictionaryData =
+    private final Function<SimpleDictionarySettable, SimpleDictionarySettable> toSimpleDictionaryData =
         (SimpleDictionarySettable sds) -> {
-            SimpleDictionaryData response = new SimpleDictionaryData(sds.getCode(), sds.getDescription());
+            SimpleDictionarySettable response = new SimpleDictionaryData(sds.getCode(), sds.getDescription());
 
             return response;
         };
@@ -40,7 +40,7 @@ public class ReferenceDataService {
             .stream()
             .map(caseType -> {
                 CaseTypeWithHearingTypesResponse mappedTo = new CaseTypeWithHearingTypesResponse();
-                final Set<SimpleDictionaryData> associatedHearingTypes = caseType.getHearingTypes()
+                final Set<SimpleDictionarySettable> associatedHearingTypes = caseType.getHearingTypes()
                     .stream()
                     .map(toSimpleDictionaryData)
                     .collect(Collectors.toSet());
@@ -53,20 +53,20 @@ public class ReferenceDataService {
             .collect(Collectors.toList());
     }
 
-    public List<SimpleDictionaryData> getSessionTypes() {
+    public List<SimpleDictionarySettable> getSessionTypes() {
         return getAllAsSimpleDictionaryData(sessionTypeRepository);
     }
 
-    public List<SimpleDictionaryData> getHearingTypes() {
+    public List<SimpleDictionarySettable> getHearingTypes() {
         return getAllAsSimpleDictionaryData(hearingTypeRepository);
     }
 
-    public List<SimpleDictionaryData> getRoomTypes() {
+    public List<SimpleDictionarySettable> getRoomTypes() {
         return getAllAsSimpleDictionaryData(roomTypeRepository);
     }
 
     @SuppressWarnings({"Indentation", "MethodParamPad"})
-    private <T extends SimpleDictionarySettable> List<SimpleDictionaryData> getAllAsSimpleDictionaryData
+    private <T extends SimpleDictionarySettable> List<SimpleDictionarySettable> getAllAsSimpleDictionaryData
         (JpaRepository<T, String> repository) {
         return repository
             .findAll()

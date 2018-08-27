@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uk.gov.hmcts.reform.sandl.snlevents.interfaces.SimpleDictionarySettable;
 
 import java.io.Serializable;
 
@@ -13,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SimpleDictionaryData implements Serializable {
+public class SimpleDictionaryData implements SimpleDictionarySettable, Serializable {
     private String code;
     private String description;
 }
