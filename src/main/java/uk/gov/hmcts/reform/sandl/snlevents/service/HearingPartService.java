@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
@@ -134,5 +135,16 @@ public class HearingPartService {
                 "lock",
                 "unlock",
                 0);
+    }
+
+    public HearingPart deleteHearingPart(UUID hearingPartId) throws IOException {
+        val hearingPart = hearingPartRepository.findOne(hearingPartId);
+        rulesService.postMessage(
+            RulesService.DELETE_HEARING_PART,
+            factsMapper.mapHearingPartToRuleJsonMessage(hearingPart)
+        );
+        hearingPart.setDeleted(true);
+
+        return save(hearingPart);
     }
 }
