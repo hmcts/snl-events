@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -122,15 +123,14 @@ public class HearingPartControllerTest {
     }
 
     @Test
-    public void deleteHearingPart_deletesHearingPart() throws Exception {
+    public void createHearingPartAction_createsHearingPartAction() throws Exception {
         val id = UUID.randomUUID();
 
-        val serviceResult = createHearingPart();
-        serviceResult.setDeleted(true);
-        when(hearingPartService.deleteHearingPart(id)).thenReturn(serviceResult);
+        val hearingPart = createHearingPart();
 
-        val response = mvc.deleteAndReturnResponse(URL + "/" + id);
-        assertThat(response).isEmpty();
+        val response = mvc.putResponseAsString(URL + "/create", objectMapper.writeValueAsString(hearingPart));
+
+        Mockito.verify(actionService).execute(any());
     }
 
     private CreateHearingPart createCreateHearingPart() {
