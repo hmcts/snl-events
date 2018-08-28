@@ -96,8 +96,8 @@ def versions = [
 ]
 
 dependencies {
-  compile 'org.projectlombok:lombok:1.16.20'
-  apt "org.projectlombok:lombok:1.16.20"
+  compile 'org.projectlombok:lombok:1.18.2'
+  apt "org.projectlombok:lombok:1.18.2"
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
@@ -145,20 +145,25 @@ jar {
 }
 
 sourceSets {
+  common {
+    java.srcDir 'src/test/common'
+  }
   test {
     java.srcDir 'src/test/java'
+    compileClasspath += main.output + common.output
+    runtimeClasspath += main.output + common.output
   }
   functional {
     java.srcDir 'src/test/functional/java'
     resources.srcDir 'src/test/resources'
-    compileClasspath += main.output + test.output
-    runtimeClasspath += main.output + test.output
+    compileClasspath += main.output + test.output + common.output
+    runtimeClasspath += main.output + test.output + common.output
   }
   integrationSources {
     java.srcDir 'src/test/integration'
     resources.srcDir 'src/test/resources'
-    compileClasspath += main.output + test.output
-    runtimeClasspath += main.output + test.output
+    compileClasspath += main.output + test.output + common.output
+    runtimeClasspath += main.output + test.output + common.output
   }
 }
 

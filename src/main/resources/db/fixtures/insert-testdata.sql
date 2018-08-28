@@ -1,8 +1,8 @@
-insert into room (id, name)
-values ('30bcf571-45ca-4528-9d05-ce51b5e3fcde', 'Room A');
+insert into room (id, name, room_type_code)
+values ('30bcf571-45ca-4528-9d05-ce51b5e3fcde', 'Room A', 'court_room');
 
-insert into room (id, name)
-values ('3e699f29-6ea9-46bf-a338-00622fe0ae1b', 'Room B');
+insert into room (id, name, room_type_code)
+values ('3e699f29-6ea9-46bf-a338-00622fe0ae1b', 'Room B', 'court_room');
 
 
 insert into person (id, person_type, name)

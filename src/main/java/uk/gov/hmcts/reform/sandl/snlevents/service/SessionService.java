@@ -139,12 +139,12 @@ public class SessionService {
         session.setStart(upsertSession.getStart());
         session.setCaseType(upsertSession.getCaseType());
 
-        if (upsertSession.getRoomId() != null) {
+        if (upsertSession.getRoomId() != null && !upsertSession.getRoomId().isEmpty()) {
             Room room = roomRepository.findOne(getUuidFromString(upsertSession.getRoomId()));
             session.setRoom(room);
         }
 
-        if (upsertSession.getPersonId() != null) {
+        if (upsertSession.getPersonId() != null && !upsertSession.getPersonId().isEmpty()) {
             Person person = personRepository.findOne(getUuidFromString(upsertSession.getPersonId()));
             session.setPerson(person);
         }
