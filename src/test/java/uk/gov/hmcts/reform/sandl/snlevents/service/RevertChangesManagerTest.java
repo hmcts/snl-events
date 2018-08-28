@@ -103,12 +103,13 @@ public class RevertChangesManagerTest {
     }
 
     private UserTransaction createUserTransactionWithHearingPartUpsert() {
-        val transaction = new UserTransaction();
 
         val data = new UserTransactionData();
         data.setEntity("hearingPart");
         data.setCounterAction("update");
         data.setBeforeData("{}");
+
+        val transaction = new UserTransaction();
         transaction.addUserTransactionData(data);
 
         return transaction;
