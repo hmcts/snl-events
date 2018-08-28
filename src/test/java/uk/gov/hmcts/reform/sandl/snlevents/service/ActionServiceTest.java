@@ -4,10 +4,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.testactions.RulesProcessableTestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.testactions.TestAction;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import static org.mockito.Matchers.any;
@@ -17,32 +19,57 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class ActionServiceTest {
+
     @InjectMocks
-    private FactMessageService factMessageService;
+    private ActionService actionService;
+
+    @Spy
+    private TestAction mockTestAction;
+
+    @Spy
+    private RulesProcessableTestAction mockRulesProcessableTestAction;
 
     @Mock
-    private ProblemService problemService;
+    private UserTransactionService uts;
+
+    @Mock
+    private RulesService rulesService;
 
     @Test
-    public void handle_savesProblemToProblemService() throws IOException {
-        when(problemService.problemCreateToDb(any())).thenReturn(createProblem());
-        factMessageService.handle(UUID.randomUUID(), createFactMsgJson());
-        verify(problemService, times(1)).save(any(Problem.class));
+    public void execute_CallsMethodsInProperOrder() {
+        when(uts.isAnyBeingTransacted(any())).thenReturn(false);
+
+        actionService.execute(mockTestAction);
+
+        verify(uts, times(0)).transactionConflicted(any());
+        verify(mockTestAction).getUserTransactionId();
+        verify(mockTestAction).getAndValidateEntities();
+        verify(mockTestAction).getAssociatedEntitiesIds();
+        verify(mockTestAction).act();
+        verify(mockTestAction).generateUserTransactionData();
+        verify(mockTestAction).generateUserTransactionData();
+
+        verify(uts, times(1)).isAnyBeingTransacted(any());
     }
 
-    private Problem createProblem() {
-        return new Problem();
+    @Test
+    public void execute_ReturnsConflictedWhenTransactionInogress() {
+        when(uts.isAnyBeingTransacted(any())).thenReturn(true);
+
+        actionService.execute(mockTestAction);
+
+        verify(mockTestAction, times(0)).act();
+        verify(uts, times(1)).transactionConflicted(any());
+        verify(uts, times(1)).isAnyBeingTransacted(any());
     }
 
-    private String createFactMsgJson() {
-        return "["
-            + "{"
-            + "\"type\": \"Problem\","
-            + "\"newFact\":"
-            + "{"
-            + "\"id\":\"id\""
-            + "}"
-            + "}"
-            + "]";
+    @Test
+    public void execute_CallsRulesServiceWhenInstanceOfRulesProcessable() {
+        UUID id = UUID.randomUUID();
+        when(mockRulesProcessableTestAction.getUserTransactionId()).thenReturn(id);
+
+        actionService.execute(mockRulesProcessableTestAction);
+
+        verify(rulesService).postMessage(Mockito.eq(id), any());
     }
 }

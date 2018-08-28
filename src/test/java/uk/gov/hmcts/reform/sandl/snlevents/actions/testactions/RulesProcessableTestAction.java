@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.testactions;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 
 import java.util.List;
 import java.util.UUID;
 
-public class TestAction extends Action {
+public class RulesProcessableTestAction extends Action implements RulesProcessable {
     @Override
     public void act() {
 
@@ -30,5 +32,10 @@ public class TestAction extends Action {
     @Override
     public UUID[] getAssociatedEntitiesIds() {
         return new UUID[0];
+    }
+
+    @Override
+    public FactMessage generateFactMessage() {
+        return null;
     }
 }
