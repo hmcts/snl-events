@@ -38,6 +38,7 @@ public class ActionServiceTest {
     @Test
     public void execute_CallsMethodsInProperOrder() {
         when(uts.isAnyBeingTransacted(any())).thenReturn(false);
+        when(mockTestAction.getAssociatedEntitiesIds()).thenReturn(new UUID[0]);
 
         actionService.execute(mockTestAction);
 
@@ -49,18 +50,18 @@ public class ActionServiceTest {
         verify(mockTestAction).generateUserTransactionData();
         verify(mockTestAction).generateUserTransactionData();
 
-        verify(uts, times(1)).isAnyBeingTransacted(any());
+        verify(uts, times(1)).isAnyBeingTransacted();
     }
 
     @Test
-    public void execute_ReturnsConflictedWhenTransactionInogress() {
-        when(uts.isAnyBeingTransacted(any())).thenReturn(true);
+    public void execute_ReturnsConflictedWhenTransactionInProgress() {
+        when(uts.isAnyBeingTransacted()).thenReturn(true);
 
         actionService.execute(mockTestAction);
 
         verify(mockTestAction, times(0)).act();
         verify(uts, times(1)).transactionConflicted(any());
-        verify(uts, times(1)).isAnyBeingTransacted(any());
+        verify(uts, times(1)).isAnyBeingTransacted();
     }
 
     @Test

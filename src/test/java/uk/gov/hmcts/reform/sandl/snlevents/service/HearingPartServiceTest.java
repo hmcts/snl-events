@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -164,6 +165,15 @@ public class HearingPartServiceTest {
         val returnedHearingPart = hearingPartService.deleteHearingPart(UUID.randomUUID());
 
         assertThat(returnedHearingPart.isDeleted()).isEqualTo(true);
+    }
+
+    @Test
+    public void findOne_CallsRepo() throws IOException {
+        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+
+        hearingPartService.findOne(UUID.randomUUID());
+
+        verify(hearingPartRepository).findOne(any(UUID.class));
     }
 
     private UserTransaction createUserTransaction() {
