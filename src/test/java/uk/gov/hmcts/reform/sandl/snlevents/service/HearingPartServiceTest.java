@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -159,16 +158,7 @@ public class HearingPartServiceTest {
     }
 
     @Test
-    public void deleteHearingPart_setsDeletedFlagOnHearingPartEntity() throws IOException {
-        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
-
-        val returnedHearingPart = hearingPartService.deleteHearingPart(UUID.randomUUID());
-
-        assertThat(returnedHearingPart.isDeleted()).isEqualTo(true);
-    }
-
-    @Test
-    public void findOne_CallsRepo() throws IOException {
+    public void findOne_CallsRepo() {
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
 
         hearingPartService.findOne(UUID.randomUUID());
