@@ -137,9 +137,7 @@ public class HearingPartController {
             request, hearingPartRepository, entityManager, objectMapper
         );
 
-        actionService.execute(action);
-
-        return ok(null);
+        return ok(actionService.execute(action));
     }
 
 }
