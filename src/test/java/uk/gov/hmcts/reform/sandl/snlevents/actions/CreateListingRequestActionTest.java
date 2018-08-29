@@ -7,9 +7,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -35,6 +37,9 @@ public class CreateListingRequestActionTest {
 
     @Mock
     private HearingPartRepository hearingPartRepository;
+
+    @Spy
+    private FactsMapper factsMapper;
 
     @Before
     public void setup() {
@@ -64,6 +69,14 @@ public class CreateListingRequestActionTest {
 
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
+        FactMessage factMessage = action.generateFactMessage();
+
+        assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
+        assertThat(factMessage.getData()).isNotNull();
+    }
+
+    @Test
+    public void generateFactMessage_throwsException() {
         FactMessage factMessage = action.generateFactMessage();
 
         assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);

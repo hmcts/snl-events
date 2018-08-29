@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
@@ -10,12 +11,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 public class DeleteListingRequestAction extends Action implements RulesProcessable {
     private DeleteListingRequest deleteListingRequest;
@@ -95,6 +95,6 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] { deleteListingRequest.getHearingPartId() };
+        return new UUID[]{deleteListingRequest.getHearingPartId()};
     }
 }

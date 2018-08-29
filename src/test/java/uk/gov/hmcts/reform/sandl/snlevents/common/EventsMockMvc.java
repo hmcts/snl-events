@@ -44,7 +44,7 @@ public class EventsMockMvc {
         return objectMapper.readValue(putResponseAsString(url, body), clazz);
     }
 
-    private String putResponseAsString(String url, String body) throws Exception {
+    public String putResponseAsString(String url, String body) throws Exception {
         return mockMvc
             .perform(put(url).contentType(MediaType.APPLICATION_JSON_VALUE).content(body))
             .andExpect(status().isOk())
