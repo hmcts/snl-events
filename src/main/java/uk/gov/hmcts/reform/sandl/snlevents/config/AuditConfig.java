@@ -18,8 +18,6 @@ public class AuditConfig implements AuditorAware<String> {
             return null;
         }
 
-
         return authentication.getName();
-        //return "avv";
     }
 }

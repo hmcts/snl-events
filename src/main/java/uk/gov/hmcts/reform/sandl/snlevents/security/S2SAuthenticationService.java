@@ -53,6 +53,7 @@ public class S2SAuthenticationService {
                 .parseClaimsJws(authToken)
                 .getBody();
             final String serviceName = (String) claims.get("service");
+            final String userName = (String) claims.get("user");
             boolean validService = approvedServicesNames.contains(serviceName);
             long millisDifference = claims.getExpiration().getTime() - claims.getIssuedAt().getTime();
             if (config.getEvents().getJwtExpirationInMs() != millisDifference) {
@@ -63,7 +64,8 @@ public class S2SAuthenticationService {
                 throw new TokenClientServiceInvalidException(serviceName);
             }
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(serviceName, null, Arrays.asList());
+            String currentPrincipalName = String.format("%s:%s", serviceName, userName);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(currentPrincipalName, null, Arrays.asList());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             return true;
