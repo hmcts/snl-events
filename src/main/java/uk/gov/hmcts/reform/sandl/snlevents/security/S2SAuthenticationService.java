@@ -65,7 +65,8 @@ public class S2SAuthenticationService {
             }
 
             String currentPrincipalName = String.format("%s:%s", serviceName, userName);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(currentPrincipalName, null, Arrays.asList());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(currentPrincipalName,
+                null, Arrays.asList());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             return true;

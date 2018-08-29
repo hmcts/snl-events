@@ -30,6 +30,12 @@ public class FactMessageServiceTest {
         verify(problemService, times(1)).save(any(Problem.class));
     }
 
+    @Test(expected = RuntimeException.class)
+    public void handle_throwsRuntimeException() throws IOException {
+        when(problemService.problemCreateToDb(any())).thenReturn(createProblem());
+        factMessageService.handle(UUID.randomUUID(), "INVALID JSON MESSAGE");
+    }
+
     private Problem createProblem() {
         return new Problem();
     }

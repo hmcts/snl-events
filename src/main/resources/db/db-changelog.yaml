@@ -38,4 +38,6 @@ databaseChangeLog:
   - include:
       file: db/schema/SL-1111-add-is-deleted-column-to-hearing-part-table.yaml
   - include:
+      file: db/schema/SL-1349-reference-data.yaml
+  - include:
       file: db/schema/SL-1471-history-of-changes-listing.yaml

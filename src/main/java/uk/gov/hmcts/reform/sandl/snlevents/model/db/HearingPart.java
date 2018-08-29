@@ -26,7 +26,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.PreUpdate;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
