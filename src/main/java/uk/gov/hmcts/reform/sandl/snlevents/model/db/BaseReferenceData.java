@@ -13,6 +13,7 @@ import javax.persistence.MappedSuperclass;
 @EqualsAndHashCode
 @NoArgsConstructor
 public abstract class BaseReferenceData implements SimpleDictionarySettable {
+
     @Id
     @Getter
     @Setter

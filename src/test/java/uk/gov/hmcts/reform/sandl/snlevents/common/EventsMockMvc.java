@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.val;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,23 +38,44 @@ public class EventsMockMvc {
     }
 
     public <T> T putAndMapResponse(String url, String body, TypeReference<T> typeReference) throws Exception {
-        return objectMapper.readValue(putResponseAsString(url, body), typeReference);
+        return callAndMapResponse(put(url), body, typeReference);
     }
 
     public <T> T putAndMapResponse(String url, String body, Class<T> clazz) throws Exception {
-        return objectMapper.readValue(putResponseAsString(url, body), clazz);
+        return callAndMapResponse(put(url), body, clazz);
     }
 
-    private String putResponseAsString(String url, String body) throws Exception {
-        return mockMvc
-            .perform(put(url).contentType(MediaType.APPLICATION_JSON_VALUE).content(body))
-            .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
+    private <T> T callAndMapResponse(MockHttpServletRequestBuilder requestBuilder,
+                                    String body,
+                                    TypeReference<T> typeReference) throws Exception {
+        return objectMapper.readValue(callResponseAsString(requestBuilder, body), typeReference);
     }
 
-    public String deleteAndReturnResponse(String url) throws Exception {
+    public <T> T callAndMapResponse(MockHttpServletRequestBuilder requestBuilder,
+                                    Object body,
+                                    TypeReference<T> typeReference) throws Exception {
+        val bodyAsString = objectMapper.writeValueAsString(body);
+
+        return objectMapper.readValue(callResponseAsString(requestBuilder, bodyAsString), typeReference);
+    }
+
+    public <T> T callAndMapResponse(MockHttpServletRequestBuilder requestBuilder,
+                                    Object body,
+                                    Class<T> clazz) throws Exception {
+        val bodyAsString = objectMapper.writeValueAsString(body);
+
+        return objectMapper.readValue(callResponseAsString(requestBuilder, bodyAsString), clazz);
+    }
+
+    public <T> T callAndMapResponse(MockHttpServletRequestBuilder requestBuilder,
+                                    String body,
+                                    Class<T> clazz) throws Exception {
+        return objectMapper.readValue(callResponseAsString(requestBuilder, body), clazz);
+    }
+
+    private String callResponseAsString(MockHttpServletRequestBuilder requestBuilder, String body) throws Exception {
         return mockMvc
-            .perform(delete(url))
+            .perform(requestBuilder.contentType(MediaType.APPLICATION_JSON_VALUE).content(body))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
     }

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +26,7 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -158,12 +158,12 @@ public class HearingPartServiceTest {
     }
 
     @Test
-    public void deleteHearingPart_setsDeletedFlagOnHearingPartEntity() throws IOException {
+    public void findOne_CallsRepo() {
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
 
-        val returnedHearingPart = hearingPartService.deleteHearingPart(UUID.randomUUID());
+        hearingPartService.findOne(UUID.randomUUID());
 
-        assertThat(returnedHearingPart.isDeleted()).isEqualTo(true);
+        verify(hearingPartRepository).findOne(any(UUID.class));
     }
 
     private UserTransaction createUserTransaction() {

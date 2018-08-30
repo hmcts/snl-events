@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.fakerules.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -44,15 +45,17 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
     @Autowired
     EntityManager entityManager;
 
-    @Test
-    public void assignHearingPartToSessionWithTransaction_shouldWorkInTransactionalManner() throws Exception {
-
+    @Before
+    public void stubRulesServiceResponse() {
         stubFor(post(urlEqualTo("/msg?rulesDefinition=Listings"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
                 .withBody("{}")));
+    }
 
+    @Test
+    public void assignHearingPartToSessionWithTransaction_shouldWorkInTransactionalManner() throws Exception {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
         assertThat(savedHearingPart.getSessionId()).isNull();
 
@@ -77,12 +80,6 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @Test
     public void assignHearingPartToSessionWithTransaction_shouldReturnConflict() throws Exception {
-        stubFor(post(urlEqualTo("/msg?rulesDefinition=Listings"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")));
-
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
         Session savedSession = sessionRepository.save(sessionBuilder.build());
 
@@ -123,12 +120,6 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @Test(expected = OptimisticLockingFailureException.class)
     public void assignHearingPartToSessionWithTransaction_throwsException_whenHearingPartIsLocked() throws IOException {
-        stubFor(post(urlEqualTo("/msg?rulesDefinition=Listings"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json")
-                .withBody("{}")));
-
         //GIVEN latest version of HearingPart is 2
         HearingPart savedHearingPart = hearingPartRepository.save(
             hearingPartBuilder.withId(UUID.randomUUID()).withVersion(2L).build()

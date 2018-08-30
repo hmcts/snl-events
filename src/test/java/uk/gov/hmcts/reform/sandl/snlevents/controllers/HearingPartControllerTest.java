@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import lombok.var;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,8 +17,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -28,11 +33,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingPartController.class)
@@ -46,6 +55,18 @@ public class HearingPartControllerTest {
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
     public static final UUID RESERVED_JUDGE_ID = UUID.randomUUID();
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private HearingPartRepository hearingPartRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private ActionService actionService;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private EntityManager entityManager;
 
     @MockBean
     private HearingPartService hearingPartService;
@@ -101,20 +122,44 @@ public class HearingPartControllerTest {
         when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
-        val response = mvc.putAndMapResponse(URL, content, HearingPart.class);
+        val response = mvc.callAndMapResponse(put(URL), content, HearingPart.class);
         assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
     }
 
     @Test
-    public void deleteHearingPart_deletesHearingPart() throws Exception {
-        val id = UUID.randomUUID();
+    public void createHearingPartAction_createsHearingPartAction() throws Exception {
+        val ut = createUserTransaction();
+        when(actionService.execute(any())).thenReturn(ut);
 
-        val serviceResult = createHearingPart();
-        serviceResult.setDeleted(true);
-        when(hearingPartService.deleteHearingPart(id)).thenReturn(serviceResult);
+        val hearingPart = createHearingPart();
+        val response = mvc.callAndMapResponse(
+            put(URL + "/create"), objectMapper.writeValueAsString(hearingPart), UserTransaction.class
+        );
 
-        val response = mvc.deleteAndReturnResponse(URL + "/" + id);
-        assertThat(response).isEmpty();
+        assertThat(response).isEqualTo(ut);
+    }
+
+    private UserTransaction createUserTransaction() {
+        var ut = new UserTransaction();
+        ut.setId(UUID.randomUUID());
+
+        return ut;
+    }
+
+    @Test
+    public void deleteHearingPartAction_deletesHearingPart() throws Exception {
+        val ut = createUserTransaction();
+        when(actionService.execute(any())).thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(
+            post(URL + "/delete"), createDeleteListingRequest(), UserTransaction.class
+        );
+
+        assertThat(response).isEqualTo(ut);
+    }
+
+    private DeleteListingRequest createDeleteListingRequest() {
+        return new DeleteListingRequest();
     }
 
     private CreateHearingPart createCreateHearingPart() {
