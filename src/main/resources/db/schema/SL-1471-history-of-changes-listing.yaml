@@ -1,5 +1,14 @@
 databaseChangeLog:
   - changeSet:
+      id: add-hibernate-sequence
+      author: kpakur
+      comment: Without this sequence hibernate complains and application would not start.
+      failOnError: false
+      changes:
+        - createSequence:
+            schemaName: public
+            sequenceName: hibernate_sequence
+  - changeSet:
       id: add-revinfo-table
       author: kpakur
       changes:
@@ -26,6 +35,7 @@ databaseChangeLog:
                 name: rev
                 type: int
                 constraints:
+                  nullable: false
                   foreignKeyName: fk_hearing_part_aud_revinfo
                   references: revinfo(rev)
             - column:
@@ -35,6 +45,8 @@ databaseChangeLog:
             - column:
                 name: id
                 type: UUID
+                constraints:
+                  nullable: false
             - column:
                 name: case_number
                 type: VARCHAR(200)
@@ -89,24 +101,11 @@ databaseChangeLog:
             - column:
                 name: modified_by
                 type: varchar(255)
-  - changeSet:
-      id: hearing_part_aud-primarykey
-      author: kpakur
-      changes:
         - addPrimaryKey:
             columnNames: id, rev
             constraintName: pk_hearing_part_aud
             schemaName: public
             tableName: hearing_part_aud
-  - changeSet:
-      id: add-hibernate-sequence
-      author: kpakur
-      comment: Without this sequence hibernate complains and application would not start.
-      failOnError: false
-      changes:
-        - createSequence:
-            schemaName: public
-            sequenceName: hibernate_sequence
   - changeSet:
       id: hearing_part-new-columns-forhistory
       author: kpakur
