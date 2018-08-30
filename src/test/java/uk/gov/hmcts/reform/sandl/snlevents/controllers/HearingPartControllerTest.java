@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import lombok.var;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
@@ -38,6 +40,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingPartController.class)
@@ -118,19 +122,44 @@ public class HearingPartControllerTest {
         when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
-        val response = mvc.putAndMapResponse(URL, content, HearingPart.class);
+        val response = mvc.callAndMapResponse(put(URL), content, HearingPart.class);
         assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
     }
 
     @Test
     public void createHearingPartAction_createsHearingPartAction() throws Exception {
-        val id = UUID.randomUUID();
+        val ut = createUserTransaction();
+        when(actionService.execute(any())).thenReturn(ut);
 
         val hearingPart = createHearingPart();
+        val response = mvc.callAndMapResponse(
+            put(URL + "/create"), objectMapper.writeValueAsString(hearingPart), UserTransaction.class
+        );
 
-        val response = mvc.putResponseAsString(URL + "/create", objectMapper.writeValueAsString(hearingPart));
+        assertThat(response).isEqualTo(ut);
+    }
 
-        Mockito.verify(actionService).execute(any());
+    private UserTransaction createUserTransaction() {
+        var ut = new UserTransaction();
+        ut.setId(UUID.randomUUID());
+
+        return ut;
+    }
+
+    @Test
+    public void deleteHearingPartAction_deletesHearingPart() throws Exception {
+        val ut = createUserTransaction();
+        when(actionService.execute(any())).thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(
+            post(URL + "/delete"), createDeleteListingRequest(), UserTransaction.class
+        );
+
+        assertThat(response).isEqualTo(ut);
+    }
+
+    private DeleteListingRequest createDeleteListingRequest() {
+        return new DeleteListingRequest();
     }
 
     private CreateHearingPart createCreateHearingPart() {
