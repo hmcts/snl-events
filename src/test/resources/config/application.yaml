@@ -79,7 +79,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: uk.gov.hmcts.reform.sandl.snlevents.config.H2DBExtendedDialect
+        dialect: uk.gov.hmcts.reform.sandl.snlevents.config.H2DbExtendedDialect
 #      tomcat:
 #        max-active: 10
 #        max-idle: 10

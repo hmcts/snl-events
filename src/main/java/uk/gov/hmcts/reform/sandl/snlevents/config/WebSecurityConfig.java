@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SJwtAuthenticationFilter;
 import uk.gov.hmcts.reform.sandl.snlevents.security.ServiceAuthenticationEntryPoint;
 
@@ -20,11 +20,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private ServiceAuthenticationEntryPoint unauthorizedHandler;
 
     @Autowired
-    private S2SAuthenticationService s2SAuthenticationService;
+    private S2SAuthenticationConfig s2SAuthenticationConfig;
 
     @Bean
     public S2SJwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new S2SJwtAuthenticationFilter(s2SAuthenticationService);
+        return new S2SJwtAuthenticationFilter(s2SAuthenticationConfig);
     }
 
     @Override

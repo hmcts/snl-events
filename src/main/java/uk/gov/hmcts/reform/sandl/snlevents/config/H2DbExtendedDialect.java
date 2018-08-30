@@ -4,8 +4,8 @@ import org.hibernate.dialect.H2Dialect;
 
 import java.sql.Types;
 
-public class H2DBExtendedDialect extends H2Dialect {
-    public H2DBExtendedDialect() {
+public class H2DbExtendedDialect extends H2Dialect {
+    public H2DbExtendedDialect() {
         super();
         registerColumnType(Types.TINYINT, "smallint");
     }

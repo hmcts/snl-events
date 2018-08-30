@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -15,10 +15,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(TimeController.class)
 @Import(TestConfiguration.class)
+@AutoConfigureMockMvc(secure = false)
 public class TimeControllerTest {
     public static final String URL = "/time";
 
@@ -36,7 +36,7 @@ public class TimeControllerTest {
     private RulesService rulesService;
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private S2SAuthenticationService s2SAuthenticationService;
+    private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
 
     @MockBean
     private FactsMapper factsMapper;
@@ -46,11 +46,6 @@ public class TimeControllerTest {
 
     @Autowired
     private EventsMockMvc mvc;
-
-    @Before
-    public void setupMock() {
-        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
-    }
 
     @Test
     public void upsert_postsTimeToRulesService() throws Exception {
