@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -127,10 +129,15 @@ public class HearingPartController {
         return ok(ut);
     }
 
-    @DeleteMapping(path = "/{hearingPartId}")
-    public ResponseEntity deleteHearingPart(@PathVariable UUID hearingPartId) throws IOException {
-        hearingPartService.deleteHearingPart(hearingPartId);
+    @PostMapping(path = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity deleteHearingPart(
+        @RequestBody DeleteListingRequest request
+    ) {
+        Action action = new DeleteListingRequestAction(
+            request, hearingPartRepository, entityManager, objectMapper
+        );
 
-        return ok(null);
+        return ok(actionService.execute(action));
     }
+
 }

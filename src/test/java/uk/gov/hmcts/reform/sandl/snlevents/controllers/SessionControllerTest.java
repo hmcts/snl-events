@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -134,8 +135,8 @@ public class SessionControllerTest {
         when(sessionService.saveWithTransaction(upsertSession)).thenReturn(userTransaction);
         when(userTransactionService.rulesProcessed(userTransaction)).thenReturn(userTransaction);
 
-        val response = mvc.putAndMapResponse(
-            SESSION_URL, objectMapper.writeValueAsString(upsertSession), UserTransaction.class
+        val response = mvc.callAndMapResponse(
+            put(SESSION_URL), objectMapper.writeValueAsString(upsertSession), UserTransaction.class
         );
         assertEquals(userTransaction, response);
     }
