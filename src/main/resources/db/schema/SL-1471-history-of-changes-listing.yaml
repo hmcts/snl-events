@@ -87,9 +87,6 @@ databaseChangeLog:
                 name: is_deleted
                 type: boolean
             - column:
-                name: version
-                type: BIGINT
-            - column:
                 name: modified_at
                 type: TIMESTAMP WITH TIME ZONE
             - column:
