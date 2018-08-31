@@ -54,7 +54,7 @@ public class S2SJwtAuthenticationFilterTest {
         when(request.getHeader(TokenService.HEADER_NAME))
             .thenReturn("NO BEARER IN HEADER");
         when(request.getRequestURI())
-            .thenReturn("/health"); //
+            .thenReturn("/health");
 
         filter.doFilterInternal(request, response, filterChain);
 
