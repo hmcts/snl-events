@@ -17,30 +17,29 @@ const refDataTables = ["session_type", "hearing_type", "case_type", "room_type"]
 let roomNames = [];
 let roomIds = [];
 let judgeIds = [];
-
-console.log(`
-TRUNCATE table hearing_part CASCADE;
-TRUNCATE table session CASCADE;
-TRUNCATE table availability CASCADE;
-TRUNCATE table person CASCADE;
-TRUNCATE table room CASCADE;
-TRUNCATE table problem_reference CASCADE;
-TRUNCATE table problem CASCADE;
-TRUNCATE table user_transaction_data CASCADE;
-TRUNCATE table user_transaction CASCADE;
-TRUNCATE table room_type CASCADE;
-TRUNCATE table case_type_session_type CASCADE;
-TRUNCATE table hearing_type_case_type CASCADE;
-TRUNCATE table case_type CASCADE;
-TRUNCATE table hearing_type_session_type CASCADE;
-TRUNCATE table session_type CASCADE;
-TRUNCATE table hearing_type CASCADE;
-`);
+let roomIdOfRoomWithOutRoomType = [];
 
 const fileName = process.argv.splice(2)[0];
 
-readXlsxFile(fileName, { sheet: 1 }).then((rows) => {
-  rows.forEach(row => {
+let anyErrorFound = false;
+let rowsSheet1
+let rowsSheet2
+
+readXlsxFile(fileName, { sheet: 1 })
+.then(rows => rowsSheet1 = rows)
+.then(() => readXlsxFile(fileName, { sheet: 2 }))
+.then(rows => rowsSheet2 = rows)
+.then(() => {
+  validateRows(rowsSheet1, 1);
+  validateRows(rowsSheet2, 2);
+
+  if (anyErrorFound) {
+    process.exit(1);
+  }
+
+  printTruncateSQL();
+
+  rowsSheet1.forEach(row => {
     const tableName = parseTableName(row[0]);
     const description = row[1];
     const code = createCodeFrom(description);
@@ -51,14 +50,13 @@ readXlsxFile(fileName, { sheet: 1 }).then((rows) => {
       console.log(createPersonSQL(description));
     } else if (tableName === "room") {
       // room require room_type_code that is set in second sheet
-      roomNames.push(description);
+      roomNames.push({description: description, hasBeenUsed: false});
     } else {
       console.error(`Error -> Table name: ${tableName} not supported`);
     }
   });
-}).then(() => {
-    readXlsxFile(fileName, { sheet: 2 }).then((rows) => {
-    rows.forEach(row => {
+
+  rowsSheet2.forEach(row => {
       const associactionA = row[0];
       const tableNameA = extractTableNameFrom(associactionA);
       const descriptionOfAssociactionA = extractDescriptionFrom(associactionA);
@@ -74,24 +72,81 @@ readXlsxFile(fileName, { sheet: 1 }).then((rows) => {
         case "hearing_type_session_type":
           sqlStatement = generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
           break;
+        case "hearing_type_case_type":
+          sqlStatement = generateHearingTypeCaseTypeJoinTableSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
+          break;
         case "room":
           sqlStatement = generateRoomSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
           break;
       }
 
       console.log(sqlStatement);
-    });
+  });
 
-    console.log(generateAvailabilitySQL(judgeIds, roomIds));
+  console.log(generateAvailabilitySQL(judgeIds, roomIds));
+  
+  const unusedRooms = roomNames.filter((roomName) => roomName.hasBeenUsed === false)
+  if (unusedRooms.length != 0) {
+    console.error()
+    console.error('Following rooms arent used in second sheet');
+    unusedRooms.forEach(roomName => console.error(roomName.description));
+    console.error()
+    console.error('Generated SQL statements for these rooms - THERE ARENT INCLUDED IN AVAILABILITY');
+    unusedRooms.forEach(roomName => console.error(generateRoomSQLWithNullRoomType(roomName.description)));
+  }
 });
-}).catch(error => console.log('Errors ' + error));
 
+function validateRows(rows, sheet) {
+  const alreadyIteratedRows = [];
+  rows.forEach((row, i) => {
+    if (row[0] === null || row[0].trim() === '' || row[1] === null || row[1].trim() === '') {
+      console.error(`Empty values in sheet: ${sheet}, row ${i}: ${row[0]} ${row[1]}`);
+      anyErrorFound = true;
+    }
+
+    const hash = row[0] + row[1];
+    if (alreadyIteratedRows.indexOf(hash) > -1) {
+      console.error(`Duplicated row in sheet: ${sheet}. Duplicated values ${row[0]} ${row[1]}`);
+      anyErrorFound = true;
+    } else {
+      alreadyIteratedRows.push(hash);
+    }
+  });
+}
+
+function printTruncateSQL() {
+  console.log(`
+  TRUNCATE table hearing_part CASCADE;
+  TRUNCATE table session CASCADE;
+  TRUNCATE table availability CASCADE;
+  TRUNCATE table person CASCADE;
+  TRUNCATE table room CASCADE;
+  TRUNCATE table problem_reference CASCADE;
+  TRUNCATE table problem CASCADE;
+  TRUNCATE table user_transaction_data CASCADE;
+  TRUNCATE table user_transaction CASCADE;
+  TRUNCATE table room_type CASCADE;
+  TRUNCATE table case_type_session_type CASCADE;
+  TRUNCATE table hearing_type_case_type CASCADE;
+  TRUNCATE table case_type CASCADE;
+  TRUNCATE table hearing_type_session_type CASCADE;
+  TRUNCATE table session_type CASCADE;
+  TRUNCATE table hearing_type CASCADE;
+  `);
+}
 
 function generateCaseTypeSessionTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
   const caseType = (tableNameA.toLowerCase().indexOf("case") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
   const sessionType = (tableNameA.toLowerCase().indexOf("session") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
 
   return `INSERT INTO case_type_session_type (case_type_code, session_type_code) values ((Select code from case_type where description = '${caseType[1]}'), (Select code from session_type where description = '${sessionType[1]}'));`;
+}
+
+function generateHearingTypeCaseTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
+  const caseType = (tableNameA.toLowerCase().indexOf("case") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  const hearingType = (tableNameA.toLowerCase().indexOf("hearing") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+
+  return `INSERT INTO hearing_type_case_type (case_type_code, hearing_type_code) values ((Select code from case_type where description = '${caseType[1]}'), (Select code from hearing_type where description = '${hearingType[1]}'));`;
 }
 
 function generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
@@ -103,10 +158,25 @@ function generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionA, ta
 
 function generateRoomSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
   const roomType = (tableNameA.toLowerCase().indexOf("room_type") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
-  const room = (tableNameA.toLowerCase().indexOf("room") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  const room = (tableNameA.toLowerCase().indexOf("room_type") < 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  
+  const usedRoomDescriptionIndex = roomNames.findIndex((roomName) => roomName.description === room[1]);
+  
+  if (usedRoomDescriptionIndex > -1) {
+    roomNames[usedRoomDescriptionIndex].hasBeenUsed = true;
+  } else {
+    console.error(`Room with name/description ${room[1]} do not exist on first sheet`)
+  }
+  
     const roomId = uuidv4();
     roomIds.push(roomId);
-  return `INSERT INTO room (id ,name, room_type_code) VALUES ('${roomId}', '${room[1]}', (Select code from room_type where description = '${roomType[1]}'));`;
+  return `INSERT INTO room (id, name, room_type_code) VALUES ('${roomId}', '${room[1]}', (Select code from room_type where description = '${roomType[1]}'));`;
+}
+
+function generateRoomSQLWithNullRoomType(roomName) { 
+  const roomId = uuidv4();
+  roomIdOfRoomWithOutRoomType.push(roomId);
+  return `INSERT INTO room (id, name, room_type_code) VALUES ('${roomId}', '${roomName}', NULL);`;
 }
 
 function resolveTableName(tableName1, tableName2) {
@@ -122,12 +192,18 @@ function resolveTableName(tableName1, tableName2) {
     return (tableName === "room" || tableName === "room_type");
   }
 
+  function isHearingTypeOrCaseType(tableName) {
+    return (tableName === "hearing_type" || tableName === "case_type");
+  }
+
   let tableName;
 
   if (isSessionTypeOrCaseType(tableName1) && isSessionTypeOrCaseType(tableName2)) {
     tableName = "case_type_session_type";
   } else if (isSessionTypeOrHearingType(tableName1) && isSessionTypeOrHearingType(tableName2)) {
     tableName = "hearing_type_session_type";
+  } else if (isHearingTypeOrCaseType(tableName1) && isHearingTypeOrCaseType(tableName2)) {
+    tableName = "hearing_type_case_type";
   } else if (isRoomTypeOrRoom(tableName1) && isRoomTypeOrRoom(tableName2)) {
     tableName = "room";
   } else {
