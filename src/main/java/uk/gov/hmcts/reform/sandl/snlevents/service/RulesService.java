@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.sandl.snlevents.config.SubscribersConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class RulesService {
     private SubscribersConfiguration subscribersConfiguration;
 
     @Autowired
-    private S2SAuthenticationService s2sAuthService;
+    private S2SRulesAuthenticationClient s2sAuthService;
 
     public void postMessage(String msgType, String msgData) {
         postToSubscribers(null, new FactMessage(msgType, msgData));
