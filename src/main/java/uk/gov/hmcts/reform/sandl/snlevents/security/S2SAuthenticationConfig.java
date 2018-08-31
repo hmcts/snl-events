@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 @Getter
 @Setter
-class S2SAuthenticationConfig {
+public class S2SAuthenticationConfig {
     JwtCredentials events;
     JwtCredentials rules;
 

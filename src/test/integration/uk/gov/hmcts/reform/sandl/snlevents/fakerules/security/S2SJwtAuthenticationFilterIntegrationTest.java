@@ -13,7 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.util.Date;
 
@@ -25,7 +25,7 @@ public class S2SJwtAuthenticationFilterIntegrationTest extends BaseIntegrationTe
     private int port;
 
     @Autowired
-    S2SAuthenticationService s2sAuthService;
+    S2SRulesAuthenticationClient s2sAuthService;
 
     private Helper helper = new Helper();
 

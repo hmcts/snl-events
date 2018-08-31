@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -48,7 +48,7 @@ public class HearingPartServiceTest {
     private RulesService rulesService;
     @Mock
     @SuppressWarnings("PMD.UnusedPrivateField")
-    S2SAuthenticationService s2SAuthenticationService;
+    S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
     @Mock
     @SuppressWarnings("PMD.UnusedPrivateField")
     private FactsMapper factsMapper;

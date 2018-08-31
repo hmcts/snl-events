@@ -65,19 +65,21 @@ liquibase:
 #If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:
   application:
-    name: Spring Boot Template
+    name: snl-events-tests
   datasource:
       url: jdbc:h2:mem:db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;
       username: sa
       password:
       properties:
         charSet: UTF-8
-      jpa:
-        hibernate:
-          ddl-auto: validate
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-        show-sql: false
       driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: uk.gov.hmcts.reform.sandl.snlevents.config.H2DbExtendedDialect
 #      tomcat:
 #        max-active: 10
 #        max-idle: 10
