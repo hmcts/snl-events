@@ -17,6 +17,7 @@ const refDataTables = ["session_type", "hearing_type", "case_type", "room_type"]
 let roomNames = [];
 let roomIds = [];
 let judgeIds = [];
+let roomIdOfRoomWithOutRoomType = [];
 
 console.log(`
 TRUNCATE table hearing_part CASCADE;
@@ -74,6 +75,9 @@ readXlsxFile(fileName, { sheet: 1 }).then((rows) => {
         case "hearing_type_session_type":
           sqlStatement = generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
           break;
+        case "hearing_type_case_type":
+          sqlStatement = generateHearingTypeCaseTypeJoinTableSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
+          break;
         case "room":
           sqlStatement = generateRoomSQL(tableNameA, descriptionOfAssociactionA, tableNameB, descriptionOfAssociactionB);
           break;
@@ -83,6 +87,13 @@ readXlsxFile(fileName, { sheet: 1 }).then((rows) => {
     });
 
     console.log(generateAvailabilitySQL(judgeIds, roomIds));
+
+    if (roomNames.length != 0) {
+      console.error('Following rooms arent used in second sheet')
+      roomNames.forEach(roomname => console.log(roomname))
+      console.error('Generated SQL statements for these rooms - THERE ARENT INCLUDED IN AVAILABILITY')
+      roomNames.forEach(roomName => console.log(generateRoomSQLWithNullRoomType(roomName)));
+    }
 });
 }).catch(error => console.log('Errors ' + error));
 
@@ -94,6 +105,13 @@ function generateCaseTypeSessionTypeJoinTableSQL(tableNameA, descriptionA, table
   return `INSERT INTO case_type_session_type (case_type_code, session_type_code) values ((Select code from case_type where description = '${caseType[1]}'), (Select code from session_type where description = '${sessionType[1]}'));`;
 }
 
+function generateHearingTypeCaseTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
+  const caseType = (tableNameA.toLowerCase().indexOf("case") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  const hearingType = (tableNameA.toLowerCase().indexOf("hearing") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+
+  return `INSERT INTO hearing_type_case_type (case_type_code, hearing_type_code) values ((Select code from case_type where description = '${caseType[1]}'), (Select code from hearing_type where description = '${hearingType[1]}'));`;
+}
+
 function generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
   const sessionType = (tableNameA.toLowerCase().indexOf("session") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
   const hearingType = (tableNameA.toLowerCase().indexOf("hearing") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
@@ -103,10 +121,24 @@ function generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionA, ta
 
 function generateRoomSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
   const roomType = (tableNameA.toLowerCase().indexOf("room_type") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
-  const room = (tableNameA.toLowerCase().indexOf("room") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  const room = (tableNameA.toLowerCase().indexOf("room_type") < 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
+  
+  const indexOfUsedRoomDescription = roomNames.indexOf(room[1]);
+  if (indexOfUsedRoomDescription > -1) {
+    roomNames.splice(indexOfUsedRoomDescription, 1);
+  } else {
+    console.error(`Room with name/description ${room[1]} do not exist on first sheet`)
+  }
+  
     const roomId = uuidv4();
     roomIds.push(roomId);
-  return `INSERT INTO room (id ,name, room_type_code) VALUES ('${roomId}', '${room[1]}', (Select code from room_type where description = '${roomType[1]}'));`;
+  return `INSERT INTO room (id, name, room_type_code) VALUES ('${roomId}', '${room[1]}', (Select code from room_type where description = '${roomType[1]}'));`;
+}
+
+function generateRoomSQLWithNullRoomType(roomName) { 
+  const roomId = uuidv4();
+  roomIdOfRoomWithOutRoomType.push(roomId);
+  return `INSERT INTO room (id, name, room_type_code) VALUES ('${roomId}', '${roomName}', NULL);`;
 }
 
 function resolveTableName(tableName1, tableName2) {
@@ -122,12 +154,18 @@ function resolveTableName(tableName1, tableName2) {
     return (tableName === "room" || tableName === "room_type");
   }
 
+  function isHearingTypeOrCaseType(tableName) {
+    return (tableName === "hearing_type" || tableName === "case_type");
+  }
+
   let tableName;
 
   if (isSessionTypeOrCaseType(tableName1) && isSessionTypeOrCaseType(tableName2)) {
     tableName = "case_type_session_type";
   } else if (isSessionTypeOrHearingType(tableName1) && isSessionTypeOrHearingType(tableName2)) {
     tableName = "hearing_type_session_type";
+  } else if (isHearingTypeOrCaseType(tableName1) && isHearingTypeOrCaseType(tableName2)) {
+    tableName = "hearing_type_case_type";
   } else if (isRoomTypeOrRoom(tableName1) && isRoomTypeOrRoom(tableName2)) {
     tableName = "room";
   } else {
