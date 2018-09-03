@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.sandl.snlevents.config.SubscribersConfiguration;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class RulesServiceTest {
     private SubscribersConfiguration subscribersConfiguration;
 
     @Mock
-    private S2SAuthenticationService s2SAuthenticationService;
+    private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
 
     @Mock
     private RestTemplate restTemplate = mock(RestTemplate.class);

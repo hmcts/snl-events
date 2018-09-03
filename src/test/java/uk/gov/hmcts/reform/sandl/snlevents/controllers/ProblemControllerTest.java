@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ProblemService;
 
 import java.util.Arrays;
@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProblemController.class)
 @Import(TestConfiguration.class)
+@AutoConfigureMockMvc(secure = false)
 public class ProblemControllerTest {
     public static final String URL = "/problems";
 
@@ -35,15 +35,10 @@ public class ProblemControllerTest {
     private ProblemService problemService;
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private S2SAuthenticationService s2SAuthenticationService;
+    private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
 
     @Autowired
     private EventsMockMvc mvc;
-
-    @Before
-    public void setupMock() {
-        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
-    }
 
     @Test
     public void getProblems_returnsProblemsFromService() throws Exception {
