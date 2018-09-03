@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
@@ -12,11 +13,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
@@ -56,16 +55,11 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearingPart.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
         hearingPart.setReservedJudgeId(updateListingRequest.getReservedJudgeId());
 
-        if (updateListingRequest.getCreatedAt() == null) {
-            hearingPart.setCreatedAt(OffsetDateTime.now());
-        } else {
-            hearingPart.setCreatedAt(updateListingRequest.getCreatedAt());
-        }
         hearingPart.setPriority(updateListingRequest.getPriority());
 
         entityManager.detach(hearingPart);
         hearingPart.setVersion(updateListingRequest.getVersion());
-        hearingPartRepository.save(hearingPart);
+        hearingPart = hearingPartRepository.save(hearingPart);
     }
 
     @Override

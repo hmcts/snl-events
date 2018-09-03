@@ -42,7 +42,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
         hearingPart.setPriority(createHearingPart.getPriority());
 
-        hearingPartRepository.save(hearingPart);
+        hearingPart = hearingPartRepository.save(hearingPart);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg = null;
         try {
-            msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
+            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

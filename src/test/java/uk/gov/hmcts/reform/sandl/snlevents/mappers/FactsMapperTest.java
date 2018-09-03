@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 
@@ -71,34 +70,6 @@ public class FactsMapperTest {
             + "}";
 
         assertThat(mapped).isEqualTo(expected);
-    }
-
-    @Test
-    public void mapCreateHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapCreateHearingPartToRuleJsonMessage(createCreateHearingPart());
-        val expected = "{"
-            + "\"id\":\"" + ID + "\","
-            + "\"sessionId\":null,"
-            + "\"caseType\":\"" + CASE_TYPE + "\","
-            + "\"duration\":" + DURATION_MAPPED + ","
-            + "\"scheduleStart\":\"" + START_MAPPED + "\","
-            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
-            + "\"createdAt\":\"" + START_MAPPED + "\""
-            + "}";
-
-        assertThat(mapped).isEqualTo(expected);
-    }
-
-    private CreateHearingPart createCreateHearingPart() {
-        val chp = new CreateHearingPart();
-        chp.setId(createUuid());
-        chp.setDuration(createDuration());
-        chp.setCaseType(CASE_TYPE);
-        chp.setScheduleStart(START);
-        chp.setScheduleEnd(END);
-        chp.setCreatedAt(START);
-
-        return chp;
     }
 
     @Test
