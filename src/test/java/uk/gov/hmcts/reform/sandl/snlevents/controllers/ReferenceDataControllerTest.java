@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.RoomType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.CaseTypeWithHearingTypesResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SimpleDictionaryData;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ReferenceDataService;
 
 import java.util.List;
@@ -28,12 +28,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ReferenceDataController.class)
 @Import(TestConfiguration.class)
+@AutoConfigureMockMvc(secure = false)
 public class ReferenceDataControllerTest {
     public static final String URL_ROOM_TYPES = "/reference/room-types";
     public static final String URL_SESSION_TYPES = "/reference/session-types";
@@ -43,19 +43,14 @@ public class ReferenceDataControllerTest {
     private static final String DEFAULT_CODE = "sample-code";
     private static final String DEFAULT_DESCRIPTION = "sample description";
 
-    @Autowired
-    private EventsMockMvc mvc;
-
     @MockBean
     private ReferenceDataService testService;
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private S2SAuthenticationService s2SAuthenticationService;
+    private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
 
-    @Before
-    public void setupMock() {
-        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
-    }
+    @Autowired
+    private EventsMockMvc mvc;
 
     @Test
     public void fetchAllRoomTypes_returnsRoomTypesFromService() throws Exception {
