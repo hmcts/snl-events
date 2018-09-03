@@ -40,6 +40,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
         hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
         hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
+        hearingPart.setPriority(createHearingPart.getPriority());
 
         hearingPartRepository.save(hearingPart);
     }
