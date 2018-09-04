@@ -168,7 +168,6 @@ public class HearingPartControllerTest {
         chp.setCaseTitle(TITLE);
         chp.setHearingType(HEARING_TYPE);
         chp.setDuration(createDuration());
-        chp.setCreatedAt(createOffsetDateTime());
         chp.setPriority(Priority.Low);
         chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         chp.setReservedJudgeId(RESERVED_JUDGE_ID);
@@ -195,7 +194,6 @@ public class HearingPartControllerTest {
         hp.setCaseTitle(TITLE);
         hp.setHearingType(HEARING_TYPE);
         hp.setDuration(createDuration());
-        hp.setCreatedAt(createOffsetDateTime());
         hp.setPriority(Priority.Low);
         hp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         hp.setReservedJudgeId(RESERVED_JUDGE_ID);

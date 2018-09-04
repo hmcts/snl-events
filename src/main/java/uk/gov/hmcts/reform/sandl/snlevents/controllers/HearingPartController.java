@@ -88,10 +88,6 @@ public class HearingPartController {
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity upsertHearingPart(@RequestBody CreateHearingPart createHearingPart) throws IOException {
-
-        String msg = factsMapper.mapCreateHearingPartToRuleJsonMessage(createHearingPart);
-        rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
-
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createHearingPart.getId());
         hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
@@ -103,10 +99,14 @@ public class HearingPartController {
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
         hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
         hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
-        hearingPart.setCreatedAt(createHearingPart.getCreatedAt());
         hearingPart.setPriority(createHearingPart.getPriority());
 
-        return ok(hearingPartService.save(hearingPart));
+        hearingPart = hearingPartService.save(hearingPart);
+
+        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+        rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
+
+        return ok(hearingPart);
     }
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)

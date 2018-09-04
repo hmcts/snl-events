@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
@@ -22,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import javax.xml.ws.WebServiceException;
@@ -74,24 +72,6 @@ public class FactsMapper {
         Optional.ofNullable(session.getPerson()).ifPresent(p -> factSession.setJudgeId(p.getId().toString()));
 
         return objectMapper.writeValueAsString(factSession);
-    }
-
-    public String mapCreateHearingPartToRuleJsonMessage(CreateHearingPart createHearingPart)
-        throws JsonProcessingException {
-        FactHearingPart factHearingPart = new FactHearingPart();
-
-        factHearingPart.setId(createHearingPart.getId().toString());
-        factHearingPart.setDuration(createHearingPart.getDuration());
-        factHearingPart.setCaseType(createHearingPart.getCaseType());
-        factHearingPart.setScheduleStart(createHearingPart.getScheduleStart());
-        factHearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
-        if (createHearingPart.getCreatedAt() == null) {
-            factHearingPart.setCreatedAt(OffsetDateTime.now());
-        } else {
-            factHearingPart.setCreatedAt(createHearingPart.getCreatedAt());
-        }
-
-        return objectMapper.writeValueAsString(factHearingPart);
     }
 
     public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
