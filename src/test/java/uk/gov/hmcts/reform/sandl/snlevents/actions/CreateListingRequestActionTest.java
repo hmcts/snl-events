@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class CreateListingRequestActionTest {
@@ -35,6 +37,8 @@ public class CreateListingRequestActionTest {
 
     private CreateHearingPart createHearingPart;
 
+    private HearingPart hearingPart;
+
     @Mock
     private HearingPartRepository hearingPartRepository;
 
@@ -45,6 +49,9 @@ public class CreateListingRequestActionTest {
     public void setup() {
         this.createHearingPart = createCreateHearingPart();
         this.action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
+        this.hearingPart = createHearingPart();
+
+        when(hearingPartRepository.save(any(HearingPart.class))).thenReturn(hearingPart);
     }
 
     @Test
@@ -69,6 +76,7 @@ public class CreateListingRequestActionTest {
 
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
+        action.act();
         FactMessage factMessage = action.generateFactMessage();
 
         assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
@@ -77,6 +85,7 @@ public class CreateListingRequestActionTest {
 
     @Test
     public void generateFactMessage_throwsException() {
+        action.act();
         FactMessage factMessage = action.generateFactMessage();
 
         assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
@@ -125,6 +134,14 @@ public class CreateListingRequestActionTest {
         chp.setUserTransactionId(createUuid(TRANSACTION_ID));
 
         return chp;
+    }
+
+    private HearingPart createHearingPart() {
+        val hp = new HearingPart();
+        hp.setId(createUuid(ID));
+        hp.setCaseType("ct");
+
+        return hp;
     }
 
     private UUID createUuid(String uuid) {

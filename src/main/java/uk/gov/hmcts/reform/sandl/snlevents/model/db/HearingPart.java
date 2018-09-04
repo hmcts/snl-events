@@ -78,12 +78,14 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     private boolean isDeleted;
 
     @CreatedDate
+    @Column(updatable = false)
     private OffsetDateTime createdAt;
 
     @LastModifiedDate
     private OffsetDateTime modifiedAt;
 
     @CreatedBy
+    @Column(updatable = false)
     private String createdBy;
 
     @LastModifiedBy

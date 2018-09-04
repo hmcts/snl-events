@@ -31,8 +31,6 @@ public class CreateHearingPart implements UserTransactional {
 
     private OffsetDateTime scheduleEnd;
 
-    private OffsetDateTime createdAt;
-
     private Priority priority;
 
     private UUID reservedJudgeId;

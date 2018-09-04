@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class UpdateListingRequestActionTest {
@@ -58,6 +60,7 @@ public class UpdateListingRequestActionTest {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
         Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
+        when(hearingPartRepository.save(Matchers.any(HearingPart.class))).thenReturn(hearingPart);
     }
 
     @Test
