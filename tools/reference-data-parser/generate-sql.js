@@ -188,6 +188,10 @@ function resolveTableName(tableName1, tableName2) {
     return (tableName === "session_type" || tableName === "hearing_type");
   }
 
+  function isHearingTypeOrCaseType(tableName) {
+    return (tableName === "hearing_type" || tableName === "case_type");
+  }
+
   function isRoomTypeOrRoom(tableName) {
     return (tableName === "room" || tableName === "room_type");
   }
@@ -254,7 +258,7 @@ function generateAvailabilitySQL(judgeIds, roomsIds) {
     function createRoomsValues(roomIds) {
         return roomIds.map(roomId => {
             return `((SELECT uuid_generate_v4()), startDateTime, 28800, null, '${roomId}')`;
-        }); 
+        });
     }
     const values = createJudgeAvailability(judgeIds).concat(createRoomsValues(roomsIds));
     return `
