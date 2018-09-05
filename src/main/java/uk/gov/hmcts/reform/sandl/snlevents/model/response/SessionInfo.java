@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 
 import java.io.Serializable;
 import java.time.Duration;

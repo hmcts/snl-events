@@ -73,12 +73,12 @@ public class SessionControllerTest {
 
     @Test
     public void getSessionById_returnsSessionFromService() throws Exception {
-        final Session session = createSession();
+        final SessionInfo session = createSessionInfoList().get(0);
         final String uuidParam = "/9e8bb0a0-0b0f-463d-ae8e-67a09e12f0cc";
 
-        when(sessionService.getSessionById(any(UUID.class))).thenReturn(session);
+        when(sessionService.getSessionInfoById(any(UUID.class))).thenReturn(session);
 
-        val response = mvc.getAndMapResponse(SESSION_URL + uuidParam, Session.class);
+        val response = mvc.getAndMapResponse(SESSION_URL + uuidParam, SessionInfo.class);
         assertEquals(session, response);
     }
 
