@@ -21,7 +21,7 @@ public class UpsertSession implements UserTransactional {
 
     private Duration duration;
 
-    private String caseType;
+    private String sessionType;
 
     private String personId;
 

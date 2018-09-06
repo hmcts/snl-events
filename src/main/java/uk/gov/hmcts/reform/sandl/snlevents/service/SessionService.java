@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -49,6 +52,7 @@ public class SessionService {
             s.getPerson(),
             s.getRoom(),
             s.getCaseType(),
+            s.getSessionType(),
             s.getVersion()
         );
 
@@ -62,6 +66,8 @@ public class SessionService {
     private PersonRepository personRepository;
     @Autowired
     private HearingPartRepository hearingPartRepository;
+    @Autowired
+    private SessionTypeRepository sessionTypeRepository;
     @Autowired
     private UserTransactionService userTransactionService;
     @Autowired
@@ -137,7 +143,10 @@ public class SessionService {
         session.setId(upsertSession.getId());
         session.setDuration(upsertSession.getDuration());
         session.setStart(upsertSession.getStart());
-        session.setCaseType(upsertSession.getCaseType());
+        if (upsertSession.getSessionType() != null && !upsertSession.getSessionType().isEmpty()) {
+            val sessionType = sessionTypeRepository.findOne(upsertSession.getSessionType());
+            session.setSessionType(sessionType);
+        }
 
         if (upsertSession.getRoomId() != null && !upsertSession.getRoomId().isEmpty()) {
             Room room = roomRepository.findOne(getUuidFromString(upsertSession.getRoomId()));
@@ -185,7 +194,10 @@ public class SessionService {
     private Session updateSession(Session session, UpsertSession upsertSession) {
         Optional.ofNullable(upsertSession.getDuration()).ifPresent(session::setDuration);
         Optional.ofNullable(upsertSession.getStart()).ifPresent(session::setStart);
-        Optional.ofNullable(upsertSession.getCaseType()).ifPresent(session::setCaseType);
+        Optional.ofNullable(upsertSession.getSessionType()).ifPresent(sessionTypeCode -> {
+            val sessionType = sessionTypeRepository.findOne(sessionTypeCode);
+            session.setSessionType(sessionType);
+        });
 
         setResources(session, upsertSession);
 
