@@ -5,22 +5,31 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import lombok.val;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactCaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactPerson;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactRoom;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.xml.ws.WebServiceException;
@@ -162,5 +171,31 @@ public class FactsMapper {
         factTime.setValue(dateTimePartValue.getValue());
 
         return objectMapper.writeValueAsString(factTime);
+    }
+
+    public String mapDbSessionTypeToRuleJsonMessage(SessionType sessionType) throws JsonProcessingException {
+        FactSessionType factSessionType = new FactSessionType();
+        factSessionType.setId(sessionType.getCode());
+        List<FactCaseType> caseTypes = new ArrayList<>();
+        for (val ct : sessionType.getCaseTypes()) {
+            caseTypes.add(mapDbCaseTypeToFactCaseType(ct));
+        }
+        List<FactHearingType> hearingTypes = new ArrayList<>();
+        for (val ht : sessionType.getHearingTypes()) {
+            hearingTypes.add(mapDbHearingTypeToFactHearingType(ht));
+        }
+
+        factSessionType.setCaseTypes(caseTypes);
+        factSessionType.setHearingTypes(hearingTypes);
+
+        return objectMapper.writeValueAsString(factSessionType);
+    }
+
+    private FactCaseType mapDbCaseTypeToFactCaseType(CaseType ct) {
+        return new FactCaseType(ct.getCode(), ct.getDescription());
+    }
+
+    private FactHearingType mapDbHearingTypeToFactHearingType(HearingType ht) {
+        return new FactHearingType(ht.getCode(), ht.getDescription());
     }
 }
