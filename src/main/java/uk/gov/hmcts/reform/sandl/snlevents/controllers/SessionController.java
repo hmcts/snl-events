@@ -45,8 +45,8 @@ public class SessionController {
     private FactsMapper factsMapper;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Session getSessionById(@PathVariable("id") UUID id) {
-        return sessionService.getSessionById(id);
+    public SessionInfo getSessionById(@PathVariable("id") UUID id) {
+        return sessionService.getSessionInfoById(id);
     }
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
