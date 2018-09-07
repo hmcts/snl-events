@@ -78,8 +78,6 @@ public class SessionService {
     private FactsMapper factsMapper;
     @Autowired
     private RulesService rulesService;
-    @Autowired
-    private SessionTypeRepository sessionTypeRepository;
 
     public List getSessions() {
         return sessionRepository.findAll();

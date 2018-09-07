@@ -91,6 +91,7 @@ public class FactsMapperTest {
             + "\"id\":\"" + ID + "\","
             + "\"sessionId\":\"" + ID + "\","
             + "\"caseType\":\"" + CASE_TYPE + "\","
+            + "\"hearingType\":\"" + HEARING_TYPE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
             + "\"scheduleStart\":\"" + START_MAPPED + "\","
             + "\"scheduleEnd\":\"" + END_MAPPED + "\","
@@ -105,6 +106,7 @@ public class FactsMapperTest {
         hp.setId(createUuid());
         hp.setDuration(createDuration());
         hp.setCaseType(CASE_TYPE);
+        hp.setHearingType(HEARING_TYPE);
         hp.setScheduleStart(START);
         hp.setScheduleEnd(END);
         hp.setCreatedAt(START);
@@ -136,6 +138,7 @@ public class FactsMapperTest {
             + "\"id\":\"" + ID + "\","
             + "\"sessionId\":\"" + ID + "\","
             + "\"caseType\":\"" + CASE_TYPE + "\","
+            + "\"hearingType\":\"" + HEARING_TYPE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
             + "\"scheduleStart\":\"" + START_MAPPED + "\","
             + "\"scheduleEnd\":\"" + END_MAPPED + "\","
