@@ -15,7 +15,7 @@ public class UpsertSessionBuilder {
     private UUID transactionId = UUID.randomUUID();
     private OffsetDateTime start = OffsetDateTimeHelper.january2018();
     private Duration duration = Duration.ofMinutes(30);
-    private String caseType = "SCLAIMS";
+    private String sessionType = "SCLAIMS";
     private String personId = null;
     private String roomId = null;
     private Long version = 0L;
@@ -24,7 +24,7 @@ public class UpsertSessionBuilder {
         id = session.getId();
         start = session.getStart();
         duration = session.getDuration();
-        caseType = session.getCaseType();
+        sessionType = session.getSessionType() == null ? null : session.getSessionType().getCode();
         personId = session.getPerson() == null ? null : session.getPerson().getId().toString();
         roomId = session.getRoom() == null ? null : session.getRoom().getId().toString();
         version = session.getVersion();
@@ -61,7 +61,7 @@ public class UpsertSessionBuilder {
         us.setUserTransactionId(transactionId);
         us.setId(id);
         us.setDuration(duration);
-        us.setCaseType(caseType);
+        us.setSessionType(sessionType);
         us.setStart(start);
 
         return us;
