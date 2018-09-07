@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
@@ -53,6 +54,7 @@ public class SessionServiceTest {
     private static final OffsetDateTime OFFSET_DATE_TIME = OffsetDateTime.MAX;
     private static final long DURATION = 1L;
     private static final String CASE_TYPE = "case-type";
+    private static final String SESSION_TYPE = "session-type";
     private static final String UUID_STRING = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
     private static final String JUDGE_NAME = "judge-name";
     public static final LocalDate START_DATE = LocalDate.MIN;
@@ -169,7 +171,7 @@ public class SessionServiceTest {
 
         Session savedSession = sessionService.save(createUpsertSession());
         verify(sessionRepository, times(1)).save(any(Session.class));
-        assertThat(savedSession).isEqualToComparingFieldByFieldRecursively(createSession());
+        assertThat(savedSession).isEqualToComparingFieldByFieldRecursively(createSessionWithNoSessionType());
     }
 
     @Test
@@ -238,12 +240,26 @@ public class SessionServiceTest {
     private Session createSession(Long version) {
         Session session = new Session();
         session.setCaseType(CASE_TYPE);
+        session.setSessionType(new SessionType(SESSION_TYPE, "Session Type"));
         session.setDuration(createDuration());
         session.setId(createUuid());
         session.setPerson(getPerson());
         session.setRoom(getRoom());
         session.setStart(OFFSET_DATE_TIME);
         session.setVersion(version);
+
+        return session;
+    }
+
+    private Session createSessionWithNoSessionType() {
+        Session session = new Session();
+        session.setCaseType(CASE_TYPE);
+        session.setDuration(createDuration());
+        session.setId(createUuid());
+        session.setPerson(getPerson());
+        session.setRoom(getRoom());
+        session.setStart(OFFSET_DATE_TIME);
+        session.setVersion(null);
 
         return session;
     }
@@ -275,6 +291,7 @@ public class SessionServiceTest {
             createDuration(),
             getPerson(),
             getRoom(),
+            SESSION_TYPE,
             CASE_TYPE,
             VERSION
         );

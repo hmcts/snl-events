@@ -42,15 +42,19 @@ public class SessionService {
 
     public static final String SESSION_ENTITY_NAME = "session";
     private final Function<Session, SessionInfo> sessionDbToSessionInfo =
-        (Session s) -> new SessionInfo(
-            s.getId(),
-            s.getStart(),
-            s.getDuration(),
-            s.getPerson(),
-            s.getRoom(),
-            s.getCaseType(),
-            s.getVersion()
-        );
+        (Session s) -> {
+            String sessionTypeCode = s.getSessionType() != null ? s.getSessionType().getCode() : null;
+            return new SessionInfo(
+                s.getId(),
+                s.getStart(),
+                s.getDuration(),
+                s.getPerson(),
+                s.getRoom(),
+                sessionTypeCode,
+                s.getCaseType(),
+                s.getVersion()
+            );
+        };
 
     @PersistenceContext
     EntityManager entityManager;
@@ -79,6 +83,9 @@ public class SessionService {
         return sessionRepository.findOne(id);
     }
 
+    public SessionInfo getSessionInfoById(UUID id) {
+        return sessionDbToSessionInfo.apply(sessionRepository.findOne(id));
+    }
 
     //nottodo move entity manager to repository
     public List getSessionsFromDate(LocalDate localDate) {
