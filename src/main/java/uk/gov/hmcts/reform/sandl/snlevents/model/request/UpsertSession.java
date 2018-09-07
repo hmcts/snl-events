@@ -28,4 +28,6 @@ public class UpsertSession implements UserTransactional {
     private String roomId;
 
     private Long version;
+
+    private String sessionTypeCode;
 }

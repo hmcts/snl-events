@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
@@ -77,6 +78,8 @@ public class SessionService {
     private FactsMapper factsMapper;
     @Autowired
     private RulesService rulesService;
+    @Autowired
+    private SessionTypeRepository sessionTypeRepository;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -160,6 +163,11 @@ public class SessionService {
         if (upsertSession.getPersonId() != null && !upsertSession.getPersonId().isEmpty()) {
             Person person = personRepository.findOne(getUuidFromString(upsertSession.getPersonId()));
             session.setPerson(person);
+        }
+
+        if (upsertSession.getSessionTypeCode() != null && !upsertSession.getSessionTypeCode().isEmpty()) {
+            SessionType sessionType = sessionTypeRepository.findOne(upsertSession.getSessionTypeCode());
+            session.setSessionType(sessionType);
         }
 
         return this.save(session);
