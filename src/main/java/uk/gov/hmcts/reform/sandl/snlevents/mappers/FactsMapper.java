@@ -61,7 +61,7 @@ public class FactsMapper {
         factSession.setId(upsertSession.getId().toString());
         factSession.setDuration(upsertSession.getDuration());
         factSession.setStart(upsertSession.getStart());
-        factSession.setSessionType(upsertSession.getSessionType());
+        factSession.setSessionType(upsertSession.getSessionTypeCode());
 
         Optional.ofNullable(upsertSession.getRoomId()).ifPresent(factSession::setRoomId);
         Optional.ofNullable(upsertSession.getPersonId()).ifPresent(factSession::setJudgeId);
