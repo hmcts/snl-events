@@ -56,7 +56,6 @@ public class SessionServiceTest {
     private static final long DURATION = 1L;
     private static final String SESSION_TYPE = "session-type";
     private static final String SESSION_TYPE_DESC = "session-type-desc";
-    private static final String SESSION_TYPE = "session-type";
     private static final String UUID_STRING = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
     private static final String JUDGE_NAME = "judge-name";
     public static final LocalDate START_DATE = LocalDate.MIN;
@@ -177,7 +176,7 @@ public class SessionServiceTest {
 
         Session savedSession = sessionService.save(createUpsertSession());
         verify(sessionRepository, times(1)).save(any(Session.class));
-        assertThat(savedSession).isEqualToComparingFieldByFieldRecursively(createSessionWithNoSessionType());
+        assertThat(savedSession).isEqualToComparingFieldByFieldRecursively(createSession());
     }
 
     @Test
@@ -248,26 +247,12 @@ public class SessionServiceTest {
     private Session createSession(Long version) {
         Session session = new Session();
         session.setSessionType(new SessionType(SESSION_TYPE, SESSION_TYPE_DESC));
-        session.setSessionType(new SessionType(SESSION_TYPE, "Session Type"));
         session.setDuration(createDuration());
         session.setId(createUuid());
         session.setPerson(getPerson());
         session.setRoom(getRoom());
         session.setStart(OFFSET_DATE_TIME);
         session.setVersion(version);
-
-        return session;
-    }
-
-    private Session createSessionWithNoSessionType() {
-        Session session = new Session();
-        session.setCaseType(CASE_TYPE);
-        session.setDuration(createDuration());
-        session.setId(createUuid());
-        session.setPerson(getPerson());
-        session.setRoom(getRoom());
-        session.setStart(OFFSET_DATE_TIME);
-        session.setVersion(null);
 
         return session;
     }
@@ -299,8 +284,7 @@ public class SessionServiceTest {
             createDuration(),
             getPerson(),
             getRoom(),
-            null,
-            new SessionType(SESSION_TYPE, SESSION_TYPE_DESC),
+            SESSION_TYPE,
             VERSION
         );
     }

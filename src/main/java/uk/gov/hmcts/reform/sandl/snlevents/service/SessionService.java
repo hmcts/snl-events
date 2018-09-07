@@ -53,7 +53,6 @@ public class SessionService {
                 s.getPerson(),
                 s.getRoom(),
                 sessionTypeCode,
-                s.getCaseType(),
                 s.getVersion()
             );
         };

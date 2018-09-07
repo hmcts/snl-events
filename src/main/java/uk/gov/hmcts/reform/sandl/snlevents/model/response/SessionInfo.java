@@ -31,9 +31,5 @@ public class SessionInfo implements Serializable {
 
     String sessionTypeCode;
 
-    String caseType;
-
-    SessionType sessionType;
-
     Long version;
 }
