@@ -80,13 +80,11 @@ public class SessionService {
     }
 
     public Session getSessionById(UUID id) {
-        Session s = sessionRepository.findOne(id);
-        return s;
+        return sessionRepository.findOne(id);
     }
 
     public SessionInfo getSessionInfoById(UUID id) {
-        Session s = sessionRepository.findOne(id);
-        return sessionDbToSessionInfo.apply(s);
+        return sessionDbToSessionInfo.apply(sessionRepository.findOne(id));
     }
 
     //nottodo move entity manager to repository
