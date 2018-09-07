@@ -5,18 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("squid:S3437")
-public class FactSession implements Serializable {
+public class FactSessionType implements Serializable {
     private String id;
-    private String judgeId;
-    private OffsetDateTime start;
-    private Duration duration;
-    private String roomId;
-    private String sessionType;
+    private List<FactCaseType> caseTypes;
+    private List<FactHearingType> hearingTypes;
 }

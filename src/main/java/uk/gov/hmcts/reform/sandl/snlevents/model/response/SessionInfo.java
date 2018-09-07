@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-
 import java.util.UUID;
 
 @Data
@@ -29,8 +28,6 @@ public class SessionInfo implements Serializable {
     Room room;
 
     String sessionTypeCode;
-
-    String caseType;
 
     Long version;
 }

@@ -29,6 +29,7 @@ public class RulesService {
     public static final String UPSERT_AVAILABILITY = "upsert-availability";
     public static final String DELETE_SESSION = "delete-session";
     public static final String DELETE_HEARING_PART = "delete-hearingPart";
+    public static final String UPSERT_SESSION_TYPE = "upsert-sessionType";
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 

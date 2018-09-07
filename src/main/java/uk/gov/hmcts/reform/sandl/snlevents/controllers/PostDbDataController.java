@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.AvailabilityRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.io.IOException;
@@ -47,8 +49,15 @@ public class PostDbDataController {
     @Autowired
     private HearingPartRepository hearingPartRepository;
 
+    @Autowired
+    private SessionTypeRepository sessionTypeRepository;
+
     @PostMapping(path = "")
     public ResponseEntity postDbData() throws IOException {
+        for (SessionType sessionType : sessionTypeRepository.findAll()) {
+            String msg = factsMapper.mapDbSessionTypeToRuleJsonMessage(sessionType);
+            rulesService.postMessage(RulesService.UPSERT_SESSION_TYPE, msg);
+        }
 
         for (Room room : roomRepository.findAll()) {
             String msg = factsMapper.mapDbRoomToRuleJsonMessage(room);

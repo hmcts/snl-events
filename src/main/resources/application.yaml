@@ -56,6 +56,12 @@ fact-propagation:
     upsert-minute:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    insert-sessionType:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    upsert-sessionType:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    delete-sessionType:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
 
 liquibase:
   enabled: ${ENABLE_DB_MIGRATE_IN_SERVICE:true}

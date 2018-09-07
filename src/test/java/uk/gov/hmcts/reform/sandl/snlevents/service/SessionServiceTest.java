@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -53,8 +54,8 @@ public class SessionServiceTest {
     public static final long VERSION = 1L;
     private static final OffsetDateTime OFFSET_DATE_TIME = OffsetDateTime.MAX;
     private static final long DURATION = 1L;
-    private static final String CASE_TYPE = "case-type";
     private static final String SESSION_TYPE = "session-type";
+    private static final String SESSION_TYPE_DESC = "session-type-desc";
     private static final String UUID_STRING = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
     private static final String JUDGE_NAME = "judge-name";
     public static final LocalDate START_DATE = LocalDate.MIN;
@@ -73,6 +74,8 @@ public class SessionServiceTest {
     private PersonRepository personRepository;
     @Mock
     private HearingPartRepository hearingPartRepository;
+    @Mock
+    private SessionTypeRepository sessionTypeRepository;
     @Mock
     private UserTransactionService userTransactionService;
     @Mock
@@ -168,16 +171,19 @@ public class SessionServiceTest {
     public void save_savesSessionToRepository() {
         when(roomRepository.findOne(any(UUID.class))).thenReturn(getRoom());
         when(personRepository.findOne(any(UUID.class))).thenReturn(getPerson());
+        when(sessionTypeRepository.findOne(any(String.class)))
+            .thenReturn(new SessionType(SESSION_TYPE, SESSION_TYPE_DESC));
 
         Session savedSession = sessionService.save(createUpsertSession());
         verify(sessionRepository, times(1)).save(any(Session.class));
-        assertThat(savedSession).isEqualToComparingFieldByFieldRecursively(createSessionWithNoSessionType());
+        assertThat(savedSession).isEqualToComparingFieldByFieldRecursively(createSession());
     }
 
     @Test
     public void saveWithTransaction_startsTransaction() {
         when(userTransactionService.startTransaction(eq(createUuid()), any(List.class)))
             .thenReturn(createUserTransaction());
+        when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
 
         UserTransaction transaction = sessionService.saveWithTransaction(createUpsertSession());
 
@@ -196,6 +202,7 @@ public class SessionServiceTest {
         when(userTransactionService.startTransaction(any(UUID.class), any(List.class)))
             .thenReturn(createUserTransaction());
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
+        when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).then(returnsFirstArg());
         when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session))).thenReturn(message);
 
@@ -239,27 +246,13 @@ public class SessionServiceTest {
 
     private Session createSession(Long version) {
         Session session = new Session();
-        session.setCaseType(CASE_TYPE);
-        session.setSessionType(new SessionType(SESSION_TYPE, "Session Type"));
+        session.setSessionType(new SessionType(SESSION_TYPE, SESSION_TYPE_DESC));
         session.setDuration(createDuration());
         session.setId(createUuid());
         session.setPerson(getPerson());
         session.setRoom(getRoom());
         session.setStart(OFFSET_DATE_TIME);
         session.setVersion(version);
-
-        return session;
-    }
-
-    private Session createSessionWithNoSessionType() {
-        Session session = new Session();
-        session.setCaseType(CASE_TYPE);
-        session.setDuration(createDuration());
-        session.setId(createUuid());
-        session.setPerson(getPerson());
-        session.setRoom(getRoom());
-        session.setStart(OFFSET_DATE_TIME);
-        session.setVersion(null);
 
         return session;
     }
@@ -292,7 +285,6 @@ public class SessionServiceTest {
             getPerson(),
             getRoom(),
             SESSION_TYPE,
-            CASE_TYPE,
             VERSION
         );
     }
@@ -311,7 +303,7 @@ public class SessionServiceTest {
 
     private UpsertSession createUpsertSession() {
         UpsertSession session = new UpsertSession();
-        session.setCaseType(CASE_TYPE);
+        session.setSessionType(SESSION_TYPE);
         session.setDuration(createDuration());
         session.setId(createUuid());
         session.setUserTransactionId(createUuid());
