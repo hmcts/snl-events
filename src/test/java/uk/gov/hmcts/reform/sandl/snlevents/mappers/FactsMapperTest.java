@@ -246,7 +246,7 @@ public class FactsMapperTest {
         us.setId(createUuid());
         us.setDuration(createDuration());
         us.setStart(START);
-        us.setSessionType(SESSION_TYPE);
+        us.setSessionTypeCode(SESSION_TYPE);
         us.setRoomId(createUuid(ROOM_ID).toString());
         us.setPersonId(createUuid(PERSON_ID).toString());
 
