@@ -13,9 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.sandl.snlevents.config.SubscribersConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,12 +23,13 @@ import java.util.UUID;
 public class RulesService {
     public static final String INSERT_SESSION = "insert-session";
     public static final String UPSERT_SESSION = "upsert-session";
-    public static final String DELETE_SESSION = "delete-session";
     public static final String UPSERT_HEARING_PART = "upsert-hearingPart";
-    public static final String DELETE_HEARING_PART = "delete-hearingPart";
     public static final String UPSERT_ROOM = "upsert-room";
     public static final String UPSERT_JUDGE = "upsert-judge";
     public static final String UPSERT_AVAILABILITY = "upsert-availability";
+    public static final String DELETE_SESSION = "delete-session";
+    public static final String DELETE_HEARING_PART = "delete-hearingPart";
+    public static final String UPSERT_SESSION_TYPE = "upsert-sessionType";
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
@@ -45,19 +45,23 @@ public class RulesService {
     private SubscribersConfiguration subscribersConfiguration;
 
     @Autowired
-    private S2SAuthenticationService s2sAuthService;
+    private S2SRulesAuthenticationClient s2sAuthService;
 
-    public void postMessage(String msgType, String msgData) throws IOException {
+    public void postMessage(String msgType, String msgData) {
         postToSubscribers(null, new FactMessage(msgType, msgData));
     }
 
     public void postMessage(UUID userTransactionId,
-                            String msgType, String msgData) throws IOException {
+                            String msgType, String msgData) {
         postToSubscribers(userTransactionId, new FactMessage(msgType, msgData));
     }
 
+    public void postMessage(UUID userTransactionId, FactMessage factMessage) {
+        postToSubscribers(userTransactionId, factMessage);
+    }
+
     @HystrixCommand
-    private void postToSubscribers(UUID userTransactionId, FactMessage msg) throws IOException {
+    private void postToSubscribers(UUID userTransactionId, FactMessage msg) {
         Map<String, List<String>> subscribers = subscribersConfiguration.getSubscribers();
 
         HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();

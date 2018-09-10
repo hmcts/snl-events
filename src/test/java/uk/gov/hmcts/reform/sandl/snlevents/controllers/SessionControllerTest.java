@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
-import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationService;
+import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
@@ -33,11 +33,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(SessionController.class)
 @Import(TestConfiguration.class)
+@AutoConfigureMockMvc(secure = false)
 public class SessionControllerTest {
 
     private static final String SESSION_URL = "/sessions";
@@ -45,7 +47,7 @@ public class SessionControllerTest {
     @MockBean
     private SessionService sessionService;
     @MockBean
-    private S2SAuthenticationService s2SAuthenticationService;
+    private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private RulesService rulesService;
@@ -60,11 +62,6 @@ public class SessionControllerTest {
     @Autowired
     private EventsMockMvc mvc;
 
-    @Before
-    public void setupMock() {
-        when(s2SAuthenticationService.validateToken(any())).thenReturn(true);
-    }
-
     @Test
     public void fetchAllSessions_returnsSessionsFromService() throws Exception {
         val sessions = createSessionList();
@@ -76,12 +73,12 @@ public class SessionControllerTest {
 
     @Test
     public void getSessionById_returnsSessionFromService() throws Exception {
-        final Session session = createSession();
+        final SessionInfo session = createSessionInfoList().get(0);
         final String uuidParam = "/9e8bb0a0-0b0f-463d-ae8e-67a09e12f0cc";
 
-        when(sessionService.getSessionById(any(UUID.class))).thenReturn(session);
+        when(sessionService.getSessionInfoById(any(UUID.class))).thenReturn(session);
 
-        val response = mvc.getAndMapResponse(SESSION_URL + uuidParam, Session.class);
+        val response = mvc.getAndMapResponse(SESSION_URL + uuidParam, SessionInfo.class);
         assertEquals(session, response);
     }
 
@@ -138,8 +135,8 @@ public class SessionControllerTest {
         when(sessionService.saveWithTransaction(upsertSession)).thenReturn(userTransaction);
         when(userTransactionService.rulesProcessed(userTransaction)).thenReturn(userTransaction);
 
-        val response = mvc.putAndMapResponse(
-            SESSION_URL, objectMapper.writeValueAsString(upsertSession), UserTransaction.class
+        val response = mvc.callAndMapResponse(
+            put(SESSION_URL), objectMapper.writeValueAsString(upsertSession), UserTransaction.class
         );
         assertEquals(userTransaction, response);
     }

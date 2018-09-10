@@ -49,6 +49,8 @@ public class Session extends VersionedEntity implements Serializable {
 
     @Getter
     @Setter
+    @EqualsAndHashCode.Exclude
+    @Deprecated
     private String caseType;
 
     @ManyToOne

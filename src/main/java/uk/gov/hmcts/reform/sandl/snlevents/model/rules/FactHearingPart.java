@@ -16,6 +16,7 @@ public class FactHearingPart implements Serializable {
     private String id;
     private String sessionId;
     private String caseType;
+    private String hearingType;
     private Duration duration;
     private OffsetDateTime scheduleStart;
     private OffsetDateTime scheduleEnd;

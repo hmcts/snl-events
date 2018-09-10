@@ -18,5 +18,5 @@ public class FactSession implements Serializable {
     private OffsetDateTime start;
     private Duration duration;
     private String roomId;
-    private String caseType;
+    private String sessionType;
 }

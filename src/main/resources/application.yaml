@@ -30,6 +30,8 @@ fact-propagation:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
     upsert-hearingPart:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    delete-hearingPart:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
     upsert-room:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Search
@@ -54,6 +56,12 @@ fact-propagation:
     upsert-minute:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    insert-sessionType:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    upsert-sessionType:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+    delete-sessionType:
+      - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
 
 liquibase:
   enabled: ${ENABLE_DB_MIGRATE_IN_SERVICE:true}
@@ -74,7 +82,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-      dialect: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
 #      properties:
 #        charSet: UTF-8
