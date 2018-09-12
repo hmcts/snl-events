@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class HearingType extends BaseReferenceData implements Serializable {
 
     @EqualsAndHashCode.Exclude
     @Getter
+    @JsonIgnore
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
         CascadeType.MERGE
