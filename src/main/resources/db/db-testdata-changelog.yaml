@@ -10,6 +10,14 @@ databaseChangeLog:
         - sqlFile:
             path: db/testdata/insert-testdata.sql
             splitStatements: false
-
+  - changeSet:
+      id: insert-test-data-postgresql-only
+      validCheckSum: ANY
+      author: kpakur
+      dbms: postgresql
+      changes:
+        - sqlFile:
+            path: db/testdata/insert-testdata-postgresql.sql
+            splitStatements: false
 # do NOT add more changeset files with test data, use the existing one and maintain what's there
 # to have a good base data for development and testing
