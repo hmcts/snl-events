@@ -20,4 +20,6 @@ public class AmendSessionRequest implements UserTransactional {
     private String startTime;
 
     private String sessionTypeCode;
+
+    private Long version;
 }

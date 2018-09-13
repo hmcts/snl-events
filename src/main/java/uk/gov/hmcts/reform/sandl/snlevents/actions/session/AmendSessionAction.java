@@ -14,7 +14,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -50,14 +53,16 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
         session.setDuration(Duration.ofSeconds(amendSessionRequest.getDurationInSeconds()));
         session.setStart(updateStartTimeFromRequest(session.getStart(), amendSessionRequest.getStartTime()));
+        entityManager.detach(session);
+        session.setVersion(amendSessionRequest.getVersion());
 
         sessionRepository.save(session);
     }
 
     private OffsetDateTime updateStartTimeFromRequest(OffsetDateTime startDateTime, String startTime) {
-        val parts = startTime.split("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
-        val hour = Integer.valueOf(parts[0]);
-        val minute = Integer.valueOf(parts[1]);
+        val localTime = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
+        val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
+        val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
 
         return startDateTime.withHour(hour).withMinute(minute);
     }

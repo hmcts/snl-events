@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import javax.persistence.ManyToMany;
 public class CaseType extends BaseReferenceData implements Serializable {
 
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     @Getter
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
@@ -25,6 +27,7 @@ public class CaseType extends BaseReferenceData implements Serializable {
     private Set<SessionType> sessionTypes = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     @Getter
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
