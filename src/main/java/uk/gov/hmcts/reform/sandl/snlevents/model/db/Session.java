@@ -72,7 +72,7 @@ public class Session extends VersionedEntity implements Serializable {
         })
     private SessionType sessionType;
 
-    public void setSessionType(SessionType sessionType) {
+    public void  setSessionType(SessionType sessionType) {
         this.sessionType = sessionType;
         sessionType.getSessions().add(this);
     }
