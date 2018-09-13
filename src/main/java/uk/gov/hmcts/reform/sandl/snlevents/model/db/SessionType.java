@@ -31,6 +31,7 @@ public class SessionType extends BaseReferenceData implements Serializable {
 
     @EqualsAndHashCode.Exclude
     @Getter
+    @JsonIgnore
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
         CascadeType.MERGE
@@ -44,6 +45,7 @@ public class SessionType extends BaseReferenceData implements Serializable {
 
     @EqualsAndHashCode.Exclude
     @Getter
+    @JsonIgnore
     @ManyToMany(cascade = {
         CascadeType.PERSIST,
         CascadeType.MERGE

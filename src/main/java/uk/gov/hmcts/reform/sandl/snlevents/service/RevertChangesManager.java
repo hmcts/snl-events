@@ -56,6 +56,25 @@ public class RevertChangesManager {
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
 
+        } else if ("session".equals(utd.getEntity()) && "update".equals(utd.getCounterAction())) {
+            Session session = sessionRepository.findOne(utd.getEntityId());
+
+            Session previousSession;
+            String msg;
+
+            try {
+                previousSession = objectMapper.readValue(utd.getBeforeData(), Session.class);
+                msg = factsMapper.mapDbSessionToRuleJsonMessage(previousSession);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_SESSION, msg);
+
+            previousSession.setVersion(session.getVersion());
+
+            sessionRepository.save(previousSession);
+
         } else if ("hearingPart".equals(utd.getEntity())) {
             handleHearingPart(utd);
         }
