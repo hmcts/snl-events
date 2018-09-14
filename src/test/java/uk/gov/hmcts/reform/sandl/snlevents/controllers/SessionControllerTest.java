@@ -11,11 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.AmendSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -36,6 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -167,6 +170,22 @@ public class SessionControllerTest {
             SessionWithHearings.class
         );
         assertEquals(sessionWithHearings, response);
+    }
+
+    @Test
+    public void amendSession_returnsUserTransaction() throws Exception {
+        val userTransaction = new UserTransaction();
+        userTransaction.setId(UUID.randomUUID());
+
+        when(actionService.execute(any(AmendSessionAction.class))).thenReturn(userTransaction);
+
+        val response = mvc.callAndMapResponse(
+            post(SESSION_URL + "/amend"),
+            new AmendSessionRequest(),
+            UserTransaction.class
+        );
+
+        assertEquals(userTransaction, response);
     }
 
     private Session createSession() {
