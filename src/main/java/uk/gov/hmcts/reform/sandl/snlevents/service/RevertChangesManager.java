@@ -45,36 +45,8 @@ public class RevertChangesManager {
     }
 
     private void handleTransactionData(UserTransactionData utd) {
-        if ("session".equals(utd.getEntity()) && "delete".equals(utd.getCounterAction())) {
-            Session session = sessionRepository.findOne(utd.getEntityId());
-
-            if (session == null) {
-                throw new WebServiceException("session not found");
-            }
-
-            sessionRepository.delete(utd.getEntityId());
-            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
-
-        } else if ("session".equals(utd.getEntity()) && "update".equals(utd.getCounterAction())) {
-            Session session = sessionRepository.findOne(utd.getEntityId());
-
-            Session previousSession;
-            String msg;
-
-            try {
-                previousSession = objectMapper.readValue(utd.getBeforeData(), Session.class);
-                msg = factsMapper.mapDbSessionToRuleJsonMessage(previousSession);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_SESSION, msg);
-
-            previousSession.setVersion(session.getVersion());
-
-            sessionRepository.save(previousSession);
-
+        if ("session".equals(utd.getEntity())) {
+            handleSession(utd);
         } else if ("hearingPart".equals(utd.getEntity())) {
             handleHearingPart(utd);
         }
@@ -111,6 +83,40 @@ public class RevertChangesManager {
             }
 
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_HEARING_PART, msg);
+        }
+    }
+
+    private void handleSession(UserTransactionData utd) {
+        if ("delete".equals(utd.getCounterAction())) {
+            Session session = sessionRepository.findOne(utd.getEntityId());
+
+            if (session == null) {
+                throw new WebServiceException("session not found");
+            }
+
+            sessionRepository.delete(utd.getEntityId());
+            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+
+        } else if ("update".equals(utd.getCounterAction())) {
+            Session session = sessionRepository.findOne(utd.getEntityId());
+
+            Session previousSession;
+            String msg;
+
+            try {
+                previousSession = objectMapper.readValue(utd.getBeforeData(), Session.class);
+                msg = factsMapper.mapDbSessionToRuleJsonMessage(previousSession);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_SESSION, msg);
+
+            previousSession.setVersion(session.getVersion());
+
+            sessionRepository.save(previousSession);
+
         }
     }
 }
