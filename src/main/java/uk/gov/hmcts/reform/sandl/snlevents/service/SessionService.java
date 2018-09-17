@@ -225,10 +225,9 @@ public class SessionService {
     public UserTransaction updateWithTransaction(Session givenSession,
                                                  UpsertSession upsertSession,
                                                  List<HearingPart> hearingParts) throws IOException {
+        List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(givenSession, hearingParts);
         Session session = updateSession(givenSession, upsertSession);
         save(session);
-
-        List<UserTransactionData> userTransactionDataList = generateUserTransactionDataList(session, hearingParts);
 
         UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(),
             userTransactionDataList);
