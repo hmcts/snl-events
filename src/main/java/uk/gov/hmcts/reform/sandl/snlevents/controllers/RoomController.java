@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.RoomResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RoomService;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class RoomController {
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    List<Room> fetchAllRooms() {
-        return roomService.getRooms();
+    List<RoomResponse> fetchAllRooms() {
+        return roomService.getRoomResponses();
     }
 }
