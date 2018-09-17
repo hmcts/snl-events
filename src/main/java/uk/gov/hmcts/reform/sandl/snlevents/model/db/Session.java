@@ -81,9 +81,11 @@ public class Session extends VersionedEntity implements Serializable, HistoryAud
 
     @CreatedDate
     @Column(updatable = false)
+    @EqualsAndHashCode.Exclude
     private OffsetDateTime createdAt;
 
     @LastModifiedDate
+    @EqualsAndHashCode.Exclude
     private OffsetDateTime modifiedAt;
 
     @CreatedBy
