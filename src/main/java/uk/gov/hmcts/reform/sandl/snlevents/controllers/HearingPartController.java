@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -78,7 +79,7 @@ public class HearingPartController {
     }
 
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createHearingPartAction(@RequestBody CreateHearingPart createHearingPart) throws Exception {
+    public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPart createHearingPart) throws Exception {
         Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
 
         UserTransaction ut = actionService.execute(action);
