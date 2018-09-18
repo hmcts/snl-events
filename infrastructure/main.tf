@@ -19,9 +19,7 @@ module "snl-events" {
     SNL_EVENTS_DB_USERNAME = "${module.postgres-snl-events.user_name}"
     SNL_EVENTS_DB_PASSWORD = "${module.postgres-snl-events.postgresql_password}"
     SNL_EVENTS_DB_PARAMS = "?ssl=true"
-    SNL_RULES_URL1 = "http://10.104.8.9:8091"
-    SNL_RULES_URL2 = "http://10.104.8.6:8091"
-    SNL_RULES_URL3 = "http://10.104.8.8:8091"
+    SNL_RULES_URL = "http://10.104.8.9:8091"
   }
 
 }
