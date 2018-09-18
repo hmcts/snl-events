@@ -104,3 +104,5 @@ spring:
 #        remove-abandoned-timeout: 60
 #        log-abandoned: true
 #        abandon-when-percentage-full: 0
+
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 10000
