@@ -31,12 +31,10 @@ databaseChangeLog:
             type: UUID
         - column:
             constraints:
-              nullable: false
             name: start
             type: TIMESTAMP WITH TIME ZONE
         - column:
             constraints:
-              nullable: false
             name: duration
             type: BIGINT
         - column:
