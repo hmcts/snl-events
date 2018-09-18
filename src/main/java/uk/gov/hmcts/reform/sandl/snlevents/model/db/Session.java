@@ -67,7 +67,7 @@ public class Session extends VersionedEntity implements Serializable, HistoryAud
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "session")
     @JsonIgnore
-    @Audited(targetAuditMode = NOT_AUDITED)
+    @NotAudited
     private List<HearingPart> hearingParts;
 
     @EqualsAndHashCode.Exclude
