@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class ErrorValidationErrors implements Serializable {
+public class ValidationErrorDetails implements Serializable {
     private List<ErrorDetails> errorDetailsList;
 
     public static ErrorDetails fromFieldError(FieldError fieldError) {
@@ -23,7 +23,7 @@ public class ErrorValidationErrors implements Serializable {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public static class ErrorDetails implements Serializable{
+    public static class ErrorDetails implements Serializable {
         private String field;
         private String errorMessage;
     }

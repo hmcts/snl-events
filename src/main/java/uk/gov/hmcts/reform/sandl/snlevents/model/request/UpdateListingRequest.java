@@ -8,11 +8,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
 import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor

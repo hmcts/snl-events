@@ -78,6 +78,26 @@ public class HearingPartController {
         return hearingPartService.getAllHearingParts();
     }
 
+    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity upsertHearingPart(@RequestBody CreateHearingPart createHearingPart) throws IOException {
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(createHearingPart.getId());
+        hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
+        hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
+        hearingPart.setCaseType(createHearingPart.getCaseType());
+        hearingPart.setHearingType(createHearingPart.getHearingType());
+        hearingPart.setDuration(createHearingPart.getDuration());
+        hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
+        hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
+        hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
+        hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
+        hearingPart.setPriority(createHearingPart.getPriority());
+        hearingPart = hearingPartService.save(hearingPart);
+        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+        rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
+        return ok(hearingPart);
+    }
+
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPart createHearingPart) {
         Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
