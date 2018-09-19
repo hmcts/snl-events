@@ -1,0 +1,78 @@
+databaseChangeLog:
+- changeSet:
+    id: create-session-history-table
+    author: rkruk
+    changes:
+    - createTable:
+        tableName: session_aud
+        columns:
+        #audit columns
+        - column:
+            name: rev
+            type: int
+            constraints:
+              nullable: false
+              foreignKeyName: fk_session_aud_revinfo
+              references: revinfo(rev)
+        - column:
+            name: revtype
+            type: smallint
+        #session columns
+        - column:
+            constraints:
+              nullable: false
+            name: id
+            type: UUID
+        - column:
+            name: person_id
+            type: UUID
+        - column:
+            name: room_id
+            type: UUID
+        - column:
+            constraints:
+            name: start
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+            name: duration
+            type: BIGINT
+        - column:
+            name: session_type_code
+            type: varchar(255)
+        - column:
+            name: modified_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: created_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: created_by
+            type: varchar(255)
+        - column:
+            name: modified_by
+            type: varchar(255)
+    - addPrimaryKey:
+        columnNames: id, rev
+        constraintName: pk_session_aud
+        schemaName: public
+        tableName: session_aud
+- changeSet:
+    id: sessions-new-columns-forhistory
+    author: rkruk
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: modified_at
+            type: timestamp with time zone
+        - column:
+            name: modified_by
+            type: varchar(255)
+        - column:
+            name: created_by
+            type: varchar(255)
+        - column:
+            name: created_at
+            type: timestamp with time zone
+        tableName: session
