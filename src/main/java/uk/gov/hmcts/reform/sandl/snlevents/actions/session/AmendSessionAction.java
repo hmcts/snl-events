@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import java.time.Duration;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +50,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         }
 
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
-        session.setDuration(Duration.ofSeconds(amendSessionRequest.getDurationInSeconds()));
+        session.setDuration(amendSessionRequest.getDurationInSeconds());
         session.setStart(updateStartTimeFromRequest(session.getStart(), amendSessionRequest.getStartTime()));
         entityManager.detach(session);
         session.setVersion(amendSessionRequest.getVersion());

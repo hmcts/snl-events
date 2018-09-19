@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 public class AmendSessionActionTest {
     private static final String SESSION_TYPE_CODE = "TYPE";
-    private static final Long DURATION = 1800L;
+    private static final Duration DURATION = Duration.ofMinutes(30);
     private static final String START_TIME = "10:00";
 
     private static final UUID ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
@@ -121,7 +121,7 @@ public class AmendSessionActionTest {
         s.setId(ID);
         s.setStart(dateTime.withHour(10).withMinute(0));
         s.setSessionType(createSessionType());
-        s.setDuration(Duration.ofSeconds(DURATION));
+        s.setDuration(DURATION);
 
         return s;
     }

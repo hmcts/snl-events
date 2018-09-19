@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
+import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
 
+import java.time.Duration;
 import java.util.UUID;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -15,10 +18,13 @@ public class AmendSessionRequest implements UserTransactional {
 
     private UUID userTransactionId;
 
-    private Long durationInSeconds;
+    @MinDuration(minMinutes = 1)
+    private Duration durationInSeconds;
 
+    @NotNull
     private String startTime;
 
+    @NotNull
     private String sessionTypeCode;
 
     private Long version;

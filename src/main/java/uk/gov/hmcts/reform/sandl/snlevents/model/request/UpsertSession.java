@@ -4,10 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
+import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor
@@ -17,8 +21,10 @@ public class UpsertSession implements UserTransactional {
 
     private UUID userTransactionId;
 
+    @NotNull
     private OffsetDateTime start;
 
+    @MinDuration(minMinutes = 1)
     private Duration duration;
 
     private String sessionType;
@@ -29,5 +35,7 @@ public class UpsertSession implements UserTransactional {
 
     private Long version;
 
+    @NotNull
+    @Size(max = 255)
     private String sessionTypeCode;
 }

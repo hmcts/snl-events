@@ -28,7 +28,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -133,10 +135,10 @@ public class SessionControllerTest {
 
     @Test
     public void updateSession_returnsUserTransaction() throws Exception {
-        UpsertSession upsertSession = new UpsertSession();
+        UpsertSession upsertSession = createUpsertSession();
         UserTransaction userTransaction = new UserTransaction();
 
-        when(sessionService.updateSession(upsertSession)).thenReturn(userTransaction);
+        when(sessionService.updateSession(any(UpsertSession.class))).thenReturn(userTransaction);
 
         val response = mvc.putAndMapResponse(
             SESSION_URL + "/update", objectMapper.writeValueAsString(upsertSession), UserTransaction.class
@@ -146,15 +148,15 @@ public class SessionControllerTest {
 
     @Test
     public void insertSession_returnsUserTransaction() throws Exception {
-        UpsertSession upsertSession = new UpsertSession();
+        UpsertSession upsertSession = createUpsertSession();
         UserTransaction userTransaction = new UserTransaction();
 
-        when(factsMapper.mapCreateSessionToRuleJsonMessage(upsertSession)).thenReturn("rules message");
-        when(sessionService.saveWithTransaction(upsertSession)).thenReturn(userTransaction);
+        when(factsMapper.mapCreateSessionToRuleJsonMessage(any(UpsertSession.class))).thenReturn("rules message");
+        when(sessionService.saveWithTransaction(any(UpsertSession.class))).thenReturn(userTransaction);
         when(userTransactionService.rulesProcessed(userTransaction)).thenReturn(userTransaction);
 
         val response = mvc.callAndMapResponse(
-            put(SESSION_URL), objectMapper.writeValueAsString(upsertSession), UserTransaction.class
+            put(SESSION_URL), upsertSession, UserTransaction.class
         );
         assertEquals(userTransaction, response);
     }
@@ -181,7 +183,7 @@ public class SessionControllerTest {
 
         val response = mvc.callAndMapResponse(
             post(SESSION_URL + "/amend"),
-            new AmendSessionRequest(),
+            createAmendSessionRequest(),
             UserTransaction.class
         );
 
@@ -190,6 +192,24 @@ public class SessionControllerTest {
 
     private Session createSession() {
         return new Session();
+    }
+
+    private UpsertSession createUpsertSession() {
+        UpsertSession upsertSession = new UpsertSession();
+        upsertSession.setStart(OffsetDateTime.now());
+        upsertSession.setDuration(Duration.ofMinutes(2));
+        upsertSession.setSessionTypeCode("f-track");
+
+        return upsertSession;
+    }
+
+    private AmendSessionRequest createAmendSessionRequest() {
+        AmendSessionRequest amendSessionRequest = new AmendSessionRequest();
+        amendSessionRequest.setDurationInSeconds(Duration.ofMinutes(2));
+        amendSessionRequest.setStartTime("15:00");
+        amendSessionRequest.setSessionTypeCode("f-track");
+
+        return amendSessionRequest;
     }
 
     private List<Session> createSessionList() {
