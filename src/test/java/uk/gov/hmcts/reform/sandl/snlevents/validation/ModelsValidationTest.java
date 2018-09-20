@@ -5,10 +5,11 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.time.Duration;
 import java.util.UUID;
+
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -28,7 +29,7 @@ public class ModelsValidationTest {
         amendSessionRequest.setSessionTypeCode("f-track");
         amendSessionRequest.setVersion(0L);
 
-        assertThat(validator.validate(amendSessionRequest).isEmpty(), is(true) );
+        assertThat(validator.validate(amendSessionRequest).isEmpty(), is(true));
     }
 
     @Test
@@ -36,7 +37,7 @@ public class ModelsValidationTest {
         AmendSessionRequest amendSessionRequest = new AmendSessionRequest();
         amendSessionRequest.setDurationInSeconds(Duration.ofMinutes(0));
 
-        assertThat(validator.validate(amendSessionRequest).size(), is(6) );
+        assertThat(validator.validate(amendSessionRequest).size(), is(6));
     }
 
     @Test

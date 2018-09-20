@@ -199,6 +199,9 @@ public class SessionControllerTest {
         upsertSession.setStart(OffsetDateTime.now());
         upsertSession.setDuration(Duration.ofMinutes(2));
         upsertSession.setSessionTypeCode("f-track");
+        upsertSession.setId(UUID.randomUUID());
+        upsertSession.setUserTransactionId(UUID.randomUUID());
+        upsertSession.setVersion(0L);
 
         return upsertSession;
     }
@@ -208,6 +211,9 @@ public class SessionControllerTest {
         amendSessionRequest.setDurationInSeconds(Duration.ofMinutes(2));
         amendSessionRequest.setStartTime("15:00");
         amendSessionRequest.setSessionTypeCode("f-track");
+        amendSessionRequest.setVersion(0L);
+        amendSessionRequest.setId(UUID.randomUUID());
+        amendSessionRequest.setUserTransactionId(UUID.randomUUID());
 
         return amendSessionRequest;
     }
