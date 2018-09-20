@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemReferenceRespon
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,7 @@ public class ProblemServiceTest {
     public static final String ENTITY_ID = "eid";
     public static final String PROBLEM_ID = "problem-id";
     private static final String TYPE = "type";
+    private static final OffsetDateTime CREATED_AT = OffsetDateTime.now();
 
     @InjectMocks
     private ProblemService problemService;
@@ -119,6 +121,7 @@ public class ProblemServiceTest {
         cp.setMessage(MESSAGE);
         cp.setSeverity(SEVERITY);
         cp.setType(TYPE);
+        cp.setCreatedAt(CREATED_AT);
 
         return cp;
     }
@@ -138,6 +141,7 @@ public class ProblemServiceTest {
         problem.setMessage(MESSAGE);
         problem.setSeverity(SEVERITY);
         problem.setType(TYPE);
+        problem.setCreatedAt(CREATED_AT);
 
         ProblemReference problemReference = new ProblemReference();
         problemReference.setDescription(DESCRIPTION);
@@ -159,6 +163,7 @@ public class ProblemServiceTest {
         problemResponse.setMessage(MESSAGE);
         problemResponse.setSeverity(SEVERITY);
         problemResponse.setType(TYPE);
+        problemResponse.setCreatedAt(CREATED_AT);
 
         ProblemReferenceResponse problemReference = new ProblemReferenceResponse();
         problemReference.setDescription(DESCRIPTION);
