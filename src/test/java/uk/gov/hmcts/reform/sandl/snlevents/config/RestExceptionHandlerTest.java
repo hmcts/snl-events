@@ -35,7 +35,7 @@ public class RestExceptionHandlerTest {
     WebRequest request;
 
     @Test
-    public void das() {
+    public void handleMethodArgumentNotValid_shouldTransformResponseCorrectly() {
         FieldError fieldError = new FieldError("createHearingPart", "duration",
             "Duration is shorter than 1 minutes");
 

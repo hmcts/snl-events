@@ -14,8 +14,10 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AmendSessionRequest implements UserTransactional {
+    @NotNull
     private UUID id;
 
+    @NotNull
     private UUID userTransactionId;
 
     @MinDuration(minMinutes = 1)
