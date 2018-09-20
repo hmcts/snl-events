@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 
@@ -22,6 +25,9 @@ public class FactMessageServiceTest {
 
     @Mock
     private ProblemService problemService;
+
+    @Spy
+    private ObjectMapper objectMapper;
 
     @Test
     public void handle_savesProblemToProblemService() throws IOException {
