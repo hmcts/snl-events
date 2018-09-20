@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+        id: add-createdAt-column-to-problem-table
+        author: kzielinski
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: true
+              tableName: problem
