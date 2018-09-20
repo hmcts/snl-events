@@ -20,6 +20,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UpdateListingRequest implements UserTransactional {
 
+    @NotNull
     private UUID id;
 
     @NotEmpty
@@ -53,8 +54,10 @@ public class UpdateListingRequest implements UserTransactional {
 
     private String communicationFacilitator;
 
+    @NotNull
     private UUID userTransactionId;
 
+    @NotNull
     private Long version;
 }
 

@@ -17,8 +17,10 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpsertSession implements UserTransactional {
+    @NotNull
     private UUID id;
 
+    @NotNull
     private UUID userTransactionId;
 
     @NotNull
@@ -33,6 +35,7 @@ public class UpsertSession implements UserTransactional {
 
     private String roomId;
 
+    @NotNull
     private Long version;
 
     @NotNull

@@ -20,6 +20,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class CreateHearingPart implements UserTransactional {
 
+    @NotNull
     private UUID id;
 
     @NotEmpty
@@ -51,5 +52,6 @@ public class CreateHearingPart implements UserTransactional {
 
     private String communicationFacilitator;
 
+    @NotNull
     private UUID userTransactionId;
 }

@@ -29,5 +29,6 @@ public class AmendSessionRequest implements UserTransactional {
     @NotNull
     private String sessionTypeCode;
 
+    @NotNull
     private Long version;
 }
