@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.CollectionTable;
@@ -23,6 +24,7 @@ public class Problem {
     private String type;
     private String severity;
     private String message;
+    private OffsetDateTime createdAt;
 
     @ElementCollection
     @CollectionTable(name = "problem_reference", joinColumns = @JoinColumn(name = "problem_id"))
