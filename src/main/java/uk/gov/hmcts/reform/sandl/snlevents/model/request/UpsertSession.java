@@ -35,7 +35,6 @@ public class UpsertSession implements UserTransactional {
 
     private String roomId;
 
-    @NotNull
     private Long version;
 
     @NotNull
