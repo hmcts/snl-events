@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
 import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
@@ -23,15 +23,15 @@ public class CreateHearingPart implements UserTransactional {
     @NotNull
     private UUID id;
 
-    @NotEmpty
+    @NotBlank
     @Size(max = 200)
     private String caseNumber;
 
-    @NotEmpty
+    @NotBlank
     @Size(max = 200)
     private String caseTitle;
 
-    @NotEmpty
+    @NotBlank
     @Size(max = 100)
     private String caseType;
 
