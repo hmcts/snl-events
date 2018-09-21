@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
+import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -88,7 +89,7 @@ public class SessionController {
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity insertSession(@RequestBody UpsertSession upsertSession) throws IOException {
+    public ResponseEntity insertSession(@Valid @RequestBody UpsertSession upsertSession) throws IOException {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(upsertSession);
 
@@ -108,7 +109,7 @@ public class SessionController {
     }
 
     @PostMapping(path = "/amend", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity amendSession(@RequestBody AmendSessionRequest amendSessionRequest) {
+    public ResponseEntity amendSession(@Valid @RequestBody AmendSessionRequest amendSessionRequest) {
         val action = new AmendSessionAction(
             amendSessionRequest,
             sessionRepository,
