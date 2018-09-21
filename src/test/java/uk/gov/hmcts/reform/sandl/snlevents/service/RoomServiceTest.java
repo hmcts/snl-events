@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.RoomType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.RoomResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 
 import java.util.Arrays;
@@ -28,11 +30,23 @@ public class RoomServiceTest {
         val repositoryRooms = createRooms();
         when(roomRepository.findAll()).thenReturn(repositoryRooms);
 
-        val serviceRooms = roomService.getRooms();
-        assertThat(serviceRooms).isEqualTo(repositoryRooms);
+        val serviceRooms = roomService.getRoomResponses();
+        assertThat(serviceRooms).isEqualTo(createRoomsResponses());
     }
 
     private List<Room> createRooms() {
-        return Arrays.asList(new Room());
+        Room r = new Room();
+        RoomType rt = new RoomType();
+        rt.setCode("Code");
+        r.setRoomType(rt);
+
+        return Arrays.asList(r);
+    }
+
+    private List<RoomResponse> createRoomsResponses() {
+        RoomResponse rr = new RoomResponse();
+        rr.setRoomTypeCode("Code");
+        return Arrays.asList(rr);
+
     }
 }
