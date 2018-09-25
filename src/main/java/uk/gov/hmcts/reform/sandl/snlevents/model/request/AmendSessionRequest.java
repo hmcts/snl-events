@@ -7,37 +7,28 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.UUID;
-
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpsertSession implements UserTransactional {
+public class AmendSessionRequest implements UserTransactional {
     @NotNull
     private UUID id;
 
     @NotNull
     private UUID userTransactionId;
 
-    @NotNull
-    private OffsetDateTime start;
-
     @MinDuration(minMinutes = 1)
-    private Duration duration;
-
-    private String sessionType;
-
-    private String personId;
-
-    private String roomId;
-
-    private Long version;
+    private Duration durationInSeconds;
 
     @NotNull
-    @Size(max = 255)
+    private String startTime;
+
+    @NotNull
     private String sessionTypeCode;
+
+    @NotNull
+    private Long version;
 }

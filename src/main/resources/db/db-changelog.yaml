@@ -41,3 +41,7 @@ databaseChangeLog:
       file: db/schema/SL-1349-reference-data.yaml
   - include:
       file: db/schema/SL-1471-history-of-changes-listing.yaml
+  - include:
+      file: db/schema/SL-1491-retain-session-history.yaml
+  - include:
+      file: db/schema/SL-1516-add-createdAt-to-problem-table.yaml

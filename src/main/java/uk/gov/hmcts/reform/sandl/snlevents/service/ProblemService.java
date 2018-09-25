@@ -40,6 +40,7 @@ public class ProblemService {
         response.setType(p.getType());
         response.setMessage(p.getMessage());
         response.setSeverity(p.getSeverity());
+        response.setCreatedAt(p.getCreatedAt());
         response.setReferences(
             p.getReferences()
                 .stream()
@@ -67,6 +68,7 @@ public class ProblemService {
         transformed.setType(cp.getType());
         transformed.setSeverity(cp.getSeverity());
         transformed.setMessage(cp.getMessage());
+        transformed.setCreatedAt(cp.getCreatedAt());
         transformed.setReferences(
             cp.getReferences()
                 .stream()

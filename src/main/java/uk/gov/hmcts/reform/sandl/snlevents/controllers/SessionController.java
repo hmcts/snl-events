@@ -1,22 +1,29 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.AmendSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
@@ -25,6 +32,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -43,6 +52,18 @@ public class SessionController {
 
     @Autowired
     private FactsMapper factsMapper;
+
+    @Autowired
+    private SessionRepository sessionRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private ActionService actionService;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public SessionInfo getSessionById(@PathVariable("id") UUID id) {
@@ -68,7 +89,7 @@ public class SessionController {
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity insertSession(@RequestBody UpsertSession upsertSession) throws IOException {
+    public ResponseEntity insertSession(@Valid @RequestBody UpsertSession upsertSession) throws IOException {
 
         String msg = factsMapper.mapCreateSessionToRuleJsonMessage(upsertSession);
 
@@ -85,6 +106,18 @@ public class SessionController {
     public ResponseEntity updateSession(@RequestBody UpsertSession upsertSession) throws IOException {
         UserTransaction ut = sessionService.updateSession(upsertSession);
         return ok(ut);
+    }
+
+    @PostMapping(path = "/amend", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity amendSession(@Valid @RequestBody AmendSessionRequest amendSessionRequest) {
+        val action = new AmendSessionAction(
+            amendSessionRequest,
+            sessionRepository,
+            entityManager,
+            objectMapper
+        );
+
+        return ok(actionService.execute(action));
     }
 
     @GetMapping(path = "/judge-diary", produces = MediaType.APPLICATION_JSON_VALUE)

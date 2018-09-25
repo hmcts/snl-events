@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.RoomResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RoomService;
 
@@ -41,14 +41,14 @@ public class RoomControllerTest {
     @Test
     public void fetchAllRooms_returnsRoomsFromService() throws Exception {
         val rooms = createRooms();
-        when(roomService.getRooms()).thenReturn(rooms);
+        when(roomService.getRoomResponses()).thenReturn(rooms);
 
-        val response = mvc.getAndMapResponse(URL, new TypeReference<List<Room>>() {
+        val response = mvc.getAndMapResponse(URL, new TypeReference<List<RoomResponse>>() {
         });
         assertThat(response).isEqualTo(rooms);
     }
 
-    private List<Room> createRooms() {
-        return Arrays.asList(new Room());
+    private List<RoomResponse> createRooms() {
+        return Arrays.asList(new RoomResponse());
     }
 }

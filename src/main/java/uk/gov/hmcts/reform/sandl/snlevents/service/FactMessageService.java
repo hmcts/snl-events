@@ -12,14 +12,11 @@ import java.util.UUID;
 
 @Service
 public class FactMessageService {
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ProblemService problemService;
-
-    public FactMessageService() {
-        objectMapper = new ObjectMapper();
-    }
 
     public void handle(UUID userTransactionId, String factMsg) {
         try {

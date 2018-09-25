@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -15,4 +16,5 @@ public class ProblemResponse {
     private String message;
     private String severity;
     private List<ProblemReferenceResponse> references;
+    private OffsetDateTime createdAt;
 }

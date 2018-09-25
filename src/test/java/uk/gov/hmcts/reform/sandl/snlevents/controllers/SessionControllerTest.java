@@ -11,28 +11,36 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.AmendSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -55,6 +63,18 @@ public class SessionControllerTest {
     private UserTransactionService userTransactionService;
     @MockBean
     private FactsMapper factsMapper;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private SessionRepository sessionRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private ActionService actionService;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private EntityManager entityManager;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -115,10 +135,10 @@ public class SessionControllerTest {
 
     @Test
     public void updateSession_returnsUserTransaction() throws Exception {
-        UpsertSession upsertSession = new UpsertSession();
+        UpsertSession upsertSession = createUpsertSession();
         UserTransaction userTransaction = new UserTransaction();
 
-        when(sessionService.updateSession(upsertSession)).thenReturn(userTransaction);
+        when(sessionService.updateSession(any(UpsertSession.class))).thenReturn(userTransaction);
 
         val response = mvc.putAndMapResponse(
             SESSION_URL + "/update", objectMapper.writeValueAsString(upsertSession), UserTransaction.class
@@ -128,15 +148,15 @@ public class SessionControllerTest {
 
     @Test
     public void insertSession_returnsUserTransaction() throws Exception {
-        UpsertSession upsertSession = new UpsertSession();
+        UpsertSession upsertSession = createUpsertSession();
         UserTransaction userTransaction = new UserTransaction();
 
-        when(factsMapper.mapCreateSessionToRuleJsonMessage(upsertSession)).thenReturn("rules message");
-        when(sessionService.saveWithTransaction(upsertSession)).thenReturn(userTransaction);
+        when(factsMapper.mapCreateSessionToRuleJsonMessage(any(UpsertSession.class))).thenReturn("rules message");
+        when(sessionService.saveWithTransaction(any(UpsertSession.class))).thenReturn(userTransaction);
         when(userTransactionService.rulesProcessed(userTransaction)).thenReturn(userTransaction);
 
         val response = mvc.callAndMapResponse(
-            put(SESSION_URL), objectMapper.writeValueAsString(upsertSession), UserTransaction.class
+            put(SESSION_URL), upsertSession, UserTransaction.class
         );
         assertEquals(userTransaction, response);
     }
@@ -154,8 +174,48 @@ public class SessionControllerTest {
         assertEquals(sessionWithHearings, response);
     }
 
+    @Test
+    public void amendSession_returnsUserTransaction() throws Exception {
+        val userTransaction = new UserTransaction();
+        userTransaction.setId(UUID.randomUUID());
+
+        when(actionService.execute(any(AmendSessionAction.class))).thenReturn(userTransaction);
+
+        val response = mvc.callAndMapResponse(
+            post(SESSION_URL + "/amend"),
+            createAmendSessionRequest(),
+            UserTransaction.class
+        );
+
+        assertEquals(userTransaction, response);
+    }
+
     private Session createSession() {
         return new Session();
+    }
+
+    private UpsertSession createUpsertSession() {
+        UpsertSession upsertSession = new UpsertSession();
+        upsertSession.setStart(OffsetDateTime.now());
+        upsertSession.setDuration(Duration.ofMinutes(2));
+        upsertSession.setSessionTypeCode("f-track");
+        upsertSession.setId(UUID.randomUUID());
+        upsertSession.setUserTransactionId(UUID.randomUUID());
+        upsertSession.setVersion(0L);
+
+        return upsertSession;
+    }
+
+    private AmendSessionRequest createAmendSessionRequest() {
+        AmendSessionRequest amendSessionRequest = new AmendSessionRequest();
+        amendSessionRequest.setDurationInSeconds(Duration.ofMinutes(2));
+        amendSessionRequest.setStartTime("15:00");
+        amendSessionRequest.setSessionTypeCode("f-track");
+        amendSessionRequest.setVersion(0L);
+        amendSessionRequest.setId(UUID.randomUUID());
+        amendSessionRequest.setUserTransactionId(UUID.randomUUID());
+
+        return amendSessionRequest;
     }
 
     private List<Session> createSessionList() {

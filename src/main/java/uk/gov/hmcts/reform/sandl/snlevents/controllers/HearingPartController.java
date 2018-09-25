@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -77,15 +78,6 @@ public class HearingPartController {
         return hearingPartService.getAllHearingParts();
     }
 
-    @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createHearingPartAction(@RequestBody CreateHearingPart createHearingPart) throws Exception {
-        Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
-
-        UserTransaction ut = actionService.execute(action);
-
-        return ok(ut);
-    }
-
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity upsertHearingPart(@RequestBody CreateHearingPart createHearingPart) throws IOException {
         HearingPart hearingPart = new HearingPart();
@@ -100,17 +92,23 @@ public class HearingPartController {
         hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
         hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
         hearingPart.setPriority(createHearingPart.getPriority());
-
         hearingPart = hearingPartService.save(hearingPart);
-
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
-
         return ok(hearingPart);
     }
 
+    @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPart createHearingPart) {
+        Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
+
+        UserTransaction ut = actionService.execute(action);
+
+        return ok(ut);
+    }
+
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateHearingPart(@RequestBody UpdateListingRequest updateListingRequest) {
+    public ResponseEntity updateHearingPart(@Valid @RequestBody UpdateListingRequest updateListingRequest) {
         Action action = new UpdateListingRequestAction(updateListingRequest,
             hearingPartRepository, entityManager, objectMapper);
 

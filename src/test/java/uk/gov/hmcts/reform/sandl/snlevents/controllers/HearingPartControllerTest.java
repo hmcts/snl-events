@@ -126,7 +126,7 @@ public class HearingPartControllerTest {
         val ut = createUserTransaction();
         when(actionService.execute(any())).thenReturn(ut);
 
-        val hearingPart = createHearingPart();
+        val hearingPart = createCreateHearingPart();
         val response = mvc.callAndMapResponse(
             put(URL + "/create"), objectMapper.writeValueAsString(hearingPart), UserTransaction.class
         );
@@ -171,6 +171,7 @@ public class HearingPartControllerTest {
         chp.setPriority(Priority.Low);
         chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         chp.setReservedJudgeId(RESERVED_JUDGE_ID);
+        chp.setUserTransactionId(UUID.randomUUID());
 
         return chp;
     }
