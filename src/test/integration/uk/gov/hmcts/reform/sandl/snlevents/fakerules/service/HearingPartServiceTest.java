@@ -7,11 +7,13 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
@@ -43,6 +45,9 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
     UserTransactionService userTransactionService;
 
     @Autowired
+    SessionTypeRepository sessionTypeRepository;
+
+    @Autowired
     EntityManager entityManager;
 
     @Before
@@ -59,7 +64,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
         assertThat(savedHearingPart.getSessionId()).isNull();
 
-        Session savedSession = sessionRepository.save(sessionBuilder.build());
+        Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
         HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
             savedSession.getId(), UUID.randomUUID()
@@ -81,7 +86,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
     @Test
     public void assignHearingPartToSessionWithTransaction_shouldReturnConflict() throws Exception {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
-        Session savedSession = sessionRepository.save(sessionBuilder.build());
+        Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
         HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
             savedSession.getId(), UUID.randomUUID()
@@ -124,7 +129,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         HearingPart savedHearingPart = hearingPartRepository.save(
             hearingPartBuilder.withId(UUID.randomUUID()).withVersion(2L).build()
         );
-        Session savedSession = sessionRepository.save(sessionBuilder.build());
+        Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
         entityManager.flush();
 
         HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
@@ -148,5 +153,12 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearingPartSessionRelationship.setHearingPartVersion(0);
 
         return hearingPartSessionRelationship;
+    }
+
+    private SessionType getSessionType() {
+        return sessionTypeRepository.findAll()
+            .stream()
+            .filter(st -> st.getCode().equals("small-claims")).findFirst().get();
+
     }
 }

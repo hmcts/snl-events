@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -65,8 +64,8 @@ public class Session extends VersionedEntity implements Serializable, HistoryAud
     @NotAudited
     private List<HearingPart> hearingParts;
 
+    @NotNull
     @EqualsAndHashCode.Exclude
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ManyToOne(cascade = {
         CascadeType.PERSIST,
         CascadeType.MERGE

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.testdata.builders;
 
 import org.springframework.boot.test.context.TestComponent;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 
 import java.time.Duration;
@@ -13,6 +14,7 @@ public class SessionBuilder {
     private UUID id = UUID.randomUUID();
     private OffsetDateTime start = OffsetDateTimeHelper.january2018();
     private Duration duration = Duration.ofMinutes(30);
+    private SessionType sessionType = new SessionType();
 
     public SessionBuilder withId(UUID id) {
         this.id = id;
@@ -21,6 +23,11 @@ public class SessionBuilder {
 
     public SessionBuilder withStart(OffsetDateTime start) {
         this.start = start;
+        return this;
+    }
+
+    public SessionBuilder withSessionType(SessionType sessionType) {
+        this.sessionType = sessionType;
         return this;
     }
 
@@ -39,6 +46,7 @@ public class SessionBuilder {
         session.setId(id);
         session.setStart(start);
         session.setDuration(duration);
+        session.setSessionType(sessionType);
 
         return session;
     }
