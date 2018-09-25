@@ -55,11 +55,6 @@ public class Session extends VersionedEntity implements Serializable, HistoryAud
     @NotNull
     private Duration duration;
 
-    @EqualsAndHashCode.Exclude
-    @Deprecated
-    @NotAudited
-    private String caseType;
-
     @ManyToOne
     @Audited(targetAuditMode = NOT_AUDITED)
     private Room room;

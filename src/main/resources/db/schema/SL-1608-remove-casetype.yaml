@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+        id: drop_casetype_from_session_table
+        author: radoslawlandowskikainos
+        changes:
+          - dropColumn:
+              tableName: session
+              columnName: case_type
+

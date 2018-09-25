@@ -13,7 +13,6 @@ public class SessionBuilder {
     private UUID id = UUID.randomUUID();
     private OffsetDateTime start = OffsetDateTimeHelper.january2018();
     private Duration duration = Duration.ofMinutes(30);
-    private String caseType = "SCLAIMS";
 
     public SessionBuilder withId(UUID id) {
         this.id = id;
@@ -40,7 +39,6 @@ public class SessionBuilder {
         session.setId(id);
         session.setStart(start);
         session.setDuration(duration);
-        session.setCaseType("SCLAIMS");
 
         return session;
     }
