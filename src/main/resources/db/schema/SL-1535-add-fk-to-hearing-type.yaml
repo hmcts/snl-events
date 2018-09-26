@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+        id: add-hearing-type-code-column-to-heairng-type-table
+        author: kzielinski
+        changes:
+          - addColumn:
+              columns:
+              - column:
+                  name: hearing_type_code
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              tableName: hearing_part
+          - addColumn:
+              columns:
+              - column:
+                  name: hearing_type_code
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              tableName: hearing_part_aud
+          - sqlFile:
+              comment: Insert not exising hearing types into HearingType table and copy hearing_type values into hearing_type_code
+              encoding: utf8
+              endDelimiter: \nGO
+              path: ../fixtures/SL-1535-migrate-hearing-type-to-hearing-type-code.sql
+              relativeToChangelogFile: true
+              splitStatements: true
+              stripComments: true
+              dbms: postgresql
+          - dropColumn:
+              columnName: hearing_type
+              tableName: hearing_part
+          - dropColumn:
+              columnName: hearing_type
+              tableName: hearing_part_aud
+          - addForeignKeyConstraint:
+              baseColumnNames: hearing_type_code
+              baseTableName: hearing_part
+              constraintName: fk_hearing_type_code_to_hearing_type
+              referencedColumnNames: code
+              referencedTableName: hearing_type
+          - addNotNullConstraint:
+              columnDataType: VARCHAR(255)
+              columnName: hearing_type_code
+              tableName: hearing_part
