@@ -90,7 +90,7 @@ public class HearingPartController {
         hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
         hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
         hearingPart.setCaseType(createHearingPart.getCaseType());
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPart.getHearingTypeCode());
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingPart.getHearingType());
         hearingPart.setHearingType(hearingType);
         hearingPart.setDuration(createHearingPart.getDuration());
         hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
