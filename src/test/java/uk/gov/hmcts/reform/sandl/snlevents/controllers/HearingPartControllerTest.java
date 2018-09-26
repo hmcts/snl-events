@@ -17,10 +17,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -50,7 +52,8 @@ public class HearingPartControllerTest {
     public static final String TYPE = "type";
     public static final String CASE_NUMBER = "90";
     public static final String TITLE = "title";
-    public static final String HEARING_TYPE = "hearing-type";
+    public static final String HEARING_TYPE_CODE = "hearing-type-code";
+    public static final HearingType HEARING_TYPE =  new HearingType(HEARING_TYPE_CODE, "hearing-type-desc");
     public static final String URL = "/hearing-part";
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
@@ -81,6 +84,10 @@ public class HearingPartControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private FactsMapper factsMapper;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private HearingTypeRepository hearingTypeRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -115,6 +122,7 @@ public class HearingPartControllerTest {
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
         when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
+        when(hearingTypeRepository.findOne(any(String.class))).thenReturn(HEARING_TYPE);
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
         val response = mvc.callAndMapResponse(put(URL), content, HearingPart.class);
@@ -166,7 +174,7 @@ public class HearingPartControllerTest {
         chp.setCaseType(TYPE);
         chp.setCaseNumber(CASE_NUMBER);
         chp.setCaseTitle(TITLE);
-        chp.setHearingType(HEARING_TYPE);
+        chp.setHearingType(HEARING_TYPE_CODE);
         chp.setDuration(createDuration());
         chp.setPriority(Priority.Low);
         chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);

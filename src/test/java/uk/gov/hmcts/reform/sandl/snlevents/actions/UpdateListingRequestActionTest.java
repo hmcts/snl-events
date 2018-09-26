@@ -13,9 +13,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -45,6 +47,9 @@ public class UpdateListingRequestActionTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private HearingTypeRepository hearingTypeRepository;
+
     @Before
     public void setup() {
         ulr = new UpdateListingRequest();
@@ -55,10 +60,12 @@ public class UpdateListingRequestActionTest {
         this.action = new UpdateListingRequestAction(ulr,
             hearingPartRepository,
             entityManager,
-            objectMapper);
+            objectMapper,
+            hearingTypeRepository);
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
+        hearingPart.setHearingType(new HearingType("code", "description"));
         Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
         when(hearingPartRepository.save(Matchers.any(HearingPart.class))).thenReturn(hearingPart);
     }

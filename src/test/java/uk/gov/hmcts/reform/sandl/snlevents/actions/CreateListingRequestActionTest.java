@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingR
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -42,13 +44,16 @@ public class CreateListingRequestActionTest {
     @Mock
     private HearingPartRepository hearingPartRepository;
 
+    @Mock
+    private HearingTypeRepository hearingTypeRepository;
+
     @Spy
     private FactsMapper factsMapper;
 
     @Before
     public void setup() {
         this.createHearingPart = createCreateHearingPart();
-        this.action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
+        this.action = new CreateListingRequestAction(createHearingPart, hearingPartRepository, hearingTypeRepository);
         this.hearingPart = createHearingPart();
 
         when(hearingPartRepository.save(any(HearingPart.class))).thenReturn(hearingPart);
@@ -140,6 +145,7 @@ public class CreateListingRequestActionTest {
         val hp = new HearingPart();
         hp.setId(createUuid(ID));
         hp.setCaseType("ct");
+        hp.setHearingType(new HearingType("code", "description"));
 
         return hp;
     }

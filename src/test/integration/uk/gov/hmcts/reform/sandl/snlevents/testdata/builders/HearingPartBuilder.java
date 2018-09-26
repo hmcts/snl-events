@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.testdata.builders;
 
 import org.springframework.boot.test.context.TestComponent;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 
 import java.time.Duration;
@@ -17,7 +18,11 @@ public class HearingPartBuilder {
     private String caseType = "SCLAIMS";
     private String caseNumber = "case number";
     private String caseTitle = "case title";
+    private String hearingTypeCode = "hearing-type-code";
+    private String hearingTypeDesc = "hearing-type-code";
     private Long version;
+
+    public HearingType hearingType = new HearingType(hearingTypeCode, hearingTypeDesc);
 
     public HearingPartBuilder withId(UUID id) {
         this.id = id;
@@ -53,6 +58,7 @@ public class HearingPartBuilder {
         hearingPart.setCaseNumber(caseNumber);
         hearingPart.setCaseTitle(caseTitle);
         hearingPart.setVersion(version);
+        hearingPart.setHearingType(hearingType);
 
         return hearingPart;
     }
