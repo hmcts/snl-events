@@ -6,8 +6,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.FactMessageService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -17,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +40,9 @@ public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
 
     @Autowired
     PersonRepository personRepository;
+
+    @Autowired
+    SessionTypeRepository sessionTypeRepository;
 
     @Test
     public void sessions_createdSessionIsRetrievable() {
@@ -66,8 +72,13 @@ public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
     }
 
     private Session createSession(Person djCope, OffsetDateTime start) {
+        SessionType sessType = sessionTypeRepository.findAll()
+            .stream()
+            .filter(st -> st.getCode().equals("small-claims")).findFirst().get();
+
         Session session = new Session();
         session.setId(UUID.randomUUID());
+        session.setSessionType(sessType);
         session.setPerson(djCope);
         session.setStart(start);
         session.setDuration(Duration.ofMinutes(30));

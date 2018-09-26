@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+        id: drop_casetype_from_session_table
+        author: radoslawlandowskikainos
+        changes:
+          - dropColumn:
+              tableName: session
+              columnName: case_type
+  - changeSet:
+        id: add_not_null_constraint_to_sessiontypecode_on_session_table
+        author: liquibase-radoslawlandowskikainos
+        changes:
+          - addNotNullConstraint:
+              columnName: session_type_code
+              columnDataType: varchar(255)
+              schemaName: public
+              tableName: session
