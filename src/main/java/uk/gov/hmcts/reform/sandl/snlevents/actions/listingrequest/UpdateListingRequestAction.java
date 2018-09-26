@@ -8,9 +8,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -25,15 +27,18 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private HearingPart hearingPart;
     private String currentHearingPartAsString;
     private EntityManager entityManager;
+    private HearingTypeRepository hearingTypeRepository;
 
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       HearingPartRepository hearingPartRepository,
                                       EntityManager entityManager,
-                                      ObjectMapper objectMapper) {
+                                      ObjectMapper objectMapper,
+                                      HearingTypeRepository hearingTypeRepository) {
         this.updateListingRequest = updateListingRequest;
         this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
+        this.hearingTypeRepository = hearingTypeRepository;
     }
 
     @Override
@@ -48,7 +53,8 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearingPart.setCaseNumber(updateListingRequest.getCaseNumber());
         hearingPart.setCaseTitle(updateListingRequest.getCaseTitle());
         hearingPart.setCaseType(updateListingRequest.getCaseType());
-        hearingPart.setHearingType(updateListingRequest.getHearingType());
+        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingType());
+        hearingPart.setHearingType(hearingType);
         hearingPart.setDuration(updateListingRequest.getDuration());
         hearingPart.setScheduleStart(updateListingRequest.getScheduleStart());
         hearingPart.setScheduleEnd(updateListingRequest.getScheduleEnd());
