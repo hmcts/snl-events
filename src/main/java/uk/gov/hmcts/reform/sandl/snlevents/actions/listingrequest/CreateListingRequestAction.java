@@ -4,9 +4,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -19,11 +21,14 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected HearingPart hearingPart;
 
     protected HearingPartRepository hearingPartRepository;
+    protected HearingTypeRepository hearingTypeRepository;
 
     public CreateListingRequestAction(CreateHearingPart createHearingPart,
-                                      HearingPartRepository hearingPartRepository) {
+                                      HearingPartRepository hearingPartRepository,
+                                      HearingTypeRepository hearingTypeRepository) {
         this.createHearingPart = createHearingPart;
         this.hearingPartRepository = hearingPartRepository;
+        this.hearingTypeRepository = hearingTypeRepository;
     }
 
     @Override
@@ -34,7 +39,8 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
         hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
         hearingPart.setCaseType(createHearingPart.getCaseType());
-        hearingPart.setHearingType(createHearingPart.getHearingType());
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingPart.getHearingTypeCode());
+        hearingPart.setHearingType(hearingType);
         hearingPart.setDuration(createHearingPart.getDuration());
         hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
