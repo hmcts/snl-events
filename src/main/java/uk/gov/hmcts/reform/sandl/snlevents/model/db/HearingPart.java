@@ -49,7 +49,9 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     private String caseType;
 
-    private String hearingType;
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private HearingType hearingType;
 
     private Duration duration;
 
