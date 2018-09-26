@@ -19,12 +19,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingR
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -64,6 +66,9 @@ public class HearingPartController {
     @Autowired
     private FactsMapper factsMapper;
 
+    @Autowired
+    HearingTypeRepository hearingTypeRepository;
+
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingPart getHearingPartById(@PathVariable("id") UUID id) {
         return hearingPartRepository.findOne(id);
@@ -85,7 +90,8 @@ public class HearingPartController {
         hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
         hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
         hearingPart.setCaseType(createHearingPart.getCaseType());
-        hearingPart.setHearingType(createHearingPart.getHearingType());
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingPart.getHearingTypeCode());
+        hearingPart.setHearingType(hearingType);
         hearingPart.setDuration(createHearingPart.getDuration());
         hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
         hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
@@ -100,7 +106,7 @@ public class HearingPartController {
 
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPart createHearingPart) {
-        Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository);
+        Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository, hearingTypeRepository);
 
         UserTransaction ut = actionService.execute(action);
 
@@ -110,7 +116,7 @@ public class HearingPartController {
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateHearingPart(@Valid @RequestBody UpdateListingRequest updateListingRequest) {
         Action action = new UpdateListingRequestAction(updateListingRequest,
-            hearingPartRepository, entityManager, objectMapper);
+            hearingPartRepository, entityManager, objectMapper, hearingTypeRepository);
 
         UserTransaction ut = actionService.execute(action);
 
