@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
@@ -34,6 +35,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,36 +99,33 @@ public class HearingPartControllerTest {
 
     @Test
     public void fetchAllHeartingParts_returnHearingPartsFromService() throws Exception {
-        val hearingParts = createHearingParts();
-        when(hearingPartService.getAllHearingParts()).thenReturn(hearingParts);
+        val hearingPartResponses = crateHearingPartResponse();
+        when(hearingPartService.getAllHearingParts()).thenReturn(hearingPartResponses);
 
-        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPart>>(){});
+        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPartResponse>>(){});
         assertEquals(response.size(), 1);
-        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
+        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingPartResponses.get(0));
     }
 
     @Test
     public void fetchAllHeartingParts_whenPassIsListedAsFalse_returnUnlistedHearingPartsFromService() throws Exception {
-        val hearingParts = createHearingParts();
-        when(hearingPartService.getAllHearingPartsThat(any())).thenReturn(hearingParts);
+        val hearingPartResponses = crateHearingPartResponse();
+        when(hearingPartService.getAllHearingPartsThat(any())).thenReturn(hearingPartResponses);
 
-        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPart>>(){});
+        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPartResponse>>(){});
         assertEquals(response.size(), 1);
-        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
-    }
-
-    private List<HearingPart> createHearingParts() {
-        return Arrays.asList(createHearingPart());
+        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingPartResponses.get(0));
     }
 
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
-        when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
+        HearingPartResponse hearingPartResponse = crateHearingPartResponse().get(0);
+        when(hearingPartService.createHearingPart(any(CreateHearingPart.class))).thenReturn(hearingPartResponse);
         when(hearingTypeRepository.findOne(any(String.class))).thenReturn(HEARING_TYPE);
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
-        val response = mvc.callAndMapResponse(put(URL), content, HearingPart.class);
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
+        val response = mvc.callAndMapResponse(put(URL), content, HearingPartResponse.class);
+        assertThat(response).isEqualToComparingFieldByFieldRecursively(hearingPartResponse);
     }
 
     @Test
@@ -142,13 +141,6 @@ public class HearingPartControllerTest {
         assertThat(response).isEqualTo(ut);
     }
 
-    private UserTransaction createUserTransaction() {
-        var ut = new UserTransaction();
-        ut.setId(UUID.randomUUID());
-
-        return ut;
-    }
-
     @Test
     public void deleteHearingPartAction_deletesHearingPart() throws Exception {
         val ut = createUserTransaction();
@@ -159,6 +151,20 @@ public class HearingPartControllerTest {
         );
 
         assertThat(response).isEqualTo(ut);
+    }
+
+    private List<HearingPartResponse> crateHearingPartResponse() {
+        return Arrays.asList(createHearingPart())
+            .stream()
+            .map(hp -> new HearingPartResponse(hp))
+            .collect(Collectors.toList());
+    }
+
+    private UserTransaction createUserTransaction() {
+        var ut = new UserTransaction();
+        ut.setId(UUID.randomUUID());
+
+        return ut;
     }
 
     private DeleteListingRequest createDeleteListingRequest() {
