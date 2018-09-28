@@ -40,7 +40,6 @@ public class SessionRepositoryTest extends BaseIntegrationTestWithFakeRules {
 
     @Test
     public void sessions_createdSessionIsRetrievable() {
-
         Person djCope = getJudgeFromDb(JUDGE_USER_NAME);
 
         Session session = createSession(djCope, january2018());
