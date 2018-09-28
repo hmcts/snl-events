@@ -19,11 +19,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingR
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
@@ -61,9 +62,12 @@ public class HearingPartController {
     @Autowired
     private HearingTypeRepository hearingTypeRepository;
 
+    @Autowired
+    private CaseTypeRepository caseTypeRepository;
+
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HearingPart getHearingPartById(@PathVariable("id") UUID id) {
-        return hearingPartRepository.findOne(id);
+    public HearingPartResponse getHearingPartById(@PathVariable("id") UUID id) {
+        return new HearingPartResponse(hearingPartRepository.findOne(id));
     }
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,14 +80,14 @@ public class HearingPartController {
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HearingPartResponse> upsertHearingPart(@RequestBody CreateHearingPart createHearingPart) throws IOException {
-        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPart);
+    public ResponseEntity<HearingPartResponse> upsertHearingPart(@RequestBody CreateHearingPartRequest createHearingPartRequest) throws IOException {
+        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
         return ok(hearingPartResponse);
     }
 
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPart createHearingPart) {
-        Action action = new CreateListingRequestAction(createHearingPart, hearingPartRepository, hearingTypeRepository);
+    public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPartRequest createHearingPartRequest) {
+        Action action = new CreateListingRequestAction(createHearingPartRequest, hearingPartRepository, hearingTypeRepository, caseTypeRepository);
 
         UserTransaction ut = actionService.execute(action);
 
@@ -93,7 +97,7 @@ public class HearingPartController {
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateHearingPart(@Valid @RequestBody UpdateListingRequest updateListingRequest) {
         Action action = new UpdateListingRequestAction(updateListingRequest,
-            hearingPartRepository, entityManager, objectMapper, hearingTypeRepository);
+            hearingPartRepository, entityManager, objectMapper, hearingTypeRepository, caseTypeRepository);
 
         UserTransaction ut = actionService.execute(action);
 

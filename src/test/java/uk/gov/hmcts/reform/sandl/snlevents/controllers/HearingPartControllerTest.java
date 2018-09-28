@@ -16,12 +16,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
@@ -40,7 +42,6 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,7 +52,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Import(TestConfiguration.class)
 @AutoConfigureMockMvc(secure = false)
 public class HearingPartControllerTest {
-    public static final String TYPE = "type";
+    public static final String CASE_TYPE_CODE = "type";
+    public static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE,"case-type-desc");
     public static final String CASE_NUMBER = "90";
     public static final String TITLE = "title";
     public static final String HEARING_TYPE_CODE = "hearing-type-code";
@@ -91,6 +93,10 @@ public class HearingPartControllerTest {
     @SuppressWarnings("PMD.UnusedPrivateField")
     private HearingTypeRepository hearingTypeRepository;
 
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private CaseTypeRepository caseTypeRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -120,7 +126,7 @@ public class HearingPartControllerTest {
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
         HearingPartResponse hearingPartResponse = crateHearingPartResponse().get(0);
-        when(hearingPartService.createHearingPart(any(CreateHearingPart.class))).thenReturn(hearingPartResponse);
+        when(hearingPartService.createHearingPart(any(CreateHearingPartRequest.class))).thenReturn(hearingPartResponse);
         when(hearingTypeRepository.findOne(any(String.class))).thenReturn(HEARING_TYPE);
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
@@ -171,16 +177,16 @@ public class HearingPartControllerTest {
         return new DeleteListingRequest();
     }
 
-    private CreateHearingPart createCreateHearingPart() {
-        val chp = new CreateHearingPart();
+    private CreateHearingPartRequest createCreateHearingPart() {
+        val chp = new CreateHearingPartRequest();
         chp.setId(createUuid());
         chp.setDuration(createDuration());
         chp.setScheduleStart(createOffsetDateTime());
         chp.setScheduleEnd(createOffsetDateTime());
-        chp.setCaseType(TYPE);
+        chp.setCaseTypeCode(CASE_TYPE_CODE);
         chp.setCaseNumber(CASE_NUMBER);
         chp.setCaseTitle(TITLE);
-        chp.setHearingType(HEARING_TYPE_CODE);
+        chp.setHearingTypeCode(HEARING_TYPE_CODE);
         chp.setDuration(createDuration());
         chp.setPriority(Priority.Low);
         chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
@@ -204,7 +210,7 @@ public class HearingPartControllerTest {
         hp.setDuration(createDuration());
         hp.setScheduleStart(createOffsetDateTime());
         hp.setScheduleEnd(createOffsetDateTime());
-        hp.setCaseType(TYPE);
+        hp.setCaseType(CASE_TYPE);
         hp.setCaseNumber(CASE_NUMBER);
         hp.setCaseTitle(TITLE);
         hp.setHearingType(HEARING_TYPE);
