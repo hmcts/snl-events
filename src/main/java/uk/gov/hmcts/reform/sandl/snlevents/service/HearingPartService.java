@@ -5,14 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -20,9 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -55,20 +55,24 @@ public class HearingPartService {
     @Autowired
     private HearingTypeRepository hearingTypeRepository;
 
-    public HearingPartResponse createHearingPart(CreateHearingPart createHearingPart) throws IOException {
+    @Autowired
+    private CaseTypeRepository caseTypeRepository;
+
+    public HearingPartResponse createHearingPart(CreateHearingPartRequest createHearingPartRequest) throws IOException {
         HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(createHearingPart.getId());
-        hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
-        hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
-        hearingPart.setCaseType(createHearingPart.getCaseType());
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPart.getHearingType());
+        hearingPart.setId(createHearingPartRequest.getId());
+        hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
+        hearingPart.setCaseTitle(createHearingPartRequest.getCaseTitle());
+        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
+        hearingPart.setCaseType(caseType);
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
         hearingPart.setHearingType(hearingType);
-        hearingPart.setDuration(createHearingPart.getDuration());
-        hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
-        hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
-        hearingPart.setPriority(createHearingPart.getPriority());
+        hearingPart.setDuration(createHearingPartRequest.getDuration());
+        hearingPart.setScheduleStart(createHearingPartRequest.getScheduleStart());
+        hearingPart.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
+        hearingPart.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
+        hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
+        hearingPart.setPriority(createHearingPartRequest.getPriority());
         hearingPart = save(hearingPart);
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
