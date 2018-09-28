@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -17,48 +19,50 @@ import java.util.UUID;
 
 public class CreateListingRequestAction extends Action implements RulesProcessable {
 
-    protected CreateHearingPart createHearingPart;
+    protected CreateHearingPartRequest createHearingPartRequest;
     protected HearingPart hearingPart;
 
     protected HearingPartRepository hearingPartRepository;
     protected HearingTypeRepository hearingTypeRepository;
+    protected CaseTypeRepository caseTypeRepository;
 
-    public CreateListingRequestAction(CreateHearingPart createHearingPart,
+    public CreateListingRequestAction(CreateHearingPartRequest createHearingPartRequest,
                                       HearingPartRepository hearingPartRepository,
-                                      HearingTypeRepository hearingTypeRepository) {
-        this.createHearingPart = createHearingPart;
+                                      HearingTypeRepository hearingTypeRepository,
+                                      CaseTypeRepository caseTypeRepository) {
+        this.createHearingPartRequest = createHearingPartRequest;
         this.hearingPartRepository = hearingPartRepository;
         this.hearingTypeRepository = hearingTypeRepository;
+        this.caseTypeRepository = caseTypeRepository;
     }
 
     @Override
     public void act() {
         hearingPart = new HearingPart();
 
-        hearingPart.setId(createHearingPart.getId());
-        hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
-        hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
-        hearingPart.setCaseType(createHearingPart.getCaseType());
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPart.getHearingType());
+        hearingPart.setId(createHearingPartRequest.getId());
+        hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
+        hearingPart.setCaseTitle(createHearingPartRequest.getCaseTitle());
+        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
+        hearingPart.setCaseType(caseType);
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
         hearingPart.setHearingType(hearingType);
-        hearingPart.setDuration(createHearingPart.getDuration());
-        hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
-        hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
-        hearingPart.setPriority(createHearingPart.getPriority());
+        hearingPart.setDuration(createHearingPartRequest.getDuration());
+        hearingPart.setScheduleStart(createHearingPartRequest.getScheduleStart());
+        hearingPart.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
+        hearingPart.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
+        hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
+        hearingPart.setPriority(createHearingPartRequest.getPriority());
 
         hearingPart = hearingPartRepository.save(hearingPart);
     }
 
     @Override
-    public void getAndValidateEntities() {
-
-    }
+    public void getAndValidateEntities() { }
 
     @Override
     public FactMessage generateFactMessage() {
-        String msg = null;
+        String msg;
         try {
             msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         } catch (Exception e) {
@@ -85,11 +89,11 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID getUserTransactionId() {
-        return this.createHearingPart.getUserTransactionId();
+        return this.createHearingPartRequest.getUserTransactionId();
     }
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {this.createHearingPart.getId()};
+        return new UUID[] {this.createHearingPartRequest.getId()};
     }
 }

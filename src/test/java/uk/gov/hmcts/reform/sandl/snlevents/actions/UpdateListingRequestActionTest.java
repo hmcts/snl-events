@@ -12,10 +12,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -50,6 +52,9 @@ public class UpdateListingRequestActionTest {
     @Mock
     private HearingTypeRepository hearingTypeRepository;
 
+    @Mock
+    private CaseTypeRepository caseTypeRepository;
+
     @Before
     public void setup() {
         ulr = new UpdateListingRequest();
@@ -61,11 +66,13 @@ public class UpdateListingRequestActionTest {
             hearingPartRepository,
             entityManager,
             objectMapper,
-            hearingTypeRepository);
+            hearingTypeRepository,
+            caseTypeRepository);
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
-        hearingPart.setHearingType(new HearingType("code", "description"));
+        hearingPart.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
+        hearingPart.setCaseType(new CaseType("case-type-code", "case-type-description"));
         Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
         when(hearingPartRepository.save(Matchers.any(HearingPart.class))).thenReturn(hearingPart);
     }

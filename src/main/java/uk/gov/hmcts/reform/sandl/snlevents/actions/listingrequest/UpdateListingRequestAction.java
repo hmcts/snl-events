@@ -7,10 +7,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -28,17 +30,20 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private String currentHearingPartAsString;
     private EntityManager entityManager;
     private HearingTypeRepository hearingTypeRepository;
+    private CaseTypeRepository caseTypeRepository;
 
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       HearingPartRepository hearingPartRepository,
                                       EntityManager entityManager,
                                       ObjectMapper objectMapper,
-                                      HearingTypeRepository hearingTypeRepository) {
+                                      HearingTypeRepository hearingTypeRepository,
+                                      CaseTypeRepository caseTypeRepository) {
         this.updateListingRequest = updateListingRequest;
         this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.hearingTypeRepository = hearingTypeRepository;
+        this.caseTypeRepository = caseTypeRepository;
     }
 
     @Override
@@ -52,8 +57,9 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearingPart.setId(updateListingRequest.getId());
         hearingPart.setCaseNumber(updateListingRequest.getCaseNumber());
         hearingPart.setCaseTitle(updateListingRequest.getCaseTitle());
-        hearingPart.setCaseType(updateListingRequest.getCaseType());
-        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingType());
+        CaseType caseType = caseTypeRepository.findOne(updateListingRequest.getCaseTypeCode());
+        hearingPart.setCaseType(caseType);
+        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingTypeCode());
         hearingPart.setHearingType(hearingType);
         hearingPart.setDuration(updateListingRequest.getDuration());
         hearingPart.setScheduleStart(updateListingRequest.getScheduleStart());
