@@ -47,7 +47,9 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     private String caseTitle;
 
-    private String caseType;
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private CaseType caseType;
 
     @ManyToOne
     @Audited(targetAuditMode = NOT_AUDITED)
@@ -65,7 +67,6 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     private Session session;
 
     @Column(name = "session_id", updatable = false, insertable = false)
-    @JsonProperty("session")
     private UUID sessionId;
 
     private UUID reservedJudgeId;
