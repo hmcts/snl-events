@@ -33,7 +33,7 @@ module "snl-events" {
 
     ENABLE_DB_MIGRATE_IN_SERVICE = "false"
 
-    SNL_RULES_URL = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+    SNL_RULES_URL = "http://pr-67-snl-rules-preview.service.core-compute-preview.internal"
   }
 
 }
