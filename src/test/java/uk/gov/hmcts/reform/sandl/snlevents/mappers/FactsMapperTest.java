@@ -33,8 +33,9 @@ public class FactsMapperTest {
     private static final OffsetDateTime END = OffsetDateTime.MAX;
     private static final String END_MAPPED = "+999999999-12-31T23:59:59.999999999-18:00";
 
-    private static final String CASE_TYPE = "case-type";
+    private static final String CASE_TYPE_CODE = "case-type";
     private static final String CASE_TYPE_DESC = "case-type-desc";
+    private static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, CASE_TYPE_DESC);
     private static final String CASE_TYPE_2 = "case-type-2";
     private static final String CASE_TYPE_DESC_2 = "case-type-desc-2";
     private static final String SESSION_TYPE = "session-type";
@@ -92,8 +93,8 @@ public class FactsMapperTest {
         val expected = "{"
             + "\"id\":\"" + ID + "\","
             + "\"sessionId\":\"" + ID + "\","
-            + "\"caseType\":\"" + CASE_TYPE + "\","
-            + "\"hearingType\":\"" + HEARING_TYPE_CODE + "\"," // add suffix Code
+            + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
+            + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
             + "\"scheduleStart\":\"" + START_MAPPED + "\","
             + "\"scheduleEnd\":\"" + END_MAPPED + "\","
@@ -139,8 +140,8 @@ public class FactsMapperTest {
         val expected = "{"
             + "\"id\":\"" + ID + "\","
             + "\"sessionId\":\"" + ID + "\","
-            + "\"caseType\":\"" + CASE_TYPE + "\","
-            + "\"hearingType\":\"" + HEARING_TYPE_CODE + "\"," //TODO Add Code Prefix
+            + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
+            + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
             + "\"scheduleStart\":\"" + START_MAPPED + "\","
             + "\"scheduleEnd\":\"" + END_MAPPED + "\","
@@ -156,7 +157,7 @@ public class FactsMapperTest {
         val expected = "{\"id\":\"" + SESSION_TYPE + "\","
             + "\"caseTypes\":"
             + "[{\"code\":\"" + CASE_TYPE_2 + "\",\"description\":\"" + CASE_TYPE_DESC_2 + "\"},"
-            + "{\"code\":\"" + CASE_TYPE + "\",\"description\":\"" + CASE_TYPE_DESC + "\"}],"
+            + "{\"code\":\"" + CASE_TYPE_CODE + "\",\"description\":\"" + CASE_TYPE_DESC + "\"}],"
             + "\"hearingTypes\":"
             + "[{\"code\":\"" + HEARING_TYPE_CODE + "\",\"description\":\"" + HEARING_TYPE_DESC + "\"},"
             + "{\"code\":\"" + HEARING_TYPE_CODE_2 + "\",\"description\":\"" + HEARING_TYPE_DESC_2 + "\"}]}";
@@ -272,7 +273,7 @@ public class FactsMapperTest {
         st.setDescription(SESSION_TYPE_DESC);
         st.addHearingType(HEARING_TYPE);
         st.addHearingType(HEARING_TYPE_2);
-        st.addCaseType(new CaseType(CASE_TYPE, CASE_TYPE_DESC));
+        st.addCaseType(new CaseType(CASE_TYPE_CODE, CASE_TYPE_DESC));
         st.addCaseType(new CaseType(CASE_TYPE_2, CASE_TYPE_DESC_2));
         return st;
     }
