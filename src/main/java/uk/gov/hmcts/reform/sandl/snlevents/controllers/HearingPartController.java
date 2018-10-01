@@ -70,7 +70,9 @@ public class HearingPartController {
     }
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<HearingPartResponse> fetchAllHearingParts(@RequestParam("isListed") Optional<Boolean> isListed) {
+    @ResponseBody public List<HearingPartResponse> fetchAllHearingParts(
+        @RequestParam("isListed") Optional<Boolean> isListed
+    ) {
         if (isListed.isPresent()) {
             return hearingPartService.getAllHearingPartsThat(isListed.get());
         }
@@ -79,14 +81,23 @@ public class HearingPartController {
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HearingPartResponse> upsertHearingPart(@RequestBody CreateHearingPartRequest createHearingPartRequest) throws IOException {
+    public ResponseEntity<HearingPartResponse> upsertHearingPart(
+        @RequestBody CreateHearingPartRequest createHearingPartRequest
+    ) throws IOException {
         HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
         return ok(hearingPartResponse);
     }
 
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createHearingPartAction(@Valid @RequestBody CreateHearingPartRequest createHearingPartRequest) {
-        Action action = new CreateListingRequestAction(createHearingPartRequest, hearingPartRepository, hearingTypeRepository, caseTypeRepository);
+    public ResponseEntity createHearingPartAction(
+        @Valid @RequestBody CreateHearingPartRequest createHearingPartRequest
+    ) {
+        Action action = new CreateListingRequestAction(
+            createHearingPartRequest,
+            hearingPartRepository,
+            hearingTypeRepository,
+            caseTypeRepository
+        );
 
         UserTransaction ut = actionService.execute(action);
 
