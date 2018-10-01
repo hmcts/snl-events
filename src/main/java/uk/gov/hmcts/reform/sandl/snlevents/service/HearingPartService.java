@@ -58,21 +58,8 @@ public class HearingPartService {
     @Autowired
     private CaseTypeRepository caseTypeRepository;
 
-    public HearingPartResponse mapToHearingPartResponse(CreateHearingPartRequest createHearingPartRequest) throws IOException {
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(createHearingPartRequest.getId());
-        hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
-        hearingPart.setCaseTitle(createHearingPartRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
-        hearingPart.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
-        hearingPart.setHearingType(hearingType);
-        hearingPart.setDuration(createHearingPartRequest.getDuration());
-        hearingPart.setScheduleStart(createHearingPartRequest.getScheduleStart());
-        hearingPart.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
-        hearingPart.setPriority(createHearingPartRequest.getPriority());
+    public HearingPartResponse createHearingPart(CreateHearingPartRequest createHearingPartRequest) throws IOException {
+        HearingPart hearingPart = mapToHearingPart(createHearingPartRequest);
         hearingPart = save(hearingPart);
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
@@ -178,5 +165,24 @@ public class HearingPartService {
                 "lock",
                 "unlock",
                 0);
+    }
+
+    private HearingPart mapToHearingPart(CreateHearingPartRequest createHearingPartRequest) {
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(createHearingPartRequest.getId());
+        hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
+        hearingPart.setCaseTitle(createHearingPartRequest.getCaseTitle());
+        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
+        hearingPart.setCaseType(caseType);
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
+        hearingPart.setHearingType(hearingType);
+        hearingPart.setDuration(createHearingPartRequest.getDuration());
+        hearingPart.setScheduleStart(createHearingPartRequest.getScheduleStart());
+        hearingPart.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
+        hearingPart.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
+        hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
+        hearingPart.setPriority(createHearingPartRequest.getPriority());
+
+        return  hearingPart;
     }
 }

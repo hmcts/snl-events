@@ -80,7 +80,7 @@ public class HearingPartController {
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HearingPartResponse> upsertHearingPart(@RequestBody CreateHearingPartRequest createHearingPartRequest) throws IOException {
-        HearingPartResponse hearingPartResponse = hearingPartService.mapToHearingPartResponse(createHearingPartRequest);
+        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
         return ok(hearingPartResponse);
     }
 
