@@ -35,7 +35,6 @@ module "snl-events" {
 
     SNL_RULES_URL = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   }
-
 }
 
 module "postgres-snl-events" {
