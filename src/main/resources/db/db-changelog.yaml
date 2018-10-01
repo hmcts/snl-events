@@ -46,4 +46,6 @@ databaseChangeLog:
   - include:
       file: db/schema/SL-1516-add-createdAt-to-problem-table.yaml
   - include:
+      file: db/schema/SL-1608-remove-casetype.yaml
+  - include:
       file: db/schema/SL-1535-add-fk-to-hearing-type.yaml

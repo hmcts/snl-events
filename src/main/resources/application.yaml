@@ -6,10 +6,10 @@ management:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
     events:
       jwtSecret: "sialaBabaMak"
-      jwtExpirationInMs: 5000
+      jwtExpirationInMs: 30000
     rules:
       jwtSecret: "nieWiedzialaJak"
-      jwtExpirationInMs: 5000
+      jwtExpirationInMs: 30000
 
 communication:
   searchUrl: ${SNL_RULES_URL:http://localhost:8091}/search
@@ -104,3 +104,5 @@ spring:
 #        remove-abandoned-timeout: 60
 #        log-abandoned: true
 #        abandon-when-percentage-full: 0
+
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 30000
