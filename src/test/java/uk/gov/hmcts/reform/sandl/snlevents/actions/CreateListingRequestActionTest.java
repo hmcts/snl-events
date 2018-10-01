@@ -110,23 +110,6 @@ public class CreateListingRequestActionTest {
         assertThat(factMessage.getData()).isNotNull();
     }
 
-    //    @Test
-    //    public void act_worksProperly() {
-    //        action.getAndValidateEntities();
-    //        action.act();
-    //
-    //        ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
-    //        Mockito.verify(hearingPartRepository).save(captor.capture());
-    //
-    //        HearingPart expectedHearingPart = new HearingPart();
-    //        expectedHearingPart.setId(createHearingPartRequest.getId());
-    //        CaseType caseTypeCode = new CaseType(createHearingPartRequest.getCaseTypeCode(), "desc");
-    //        expectedHearingPart.setCaseTypeCode(caseTypeCode);
-    //
-    //        assertThat(captor.getValue().getId()).isEqualTo(expectedHearingPart.getId());
-    //        assertThat(captor.getValue().getCaseTypeCode()).isEqualTo(expectedHearingPart.getCaseTypeCode());
-    //    }
-
     @Test
     public void getUserTransactionData_returnsCorrectData() {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
