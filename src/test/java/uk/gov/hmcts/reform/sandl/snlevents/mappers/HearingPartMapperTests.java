@@ -49,18 +49,18 @@ public class HearingPartMapperTests {
         when(hearingTypeRepository.findOne(HEARING_TYPE_CODE)).thenReturn(HEARING_TYPE);
 
         val chpr = new CreateHearingPartRequest();
-            chpr.setId(ID);
-            chpr.setCaseNumber(CASE_NUMBER);
-            chpr.setCaseTitle(CASE_TITLE);
-            chpr.setCaseTypeCode(CASE_TYPE_CODE);
-            chpr.setHearingTypeCode(HEARING_TYPE_CODE);
-            chpr.setDuration(DURATION);
-            chpr.setScheduleStart(SCHEDULE_START);
-            chpr.setScheduleEnd(SCHEDULE_END);
-            chpr.setPriority(PRIORITY);
-            chpr.setReservedJudgeId(RESERVED_JUDGE_ID);
-            chpr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
-            chpr.setUserTransactionId(USER_TRANSACTION_ID);
+        chpr.setId(ID);
+        chpr.setCaseNumber(CASE_NUMBER);
+        chpr.setCaseTitle(CASE_TITLE);
+        chpr.setCaseTypeCode(CASE_TYPE_CODE);
+        chpr.setHearingTypeCode(HEARING_TYPE_CODE);
+        chpr.setDuration(DURATION);
+        chpr.setScheduleStart(SCHEDULE_START);
+        chpr.setScheduleEnd(SCHEDULE_END);
+        chpr.setPriority(PRIORITY);
+        chpr.setReservedJudgeId(RESERVED_JUDGE_ID);
+        chpr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
+        chpr.setUserTransactionId(USER_TRANSACTION_ID);
 
         val hp = new HearingPartMapper().mapToHearingPart(chpr, caseTypeRepository, hearingTypeRepository);
 
