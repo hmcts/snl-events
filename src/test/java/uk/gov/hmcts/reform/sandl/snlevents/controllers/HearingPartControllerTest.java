@@ -126,7 +126,7 @@ public class HearingPartControllerTest {
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
         HearingPartResponse hearingPartResponse = crateHearingPartResponse().get(0);
-        when(hearingPartService.createHearingPart(any(CreateHearingPartRequest.class))).thenReturn(hearingPartResponse);
+        when(hearingPartService.mapToHearingPartResponse(any(CreateHearingPartRequest.class))).thenReturn(hearingPartResponse);
         when(hearingTypeRepository.findOne(any(String.class))).thenReturn(HEARING_TYPE);
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 

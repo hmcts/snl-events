@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
@@ -81,7 +80,7 @@ public class HearingPartController {
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HearingPartResponse> upsertHearingPart(@RequestBody CreateHearingPartRequest createHearingPartRequest) throws IOException {
-        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
+        HearingPartResponse hearingPartResponse = hearingPartService.mapToHearingPartResponse(createHearingPartRequest);
         return ok(hearingPartResponse);
     }
 

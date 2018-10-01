@@ -58,7 +58,7 @@ public class HearingPartService {
     @Autowired
     private CaseTypeRepository caseTypeRepository;
 
-    public HearingPartResponse createHearingPart(CreateHearingPartRequest createHearingPartRequest) throws IOException {
+    public HearingPartResponse mapToHearingPartResponse(CreateHearingPartRequest createHearingPartRequest) throws IOException {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createHearingPartRequest.getId());
         hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
