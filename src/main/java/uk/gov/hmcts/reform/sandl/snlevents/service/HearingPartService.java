@@ -77,7 +77,7 @@ public class HearingPartService {
         return hearingPartRepository
             .findAll()
             .stream()
-            .map(hp -> new HearingPartResponse(hp))
+            .map(HearingPartResponse::new)
             .collect(Collectors.toList());
     }
 
@@ -90,7 +90,7 @@ public class HearingPartService {
         }
 
         return hearingParts.stream()
-            .map(hp -> new HearingPartResponse(hp))
+            .map(HearingPartResponse::new)
             .collect(Collectors.toList());
     }
 

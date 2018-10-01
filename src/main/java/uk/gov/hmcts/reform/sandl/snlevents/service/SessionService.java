@@ -112,7 +112,7 @@ public class SessionService {
 
         List<HearingPartResponse> hearingPartsResponse = hearingPartRepository.findBySessionIn(sessions)
             .stream()
-            .map(hp -> new HearingPartResponse(hp))
+            .map(HearingPartResponse::new)
             .collect(Collectors.toList());
 
         SessionWithHearings sessionsWithHearings = new SessionWithHearings();
@@ -134,7 +134,7 @@ public class SessionService {
 
         List<HearingPartResponse> hearingPartsResponse = hearingPartRepository.findBySessionIn(sessions)
             .stream()
-            .map(hp -> new HearingPartResponse(hp))
+            .map(HearingPartResponse::new)
             .collect(Collectors.toList());
 
         SessionWithHearings sessionWithHearings = new SessionWithHearings();

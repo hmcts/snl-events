@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HearingPartResponse {
+public class HearingPartResponse implements Serializable {
     private UUID id;
     private String caseNumber;
     private String caseTitle;
