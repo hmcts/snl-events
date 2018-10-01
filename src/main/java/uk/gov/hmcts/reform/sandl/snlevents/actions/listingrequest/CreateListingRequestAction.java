@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -25,12 +26,15 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected HearingPartRepository hearingPartRepository;
     protected HearingTypeRepository hearingTypeRepository;
     protected CaseTypeRepository caseTypeRepository;
+    protected HearingPartMapper hearingPartMapper;
 
     public CreateListingRequestAction(CreateHearingPartRequest createHearingPartRequest,
+                                      HearingPartMapper hearingPartMapper,
                                       HearingPartRepository hearingPartRepository,
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository) {
         this.createHearingPartRequest = createHearingPartRequest;
+        this.hearingPartMapper = hearingPartMapper;
         this.hearingPartRepository = hearingPartRepository;
         this.hearingTypeRepository = hearingTypeRepository;
         this.caseTypeRepository = caseTypeRepository;
@@ -38,27 +42,19 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public void act() {
-        hearingPart = new HearingPart();
-
-        hearingPart.setId(createHearingPartRequest.getId());
-        hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
-        hearingPart.setCaseTitle(createHearingPartRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
-        hearingPart.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
-        hearingPart.setHearingType(hearingType);
-        hearingPart.setDuration(createHearingPartRequest.getDuration());
-        hearingPart.setScheduleStart(createHearingPartRequest.getScheduleStart());
-        hearingPart.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
-        hearingPart.setPriority(createHearingPartRequest.getPriority());
+        hearingPart = hearingPartMapper.mapToHearingPart(
+            createHearingPartRequest,
+            caseTypeRepository,
+            hearingTypeRepository
+        );
 
         hearingPart = hearingPartRepository.save(hearingPart);
     }
 
     @Override
-    public void getAndValidateEntities() { }
+    public void getAndValidateEntities() {
+        // No op
+    }
 
     @Override
     public FactMessage generateFactMessage() {

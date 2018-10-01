@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
@@ -58,8 +59,15 @@ public class HearingPartService {
     @Autowired
     private CaseTypeRepository caseTypeRepository;
 
+    @Autowired
+    private HearingPartMapper hearingPartMapper;
+
     public HearingPartResponse createHearingPart(CreateHearingPartRequest createHearingPartRequest) throws IOException {
-        HearingPart hearingPart = mapToHearingPart(createHearingPartRequest);
+        HearingPart hearingPart = hearingPartMapper.mapToHearingPart(
+            createHearingPartRequest,
+            caseTypeRepository,
+            hearingTypeRepository
+        );
         hearingPart = save(hearingPart);
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
@@ -165,24 +173,5 @@ public class HearingPartService {
                 "lock",
                 "unlock",
                 0);
-    }
-
-    private HearingPart mapToHearingPart(CreateHearingPartRequest createHearingPartRequest) {
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(createHearingPartRequest.getId());
-        hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
-        hearingPart.setCaseTitle(createHearingPartRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
-        hearingPart.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
-        hearingPart.setHearingType(hearingType);
-        hearingPart.setDuration(createHearingPartRequest.getDuration());
-        hearingPart.setScheduleStart(createHearingPartRequest.getScheduleStart());
-        hearingPart.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
-        hearingPart.setPriority(createHearingPartRequest.getPriority());
-
-        return  hearingPart;
     }
 }

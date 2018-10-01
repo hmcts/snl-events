@@ -10,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -51,6 +52,9 @@ public class CreateListingRequestActionTest {
     private CaseTypeRepository caseTypeRepository;
 
     @Spy
+    private HearingPartMapper hearingPartMapper;
+
+    @Spy
     private FactsMapper factsMapper;
 
     @Before
@@ -58,6 +62,7 @@ public class CreateListingRequestActionTest {
         this.createHearingPartRequest = createCreateHearingPart();
         this.action = new CreateListingRequestAction(
             createHearingPartRequest,
+            hearingPartMapper,
             hearingPartRepository,
             hearingTypeRepository,
             caseTypeRepository

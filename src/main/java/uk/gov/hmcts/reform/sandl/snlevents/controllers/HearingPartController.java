@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
@@ -64,6 +65,9 @@ public class HearingPartController {
     @Autowired
     private CaseTypeRepository caseTypeRepository;
 
+    @Autowired
+    private HearingPartMapper hearingPartMapper;
+
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingPartResponse getHearingPartById(@PathVariable("id") UUID id) {
         return new HearingPartResponse(hearingPartRepository.findOne(id));
@@ -94,6 +98,7 @@ public class HearingPartController {
     ) {
         Action action = new CreateListingRequestAction(
             createHearingPartRequest,
+            hearingPartMapper,
             hearingPartRepository,
             hearingTypeRepository,
             caseTypeRepository
