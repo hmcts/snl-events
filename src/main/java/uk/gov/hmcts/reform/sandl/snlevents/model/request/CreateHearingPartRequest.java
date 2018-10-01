@@ -5,12 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
 
 import java.time.Duration;

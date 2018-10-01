@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 
 @Component
 public class HearingPartMapper {
-     public HearingPart mapToHearingPart(CreateHearingPartRequest createHearingPartRequest,
-                                         CaseTypeRepository caseTypeRepository,
-                                         HearingTypeRepository hearingTypeRepository) {
+    public HearingPart mapToHearingPart(CreateHearingPartRequest createHearingPartRequest,
+                                        CaseTypeRepository caseTypeRepository,
+                                        HearingTypeRepository hearingTypeRepository) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createHearingPartRequest.getId());
         hearingPart.setCaseNumber(createHearingPartRequest.getCaseNumber());
@@ -28,6 +28,6 @@ public class HearingPartMapper {
         hearingPart.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
         hearingPart.setPriority(createHearingPartRequest.getPriority());
 
-        return  hearingPart;
+        return hearingPart;
     }
 }
