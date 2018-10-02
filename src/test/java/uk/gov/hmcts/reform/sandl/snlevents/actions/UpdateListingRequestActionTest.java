@@ -37,6 +37,10 @@ public class UpdateListingRequestActionTest {
 
     private static final String ID = "123e4567-e89b-12d3-a456-426655440001";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String CASE_TYPE_CODE = "case-type-code";
+    private static final String HEARING_TYPE_CODE = "hearing-type-code";
+    private static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-description");
+    private static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-description");
 
     private UpdateListingRequestAction action;
     private UpdateListingRequest ulr;
@@ -55,11 +59,6 @@ public class UpdateListingRequestActionTest {
 
     @Mock
     private CaseTypeRepository caseTypeRepository;
-
-    private final String CASE_TYPE_CODE = "case-type-code";
-    private final String HEARING_TYPE_CODE = "hearing-type-code";
-    private final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-description");
-    private final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-description");
 
     @Before
     public void setup() {
