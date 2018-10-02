@@ -29,6 +29,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -55,12 +56,19 @@ public class UpdateListingRequestActionTest {
     @Mock
     private CaseTypeRepository caseTypeRepository;
 
+    private final String CASE_TYPE_CODE = "case-type-code";
+    private final String HEARING_TYPE_CODE = "hearing-type-code";
+    private final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-description");
+    private final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-description");
+
     @Before
     public void setup() {
         ulr = new UpdateListingRequest();
         ulr.setId(createUuid(ID));
         ulr.setCaseNumber("cn");
         ulr.setUserTransactionId(createUuid(TRANSACTION_ID));
+        ulr.setCaseTypeCode(CASE_TYPE_CODE);
+        ulr.setHearingTypeCode(HEARING_TYPE_CODE);
 
         this.action = new UpdateListingRequestAction(ulr,
             hearingPartRepository,
@@ -71,10 +79,12 @@ public class UpdateListingRequestActionTest {
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
-        hearingPart.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
-        hearingPart.setCaseType(new CaseType("case-type-code", "case-type-description"));
+        hearingPart.setHearingType(HEARING_TYPE);
+        hearingPart.setCaseType(CASE_TYPE);
         Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
         when(hearingPartRepository.save(Matchers.any(HearingPart.class))).thenReturn(hearingPart);
+        when(caseTypeRepository.findOne(eq(CASE_TYPE_CODE))).thenReturn(CASE_TYPE);
+        when(hearingTypeRepository.findOne(eq(HEARING_TYPE_CODE))).thenReturn(HEARING_TYPE);
     }
 
     @Test
