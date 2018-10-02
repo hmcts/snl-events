@@ -27,7 +27,6 @@ public class CreateHearingPartRequest implements UserTransactional {
     @Size(max = 200)
     private String caseNumber;
 
-    @NotBlank
     @Size(max = 200)
     private String caseTitle;
 
