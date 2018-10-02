@@ -5,10 +5,10 @@ management:
   security:
     enabled: ${MANAGEMENT_SECURITY_ENABLED:true}
     events:
-      jwtSecret: ${SNL_S2S_JWT_SECRET:"sialaBabaMak"}
+      jwtSecret: "${SNL_S2S_JWT_SECRET:sialaBabaMak}"
       jwtExpirationInMs: 30000
     rules:
-      jwtSecret: ${SNL_S2S_JWT_SECRET:"sialaBabaMak"}
+      jwtSecret: "${SNL_S2S_JWT_SECRET:sialaBabaMak}"
       jwtExpirationInMs: 30000
 
 communication:
