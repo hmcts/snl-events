@@ -45,7 +45,7 @@ module "snl-events" {
 
     ENABLE_DB_MIGRATE_IN_SERVICE = "false"
 
-    SNL_RULES_URL = "abc"
+    SNL_RULES_URL = "${local.rules_url}"
 
     SNL_S2S_JWT_SECRET = "${data.azurerm_key_vault_secret.s2s_jwt_secret.value}"
   }
