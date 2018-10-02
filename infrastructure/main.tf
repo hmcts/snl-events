@@ -7,7 +7,7 @@ locals {
 
   aat_rules_url = "http://snl-rules-aat.service.core-compute-aat.internal"
   local_rules_url = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
-  rules_url = "${var.env == "preview" ? local.rules_url : local.local_rules_url}"
+  rules_url = "${var.env == "preview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
   vaultName = "${var.raw_product}-${local.envInUse}"
