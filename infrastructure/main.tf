@@ -45,7 +45,7 @@ module "snl-events" {
 
     ENABLE_DB_MIGRATE_IN_SERVICE = "false"
 
-    SNL_RULES_URL = "${local.rules_url}"
+    SNL_RULES_URL = "http://snl-rules-aat.service.core-compute-aat.internal"
 
     SNL_S2S_JWT_SECRET = "abc"
   }
