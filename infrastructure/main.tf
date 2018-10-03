@@ -1,5 +1,17 @@
 locals {
   app_full_name = "${var.product}-${var.component}"
+
+  // Specifies the type of environment. var.env is replaced by pipline
+  // to i.e. pr-102-snl so then we need just aat used here
+  envInUse = "${(var.env == "preview" || var.env == "spreview") ? "aat" : var.env}"
+
+  aat_rules_url = "http://snl-rules-aat.service.core-compute-aat.internal"
+  local_rules_url = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+  rules_url = "${var.env == "preview" ? local.aat_rules_url : local.local_rules_url}"
+
+  // Shared Resources
+  vaultName = "${var.raw_product}-${local.envInUse}"
+  sharedResourceGroup = "${var.raw_product}-shared-${local.envInUse}"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -33,7 +45,9 @@ module "snl-events" {
 
     ENABLE_DB_MIGRATE_IN_SERVICE = "false"
 
-    SNL_RULES_URL = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+    SNL_RULES_URL = "${local.rules_url}"
+
+    SNL_S2S_JWT_SECRET = "${data.azurerm_key_vault_secret.s2s_jwt_secret.value}"
   }
 }
 
@@ -88,5 +102,22 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   name      = "${var.product}-${var.component}-POSTGRES-DATABASE"
   value     = "${module.postgres-snl-events.postgresql_database}"
   vault_uri = "${module.snl-vault.key_vault_uri}"
+}
+# endregion
+
+# region shared Azure Key Vault
+data "azurerm_key_vault" "snl-shared-vault" {
+  name = "${local.vaultName}"
+  resource_group_name = "${local.sharedResourceGroup}"
+}
+
+data "azurerm_key_vault_secret" "s2s_jwt_secret" {
+  name      = "s2s-jwt-secret"
+  vault_uri = "${data.azurerm_key_vault.snl-shared-vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "frontend_jwt_secret" {
+  name      = "frontend-jwt-secret"
+  vault_uri = "${data.azurerm_key_vault.snl-shared-vault.vault_uri}"
 }
 # endregion
