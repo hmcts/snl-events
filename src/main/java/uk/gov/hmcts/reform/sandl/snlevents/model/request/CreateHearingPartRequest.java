@@ -49,6 +49,7 @@ public class CreateHearingPartRequest implements UserTransactional {
 
     private UUID reservedJudgeId;
 
+    @Size(max = 255)
     private String communicationFacilitator;
 
     @NotNull
