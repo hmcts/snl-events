@@ -116,8 +116,4 @@ data "azurerm_key_vault_secret" "s2s_jwt_secret" {
   vault_uri = "${data.azurerm_key_vault.snl-shared-vault.vault_uri}"
 }
 
-data "azurerm_key_vault_secret" "frontend_jwt_secret" {
-  name      = "frontend-jwt-secret"
-  vault_uri = "${data.azurerm_key_vault.snl-shared-vault.vault_uri}"
-}
 # endregion
