@@ -12,10 +12,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -25,6 +29,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -32,6 +37,10 @@ public class UpdateListingRequestActionTest {
 
     private static final String ID = "123e4567-e89b-12d3-a456-426655440001";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String CASE_TYPE_CODE = "case-type-code";
+    private static final String HEARING_TYPE_CODE = "hearing-type-code";
+    private static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-description");
+    private static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-description");
 
     private UpdateListingRequestAction action;
     private UpdateListingRequest ulr;
@@ -45,22 +54,36 @@ public class UpdateListingRequestActionTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private HearingTypeRepository hearingTypeRepository;
+
+    @Mock
+    private CaseTypeRepository caseTypeRepository;
+
     @Before
     public void setup() {
         ulr = new UpdateListingRequest();
         ulr.setId(createUuid(ID));
         ulr.setCaseNumber("cn");
         ulr.setUserTransactionId(createUuid(TRANSACTION_ID));
+        ulr.setCaseTypeCode(CASE_TYPE_CODE);
+        ulr.setHearingTypeCode(HEARING_TYPE_CODE);
 
         this.action = new UpdateListingRequestAction(ulr,
             hearingPartRepository,
             entityManager,
-            objectMapper);
+            objectMapper,
+            hearingTypeRepository,
+            caseTypeRepository);
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
+        hearingPart.setHearingType(HEARING_TYPE);
+        hearingPart.setCaseType(CASE_TYPE);
         Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
         when(hearingPartRepository.save(Matchers.any(HearingPart.class))).thenReturn(hearingPart);
+        when(caseTypeRepository.findOne(eq(CASE_TYPE_CODE))).thenReturn(CASE_TYPE);
+        when(hearingTypeRepository.findOne(eq(HEARING_TYPE_CODE))).thenReturn(HEARING_TYPE);
     }
 
     @Test

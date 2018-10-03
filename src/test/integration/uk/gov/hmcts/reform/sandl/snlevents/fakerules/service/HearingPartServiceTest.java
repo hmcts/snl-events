@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -45,6 +47,12 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
     UserTransactionService userTransactionService;
 
     @Autowired
+    HearingTypeRepository hearingTypeRepository;
+
+    @Autowired
+    CaseTypeRepository caseTypeRepository;
+
+    @Autowired
     SessionTypeRepository sessionTypeRepository;
 
     @Autowired
@@ -57,6 +65,8 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
                 .withBody("{}")));
+        hearingTypeRepository.save(hearingPartBuilder.hearingType);
+        caseTypeRepository.save(hearingPartBuilder.caseType);
     }
 
     @Test

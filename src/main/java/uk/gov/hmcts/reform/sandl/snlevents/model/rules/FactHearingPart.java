@@ -15,8 +15,8 @@ import java.time.OffsetDateTime;
 public class FactHearingPart implements Serializable {
     private String id;
     private String sessionId;
-    private String caseType;
-    private String hearingType;
+    private String caseTypeCode;
+    private String hearingTypeCode;
     private Duration duration;
     private OffsetDateTime scheduleStart;
     private OffsetDateTime scheduleEnd;

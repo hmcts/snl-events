@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +11,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -18,6 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
@@ -34,6 +38,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -130,25 +135,27 @@ public class SessionServiceTest {
 
     @Test
     public void getSessionsWithHearingsForDates_returnsSessionsWithHearingsFromRepository() {
-        List<HearingPart> hearingParts = createHearingParts();
+        List<HearingPart> hearingPart = createHearingParts();
+        List<HearingPartResponse> hearingPartResponses = createHearingPartReponses();
         List<Session> sessions = createSessions(VERSION);
 
         when(sessionRepository.findSessionByStartDate(any(OffsetDateTime.class), any(OffsetDateTime.class)))
             .thenReturn(sessions);
         when(hearingPartRepository.findBySessionIn(any(List.class)))
-            .thenReturn(hearingParts);
+            .thenReturn(hearingPart);
 
         SessionWithHearings sessionWithHearings = sessionService.getSessionsWithHearingsForDates(START_DATE, END_DATE);
 
         List<SessionInfo> sessionInfos = createSessionInfos();
 
-        assertThat(sessionWithHearings.getHearingParts()).isEqualTo(hearingParts);
+        assertThat(sessionWithHearings.getHearingPartsResponse()).isEqualTo(hearingPartResponses);
         assertThat(sessionWithHearings.getSessions()).isEqualTo(sessionInfos);
     }
 
     @Test
     public void getSessionJudgeDiaryForDates_returnsSessionsWithHearingsFromRepository() {
-        List<HearingPart> hearingParts = createHearingParts();
+        List<HearingPart> hearingPart = createHearingParts();
+        List<HearingPartResponse> hearingPartReponses = createHearingPartReponses();
         List<Session> sessions = createSessions(VERSION);
 
         when(sessionRepository.findSessionByStartBetweenAndPerson_UsernameEquals(
@@ -156,14 +163,14 @@ public class SessionServiceTest {
         )
             .thenReturn(sessions);
         when(hearingPartRepository.findBySessionIn(any(List.class)))
-            .thenReturn(hearingParts);
+            .thenReturn(hearingPart);
 
         SessionWithHearings sessionWithHearings = sessionService
             .getSessionJudgeDiaryForDates(JUDGE_NAME, START_DATE, END_DATE);
 
         List<SessionInfo> sessionInfos = createSessionInfos();
 
-        assertThat(sessionWithHearings.getHearingParts()).isEqualTo(hearingParts);
+        assertThat(sessionWithHearings.getHearingPartsResponse()).isEqualTo(hearingPartReponses);
         assertThat(sessionWithHearings.getSessions()).isEqualTo(sessionInfos);
     }
 
@@ -294,10 +301,18 @@ public class SessionServiceTest {
     }
 
     private HearingPart createHearingPart() {
-        return new HearingPart();
+        val hp = new HearingPart();
+        hp.setCaseType(new CaseType("case-type-code", "case-type-description"));
+        hp.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
+
+        return hp;
     }
 
-    private List createHearingParts() {
+    private List<HearingPartResponse> createHearingPartReponses() {
+        return createHearingParts().stream().map(hp -> new HearingPartResponse(hp)).collect(Collectors.toList());
+    }
+
+    private List<HearingPart> createHearingParts() {
         return Arrays.asList(createHearingPart());
     }
 

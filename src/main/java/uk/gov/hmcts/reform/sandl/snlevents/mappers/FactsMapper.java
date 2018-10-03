@@ -118,8 +118,8 @@ public class FactsMapper {
 
         factHearingPart.setId(hearingPart.getId().toString());
         factHearingPart.setDuration(hearingPart.getDuration());
-        factHearingPart.setCaseType(hearingPart.getCaseType());
-        factHearingPart.setHearingType(hearingPart.getHearingType());
+        factHearingPart.setCaseTypeCode(hearingPart.getCaseType().getCode());
+        factHearingPart.setHearingTypeCode(hearingPart.getHearingType().getCode());
         factHearingPart.setScheduleStart(hearingPart.getScheduleStart());
         factHearingPart.setScheduleEnd(hearingPart.getScheduleEnd());
         factHearingPart.setCreatedAt(hearingPart.getCreatedAt());

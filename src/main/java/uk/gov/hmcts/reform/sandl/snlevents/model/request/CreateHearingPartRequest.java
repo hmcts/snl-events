@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateHearingPart implements UserTransactional {
+public class CreateHearingPartRequest implements UserTransactional {
 
     @NotNull
     private UUID id;
@@ -27,16 +27,15 @@ public class CreateHearingPart implements UserTransactional {
     @Size(max = 200)
     private String caseNumber;
 
-    @NotBlank
     @Size(max = 200)
     private String caseTitle;
 
     @NotBlank
-    @Size(max = 100)
-    private String caseType;
+    @Size(max = 255)
+    private String caseTypeCode;
 
-    @Size(max = 100)
-    private String hearingType;
+    @Size(max = 255)
+    private String hearingTypeCode;
 
     @NotNull
     @MinDuration(minMinutes = 1)
@@ -50,6 +49,7 @@ public class CreateHearingPart implements UserTransactional {
 
     private UUID reservedJudgeId;
 
+    @Size(max = 255)
     private String communicationFacilitator;
 
     @NotNull

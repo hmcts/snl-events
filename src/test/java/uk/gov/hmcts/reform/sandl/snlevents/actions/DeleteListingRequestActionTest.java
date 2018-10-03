@@ -11,7 +11,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -57,6 +59,8 @@ public class DeleteListingRequestActionTest {
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
+        hearingPart.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
+        hearingPart.setCaseType(new CaseType("case-type-code", "case-type-description"));
         Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
     }
 

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,9 +46,13 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     private String caseTitle;
 
-    private String caseType;
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private CaseType caseType;
 
-    private String hearingType;
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private HearingType hearingType;
 
     private Duration duration;
 
@@ -63,7 +66,6 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     private Session session;
 
     @Column(name = "session_id", updatable = false, insertable = false)
-    @JsonProperty("session")
     private UUID sessionId;
 
     private UUID reservedJudgeId;

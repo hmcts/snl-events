@@ -9,10 +9,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
@@ -64,7 +67,7 @@ public class HearingPartServiceTest {
     @Test
     public void getAllHearingParts_returnsHearingPartsFromRepository() {
         when(hearingPartRepository.findAll()).thenReturn(createHearingParts());
-        List<HearingPart> hearingParts = hearingPartService.getAllHearingParts();
+        List<HearingPartResponse> hearingParts = hearingPartService.getAllHearingParts();
 
         assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
     }
@@ -72,19 +75,19 @@ public class HearingPartServiceTest {
     @Test
     public void getAllHearingPartsThat_whenAreListedIsFalse_returnsHearingPartsWithNoSessionAssignedFromRepository() {
         when(hearingPartRepository.findBySessionIsNull()).thenReturn(createHearingParts());
-        List<HearingPart> hearingParts = hearingPartService.getAllHearingPartsThat(false);
+        List<HearingPartResponse> hearingPartResponses = hearingPartService.getAllHearingPartsThat(false);
 
-        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
-        assertThat(hearingParts.get(0).getSession()).isNull();
+        assertThat(hearingPartResponses.get(0)).isEqualTo(hearingPartResponses.get(0));
+        assertThat(hearingPartResponses.get(0).getSessionId()).isNull();
     }
 
     @Test
     public void getAllHearingPartsThat_whenAreListedIsTrue_returnsHearingPartsWithSessionAssignedFromRepository() {
         when(hearingPartRepository.findBySessionIsNotNull()).thenReturn(Arrays.asList(createHearingPartWithSession()));
-        List<HearingPart> hearingParts = hearingPartService.getAllHearingPartsThat(true);
+        List<HearingPartResponse> hearingPartResponses = hearingPartService.getAllHearingPartsThat(true);
 
-        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
-        assertThat(hearingParts.get(0).getSession()).isNotNull();
+        assertThat(hearingPartResponses.get(0)).isEqualTo(hearingPartResponses.get(0));
+        assertThat(hearingPartResponses.get(0).getSessionId()).isNotNull();
     }
 
     @Test
@@ -175,18 +178,25 @@ public class HearingPartServiceTest {
     }
 
     private HearingPart createHearingPart() {
-        return new HearingPart();
+        HearingPart hp = new HearingPart();
+        hp.setHearingType(new HearingType("code", "desc"));
+        hp.setCaseType(new CaseType("code", "desc"));
+
+        return hp;
     }
 
     private HearingPart createHearingPartWithSession() {
-        HearingPart hp = new HearingPart();
+        HearingPart hp = createHearingPart();
         hp.setSession(createSession());
 
         return hp;
     }
 
     private Session createSession() {
-        return new Session();
+        Session session = new Session();
+        session.setId(UUID.randomUUID());
+
+        return session;
     }
 
     private UUID createUuid() {
