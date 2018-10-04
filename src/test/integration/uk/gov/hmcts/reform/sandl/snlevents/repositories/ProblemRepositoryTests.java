@@ -30,14 +30,14 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
         Problem threeHourAgoCritical = generateProblem(OffsetDateTime.now().minusHours(3), CRITICAL);
         Problem hourAgoUrgent = generateProblem(OffsetDateTime.now().minusHours(1), URGENT);
         Problem fiveMinutesAgoWarning = generateProblem(OffsetDateTime.now().minusMinutes(5), WARNING);
-        Problem nowWithoutCreatedAtAndDifferentSeverity = generateProblem(OffsetDateTime.now().minusMinutes(5), WARNING);
+        Problem withoutCreatedAtAndDifferentSeverity = generateProblem(OffsetDateTime.now().minusMinutes(5), WARNING);
 
         List<Problem> problems = new ArrayList<>();
         problems.add(nowWarning);
         problems.add(threeHourAgoCritical);
         problems.add(hourAgoUrgent);
         problems.add(fiveMinutesAgoWarning);
-        problems.add(nowWithoutCreatedAtAndDifferentSeverity);
+        problems.add(withoutCreatedAtAndDifferentSeverity);
 
         problemRepository.save(problems);
 
@@ -48,7 +48,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
             hourAgoUrgent,
             nowWarning,
             fiveMinutesAgoWarning,
-            nowWithoutCreatedAtAndDifferentSeverity
+            withoutCreatedAtAndDifferentSeverity
         );
 
         assertThat(sortedProblems).isEqualTo(expectedOrder);

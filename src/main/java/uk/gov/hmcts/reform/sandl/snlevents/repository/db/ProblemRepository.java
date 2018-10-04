@@ -12,13 +12,13 @@ import java.util.UUID;
 @Repository
 public interface ProblemRepository extends JpaRepository<Problem, String> {
 
-    @Query("SELECT problem FROM Problem problem " +
-        "ORDER BY CASE severity " +
-        "         WHEN 'Critical'  THEN '0' " +
-        "         WHEN 'Urgent' THEN '1' " +
-        "         WHEN 'Warning'  THEN '2' " +
-        "         ELSE severity " +
-        "         END, created_at desc")
+    @Query("SELECT problem FROM Problem problem "
+        + "ORDER BY CASE severity "
+        + "         WHEN 'Critical'  THEN '0' "
+        + "         WHEN 'Urgent' THEN '1' "
+        + "         WHEN 'Warning'  THEN '2' "
+        + "         ELSE '2' "
+        + "         END, created_at desc")
     List<Problem> getAllSortedBySeverityAndCreatedAt();
 
     @Query("SELECT problem "
