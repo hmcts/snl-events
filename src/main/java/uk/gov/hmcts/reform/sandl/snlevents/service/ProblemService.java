@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ProblemReference;
@@ -10,6 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemReferenceRespon
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ProblemResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.transformers.FactTransformer;
+import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 import java.util.UUID;
@@ -78,13 +81,10 @@ public class ProblemService {
 
         return transformed;
     }
-
-    public List<ProblemResponse> getProblems() {
-        final List<Problem> problems = problemRepository.getAllSortedBySeverityAndCreatedAt();
-
-        return problems.stream()
-            .map(problemDbToResponse)
-            .collect(Collectors.toList());
+    
+    public Page<ProblemResponse> getProblems(Pageable pegable) {
+        final Page<Problem> problems = problemRepository.getAllSortedBySeverityAndCreatedAt(pegable);
+        return problems.map(problem -> problemDbToResponse.apply(problem));
     }
 
     public Problem save(Problem problem) {
