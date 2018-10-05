@@ -81,10 +81,11 @@ public class ProblemService {
 
         return transformed;
     }
-    
+
     public Page<ProblemResponse> getProblems(Pageable pegable) {
-        final Page<Problem> problems = problemRepository.getAllSortedBySeverityAndCreatedAt(pegable);
-        return problems.map(problem -> problemDbToResponse.apply(problem));
+        return problemRepository
+            .getAllSortedBySeverityAndCreatedAt(pegable)
+            .map(problem -> problemDbToResponse.apply(problem));
     }
 
     public Problem save(Problem problem) {
