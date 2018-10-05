@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -15,44 +18,45 @@ import java.util.UUID;
 
 public class CreateListingRequestAction extends Action implements RulesProcessable {
 
-    protected CreateHearingPart createHearingPart;
+    protected CreateHearingPartRequest createHearingPartRequest;
     protected HearingPart hearingPart;
 
     protected HearingPartRepository hearingPartRepository;
+    protected HearingTypeRepository hearingTypeRepository;
+    protected CaseTypeRepository caseTypeRepository;
+    protected HearingPartMapper hearingPartMapper;
 
-    public CreateListingRequestAction(CreateHearingPart createHearingPart,
-                                      HearingPartRepository hearingPartRepository) {
-        this.createHearingPart = createHearingPart;
+    public CreateListingRequestAction(CreateHearingPartRequest createHearingPartRequest,
+                                      HearingPartMapper hearingPartMapper,
+                                      HearingPartRepository hearingPartRepository,
+                                      HearingTypeRepository hearingTypeRepository,
+                                      CaseTypeRepository caseTypeRepository) {
+        this.createHearingPartRequest = createHearingPartRequest;
+        this.hearingPartMapper = hearingPartMapper;
         this.hearingPartRepository = hearingPartRepository;
+        this.hearingTypeRepository = hearingTypeRepository;
+        this.caseTypeRepository = caseTypeRepository;
     }
 
     @Override
     public void act() {
-        hearingPart = new HearingPart();
-
-        hearingPart.setId(createHearingPart.getId());
-        hearingPart.setCaseNumber(createHearingPart.getCaseNumber());
-        hearingPart.setCaseTitle(createHearingPart.getCaseTitle());
-        hearingPart.setCaseType(createHearingPart.getCaseType());
-        hearingPart.setHearingType(createHearingPart.getHearingType());
-        hearingPart.setDuration(createHearingPart.getDuration());
-        hearingPart.setScheduleStart(createHearingPart.getScheduleStart());
-        hearingPart.setScheduleEnd(createHearingPart.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(createHearingPart.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(createHearingPart.getReservedJudgeId());
-        hearingPart.setPriority(createHearingPart.getPriority());
+        hearingPart = hearingPartMapper.mapToHearingPart(
+            createHearingPartRequest,
+            caseTypeRepository,
+            hearingTypeRepository
+        );
 
         hearingPart = hearingPartRepository.save(hearingPart);
     }
 
     @Override
     public void getAndValidateEntities() {
-
+        // No op
     }
 
     @Override
     public FactMessage generateFactMessage() {
-        String msg = null;
+        String msg;
         try {
             msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         } catch (Exception e) {
@@ -79,11 +83,11 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID getUserTransactionId() {
-        return this.createHearingPart.getUserTransactionId();
+        return this.createHearingPartRequest.getUserTransactionId();
     }
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {this.createHearingPart.getId()};
+        return new UUID[] {this.createHearingPartRequest.getId()};
     }
 }

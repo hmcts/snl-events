@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -109,13 +110,16 @@ public class SessionService {
 
         List<Session> sessions = sessionRepository.findSessionByStartDate(fromDate, toDate);
 
-        List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(sessions);
+        List<HearingPartResponse> hearingPartsResponse = hearingPartRepository.findBySessionIn(sessions)
+            .stream()
+            .map(HearingPartResponse::new)
+            .collect(Collectors.toList());
 
         SessionWithHearings sessionsWithHearings = new SessionWithHearings();
         sessionsWithHearings.setSessions(
             sessions.stream().map(this.sessionDbToSessionInfo).collect(Collectors.toList())
         );
-        sessionsWithHearings.setHearingParts(hearingParts);
+        sessionsWithHearings.setHearingPartsResponse(hearingPartsResponse);
 
         return sessionsWithHearings;
     }
@@ -128,13 +132,16 @@ public class SessionService {
         List<Session> sessions = sessionRepository.findSessionByStartBetweenAndPerson_UsernameEquals(fromDate,
             toDate, judgeUsername);
 
-        List<HearingPart> hearingParts = hearingPartRepository.findBySessionIn(sessions);
+        List<HearingPartResponse> hearingPartsResponse = hearingPartRepository.findBySessionIn(sessions)
+            .stream()
+            .map(HearingPartResponse::new)
+            .collect(Collectors.toList());
 
         SessionWithHearings sessionWithHearings = new SessionWithHearings();
         sessionWithHearings.setSessions(
             sessions.stream().map(this.sessionDbToSessionInfo).collect(Collectors.toList())
         );
-        sessionWithHearings.setHearingParts(hearingParts);
+        sessionWithHearings.setHearingPartsResponse(hearingPartsResponse);
 
         return sessionWithHearings;
     }

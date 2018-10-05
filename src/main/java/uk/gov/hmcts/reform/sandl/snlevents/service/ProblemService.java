@@ -80,7 +80,7 @@ public class ProblemService {
     }
 
     public List<ProblemResponse> getProblems() {
-        final List<Problem> problems = problemRepository.findAll();
+        final List<Problem> problems = problemRepository.getAllSortedBySeverityAndCreatedAt();
 
         return problems.stream()
             .map(problemDbToResponse)

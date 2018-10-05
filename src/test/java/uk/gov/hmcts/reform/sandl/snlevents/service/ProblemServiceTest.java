@@ -54,7 +54,7 @@ public class ProblemServiceTest {
 
     @Test
     public void getProblemsReturnsProblemsFromRepository() {
-        when(problemRepository.findAll()).thenReturn(createProblems());
+        when(problemRepository.getAllSortedBySeverityAndCreatedAt()).thenReturn(createProblems());
 
         List<ProblemResponse> expectedProblemResponses = createProblemResponses();
 

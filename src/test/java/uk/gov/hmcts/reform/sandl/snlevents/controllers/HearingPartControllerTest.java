@@ -15,12 +15,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -32,11 +38,11 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,10 +53,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Import(TestConfiguration.class)
 @AutoConfigureMockMvc(secure = false)
 public class HearingPartControllerTest {
-    public static final String TYPE = "type";
+    public static final String CASE_TYPE_CODE = "type";
+    public static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE,"case-type-desc");
     public static final String CASE_NUMBER = "90";
     public static final String TITLE = "title";
-    public static final String HEARING_TYPE = "hearing-type";
+    public static final String HEARING_TYPE_CODE = "hearing-type-code";
+    public static final HearingType HEARING_TYPE =  new HearingType(HEARING_TYPE_CODE, "hearing-type-desc");
     public static final String URL = "/hearing-part";
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
@@ -82,6 +90,18 @@ public class HearingPartControllerTest {
     @SuppressWarnings("PMD.UnusedPrivateField")
     private FactsMapper factsMapper;
 
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private HearingTypeRepository hearingTypeRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private CaseTypeRepository caseTypeRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private HearingPartMapper hearingPartMapper;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -90,35 +110,33 @@ public class HearingPartControllerTest {
 
     @Test
     public void fetchAllHeartingParts_returnHearingPartsFromService() throws Exception {
-        val hearingParts = createHearingParts();
-        when(hearingPartService.getAllHearingParts()).thenReturn(hearingParts);
+        val hearingPartResponses = crateHearingPartResponse();
+        when(hearingPartService.getAllHearingParts()).thenReturn(hearingPartResponses);
 
-        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPart>>(){});
+        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPartResponse>>(){});
         assertEquals(response.size(), 1);
-        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
+        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingPartResponses.get(0));
     }
 
     @Test
     public void fetchAllHeartingParts_whenPassIsListedAsFalse_returnUnlistedHearingPartsFromService() throws Exception {
-        val hearingParts = createHearingParts();
-        when(hearingPartService.getAllHearingPartsThat(any())).thenReturn(hearingParts);
+        val hearingPartResponses = crateHearingPartResponse();
+        when(hearingPartService.getAllHearingPartsThat(any())).thenReturn(hearingPartResponses);
 
-        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPart>>(){});
+        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPartResponse>>(){});
         assertEquals(response.size(), 1);
-        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingParts.get(0));
-    }
-
-    private List<HearingPart> createHearingParts() {
-        return Arrays.asList(createHearingPart());
+        assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingPartResponses.get(0));
     }
 
     @Test
     public void upsertHearingPart_savesHearingPartToService() throws Exception {
-        when(hearingPartService.save(any(HearingPart.class))).then(returnsFirstArg());
+        HearingPartResponse hearingPartResponse = crateHearingPartResponse().get(0);
+        when(hearingPartService.createHearingPart(any(CreateHearingPartRequest.class))).thenReturn(hearingPartResponse);
+        when(hearingTypeRepository.findOne(any(String.class))).thenReturn(HEARING_TYPE);
         val content = objectMapper.writeValueAsString(createCreateHearingPart());
 
-        val response = mvc.callAndMapResponse(put(URL), content, HearingPart.class);
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(createHearingPart());
+        val response = mvc.callAndMapResponse(put(URL), content, HearingPartResponse.class);
+        assertThat(response).isEqualToComparingFieldByFieldRecursively(hearingPartResponse);
     }
 
     @Test
@@ -134,13 +152,6 @@ public class HearingPartControllerTest {
         assertThat(response).isEqualTo(ut);
     }
 
-    private UserTransaction createUserTransaction() {
-        var ut = new UserTransaction();
-        ut.setId(UUID.randomUUID());
-
-        return ut;
-    }
-
     @Test
     public void deleteHearingPartAction_deletesHearingPart() throws Exception {
         val ut = createUserTransaction();
@@ -153,20 +164,34 @@ public class HearingPartControllerTest {
         assertThat(response).isEqualTo(ut);
     }
 
+    private List<HearingPartResponse> crateHearingPartResponse() {
+        return Arrays.asList(createHearingPart())
+            .stream()
+            .map(hp -> new HearingPartResponse(hp))
+            .collect(Collectors.toList());
+    }
+
+    private UserTransaction createUserTransaction() {
+        var ut = new UserTransaction();
+        ut.setId(UUID.randomUUID());
+
+        return ut;
+    }
+
     private DeleteListingRequest createDeleteListingRequest() {
         return new DeleteListingRequest();
     }
 
-    private CreateHearingPart createCreateHearingPart() {
-        val chp = new CreateHearingPart();
+    private CreateHearingPartRequest createCreateHearingPart() {
+        val chp = new CreateHearingPartRequest();
         chp.setId(createUuid());
         chp.setDuration(createDuration());
         chp.setScheduleStart(createOffsetDateTime());
         chp.setScheduleEnd(createOffsetDateTime());
-        chp.setCaseType(TYPE);
+        chp.setCaseTypeCode(CASE_TYPE_CODE);
         chp.setCaseNumber(CASE_NUMBER);
         chp.setCaseTitle(TITLE);
-        chp.setHearingType(HEARING_TYPE);
+        chp.setHearingTypeCode(HEARING_TYPE_CODE);
         chp.setDuration(createDuration());
         chp.setPriority(Priority.Low);
         chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
@@ -190,7 +215,7 @@ public class HearingPartControllerTest {
         hp.setDuration(createDuration());
         hp.setScheduleStart(createOffsetDateTime());
         hp.setScheduleEnd(createOffsetDateTime());
-        hp.setCaseType(TYPE);
+        hp.setCaseType(CASE_TYPE);
         hp.setCaseNumber(CASE_NUMBER);
         hp.setCaseTitle(TITLE);
         hp.setHearingType(HEARING_TYPE);

@@ -7,10 +7,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -25,15 +29,21 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private HearingPart hearingPart;
     private String currentHearingPartAsString;
     private EntityManager entityManager;
+    private HearingTypeRepository hearingTypeRepository;
+    private CaseTypeRepository caseTypeRepository;
 
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       HearingPartRepository hearingPartRepository,
                                       EntityManager entityManager,
-                                      ObjectMapper objectMapper) {
+                                      ObjectMapper objectMapper,
+                                      HearingTypeRepository hearingTypeRepository,
+                                      CaseTypeRepository caseTypeRepository) {
         this.updateListingRequest = updateListingRequest;
         this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
+        this.hearingTypeRepository = hearingTypeRepository;
+        this.caseTypeRepository = caseTypeRepository;
     }
 
     @Override
@@ -43,19 +53,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
-        hearingPart.setId(updateListingRequest.getId());
-        hearingPart.setCaseNumber(updateListingRequest.getCaseNumber());
-        hearingPart.setCaseTitle(updateListingRequest.getCaseTitle());
-        hearingPart.setCaseType(updateListingRequest.getCaseType());
-        hearingPart.setHearingType(updateListingRequest.getHearingType());
-        hearingPart.setDuration(updateListingRequest.getDuration());
-        hearingPart.setScheduleStart(updateListingRequest.getScheduleStart());
-        hearingPart.setScheduleEnd(updateListingRequest.getScheduleEnd());
-        hearingPart.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
-        hearingPart.setReservedJudgeId(updateListingRequest.getReservedJudgeId());
-
-        hearingPart.setPriority(updateListingRequest.getPriority());
 
         entityManager.detach(hearingPart);
         hearingPart.setVersion(updateListingRequest.getVersion());
@@ -69,6 +66,19 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         if (hearingPart == null) {
             throw new EntityNotFoundException("Hearing part not found");
         }
+
+        hearingPart.setCaseNumber(updateListingRequest.getCaseNumber());
+        hearingPart.setCaseTitle(updateListingRequest.getCaseTitle());
+        CaseType caseType = caseTypeRepository.findOne(updateListingRequest.getCaseTypeCode());
+        hearingPart.setCaseType(caseType);
+        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingTypeCode());
+        hearingPart.setHearingType(hearingType);
+        hearingPart.setDuration(updateListingRequest.getDuration());
+        hearingPart.setScheduleStart(updateListingRequest.getScheduleStart());
+        hearingPart.setScheduleEnd(updateListingRequest.getScheduleEnd());
+        hearingPart.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
+        hearingPart.setReservedJudgeId(updateListingRequest.getReservedJudgeId());
+        hearingPart.setPriority(updateListingRequest.getPriority());
     }
 
     @Override

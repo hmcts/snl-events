@@ -5,18 +5,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -45,16 +51,47 @@ public class HearingPartService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public List<HearingPart> getAllHearingParts() {
-        return hearingPartRepository.findAll();
+    @Autowired
+    private HearingTypeRepository hearingTypeRepository;
+
+    @Autowired
+    private CaseTypeRepository caseTypeRepository;
+
+    @Autowired
+    private HearingPartMapper hearingPartMapper;
+
+    public HearingPartResponse createHearingPart(CreateHearingPartRequest createHearingPartRequest) throws IOException {
+        HearingPart hearingPart = hearingPartMapper.mapToHearingPart(
+            createHearingPartRequest,
+            caseTypeRepository,
+            hearingTypeRepository
+        );
+        hearingPart = save(hearingPart);
+        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+        rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
+
+        return new HearingPartResponse(hearingPart);
     }
 
-    public List<HearingPart> getAllHearingPartsThat(Boolean areListed) {
+    public List<HearingPartResponse> getAllHearingParts() {
+        return hearingPartRepository
+            .findAll()
+            .stream()
+            .map(HearingPartResponse::new)
+            .collect(Collectors.toList());
+    }
+
+    public List<HearingPartResponse> getAllHearingPartsThat(Boolean areListed) {
+        List<HearingPart> hearingParts;
         if (areListed) {
-            return hearingPartRepository.findBySessionIsNotNull();
+            hearingParts = hearingPartRepository.findBySessionIsNotNull();
+        } else {
+            hearingParts = hearingPartRepository.findBySessionIsNull();
         }
 
-        return hearingPartRepository.findBySessionIsNull();
+        return hearingParts.stream()
+            .map(HearingPartResponse::new)
+            .collect(Collectors.toList());
     }
 
     public HearingPart save(HearingPart hearingPart) {

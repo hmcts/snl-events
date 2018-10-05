@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
@@ -191,7 +192,10 @@ public class SessionControllerTest {
     }
 
     private Session createSession() {
-        return new Session();
+        Session s = new Session();
+        s.setSessionType(new SessionType());
+
+        return s;
     }
 
     private UpsertSession createUpsertSession() {
