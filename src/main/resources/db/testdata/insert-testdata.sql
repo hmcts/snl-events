@@ -20,11 +20,19 @@ INSERT INTO room_type (description, code) VALUES ('Conference Room','conference-
 
 insert into session_type(code, description)
 values ('K-Fast Track and Applications', 'K-Fast Track and Applications');
+insert into session_type(code, description)
+values ('Without case and hearing type', 'Without case and hearing type');
 
 insert into case_type(code, description)
 values('K-Fast Track', 'K-Fast Track');
 insert into case_type(code, description)
 values('K-Small Claims', 'K-Small Claims');
+insert into case_type(code, description)
+values('Without hearing type', 'Without hearing type');
+insert into case_type(code, description)
+values('Matching only session type', 'Matching only session type');
+insert into case_type(code, description)
+values('Matching only hearing type', 'Matching only hearing type');
 
 insert into hearing_type(code, description)
 values('K-Application', 'K-Application');
@@ -41,9 +49,17 @@ insert into hearing_type_case_type(hearing_type_code, case_type_code)
 values('K-Someting else', 'K-Small Claims');
 insert into hearing_type_case_type(hearing_type_code, case_type_code)
 values('K-ASAJ', 'K-Small Claims');
+insert into hearing_type_case_type(hearing_type_code, case_type_code)
+values('trial', 'multi-track');
+insert into hearing_type_case_type(hearing_type_code, case_type_code)
+values('preliminary-hearing', 'multi-track');
+insert into hearing_type_case_type(hearing_type_code, case_type_code)
+values('preliminary-hearing', 'Matching only hearing type');
 
 insert into case_type_session_type(case_type_code, session_type_code)
 values('K-Fast Track', 'K-Fast Track and Applications');
+insert into case_type_session_type(case_type_code, session_type_code)
+values('Matching only session type', 'K-Fast Track and Applications');
 
 insert into hearing_type_session_type(hearing_type_code, session_type_code)
 values ('K-Application', 'K-Fast Track and Applications');
