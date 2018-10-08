@@ -51,3 +51,5 @@ databaseChangeLog:
       file: db/schema/SL-1535-add-fk-to-hearing-type.yaml
   - include:
       file: db/schema/SL-1876-multi-hearing-db-changes.yaml
+  - include:
+      file: db/schema/SL-1876-2-hearing-part-change-of-columns.yaml

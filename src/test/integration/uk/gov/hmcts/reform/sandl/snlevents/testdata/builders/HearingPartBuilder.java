@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.testdata.builders;
 
 import org.springframework.boot.test.context.TestComponent;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.mappers;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
