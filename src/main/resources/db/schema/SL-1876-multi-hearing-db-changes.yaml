@@ -1,0 +1,170 @@
+databaseChangeLog:
+  - changeSet:
+        id: create_hearing_table
+        author: lgurniewicz
+        changes:
+          - createTable:
+              columns:
+                - column:
+                    constraints:
+                      primaryKey: true
+                    name: id
+                    type: UUID
+                - column:
+                    name: case_number
+                    type: VARCHAR(200)
+                - column:
+                    name: case_title
+                    type: VARCHAR(200)
+                - column:
+                    name: duration
+                    type: BIGINT
+                - column:
+                    name: schedule_start
+                    type: TIMESTAMP WITH TIME ZONE
+                - column:
+                    name: schedule_end
+                    type: TIMESTAMP WITH TIME ZONE
+                - column:
+                    name: start
+                    type: TIMESTAMP WITH TIME ZONE
+                - column:
+                    name: created_at
+                    type: TIMESTAMP WITH TIME ZONE
+                - column:
+                    name: version
+                    type: BIGINT
+                    defaultValueNumeric: 0
+                    constraints:
+                      nullable: false
+                - column:
+                    name: priority
+                    type: int
+                - column:
+                    name: reserved_judge_id
+                    type: UUID
+                - column:
+                    name: communication_facilitator
+                    type: varchar(255)
+                - column:
+                    name: hearing_type_code
+                    type: VARCHAR(255)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: case_type_code
+                    type: VARCHAR(255)
+                    constraints:
+                      nullable: false
+                - column:
+                    name: is_deleted
+                    type: boolean
+                # history related
+                - column:
+                    name: modified_at
+                    type: TIMESTAMP WITH TIME ZONE
+                - column:
+                    name: modified_by
+                    type: varchar(255)
+                - column:
+                    name: created_by
+                    type: varchar(255)
+              tableName: hearing
+          # constraints
+          - addForeignKeyConstraint:
+              baseColumnNames: reserved_judge_id
+              baseTableName: hearing
+              constraintName: fk_reserved_judge_id_to_person_id
+              referencedColumnNames: id
+              referencedTableName: person
+          - addForeignKeyConstraint:
+               baseColumnNames: hearing_type_code
+               baseTableName: hearing
+               constraintName: fk_hearing_type_code_to_hearing_type
+               referencedColumnNames: code
+               referencedTableName: hearing_type
+          - addForeignKeyConstraint:
+              baseColumnNames: case_type_code
+              baseTableName: hearing
+              constraintName: fk_case_type_code_to_case_type
+              referencedColumnNames: code
+              referencedTableName: case_type
+
+  - changeSet:
+      id: create-hearing-history-table
+      author: lgurniewicz
+      changes:
+        - createTable:
+            tableName: hearing_aud
+            columns:
+            #audit columns
+            - column:
+                name: rev
+                type: int
+                constraints:
+                  nullable: false
+                  foreignKeyName: fk_hearing_aud_revinfo
+                  references: revinfo(rev)
+            - column:
+                name: revtype
+                type: smallint
+            #hearing columns
+            - column:
+                name: id
+                type: UUID
+            - column:
+                name: case_number
+                type: VARCHAR(200)
+            - column:
+                name: case_title
+                type: VARCHAR(200)
+            - column:
+                name: duration
+                type: BIGINT
+            - column:
+                name: schedule_start
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: schedule_end
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: start
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: created_at
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: version
+                type: BIGINT
+            - column:
+                name: priority
+                type: int
+            - column:
+                name: reserved_judge_id
+                type: UUID
+            - column:
+                name: communication_facilitator
+                type: varchar(255)
+            - column:
+                name: hearing_type_code
+                type: VARCHAR(255)
+            - column:
+                name: case_type_code
+                type: VARCHAR(255)
+            - column:
+                name: is_deleted
+                type: boolean
+            - column:
+                name: modified_at
+                type: TIMESTAMP WITH TIME ZONE
+            - column:
+                name: created_by
+                type: varchar(255)
+            - column:
+                name: modified_by
+                type: varchar(255)
+        - addPrimaryKey:
+            columnNames: id, rev
+            constraintName: pk_hearing_aud
+            schemaName: public
+            tableName: hearing_aud
