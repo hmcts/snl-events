@@ -27,6 +27,7 @@ insert into case_type(code, description)
 values('K-Fast Track', 'K-Fast Track');
 insert into case_type(code, description)
 values('K-Small Claims', 'K-Small Claims');
+
 insert into case_type(code, description)
 values('Without hearing type', 'Without hearing type');
 insert into case_type(code, description)
