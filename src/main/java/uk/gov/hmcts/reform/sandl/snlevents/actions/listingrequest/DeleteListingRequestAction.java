@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
 public class DeleteListingRequestAction extends Action implements RulesProcessable {
     private DeleteListingRequest deleteListingRequest;
@@ -62,6 +63,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
+    @Transactional
     public FactMessage generateFactMessage() {
         String msg = null;
 
