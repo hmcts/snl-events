@@ -48,7 +48,7 @@ public class ProblemServiceTest {
     public void getProblemsReturnsEmptyListWhenRepositoryReturnsEmptyList() {
         when(problemRepository.findAll()).thenReturn(new ArrayList<>());
 
-        List<ProblemResponse> ret = problemService.getProblems();
+        Iterable<ProblemResponse> ret = problemService.getProblems(null);
         assertThat(ret).isEqualTo(Collections.emptyList());
     }
 
@@ -58,7 +58,7 @@ public class ProblemServiceTest {
 
         List<ProblemResponse> expectedProblemResponses = createProblemResponses();
 
-        List<ProblemResponse> problemResponses = problemService.getProblems();
+        Iterable<ProblemResponse> problemResponses = problemService.getProblems(null);
         assertThat(problemResponses).isEqualTo(expectedProblemResponses);
     }
 

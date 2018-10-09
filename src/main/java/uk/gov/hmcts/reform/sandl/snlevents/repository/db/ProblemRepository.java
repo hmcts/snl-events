@@ -13,15 +13,19 @@ import java.util.UUID;
 
 @Repository
 public interface ProblemRepository extends PagingAndSortingRepository<Problem, String> {
-
-    @Query("SELECT problem FROM Problem problem "
+    String getProblems = "SELECT problem FROM Problem problem "
         + "ORDER BY CASE severity "
         + "         WHEN 'Critical'  THEN '0' "
         + "         WHEN 'Urgent' THEN '1' "
         + "         WHEN 'Warning'  THEN '2' "
         + "         ELSE '2' "
-        + "         END, created_at desc")
+        + "         END, created_at desc";
+
+    @Query(getProblems)
     Page<Problem> getAllSortedBySeverityAndCreatedAt(Pageable pageable);
+
+    @Query(getProblems)
+    List<Problem> getAllSortedBySeverityAndCreatedAt();
 
     @Query("SELECT problem "
         + "FROM Problem problem LEFT OUTER JOIN problem.references as pr "
