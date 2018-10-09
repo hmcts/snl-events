@@ -42,6 +42,51 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Id
     private UUID id;
 
+    @ManyToOne
+    @JsonIgnore
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private Session session;
+
+    @Column(name = "session_id", updatable = false, insertable = false)
+    private UUID sessionId;
+
+    private OffsetDateTime start;
+
+    private boolean isDeleted;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private OffsetDateTime createdAt;
+
+    @LastModifiedDate
+    private OffsetDateTime modifiedAt;
+
+    @CreatedBy
+    @Column(updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    private String modifiedBy;
+
+    @ManyToOne
+    @JsonIgnore
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private Hearing hearing;
+
+    @Column(name = "hearing_id", updatable = false, insertable = false)
+    private UUID hearingId;
+
+//// @TODO remove after future changes
+
+    @Enumerated(EnumType.ORDINAL)
+    private Priority priority;
+
+
+    private UUID reservedJudgeId;
+
+    private String communicationFacilitator;
+
+
     private String caseNumber;
 
     private String caseTitle;
@@ -59,45 +104,4 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     private OffsetDateTime scheduleStart;
 
     private OffsetDateTime scheduleEnd;
-
-    @ManyToOne
-    @JsonIgnore
-    @Audited(targetAuditMode = NOT_AUDITED)
-    private Session session;
-
-    @Column(name = "session_id", updatable = false, insertable = false)
-    private UUID sessionId;
-
-    @ManyToOne
-    @JsonIgnore
-    @Audited(targetAuditMode = NOT_AUDITED)
-    private Hearing hearing;
-
-    @Column(name = "hearing_id", updatable = false, insertable = false)
-    private UUID hearingId;
-
-    private UUID reservedJudgeId;
-
-    private String communicationFacilitator;
-
-    private OffsetDateTime start;
-
-    @Enumerated(EnumType.ORDINAL)
-    private Priority priority;
-
-    private boolean isDeleted;
-
-    @CreatedDate
-    @Column(updatable = false)
-    private OffsetDateTime createdAt;
-
-    @LastModifiedDate
-    private OffsetDateTime modifiedAt;
-
-    @CreatedBy
-    @Column(updatable = false)
-    private String createdBy;
-
-    @LastModifiedBy
-    private String modifiedBy;
 }
