@@ -25,6 +25,7 @@ public interface ProblemRepository extends PagingAndSortingRepository<Problem, S
     Page<Problem> getAllSortedBySeverityAndCreatedAt(Pageable pageable);
 
     @Query(getProblems)
+    @Deprecated
     List<Problem> getAllSortedBySeverityAndCreatedAt();
 
     @Query("SELECT problem "
