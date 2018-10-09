@@ -47,30 +47,11 @@ databaseChangeLog:
           - dropColumn:
               columnName: case_type_code
               tableName: hearing_part
-          # new column
-          - addColumn:
-              columns:
-              - column:
-                  name: hearing_id
-                  type: UUID
-              tableName: hearing_part
-          - addForeignKeyConstraint:
-              baseColumnNames: hearing_id
-              baseTableName: hearing_part
-              constraintName: fk_hearing_id_to_hearing_part_id
-              referencedColumnNames: id
-              referencedTableName: hearing
 
   - changeSet:
       id: SL-1876-changes-to-hearing-part-aud-table
       author: lgurniewicz
       changes:
-          - addColumn:
-              columns:
-              - column:
-                  name: hearing_id
-                  type: UUID
-              tableName: hearing_part_aud
           # columns drop
           - dropColumn:
               columnName: case_number
