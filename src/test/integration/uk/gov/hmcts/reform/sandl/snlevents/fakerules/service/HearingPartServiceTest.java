@@ -113,7 +113,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
-        hearingPartSessionRelationship.setHearingPartVersion(savedHearingPart.getVersion());
+        hearingPartSessionRelationship.setHearingVersion(savedHearingPart.getVersion());
         UserTransaction conflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
             savedHearingPart.getId(),
             hearingPartSessionRelationship
@@ -146,7 +146,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         );
 
         //WHEN we try to assign Session to HearingPart with older version
-        hearingPartSessionRelationship.setHearingPartVersion(1L);
+        hearingPartSessionRelationship.setHearingVersion(1L);
         hearingPartService.assignHearingPartToSessionWithTransaction(
             savedHearingPart.getId(), hearingPartSessionRelationship
         );
@@ -159,7 +159,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearingPartSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
         hearingPartSessionRelationship.setUserTransactionId(userTransactionId);
         hearingPartSessionRelationship.setSessionVersion(0);
-        hearingPartSessionRelationship.setHearingPartVersion(0);
+        hearingPartSessionRelationship.setHearingVersion(0);
 
         return hearingPartSessionRelationship;
     }

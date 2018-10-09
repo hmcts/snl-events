@@ -145,7 +145,7 @@ public class HearingPartService {
                                                                       HearingPartSessionRelationship assignment)
                                                                         throws IOException {
         entityManager.detach(hearing);
-        hearing.setVersion(assignment.getHearingPartVersion());
+        hearing.setVersion(assignment.getHearingVersion());
         HearingPart hearingPart = hearing.getHearingParts().get(0);
 
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();

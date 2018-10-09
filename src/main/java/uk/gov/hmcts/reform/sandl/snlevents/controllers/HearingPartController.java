@@ -125,12 +125,12 @@ public class HearingPartController {
         return ok(ut);
     }
 
-    @PutMapping(path = "/{hearingPartId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity assignHearingPartToSession(
-        @PathVariable UUID hearingPartId,
+        @PathVariable UUID hearingId,
         @RequestBody HearingPartSessionRelationship assignment) throws Exception {
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingPartId, assignment);
+        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingId, assignment);
 
         return ok(ut);
     }
