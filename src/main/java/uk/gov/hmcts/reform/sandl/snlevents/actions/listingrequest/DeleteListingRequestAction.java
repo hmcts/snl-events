@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -62,13 +63,13 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public FactMessage generateFactMessage() {
-        String msg;
+        String msg = null;
 
-        try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
 
         return new FactMessage(RulesService.DELETE_HEARING_PART, msg);
     }

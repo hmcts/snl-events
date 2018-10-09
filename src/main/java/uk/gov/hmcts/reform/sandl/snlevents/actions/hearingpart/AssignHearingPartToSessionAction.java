@@ -57,7 +57,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     public void act() {
         hearingPart.setSession(targetSession);
         hearingPart.setSessionId(targetSession.getId());
-        hearingPart.setStart(hearingPartSessionRelationship.getStart());
+//        hearingPart.setStart(hearingPartSessionRelationship.getStart());
 
         hearingPartRepository.save(hearingPart);
     }
@@ -88,11 +88,11 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     @Override
     public FactMessage generateFactMessage() {
         String msg = null;
-        try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+////            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart); @TODO use Action instead of service
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
 
         return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
     }

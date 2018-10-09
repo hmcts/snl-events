@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.db;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.ListedHearingRequestReportResult;
 import uk.gov.hmcts.reform.sandl.snlevents.model.report.UnlistedHearingRequestsReportResult;
@@ -58,9 +59,9 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
     )
     List<UnlistedHearingRequestsReportResult> reportUnlistedHearingRequests();
 
-    @Query(value = "select hp.caseType as caseType, s.start as startTime, hp.caseNumber "
-        + "as caseId, hp.caseTitle as caseName, hp.duration as duration, r.name as room, "
-        + "p.name as judge, hp.hearingType as hearingType from HearingPart hp JOIN hp.session as s "
+    @Query(value = "select h.caseType as caseType, s.start as startTime, h.caseNumber "
+        + "as caseId, h.caseTitle as caseName, h.duration as duration, r.name as room, "
+        + "p.name as judge, h.hearingType as hearingType from HearingPart hp JOIN hp.hearing as h JOIN hp.session as s "
         + "LEFT OUTER JOIN s.room as r LEFT OUTER JOIN s.person as p WHERE s.start BETWEEN ?1 AND ?2")
     List<ListedHearingRequestReportResult> reportListedHearingRequests(OffsetDateTime startDate,
                                                                        OffsetDateTime endDate);

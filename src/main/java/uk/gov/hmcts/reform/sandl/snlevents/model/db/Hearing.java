@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -16,7 +19,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -24,6 +30,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
@@ -83,4 +90,18 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     @LastModifiedBy
     private String modifiedBy;
+
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "hearing", cascade = {
+        CascadeType.MERGE,
+        CascadeType.PERSIST
+    })
+    @JsonIgnore
+    @NotAudited
+    private List<HearingPart> hearingParts = new ArrayList<>();
+
+    public void addHearingPart(HearingPart hearingPart) {
+        hearingPart.setHearing(this);
+        hearingParts.add(hearingPart);
+    }
 }

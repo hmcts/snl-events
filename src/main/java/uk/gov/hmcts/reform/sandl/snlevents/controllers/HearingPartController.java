@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -51,6 +52,9 @@ public class HearingPartController {
     HearingPartRepository hearingPartRepository;
 
     @Autowired
+    HearingRepository hearingRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -66,7 +70,7 @@ public class HearingPartController {
     private CaseTypeRepository caseTypeRepository;
 
     @Autowired
-    private HearingPartMapper hearingPartMapper;
+    private HearingMapper hearingMapper;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingPartResponse getHearingPartById(@PathVariable("id") UUID id) {
@@ -84,13 +88,13 @@ public class HearingPartController {
         return hearingPartService.getAllHearingParts();
     }
 
-    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HearingPartResponse> upsertHearingPart(
-        @RequestBody CreateHearingPartRequest createHearingPartRequest
-    ) throws IOException {
-        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
-        return ok(hearingPartResponse);
-    }
+//    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE) @TODO REMOVE ALSO FROM API if not used
+//    public ResponseEntity<HearingPartResponse> upsertHearingPart(
+//        @RequestBody CreateHearingPartRequest createHearingPartRequest
+//    ) throws IOException {
+//        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
+//        return ok(hearingPartResponse);
+//    }
 
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createHearingPartAction(
@@ -98,10 +102,11 @@ public class HearingPartController {
     ) {
         Action action = new CreateListingRequestAction(
             createHearingPartRequest,
-            hearingPartMapper,
+            hearingMapper,
             hearingPartRepository,
             hearingTypeRepository,
-            caseTypeRepository
+            caseTypeRepository,
+            hearingRepository
         );
 
         UserTransaction ut = actionService.execute(action);
@@ -112,7 +117,8 @@ public class HearingPartController {
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateHearingPart(@Valid @RequestBody UpdateListingRequest updateListingRequest) {
         Action action = new UpdateListingRequestAction(updateListingRequest,
-            hearingPartRepository, entityManager, objectMapper, hearingTypeRepository, caseTypeRepository);
+            hearingPartRepository, entityManager, objectMapper, hearingTypeRepository, caseTypeRepository,
+            hearingRepository);
 
         UserTransaction ut = actionService.execute(action);
 

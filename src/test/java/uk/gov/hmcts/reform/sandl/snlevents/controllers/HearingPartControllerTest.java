@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
@@ -99,7 +99,7 @@ public class HearingPartControllerTest {
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private HearingPartMapper hearingPartMapper;
+    private HearingMapper hearingMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

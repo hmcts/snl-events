@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class HearingPartMapperTests {
+public class HearingMapperTests {
     private static final UUID ID = UUID.randomUUID();
     private static final String CASE_NUMBER = "some-case-number";
     private static final String CASE_TITLE = "some-case-title";
@@ -62,7 +62,7 @@ public class HearingPartMapperTests {
         chpr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         chpr.setUserTransactionId(USER_TRANSACTION_ID);
 
-        val hp = new HearingPartMapper().mapToHearingPart(chpr, caseTypeRepository, hearingTypeRepository);
+        val hp = new HearingMapper().mapToHearingPart(chpr, caseTypeRepository, hearingTypeRepository);
 
         assertThat(hp.getId()).isEqualTo(ID);
         assertThat(hp.getCaseNumber()).isEqualTo(CASE_NUMBER);
