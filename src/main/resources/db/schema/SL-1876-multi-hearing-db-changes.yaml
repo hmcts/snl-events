@@ -158,7 +158,7 @@ databaseChangeLog:
                 type: boolean
                 constraints:
                     nullable: false
-                  defaultValue: false
+                defaultValue: false
             - column:
                 name: modified_at
                 type: TIMESTAMP WITH TIME ZONE
