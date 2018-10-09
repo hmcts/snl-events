@@ -58,12 +58,12 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         entityManager.detach(hearing);
         hearing.setVersion(deleteListingRequest.getHearingVersion());
         hearing.setDeleted(true);
+        hearing.getHearingParts().forEach(hp-> hp.setDeleted(true));
 
         hearingRepository.save(hearing);
     }
 
     @Override
-    @Transactional
     public FactMessage generateFactMessage() {
         String msg = null;
 

@@ -28,6 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -95,7 +96,7 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
     @OneToMany(mappedBy = "hearing", cascade = {
         CascadeType.MERGE,
         CascadeType.PERSIST
-    })
+    }, fetch = FetchType.EAGER)
     @JsonIgnore
     @NotAudited
     private List<HearingPart> hearingParts = new ArrayList<>();
