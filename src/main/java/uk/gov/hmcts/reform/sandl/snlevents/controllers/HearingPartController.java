@@ -140,7 +140,7 @@ public class HearingPartController {
         @RequestBody DeleteListingRequest request
     ) {
         Action action = new DeleteListingRequestAction(
-            request, hearingPartRepository, entityManager, objectMapper
+            request, hearingRepository, entityManager, objectMapper
         );
 
         return ok(actionService.execute(action));
