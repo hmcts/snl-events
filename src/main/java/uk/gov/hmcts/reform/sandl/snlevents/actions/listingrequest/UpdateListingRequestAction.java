@@ -92,11 +92,11 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public FactMessage generateFactMessage() {
         String msg = null;
-//        try {
-//            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearing);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
     }

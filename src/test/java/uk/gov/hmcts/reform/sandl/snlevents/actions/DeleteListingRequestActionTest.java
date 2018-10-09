@@ -47,9 +47,9 @@ public class DeleteListingRequestActionTest {
     @Before
     public void setup() {
         dlr = new DeleteListingRequest();
-        dlr.setHearingPartId(createUuid(ID));
+        dlr.setHearingId(createUuid(ID));
         dlr.setUserTransactionId(createUuid(TRANSACTION_ID));
-        dlr.setHearingPartVersion(1L);
+        dlr.setHearingVersion(1L);
 
         this.action = new DeleteListingRequestAction(dlr,
             hearingPartRepository,
@@ -109,7 +109,7 @@ public class DeleteListingRequestActionTest {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
         expectedTransactionData.add(new UserTransactionData("hearingPart",
-            dlr.getHearingPartId(),
+            dlr.getHearingId(),
             Mockito.any(),
             "delete",
             "create",

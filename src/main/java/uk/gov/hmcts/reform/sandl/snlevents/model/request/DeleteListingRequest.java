@@ -12,9 +12,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class DeleteListingRequest implements UserTransactional {
 
-    private UUID hearingPartId;
+    private UUID hearingId;
 
-    private Long hearingPartVersion;
+    private Long hearingVersion;
 
     private UUID userTransactionId;
 }
