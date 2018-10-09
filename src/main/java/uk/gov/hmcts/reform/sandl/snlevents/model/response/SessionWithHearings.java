@@ -16,4 +16,5 @@ public class SessionWithHearings implements Serializable {
     private List<SessionInfo> sessions;
 
     @JsonProperty("hearingParts")
-    private List<HearingPartResponse> hearingPartsResponse
+    private List<HearingPartResponse> hearingPartsResponse;
+}
