@@ -74,19 +74,19 @@ databaseChangeLog:
           - addForeignKeyConstraint:
               baseColumnNames: reserved_judge_id
               baseTableName: hearing
-              constraintName: fk_reserved_judge_id_to_person_id
+              constraintName: fk_hearing_reserved_judge_id_to_person_id
               referencedColumnNames: id
               referencedTableName: person
           - addForeignKeyConstraint:
                baseColumnNames: hearing_type_code
                baseTableName: hearing
-               constraintName: fk_hearing_type_code_to_hearing_type
+               constraintName: fk_hearing_hearing_type_code_to_hearing_type
                referencedColumnNames: code
                referencedTableName: hearing_type
           - addForeignKeyConstraint:
               baseColumnNames: case_type_code
               baseTableName: hearing
-              constraintName: fk_case_type_code_to_case_type
+              constraintName: fk_hearing_case_type_code_to_case_type
               referencedColumnNames: code
               referencedTableName: case_type
 
@@ -110,6 +110,8 @@ databaseChangeLog:
                 type: smallint
             #hearing columns
             - column:
+                constraints:
+                  nullable: false
                 name: id
                 type: UUID
             - column:
@@ -185,3 +187,14 @@ databaseChangeLog:
             constraintName: fk_hearing_part_to_hearing
             referencedColumnNames: id
             referencedTableName: hearing
+
+  - changeSet:
+      id: link-hearing-part_aud-toHearing
+      author: rkruk
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: hearing_id
+                  type: UUID
+            tableName: hearing_part_aud
