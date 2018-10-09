@@ -168,3 +168,20 @@ databaseChangeLog:
             constraintName: pk_hearing_aud
             schemaName: public
             tableName: hearing_aud
+
+  - changeSet:
+      id: link-hearingPart-toHearing
+      author: rkruk
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: hearing_id
+                  type: UUID
+            tableName: hearing_part
+        - addForeignKeyConstraint:
+            baseColumnNames: hearing_id
+            baseTableName: hearing_part
+            constraintName: fk_hearing_part_to_hearing
+            referencedColumnNames: id
+            referencedTableName: hearing
