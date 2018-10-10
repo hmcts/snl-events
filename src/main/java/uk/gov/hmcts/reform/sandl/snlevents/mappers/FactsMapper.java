@@ -86,8 +86,8 @@ public class FactsMapper {
         return objectMapper.writeValueAsString(factSession);
     }
 
-    public String mapHearingPartToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
-        return mapDbHearingPartToRuleJsonMessage(hearing);
+    public String mapHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
+        return mapDbHearingToRuleJsonMessage(hearing);
     }
 
     public String mapDbSessionToRuleJsonMessage(Session session) {
@@ -114,7 +114,7 @@ public class FactsMapper {
         }
     }
 
-    public String mapDbHearingPartToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
+    public String mapDbHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
         FactHearingPart factHearingPart = new FactHearingPart();
 
         factHearingPart.setId(hearing.getId().toString());

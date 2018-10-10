@@ -80,7 +80,7 @@ public class PostDbDataController {
         }
 
         for (Hearing hearing : hearingRepository.findAll()) {
-            String msg = factsMapper.mapDbHearingPartToRuleJsonMessage(hearing);
+            String msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
             rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
         }
 

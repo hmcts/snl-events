@@ -25,7 +25,6 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected HearingPart hearingPart;
     protected Hearing hearing;
 
-    protected HearingPartRepository hearingPartRepository;
     protected HearingTypeRepository hearingTypeRepository;
     protected CaseTypeRepository caseTypeRepository;
     protected HearingMapper hearingMapper;
@@ -33,13 +32,11 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     public CreateListingRequestAction(CreateHearingPartRequest createHearingPartRequest,
                                       HearingMapper hearingMapper,
-                                      HearingPartRepository hearingPartRepository,
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository,
                                       HearingRepository hearingRepository) {
         this.createHearingPartRequest = createHearingPartRequest;
         this.hearingMapper = hearingMapper;
-        this.hearingPartRepository = hearingPartRepository;
         this.hearingTypeRepository = hearingTypeRepository;
         this.caseTypeRepository = caseTypeRepository;
         this.hearingRepository = hearingRepository;
@@ -66,7 +63,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg;
         try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearing);
+            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -78,15 +75,19 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        userTransactionDataList.add(new UserTransactionData("hearingPart",
-            hearingPart.getId(),
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hearingPart.getId()));
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId()));
+
+        return userTransactionDataList;
+    }
+
+    private UserTransactionData prepareCreateUserTransactionData(String entity, UUID entityId) {
+        return new UserTransactionData(entity,
+            entityId,
             null,
             "create",
             "delete",
-            0)
-        );
-
-        return userTransactionDataList;
+            0);
     }
 
     @Override

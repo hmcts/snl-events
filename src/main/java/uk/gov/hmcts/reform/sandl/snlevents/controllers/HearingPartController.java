@@ -103,7 +103,6 @@ public class HearingPartController {
         Action action = new CreateListingRequestAction(
             createHearingPartRequest,
             hearingMapper,
-            hearingPartRepository,
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository
@@ -117,8 +116,7 @@ public class HearingPartController {
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateHearingPart(@Valid @RequestBody UpdateListingRequest updateListingRequest) {
         Action action = new UpdateListingRequestAction(updateListingRequest,
-            hearingPartRepository, entityManager, objectMapper, hearingTypeRepository, caseTypeRepository,
-            hearingRepository);
+            entityManager, objectMapper, hearingTypeRepository, caseTypeRepository, hearingRepository);
 
         UserTransaction ut = actionService.execute(action);
 

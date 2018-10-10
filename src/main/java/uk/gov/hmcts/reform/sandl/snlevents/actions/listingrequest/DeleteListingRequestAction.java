@@ -13,10 +13,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 
 public class DeleteListingRequestAction extends Action implements RulesProcessable {
     private DeleteListingRequest deleteListingRequest;
@@ -24,7 +24,8 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     private EntityManager entityManager;
     private ObjectMapper objectMapper;
     private Hearing hearing;
-    private String currentHearingPartAsString;
+    private String currentHearingAsString;
+    private HashMap<UUID, String> currentHearingPartsMap = new HashMap<>();
 
     public DeleteListingRequestAction(
         DeleteListingRequest deleteListingRequest,
@@ -43,24 +44,31 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         hearing = hearingRepository.findOne(deleteListingRequest.getHearingId());
 
         if (hearing == null) {
-            throw new EntityNotFoundException("Hearing part not found");
+            throw new EntityNotFoundException("Hearing not found");
         }
     }
 
     @Override
     public void act() {
-        try {
-            currentHearingPartAsString = objectMapper.writeValueAsString(hearing);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        currentHearingAsString = writeObjectAsString(hearing);
+
+        hearing.getHearingParts().forEach(hp ->
+            currentHearingPartsMap.put(hp.getId(), writeObjectAsString(hp)));
 
         entityManager.detach(hearing);
         hearing.setVersion(deleteListingRequest.getHearingVersion());
         hearing.setDeleted(true);
-        hearing.getHearingParts().forEach(hp-> hp.setDeleted(true));
+        hearing.getHearingParts().forEach(hp -> hp.setDeleted(true));
 
         hearingRepository.save(hearing);
+    }
+
+    private String writeObjectAsString(Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -68,7 +76,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         String msg = null;
 
         try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearing);
+            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -79,15 +87,21 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            currentHearingPartAsString,
-            "delete",
-            "create",
-            0)
-        );
+        userTransactionDataList.add(prepareDeleteUserTransactionData("hearing", hearing.getId(), currentHearingAsString));
+
+        currentHearingPartsMap.forEach((id, jsonValue) ->
+            userTransactionDataList.add(prepareDeleteUserTransactionData("hearingPart", id, jsonValue)));
 
         return userTransactionDataList;
+    }
+
+    private UserTransactionData prepareDeleteUserTransactionData(String entityName, UUID entityId, String currentEntityString) {
+        return new UserTransactionData(entityName,
+            entityId,
+            currentEntityString,
+            "delete",
+            "create",
+            0);
     }
 
     @Override

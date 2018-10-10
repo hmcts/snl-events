@@ -9,12 +9,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -27,9 +25,7 @@ import javax.persistence.EntityManager;
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
 
     private UpdateListingRequest updateListingRequest;
-    private HearingPartRepository hearingPartRepository;
-    private HearingPart hearingPart;
-    private String currentHearingPartAsString;
+    private String currentHearingAsString;
     private EntityManager entityManager;
     private HearingTypeRepository hearingTypeRepository;
     private CaseTypeRepository caseTypeRepository;
@@ -37,14 +33,12 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private HearingRepository hearingRepository;
 
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
-                                      HearingPartRepository hearingPartRepository,
                                       EntityManager entityManager,
                                       ObjectMapper objectMapper,
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository,
                                       HearingRepository hearingRepository) {
         this.updateListingRequest = updateListingRequest;
-        this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.hearingTypeRepository = hearingTypeRepository;
@@ -55,24 +49,22 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public void act() {
         try {
-            currentHearingPartAsString = objectMapper.writeValueAsString(hearingPart);
+            currentHearingAsString = objectMapper.writeValueAsString(hearing);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
-        entityManager.detach(hearingPart);
-        hearingPart.setVersion(updateListingRequest.getVersion());
-        hearingPart = hearingPartRepository.save(hearingPart);
+        entityManager.detach(hearing);
+        hearing.setVersion(updateListingRequest.getVersion());
+        hearingRepository.save(hearing);
     }
 
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(updateListingRequest.getId());
 
-        hearingPart = hearing.getHearingParts().get(0);
-
-        if (hearingPart == null) {
-            throw new EntityNotFoundException("Hearing part not found");
+        if (hearing == null) {
+            throw new EntityNotFoundException("Hearing not found");
         }
 
         hearing.setCaseNumber(updateListingRequest.getCaseNumber());
@@ -93,7 +85,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg = null;
         try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearing);
+            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -104,13 +96,20 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("hearingPart",
-            hearingPart.getId(),
-            currentHearingPartAsString,
+        userTransactionDataList.add(new UserTransactionData("hearing",
+            hearing.getId(),
+            currentHearingAsString,
             "update",
             "update",
-            0)
-        );
+            0));
+
+        hearing.getHearingParts().forEach(hp -> userTransactionDataList.add(new UserTransactionData("hearingPart",
+            hp.getId(),
+            null,
+            "lock",
+            "unlock",
+            0)));
+
         return userTransactionDataList;
     }
 

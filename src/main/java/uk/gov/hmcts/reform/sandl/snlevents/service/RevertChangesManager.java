@@ -62,7 +62,7 @@ public class RevertChangesManager {
 
 //            try {
 //                previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
-//                msg = factsMapper.mapDbHearingPartToRuleJsonMessage(previousHearingPart);
+//                msg = factsMapper.mapDbHearingToRuleJsonMessage(previousHearingPart);
 //            } catch (IOException e) {
 //                throw new RuntimeException(e);
 //            }
@@ -77,7 +77,7 @@ public class RevertChangesManager {
 
             String msg = null;
 //            try {
-//                msg = factsMapper.mapDbHearingPartToRuleJsonMessage(hp);
+//                msg = factsMapper.mapDbHearingToRuleJsonMessage(hp);
 //            } catch (IOException e) {
 //                throw new RuntimeException(e);
 //            }

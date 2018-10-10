@@ -71,7 +71,7 @@ public class HearingPartService {
 //            hearingTypeRepository
 //        );
 //        hearingPart = save(hearingPart);
-//        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+//        String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPart);
 //        rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
 //
 //        return new HearingPartResponse(hearingPart);
@@ -153,7 +153,7 @@ public class HearingPartService {
         hearingPart.setSession(targetSession);
         hearing.setStart(assignment.getStart());
 
-        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearing);
+        String msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         UserTransaction ut = assignWithTransaction(hearing,
                 assignment.getUserTransactionId(),
                 hearingPart.getSession(),
