@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +39,9 @@ public class RevertChangesManager {
     private FactsMapper factsMapper;
 
     @Autowired
+    EntityManager entityManager;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     public void revertChanges(UserTransaction ut) {
@@ -57,6 +62,8 @@ public class RevertChangesManager {
         } else if ("hearing".equals(utd.getEntity())) {
             handleHearing(utd);
         }
+
+
     }
 
     private void handleHearing(UserTransactionData utd) {
@@ -75,7 +82,12 @@ public class RevertChangesManager {
 
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
+            entityManager.detach(hearing);
+
             previousHearing.setVersion(hearing.getVersion());
+            entityManager.merge(previousHearing);
+
+            previousHearing.getHearingParts().get(0).setHearing(hearingRepository.findOne(previousHearing.getHearingParts().get(0).getHearingId()));
 
             hearingRepository.save(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
@@ -86,7 +98,7 @@ public class RevertChangesManager {
 
     @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
-        HearingPart hp = hearingPartRepository.findOne(utd.getEntityId());
+        HearingPart hp = hearingPartRepository.findById(utd.getEntityId());
 
         if ("update".equals(utd.getCounterAction())) {
             HearingPart previousHearingPart = new HearingPart();
@@ -94,14 +106,20 @@ public class RevertChangesManager {
 
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
-                msg = factsMapper.mapDbHearingToRuleJsonMessage(previousHearingPart.getHearing());
+
+                msg = factsMapper.mapDbHearingToRuleJsonMessage(hearingRepository.findOne(previousHearingPart.getHearingId()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
+            entityManager.detach(previousHearingPart);
+
             previousHearingPart.setVersion(hp.getVersion());
+            entityManager.merge(previousHearingPart);
+
+            previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
 
             hearingPartRepository.save(previousHearingPart);
         } else if ("delete".equals(utd.getCounterAction())) {

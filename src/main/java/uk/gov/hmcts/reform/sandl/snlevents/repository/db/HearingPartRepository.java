@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -21,6 +22,9 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
     List<HearingPart> findBySessionIsNotNull();
 
     List<HearingPart> findBySessionIsNull();
+
+    @Query(value = "select hp from HearingPart hp JOIN FETCH hp.hearing where hp.id = :uuid")
+    HearingPart findById(@Param("uuid") UUID uuid);
 
     @Query(nativeQuery = true,
         value = "select cast(title as varchar(100)) as title, cast(hearings as int) as hearings, \n"
