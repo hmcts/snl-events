@@ -93,7 +93,7 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
     private String modifiedBy;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "hearing", cascade = {
+    @OneToMany(mappedBy = "hearing", orphanRemoval = true, cascade = {
         CascadeType.MERGE,
         CascadeType.PERSIST
     }, fetch = FetchType.EAGER)

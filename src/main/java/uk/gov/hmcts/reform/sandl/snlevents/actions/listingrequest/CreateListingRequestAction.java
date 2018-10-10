@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -75,19 +74,19 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hearingPart.getId()));
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId()));
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hearingPart.getId(), 0));
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
         return userTransactionDataList;
     }
 
-    private UserTransactionData prepareCreateUserTransactionData(String entity, UUID entityId) {
+    private UserTransactionData prepareCreateUserTransactionData(String entity, UUID entityId, int actionOrder) {
         return new UserTransactionData(entity,
             entityId,
             null,
             "create",
             "delete",
-            0);
+            actionOrder);
     }
 
     @Override
