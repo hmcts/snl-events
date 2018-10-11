@@ -6,12 +6,23 @@ def product = "snl"
 def component = "events"
 
 withPipeline("java", product, component) {
-  enableDbMigration()
-  after('checkout') {
-    echo 'sln-events checked out'
-  }
+    enableDbMigration()
+    
+    onMaster {
+        enableSlackNotifications('#snl-master-builds')
+    }
+    onDemo {
+        enableSlackNotifications('#snl-demo-builds')
+    }
+    onPR {
+        enableSlackNotifications('#snl-pr-builds')
+    }
 
-  before('buildinfra:prod') {
-    error 'This is PoC project for Scheduling and Listing therefore the prod environment will not be built'
+    after('checkout') {
+        echo 'sln-events checked out'
+    }
+
+    before('buildinfra:prod') {
+        error 'This is PoC project for Scheduling and Listing therefore the prod environment will not be built'
   }
 }

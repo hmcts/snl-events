@@ -4,6 +4,7 @@ locals {
   // Specifies the type of environment. var.env is replaced by pipline
   // to i.e. pr-102-snl so then we need just aat used here
   envInUse = "${(var.env == "preview" || var.env == "spreview") ? "aat" : var.env}"
+  shortEnv = "${(var.env == "preview" || var.env == "spreview") ? var.deployment_namespace : var.env}"
 
   aat_rules_url = "http://snl-rules-aat.service.core-compute-aat.internal"
   local_rules_url = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
@@ -11,7 +12,11 @@ locals {
 
   // Shared Resources
   vaultName = "${var.raw_product}-${local.envInUse}"
-  sharedResourceGroup = "${var.raw_product}-shared-${local.envInUse}"
+  sharedResourceGroup = "${var.raw_product}-shared-infrastructure-${local.envInUse}"
+  sharedAspName = "${var.raw_product}-${local.envInUse}"
+  sharedAspRg = "${var.raw_product}-shared-infrastructure-${local.envInUse}"
+  asp_name = "${(var.env == "preview" || var.env == "spreview") ? "null" : local.sharedAspName}"
+  asp_rg = "${(var.env == "preview" || var.env == "spreview") ? "null" : local.sharedAspRg}"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -33,6 +38,8 @@ module "snl-events" {
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
+  asp_rg               = "${local.asp_rg}"
+  asp_name             = "${local.asp_name}"
   common_tags          = "${var.common_tags}"
 
   app_settings = {
@@ -71,7 +78,7 @@ module "snl-vault" {
   tenant_id = "${var.tenant_id}"
   object_id = "${var.jenkins_AAD_objectId}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
-  product_group_object_id = "70de400b-4f47-4f25-a4f0-45e1ee4e4ae3"
+  product_group_object_id = "${var.product_group_object_id}"
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
