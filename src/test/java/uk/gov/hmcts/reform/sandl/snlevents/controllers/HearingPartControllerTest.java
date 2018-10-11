@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
@@ -67,6 +69,9 @@ public class HearingPartControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private HearingPartRepository hearingPartRepository;
+
+    @MockBean
+    private HearingRepository hearingRepository;
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
@@ -161,7 +166,19 @@ public class HearingPartControllerTest {
     }
 
     private HearingPart createHearingPart() {
-        return new HearingPart();
+        val hearingPart = new HearingPart();
+        hearingPart.setId(UUID.randomUUID());
+        hearingPart.setHearing(createHearing());
+
+        return hearingPart;
+    }
+
+    private Hearing createHearing() {
+        val hearing = new Hearing();
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+
+        return hearing;
     }
 
     private UserTransaction createUserTransaction() {
