@@ -114,7 +114,7 @@ public class HearingPartService {
             beforeHearingPart,
             "update",
             "update",
-            0));
+            1));
 
 
         if (currentSession != null) {
@@ -172,10 +172,19 @@ public class HearingPartService {
     public UserTransaction assignWithTransaction(HearingPart hearingPart, UUID transactionId,
                                                  Session currentSession,
                                                  Session targetSession,
-                                                 String previousHearingPart) {
+                                                 String previousHearingPart, String previousHearing) {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPart);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+
+        userTransactionDataList.add(new UserTransactionData("hearing",
+            savedHearingPart.getHearingId(),
+            previousHearing,
+            "update",
+            "update",
+            0)
+        );
+
         userTransactionDataList.add(new UserTransactionData("hearingPart",
             savedHearingPart.getId(),
             previousHearingPart,
@@ -208,6 +217,7 @@ public class HearingPartService {
                                                                       HearingPartSessionRelationship assignment)
         throws IOException {
         String previousHearingPart = objectMapper.writeValueAsString(hearingPart);
+        String previousHearing = objectMapper.writeValueAsString(hearingPart.getHearing());
         hearingPart.setVersion(assignment.getHearingPartVersion());
 
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
@@ -218,7 +228,7 @@ public class HearingPartService {
         UserTransaction ut = assignWithTransaction(hearingPart,
             assignment.getUserTransactionId(),
             hearingPart.getSession(),
-            targetSession, previousHearingPart);
+            targetSession, previousHearingPart, previousHearing);
         rulesService.postMessage(assignment.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
         return userTransactionService.rulesProcessed(ut);
