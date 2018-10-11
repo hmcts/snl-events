@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 
@@ -48,7 +48,7 @@ public class HearingMapperTests {
         when(caseTypeRepository.findOne(CASE_TYPE_CODE)).thenReturn(CASE_TYPE);
         when(hearingTypeRepository.findOne(HEARING_TYPE_CODE)).thenReturn(HEARING_TYPE);
 
-        val chpr = new CreateHearingPartRequest();
+        val chpr = new CreateHearingRequest();
         chpr.setId(ID);
         chpr.setCaseNumber(CASE_NUMBER);
         chpr.setCaseTitle(CASE_TITLE);
@@ -62,18 +62,8 @@ public class HearingMapperTests {
         chpr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         chpr.setUserTransactionId(USER_TRANSACTION_ID);
 
-        val hp = new HearingMapper().mapToHearingPart(chpr, caseTypeRepository, hearingTypeRepository);
+        val hp = new HearingMapper().mapToHearingPart(chpr);
 
         assertThat(hp.getId()).isEqualTo(ID);
-        assertThat(hp.getCaseNumber()).isEqualTo(CASE_NUMBER);
-        assertThat(hp.getCaseTitle()).isEqualTo(CASE_TITLE);
-        assertThat(hp.getCaseType()).isEqualTo(CASE_TYPE);
-        assertThat(hp.getHearingType()).isEqualTo(HEARING_TYPE);
-        assertThat(hp.getDuration()).isEqualTo(DURATION);
-        assertThat(hp.getScheduleStart()).isEqualTo(SCHEDULE_START);
-        assertThat(hp.getScheduleEnd()).isEqualTo(SCHEDULE_END);
-        assertThat(hp.getPriority()).isEqualTo(PRIORITY);
-        assertThat(hp.getReservedJudgeId()).isEqualTo(RESERVED_JUDGE_ID);
-        assertThat(hp.getCommunicationFacilitator()).isEqualTo(COMMUNICATION_FACILITATOR);
     }
 }

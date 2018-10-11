@@ -19,10 +19,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingR
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -90,18 +89,18 @@ public class HearingPartController {
 
 //    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE) @TODO REMOVE ALSO FROM API if not used
 //    public ResponseEntity<HearingPartResponse> upsertHearingPart(
-//        @RequestBody CreateHearingPartRequest createHearingPartRequest
+//        @RequestBody CreateHearingRequest createHearingRequest
 //    ) throws IOException {
-//        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingPartRequest);
+//        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingRequest);
 //        return ok(hearingPartResponse);
 //    }
 
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createHearingPartAction(
-        @Valid @RequestBody CreateHearingPartRequest createHearingPartRequest
+        @Valid @RequestBody CreateHearingRequest createHearingRequest
     ) {
         Action action = new CreateListingRequestAction(
-            createHearingPartRequest,
+            createHearingRequest,
             hearingMapper,
             hearingTypeRepository,
             caseTypeRepository,

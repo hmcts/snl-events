@@ -11,8 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -29,6 +28,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.testdata.builders.HearingPartBuilder;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -301,8 +301,6 @@ public class SessionServiceTest {
 
     private HearingPart createHearingPart() {
         val hp = new HearingPart();
-        hp.setCaseType(new CaseType("case-type-code", "case-type-description"));
-        hp.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
 
         return hp;
     }

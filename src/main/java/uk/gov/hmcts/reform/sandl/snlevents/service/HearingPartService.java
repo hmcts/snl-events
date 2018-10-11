@@ -190,7 +190,7 @@ public class HearingPartService {
             previousHearingPart,
             "update",
             "update",
-            0)
+            1)
         );
 
         if (currentSession != null) {

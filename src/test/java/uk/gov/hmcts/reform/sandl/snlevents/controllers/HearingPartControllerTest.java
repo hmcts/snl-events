@@ -18,9 +18,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -128,17 +129,6 @@ public class HearingPartControllerTest {
     }
 
     @Test
-    public void upsertHearingPart_savesHearingPartToService() throws Exception {
-        HearingPartResponse hearingPartResponse = crateHearingPartResponse().get(0);
-        when(hearingPartService.createHearingPart(any(CreateHearingPartRequest.class))).thenReturn(hearingPartResponse);
-        when(hearingTypeRepository.findOne(any(String.class))).thenReturn(HEARING_TYPE);
-        val content = objectMapper.writeValueAsString(createCreateHearingPart());
-
-        val response = mvc.callAndMapResponse(put(URL), content, HearingPartResponse.class);
-        assertThat(response).isEqualToComparingFieldByFieldRecursively(hearingPartResponse);
-    }
-
-    @Test
     public void createHearingPartAction_createsHearingPartAction() throws Exception {
         val ut = createUserTransaction();
         when(actionService.execute(any())).thenReturn(ut);
@@ -170,6 +160,10 @@ public class HearingPartControllerTest {
             .collect(Collectors.toList());
     }
 
+    private HearingPart createHearingPart() {
+        return new HearingPart();
+    }
+
     private UserTransaction createUserTransaction() {
         var ut = new UserTransaction();
         ut.setId(UUID.randomUUID());
@@ -181,8 +175,8 @@ public class HearingPartControllerTest {
         return new DeleteListingRequest();
     }
 
-    private CreateHearingPartRequest createCreateHearingPart() {
-        val chp = new CreateHearingPartRequest();
+    private CreateHearingRequest createCreateHearingPart() {
+        val chp = new CreateHearingRequest();
         chp.setId(createUuid());
         chp.setDuration(createDuration());
         chp.setScheduleStart(createOffsetDateTime());
@@ -206,24 +200,6 @@ public class HearingPartControllerTest {
 
     private Duration createDuration() {
         return Duration.ofDays(1L);
-    }
-
-    private HearingPart createHearingPart() {
-        val hp = new HearingPart();
-        hp.setId(createUuid());
-        hp.setDuration(createDuration());
-        hp.setScheduleStart(createOffsetDateTime());
-        hp.setScheduleEnd(createOffsetDateTime());
-        hp.setCaseType(CASE_TYPE);
-        hp.setCaseNumber(CASE_NUMBER);
-        hp.setCaseTitle(TITLE);
-        hp.setHearingType(HEARING_TYPE);
-        hp.setDuration(createDuration());
-        hp.setPriority(Priority.Low);
-        hp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
-        hp.setReservedJudgeId(RESERVED_JUDGE_ID);
-
-        return hp;
     }
 
     private UUID createUuid() {

@@ -12,10 +12,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ public class DeleteListingRequestActionTest {
     private DeleteListingRequest dlr;
 
     @Mock
-    private HearingPartRepository hearingPartRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -52,15 +54,15 @@ public class DeleteListingRequestActionTest {
         dlr.setHearingVersion(1L);
 
         this.action = new DeleteListingRequestAction(dlr,
-            hearingPartRepository,
+            hearingRepository,
             entityManager,
             objectMapper);
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
-        hearingPart.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
-        hearingPart.setCaseType(new CaseType("case-type-code", "case-type-description"));
-        Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
+
+        Hearing hearing = new Hearing();
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
     }
 
     @Test
@@ -97,9 +99,9 @@ public class DeleteListingRequestActionTest {
         action.getAndValidateEntities();
         action.act();
 
-        ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
 
-        Mockito.verify(hearingPartRepository).save(captor.capture());
+        Mockito.verify(hearingRepository).save(captor.capture());
 
         assertThat(captor.getValue().isDeleted()).isEqualTo(true);
     }

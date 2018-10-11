@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
@@ -103,7 +105,7 @@ public class HearingPartServiceTest {
         when(userTransactionService.startTransaction(any(UUID.class), any(List.class))).thenReturn(transaction);
 
         UserTransaction returnedTransaction = hearingPartService.assignWithTransaction(
-            createHearingPart(), createUuid(), createSession(), createSession()
+            createHearing(), createUuid(), createSession(), createSession(), "das", "Das"
         );
 
         assertThat(returnedTransaction).isEqualTo(transaction);
@@ -178,10 +180,12 @@ public class HearingPartServiceTest {
 
     private HearingPart createHearingPart() {
         HearingPart hp = new HearingPart();
-        hp.setHearingType(new HearingType("code", "desc"));
-        hp.setCaseType(new CaseType("code", "desc"));
 
         return hp;
+    }
+
+    private Hearing createHearing() {
+        return new Hearing();
     }
 
     private HearingPart createHearingPartWithSession() {

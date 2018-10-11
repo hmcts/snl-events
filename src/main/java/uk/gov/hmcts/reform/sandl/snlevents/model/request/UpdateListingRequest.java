@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateListingRequest extends CreateHearingPartRequest {
+public class UpdateListingRequest extends CreateHearingRequest {
     @NotNull
     private Long version;
 }

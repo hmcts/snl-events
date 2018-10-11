@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 
@@ -13,31 +13,31 @@ import java.util.UUID;
 
 @Component
 public class HearingMapper {
-    public HearingPart mapToHearingPart(CreateHearingPartRequest createHearingPartRequest) {
+    public HearingPart mapToHearingPart(CreateHearingRequest createHearingRequest) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
-        hearingPart.setHearingId(createHearingPartRequest.getId());
+        hearingPart.setHearingId(createHearingRequest.getId());
 
         return hearingPart;
     }
 
-    public Hearing mapToHearing(CreateHearingPartRequest createHearingPartRequest,
+    public Hearing mapToHearing(CreateHearingRequest createHearingRequest,
                                 CaseTypeRepository caseTypeRepository,
                                 HearingTypeRepository hearingTypeRepository) {
         Hearing hearing = new Hearing();
-        hearing.setId(createHearingPartRequest.getId());
-        hearing.setCaseNumber(createHearingPartRequest.getCaseNumber());
-        hearing.setCaseTitle(createHearingPartRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(createHearingPartRequest.getCaseTypeCode());
+        hearing.setId(createHearingRequest.getId());
+        hearing.setCaseNumber(createHearingRequest.getCaseNumber());
+        hearing.setCaseTitle(createHearingRequest.getCaseTitle());
+        CaseType caseType = caseTypeRepository.findOne(createHearingRequest.getCaseTypeCode());
         hearing.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingPartRequest.getHearingTypeCode());
+        HearingType hearingType = hearingTypeRepository.findOne(createHearingRequest.getHearingTypeCode());
         hearing.setHearingType(hearingType);
-        hearing.setDuration(createHearingPartRequest.getDuration());
-        hearing.setScheduleStart(createHearingPartRequest.getScheduleStart());
-        hearing.setScheduleEnd(createHearingPartRequest.getScheduleEnd());
-        hearing.setCommunicationFacilitator(createHearingPartRequest.getCommunicationFacilitator());
-        hearing.setReservedJudgeId(createHearingPartRequest.getReservedJudgeId());
-        hearing.setPriority(createHearingPartRequest.getPriority());
+        hearing.setDuration(createHearingRequest.getDuration());
+        hearing.setScheduleStart(createHearingRequest.getScheduleStart());
+        hearing.setScheduleEnd(createHearingRequest.getScheduleEnd());
+        hearing.setCommunicationFacilitator(createHearingRequest.getCommunicationFacilitator());
+        hearing.setReservedJudgeId(createHearingRequest.getReservedJudgeId());
+        hearing.setPriority(createHearingRequest.getPriority());
 
         return hearing;
     }

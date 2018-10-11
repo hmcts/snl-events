@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
@@ -88,10 +89,9 @@ public class FactsMapperTest {
 
     @Test
     public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapHearingToRuleJsonMessage(createHearingPart());
+        val mapped = factsMapper.mapHearingToRuleJsonMessage(createHearing());
         val expected = "{"
             + "\"id\":\"" + ID + "\","
-            + "\"sessionId\":\"" + ID + "\","
             + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
             + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
@@ -103,8 +103,8 @@ public class FactsMapperTest {
         assertThat(mapped).isEqualTo(expected);
     }
 
-    private HearingPart createHearingPart() {
-        val hp = new HearingPart();
+    private Hearing createHearing() {
+        val hp = new Hearing();
         hp.setId(createUuid());
         hp.setDuration(createDuration());
         hp.setCaseType(CASE_TYPE);
@@ -112,7 +112,6 @@ public class FactsMapperTest {
         hp.setScheduleStart(START);
         hp.setScheduleEnd(END);
         hp.setCreatedAt(START);
-        hp.setSession(createSession());
 
         return hp;
     }
@@ -135,10 +134,9 @@ public class FactsMapperTest {
 
     @Test
     public void mapDbHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapDbHearingToRuleJsonMessage(createHearingPart());
+        val mapped = factsMapper.mapDbHearingToRuleJsonMessage(createHearing());
         val expected = "{"
             + "\"id\":\"" + ID + "\","
-            + "\"sessionId\":\"" + ID + "\","
             + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
             + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
