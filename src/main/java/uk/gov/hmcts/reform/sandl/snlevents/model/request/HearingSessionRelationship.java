@@ -6,10 +6,10 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
-public class HearingPartSessionRelationship {
+public class HearingSessionRelationship {
     UUID userTransactionId;
-    UUID hearingPartId;
-    long hearingPartVersion;
+    UUID hearingId;
+    long hearingVersion;
     UUID sessionId;
     long sessionVersion;
     OffsetDateTime start;

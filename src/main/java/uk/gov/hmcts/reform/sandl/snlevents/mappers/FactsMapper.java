@@ -202,4 +202,26 @@ public class FactsMapper {
     private FactHearingType mapDbHearingTypeToFactHearingType(HearingType ht) {
         return new FactHearingType(ht.getCode(), ht.getDescription());
     }
+
+    public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
+        Hearing hearing = hearingPart.getHearing();
+        FactHearingPart factHearingPart = new FactHearingPart();
+
+        factHearingPart.setId(hearing.getId().toString());
+        factHearingPart.setDuration(hearing.getDuration());
+        factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
+        factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
+        factHearingPart.setScheduleStart(hearing.getScheduleStart());
+        factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
+        factHearingPart.setCreatedAt(hearing.getCreatedAt());
+
+        if (hearingPart.getSession() != null) {
+            factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        }
+
+        Optional.ofNullable(hearingPart.getSession()).ifPresent(
+            s -> factHearingPart.setSessionId(s.getId().toString()));
+
+        return objectMapper.writeValueAsString(factHearingPart);
+    }
 }

@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -124,10 +125,10 @@ public class HearingPartController {
 
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity assignHearingPartToSession(
-        @PathVariable UUID hearingId,
+        @PathVariable UUID hearingPartId,
         @RequestBody HearingPartSessionRelationship assignment) throws Exception {
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingId, assignment);
+        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingPartId, assignment);
 
         return ok(ut);
     }

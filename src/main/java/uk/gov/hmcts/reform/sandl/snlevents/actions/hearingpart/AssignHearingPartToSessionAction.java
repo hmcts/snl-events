@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -18,7 +17,7 @@ import java.util.UUID;
 
 public class AssignHearingPartToSessionAction extends Action implements RulesProcessable {
 
-    protected HearingPartSessionRelationship hearingPartSessionRelationship;
+    protected HearingSessionRelationship hearingSessionRelationship;
     protected UUID hearingPartId;
     protected HearingPart hearingPart;
     protected Session targetSession;
@@ -28,10 +27,10 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     protected SessionRepository sessionRepository;
 
     public AssignHearingPartToSessionAction(UUID hearingPartId,
-                                            HearingPartSessionRelationship hearingPartSessionRelationship,
+                                            HearingSessionRelationship hearingSessionRelationship,
                                             HearingPartRepository hearingPartRepository,
                                             SessionRepository sessionRepository) {
-        this.hearingPartSessionRelationship = hearingPartSessionRelationship;
+        this.hearingSessionRelationship = hearingSessionRelationship;
         this.hearingPartId = hearingPartId;
         this.hearingPartRepository = hearingPartRepository;
         this.sessionRepository = sessionRepository;
@@ -40,7 +39,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     @Override
     public void getAndValidateEntities() {
         hearingPart = hearingPartRepository.findOne(hearingPartId);
-        targetSession = sessionRepository.findOne(hearingPartSessionRelationship.getSessionId());
+        targetSession = sessionRepository.findOne(hearingSessionRelationship.getSessionId());
         if (targetSession == null) {
             throw new RuntimeException("Target session cannot be null!");
         } else if (hearingPart == null) {
@@ -57,7 +56,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     public void act() {
         hearingPart.setSession(targetSession);
         hearingPart.setSessionId(targetSession.getId());
-//        hearingPart.setStart(hearingPartSessionRelationship.getStart());
+//        hearingPart.setStart(hearingSessionRelationship.getStart());
 
         hearingPartRepository.save(hearingPart);
     }
@@ -99,7 +98,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override
     public UUID getUserTransactionId() {
-        return hearingPartSessionRelationship.getUserTransactionId();
+        return hearingSessionRelationship.getUserTransactionId();
     }
 
     private UserTransactionData getLockedSessionTransactionData(UUID id) {

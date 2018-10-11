@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -118,7 +118,7 @@ public class HearingPartServiceTest {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
 
-        UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
+        UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
         );
 
@@ -137,7 +137,7 @@ public class HearingPartServiceTest {
         when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class)))
             .thenReturn(true);
 
-        UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
+        UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
         );
 
@@ -152,7 +152,7 @@ public class HearingPartServiceTest {
         //target session doesn't exist
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(null);
 
-        UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
+        UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
         );
 
@@ -202,7 +202,7 @@ public class HearingPartServiceTest {
         return UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
     }
 
-    private HearingPartSessionRelationship createHearingPartSessionRelationship() {
-        return new HearingPartSessionRelationship();
+    private HearingSessionRelationship createHearingPartSessionRelationship() {
+        return new HearingSessionRelationship();
     }
 }

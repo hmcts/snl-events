@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFake
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -75,13 +75,13 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
-        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
+        HearingSessionRelationship hearingSessionRelationship = createRelationship(
             savedSession.getId(), UUID.randomUUID()
         );
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(
+        UserTransaction ut = hearingPartService.assignHearingToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+            hearingSessionRelationship);
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
         ut = userTransactionService.commit(ut.getId());
@@ -97,35 +97,35 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
-        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
+        HearingSessionRelationship hearingSessionRelationship = createRelationship(
             savedSession.getId(), UUID.randomUUID()
         );
 
-        //do what assignHearingPartToSessionWithTransaction does but without doing detach
+        //do what assignHearingToSessionWithTransaction does but without doing detach
         //detach makes using this method second time throw 'possible non-threadsafe access to session'
         //we want to set started transaction state without detaching hearingPart we are going to use in next step
         UserTransaction ut = hearingPartService.assignWithTransaction(
             savedHearingPart,
-            hearingPartSessionRelationship.getUserTransactionId(),
+            hearingSessionRelationship.getUserTransactionId(),
             savedHearingPart.getSession(),
             savedSession
         );
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
-        hearingPartSessionRelationship.setHearingVersion(savedHearingPart.getVersion());
-        UserTransaction conflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
+        hearingSessionRelationship.setHearingVersion(savedHearingPart.getVersion());
+        UserTransaction conflictingUt = hearingPartService.assignHearingToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship
+            hearingSessionRelationship
         );
 
         assertThat(conflictingUt.getStatus()).isEqualTo(UserTransactionStatus.CONFLICT);
 
         userTransactionService.commit(ut.getId());
 
-        UserTransaction nonConflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
+        UserTransaction nonConflictingUt = hearingPartService.assignHearingToSessionWithTransaction(
             savedHearingPart.getId(),
-            hearingPartSessionRelationship
+            hearingSessionRelationship
         );
 
         assertThat(nonConflictingUt.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
@@ -141,27 +141,27 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
         entityManager.flush();
 
-        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
+        HearingSessionRelationship hearingSessionRelationship = createRelationship(
             savedSession.getId(), UUID.randomUUID()
         );
 
         //WHEN we try to assign Session to HearingPart with older version
-        hearingPartSessionRelationship.setHearingVersion(1L);
-        hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(), hearingPartSessionRelationship
+        hearingSessionRelationship.setHearingVersion(1L);
+        hearingPartService.assignHearingToSessionWithTransaction(
+            savedHearingPart.getId(), hearingSessionRelationship
         );
         //THEN Optimistic Locking prevents us to do so
     }
 
-    private HearingPartSessionRelationship createRelationship(UUID sessionUuid, UUID userTransactionId) {
-        HearingPartSessionRelationship hearingPartSessionRelationship = new HearingPartSessionRelationship();
-        hearingPartSessionRelationship.setSessionId(sessionUuid);
-        hearingPartSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
-        hearingPartSessionRelationship.setUserTransactionId(userTransactionId);
-        hearingPartSessionRelationship.setSessionVersion(0);
-        hearingPartSessionRelationship.setHearingVersion(0);
+    private HearingSessionRelationship createRelationship(UUID sessionUuid, UUID userTransactionId) {
+        HearingSessionRelationship hearingSessionRelationship = new HearingSessionRelationship();
+        hearingSessionRelationship.setSessionId(sessionUuid);
+        hearingSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
+        hearingSessionRelationship.setUserTransactionId(userTransactionId);
+        hearingSessionRelationship.setSessionVersion(0);
+        hearingSessionRelationship.setHearingVersion(0);
 
-        return hearingPartSessionRelationship;
+        return hearingSessionRelationship;
     }
 
     private SessionType getSessionType() {
