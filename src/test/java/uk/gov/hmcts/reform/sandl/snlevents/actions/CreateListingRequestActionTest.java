@@ -85,10 +85,9 @@ public class CreateListingRequestActionTest {
 
     @Test
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
-        action.act();
         UUID[] ids = action.getAssociatedEntitiesIds();
 
-        assertThat(ids).isEqualTo(new UUID[] {createUuid(HEARING_ID), createUuid(HEARING_PART_ID)});
+        assertThat(ids).isEqualTo(new UUID[] {createUuid(HEARING_ID)});
     }
 
     @Test

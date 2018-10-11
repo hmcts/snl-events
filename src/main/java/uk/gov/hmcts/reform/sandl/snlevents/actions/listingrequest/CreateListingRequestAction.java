@@ -96,6 +96,6 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {this.createHearingRequest.getId(), this.hearingPart.getId()};
+        return new UUID[] {this.createHearingRequest.getId()};
     }
 }
