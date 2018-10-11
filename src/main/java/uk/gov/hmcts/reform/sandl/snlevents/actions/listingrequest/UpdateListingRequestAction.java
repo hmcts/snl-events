@@ -55,17 +55,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
 
         entityManager.detach(hearing);
-        hearing.setVersion(updateListingRequest.getVersion());
-        hearingRepository.save(hearing);
-    }
-
-    @Override
-    public void getAndValidateEntities() {
-        hearing = hearingRepository.findOne(updateListingRequest.getId());
-
-        if (hearing == null) {
-            throw new EntityNotFoundException("Hearing not found");
-        }
 
         hearing.setCaseNumber(updateListingRequest.getCaseNumber());
         hearing.setCaseTitle(updateListingRequest.getCaseTitle());
@@ -79,6 +68,17 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
         hearing.setReservedJudgeId(updateListingRequest.getReservedJudgeId());
         hearing.setPriority(updateListingRequest.getPriority());
+        hearing.setVersion(updateListingRequest.getVersion());
+        hearingRepository.save(hearing);
+    }
+
+    @Override
+    public void getAndValidateEntities() {
+        hearing = hearingRepository.findOne(updateListingRequest.getId());
+
+        if (hearing == null) {
+            throw new EntityNotFoundException("Hearing not found");
+        }
     }
 
     @Override
