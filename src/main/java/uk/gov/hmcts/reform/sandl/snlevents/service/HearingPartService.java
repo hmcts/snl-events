@@ -166,18 +166,17 @@ public class HearingPartService {
                 assignment.getSessionId());
     }
 
-
-
     @Transactional
     public UserTransaction assignWithTransaction(HearingPart hearingPart, UUID transactionId,
                                                  Session currentSession,
-                                                 Session targetSession) throws JsonProcessingException {
+                                                 Session targetSession,
+                                                 String previousHearingPart) {
         HearingPart savedHearingPart = hearingPartRepository.save(hearingPart);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearingPart",
             savedHearingPart.getId(),
-            objectMapper.writeValueAsString(hearingPart),
+            previousHearingPart,
             "update",
             "update",
             0)
@@ -206,7 +205,7 @@ public class HearingPartService {
                                                                       Session targetSession,
                                                                       HearingPartSessionRelationship assignment)
         throws IOException {
-        entityManager.detach(hearingPart);
+        String previousHearingPart = objectMapper.writeValueAsString(hearingPart);
         hearingPart.setVersion(assignment.getHearingPartVersion());
 
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
@@ -217,7 +216,7 @@ public class HearingPartService {
         UserTransaction ut = assignWithTransaction(hearingPart,
             assignment.getUserTransactionId(),
             hearingPart.getSession(),
-            targetSession);
+            targetSession, previousHearingPart);
         rulesService.postMessage(assignment.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
         return userTransactionService.rulesProcessed(ut);
