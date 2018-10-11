@@ -86,7 +86,7 @@ public class RevertChangesManager {
             previousHearing.setVersion(hearing.getVersion());
             entityManager.merge(previousHearing);
 
-            previousHearing.getHearingParts().get(0).setHearing(hearingRepository.findOne(previousHearing.getHearingParts().get(0).getHearingId()));
+            previousHearing.getHearingParts().get(0).setHearing(hearingRepository.findOne(previousHearing.getId()));
 
             hearingRepository.save(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
@@ -106,12 +106,13 @@ public class RevertChangesManager {
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
 
-                msg = factsMapper.mapDbHearingToRuleJsonMessage(hearingRepository.findOne(previousHearingPart.getHearingId()));
+//                msg = factsMapper.mapDbHearingToRuleJsonMessage(hearingRepository.findOne(previousHearingPart.getHearingId())); @TODO if we change the rules to have both entities
+// hearing and hearingPart then we would have to send a hearingPart here
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+//            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
             entityManager.detach(previousHearingPart);
 
@@ -119,7 +120,10 @@ public class RevertChangesManager {
             entityManager.merge(previousHearingPart);
 
             previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
-            previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
+            if (previousHearingPart.getSessionId() != null) {
+                previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
+
+            }
 
             hearingPartRepository.save(previousHearingPart);
         } else if ("delete".equals(utd.getCounterAction())) {
