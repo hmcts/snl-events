@@ -119,6 +119,7 @@ public class RevertChangesManager {
             entityManager.merge(previousHearingPart);
 
             previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
+            previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
 
             hearingPartRepository.save(previousHearingPart);
         } else if ("delete".equals(utd.getCounterAction())) {
