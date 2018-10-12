@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,9 +79,11 @@ public class UpdateListingRequestActionTest {
             hearingRepository
         );
 
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(createUuid(ID));
         Hearing hearing = new Hearing();
+        hearing.setId(createUuid(ID));
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+        hearing.setHearingParts(Arrays.asList(new HearingPart()));
 
         Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
         when(hearingRepository.save(Matchers.any(Hearing.class))).thenReturn(hearing);
@@ -126,22 +129,26 @@ public class UpdateListingRequestActionTest {
 
         Mockito.verify(hearingRepository).save(captor.capture());
 
-        HearingPart expectedHearingPart = new HearingPart();
-
-        expectedHearingPart.setId(ulr.getId());
-
-        assertThat(captor.getValue().getId()).isEqualTo(expectedHearingPart.getId());
+        assertThat(captor.getValue().getId()).isEqualTo(ulr.getId());
     }
 
     @Test
     public void getUserTransactionData_returnsCorrectData() {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
+        expectedTransactionData.add(new UserTransactionData("hearing",
             ulr.getId(),
             Mockito.any(),
             "update",
             "update",
+            0)
+        );
+
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            null,
+            null,
+            "lock",
+            "unlock",
             0)
         );
 
