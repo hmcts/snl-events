@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.testdata.builders.HearingPartBuilder;
 
 import java.io.IOException;
 import java.time.Duration;
