@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
@@ -44,6 +45,8 @@ public class HearingPartServiceTest {
     @Mock
     HearingPartRepository hearingPartRepository;
     @Mock
+    HearingRepository hearingRepository;
+    @Mock
     UserTransactionService userTransactionService;
     @Mock
     SessionRepository sessionRepository;
@@ -63,19 +66,23 @@ public class HearingPartServiceTest {
     @Before
     public void init() {
         when(hearingPartRepository.save(any(HearingPart.class))).then(returnsFirstArg());
+        when(hearingRepository.save(any(Hearing.class))).then(returnsFirstArg());
     }
 
     @Test
     public void getAllHearingParts_returnsHearingPartsFromRepository() {
-        when(hearingPartRepository.findAll()).thenReturn(createHearingParts());
-        List<HearingPartResponse> hearingParts = hearingPartService.getAllHearingParts();
+        List<HearingPart> hearingParts = createHearingParts();
+        when(hearingPartRepository.findAll()).thenReturn(hearingParts);
+        List<HearingPartResponse> obtainedHearingParts = hearingPartService.getAllHearingParts();
 
-        assertThat(hearingParts.get(0)).isEqualTo(hearingParts.get(0));
+        assertThat(obtainedHearingParts.size()).isEqualTo(hearingParts.size());
     }
 
     @Test
     public void getAllHearingPartsThat_whenAreListedIsFalse_returnsHearingPartsWithNoSessionAssignedFromRepository() {
-        when(hearingPartRepository.findBySessionIsNull()).thenReturn(createHearingParts());
+        List<HearingPart> hps = createHearingParts();
+        hps.stream().forEach(hp -> hp.setSessionId(null));
+        when(hearingPartRepository.findBySessionIsNull()).thenReturn(hps);
         List<HearingPartResponse> hearingPartResponses = hearingPartService.getAllHearingPartsThat(false);
 
         assertThat(hearingPartResponses.get(0)).isEqualTo(hearingPartResponses.get(0));
@@ -84,7 +91,8 @@ public class HearingPartServiceTest {
 
     @Test
     public void getAllHearingPartsThat_whenAreListedIsTrue_returnsHearingPartsWithSessionAssignedFromRepository() {
-        when(hearingPartRepository.findBySessionIsNotNull()).thenReturn(Arrays.asList(createHearingPartWithSession()));
+        when(hearingPartRepository.findBySessionIsNotNull()).thenReturn(
+            Arrays.asList(createHearingPart()));
         List<HearingPartResponse> hearingPartResponses = hearingPartService.getAllHearingPartsThat(true);
 
         assertThat(hearingPartResponses.get(0)).isEqualTo(hearingPartResponses.get(0));
@@ -119,6 +127,7 @@ public class HearingPartServiceTest {
         //target session exists
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
@@ -135,8 +144,9 @@ public class HearingPartServiceTest {
         //target session exists
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
         //there's transaction in progress
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class)))
+        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class), any(UUID.class)))
             .thenReturn(true);
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
@@ -180,19 +190,21 @@ public class HearingPartServiceTest {
 
     private HearingPart createHearingPart() {
         HearingPart hp = new HearingPart();
+        Hearing h = new Hearing();
+        h.addHearingPart(hp);
+        hp.setHearing(h);
+        hp.getHearing().setCaseType(new CaseType("code", "desc"));
+        hp.getHearing().setHearingType(new HearingType("code", "desc"));
+        hp.setSessionId(createUuid());
 
         return hp;
     }
 
     private Hearing createHearing() {
-        return new Hearing();
-    }
+        Hearing h = new Hearing();
+        h.addHearingPart(createHearingPart());
 
-    private HearingPart createHearingPartWithSession() {
-        HearingPart hp = createHearingPart();
-        hp.setSession(createSession());
-
-        return hp;
+        return h;
     }
 
     private Session createSession() {
