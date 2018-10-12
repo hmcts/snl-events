@@ -8,6 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +49,7 @@ public class FactsMapperTest {
     private static final String HEARING_TYPE_DESC_2 = "hearing-type-desc-2";
     private static final HearingType HEARING_TYPE_2 = new HearingType(HEARING_TYPE_CODE_2, HEARING_TYPE_DESC_2);
     private static final String ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String SESSION_ID = "83537f81-b730-4754-aba4-0277b7882824";
     private static final String PERSON_ID = "1fa92e14-ce0e-4a1f-b352-53f1581d771f";
     private static final String ROOM_ID = "3a8b6e05-afb9-4b2a-b87d-152971d0607a";
 
@@ -87,33 +90,20 @@ public class FactsMapperTest {
         assertThat(mapped).isEqualTo(expected);
     }
 
-    @Test
-    public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapHearingToRuleJsonMessage(createHearing());
-        val expected = "{"
-            + "\"id\":\"" + ID + "\","
-            + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
-            + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
-            + "\"duration\":" + DURATION_MAPPED + ","
-            + "\"scheduleStart\":\"" + START_MAPPED + "\","
-            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
-            + "\"createdAt\":\"" + START_MAPPED + "\""
-            + "}";
-
-        assertThat(mapped).isEqualTo(expected);
-    }
-
     private Hearing createHearing() {
-        val hp = new Hearing();
-        hp.setId(createUuid());
-        hp.setDuration(createDuration());
-        hp.setCaseType(CASE_TYPE);
-        hp.setHearingType(HEARING_TYPE);
-        hp.setScheduleStart(START);
-        hp.setScheduleEnd(END);
-        hp.setCreatedAt(START);
+        val h = new Hearing();
+        h.setId(createUuid());
+        h.setDuration(createDuration());
+        h.setCaseType(CASE_TYPE);
+        h.setHearingType(HEARING_TYPE);
+        h.setScheduleStart(START);
+        h.setScheduleEnd(END);
+        h.setCreatedAt(START);
+        val hp = new HearingPart();
+        hp.setSessionId(createUuid(SESSION_ID));
+        h.setHearingParts(Arrays.asList(hp));
 
-        return hp;
+        return h;
     }
 
     @Test
@@ -133,10 +123,11 @@ public class FactsMapperTest {
     }
 
     @Test
-    public void mapDbHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
+    public void mapDbHearingToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapDbHearingToRuleJsonMessage(createHearing());
         val expected = "{"
             + "\"id\":\"" + ID + "\","
+            + "\"sessionId\":\"" + SESSION_ID + "\","
             + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
             + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
             + "\"duration\":" + DURATION_MAPPED + ","
