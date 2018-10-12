@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ProblemReference;
@@ -79,12 +80,18 @@ public class ProblemService {
         return transformed;
     }
 
-    public List<ProblemResponse> getProblems() {
-        final List<Problem> problems = problemRepository.getAllSortedBySeverityAndCreatedAt();
+    public Iterable<ProblemResponse> getProblems(Pageable pegable) {
+        if (pegable == null) {
+            return problemRepository
+                .getAllSortedBySeverityAndCreatedAt()
+                .stream()
+                .map(problemDbToResponse)
+                .collect(Collectors.toList());
+        }
 
-        return problems.stream()
-            .map(problemDbToResponse)
-            .collect(Collectors.toList());
+        return problemRepository
+            .getAllSortedBySeverityAndCreatedAt(pegable)
+            .map(problem -> problemDbToResponse.apply(problem));
     }
 
     public Problem save(Problem problem) {

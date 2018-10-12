@@ -13,6 +13,12 @@ variable "component" {
   default     = "events"
   description = "Scheduling and Listing "
 }
+
+variable "deployment_namespace" {
+  type        = "string"
+  default     = ""
+}
+
 variable "location" {
   type    = "string"
   default = "UK South"
@@ -43,6 +49,19 @@ variable "subscription" {}
 variable "appinsights_instrumentation_key" {
   description = "Instrumentation key of the App Insights instance this webapp should use. Module will create own App Insights resource if this is not provided."
   default = ""
+}
+
+variable "asp_rg" {
+  default = ""
+}
+
+variable "asp_name" {
+  default = ""
+}
+
+variable "product_group_object_id" {
+  default = "c9ab670f-8f92-4170-ba08-796ccab27751"
+  description = "dcd_snl_kv"
 }
 
 variable "db_user" {

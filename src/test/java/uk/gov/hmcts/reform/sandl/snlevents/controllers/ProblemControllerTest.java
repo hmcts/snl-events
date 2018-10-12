@@ -43,7 +43,7 @@ public class ProblemControllerTest {
     @Test
     public void getProblems_returnsProblemsFromService() throws Exception {
         val problems = createProblems();
-        when(problemService.getProblems()).thenReturn(createProblems());
+        when(problemService.getProblems(null)).thenReturn(createProblems());
 
         val response = mvc.getAndMapResponse(
             URL, new TypeReference<List<ProblemResponse>>(){}
