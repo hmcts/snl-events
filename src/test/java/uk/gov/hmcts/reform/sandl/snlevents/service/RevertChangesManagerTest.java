@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -56,6 +57,26 @@ public class RevertChangesManagerTest {
     ObjectMapper objectMapper;
 
     @Test
+    public void revertChanges_handleHearing_whenCounterActionIsDelete() throws IOException {
+        Hearing h = createHearing();
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(h);
+        val transaction = createUserTransactionWithHearingDelete();
+        revertChangesManager.revertChanges(transaction);
+        verify(hearingRepository, times(1)).delete(h.getId());
+    }
+
+    @Test
+    @Ignore
+    public void revertChanges_handleHearing_whenCounterActionIsUpdate() throws IOException {
+        Hearing h = createHearing();
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(h);
+        val transaction = createUserTransactionWithHearingUpdate();
+        revertChangesManager.revertChanges(transaction);
+        verify(rulesService, times(1))
+            .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
+    }
+
+    @Test
     public void revertChanges_deletesSessionInRuleService_ifCounterActionIsDelete() throws IOException {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
         val transaction = createUserTransactionWithSessionDelete();
@@ -101,11 +122,32 @@ public class RevertChangesManagerTest {
     }
 
     private UserTransaction createUserTransactionWithHearingPartDelete() {
-        val transaction = new UserTransaction();
-
         val data = new UserTransactionData();
         data.setEntity("hearingPart");
         data.setCounterAction("delete");
+        val transaction = new UserTransaction();
+        transaction.addUserTransactionData(data);
+
+        return transaction;
+    }
+
+    private UserTransaction createUserTransactionWithHearingDelete() {
+        val data = new UserTransactionData();
+        data.setEntity("hearing");
+        data.setCounterAction("delete");
+        data.setBeforeData("{}");
+        val transaction = new UserTransaction();
+        transaction.addUserTransactionData(data);
+
+        return transaction;
+    }
+
+    private UserTransaction createUserTransactionWithHearingUpdate() {
+        val transaction = new UserTransaction();
+
+        val data = new UserTransactionData();
+        data.setEntity("hearing");
+        data.setCounterAction("update");
         transaction.addUserTransactionData(data);
 
         return transaction;
@@ -133,6 +175,10 @@ public class RevertChangesManagerTest {
         hp.setHearing(h);
 
         return hp;
+    }
+
+    private Hearing createHearing() {
+        return createHearingPart().getHearing();
     }
 
     private UUID createUuid() {
