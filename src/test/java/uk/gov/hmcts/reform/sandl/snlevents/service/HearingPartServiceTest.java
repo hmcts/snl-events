@@ -146,7 +146,8 @@ public class HearingPartServiceTest {
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
         //there's transaction in progress
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class), any(UUID.class)))
+        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class),
+            any(UUID.class), any(UUID.class)))
             .thenReturn(true);
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(

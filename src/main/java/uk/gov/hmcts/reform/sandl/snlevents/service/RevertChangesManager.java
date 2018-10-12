@@ -14,11 +14,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
 
 @Service
 public class RevertChangesManager {
@@ -106,13 +107,15 @@ public class RevertChangesManager {
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
 
-//                msg = factsMapper.mapDbHearingToRuleJsonMessage(hearingRepository.findOne(previousHearingPart.getHearingId())); @TODO if we change the rules to have both entities
-// hearing and hearingPart then we would have to send a hearingPart here
+                //msg = factsMapper.mapDbHearingToRuleJsonMessage(
+                //hearingRepository.findOne(previousHearingPart.getHearingId())); @TODO if we change the rules
+                //to have both entities
+                //hearing and hearingPart then we would have to send a hearingPart here
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-//            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            //rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
             entityManager.detach(previousHearingPart);
 
