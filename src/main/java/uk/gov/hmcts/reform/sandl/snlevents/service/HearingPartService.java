@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -14,10 +13,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
@@ -55,15 +52,6 @@ public class HearingPartService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private HearingTypeRepository hearingTypeRepository;
-
-    @Autowired
-    private CaseTypeRepository caseTypeRepository;
-
-    @Autowired
-    private HearingMapper hearingMapper;
 
     public List<HearingPartResponse> getAllHearingParts() {
         return hearingPartRepository
