@@ -9,8 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
@@ -144,7 +146,8 @@ public class HearingPartServiceTest {
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
         //there's transaction in progress
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class), any(UUID.class), any(UUID.class)))
+        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class),
+            any(UUID.class), any(UUID.class)))
             .thenReturn(true);
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
