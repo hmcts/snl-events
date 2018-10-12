@@ -87,14 +87,6 @@ public class HearingPartController {
         return hearingPartService.getAllHearingParts();
     }
 
-//    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE) @TODO REMOVE ALSO FROM API if not used
-//    public ResponseEntity<HearingPartResponse> upsertHearingPart(
-//        @RequestBody CreateHearingRequest createHearingRequest
-//    ) throws IOException {
-//        HearingPartResponse hearingPartResponse = hearingPartService.createHearingPart(createHearingRequest);
-//        return ok(hearingPartResponse);
-//    }
-
     @PutMapping(path = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createHearingPartAction(
         @Valid @RequestBody CreateHearingRequest createHearingRequest

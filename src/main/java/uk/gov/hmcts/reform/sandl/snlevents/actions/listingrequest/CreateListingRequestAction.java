@@ -13,10 +13,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import javax.transaction.Transactional;
 
 public class CreateListingRequestAction extends Action implements RulesProcessable {
 

@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import java.io.IOException;
 import java.util.UUID;
 import javax.persistence.EntityManager;
-import javax.xml.ws.WebServiceException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -80,8 +79,8 @@ public class RevertChangesManagerTest {
         when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(createHearingPart());
         val transaction = createUserTransactionWithHearingPartUpsert();
         revertChangesManager.revertChanges(transaction);
-//        verify(rulesService, times(1)) @TODO to be considered while working on multiple sessions
-//            .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
+        //verify(rulesService, times(1)) @TODO to be considered while working on multiple sessions
+        //    .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -130,13 +129,13 @@ public class RevertChangesManagerTest {
         hp.setVersion(0L);
         val h = new Hearing();
 
-        hp.setHearingId(createUUID());
+        hp.setHearingId(createUuid());
         hp.setHearing(h);
 
         return hp;
     }
 
-    private UUID createUUID() {
+    private UUID createUuid() {
         return UUID.randomUUID();
     }
 
