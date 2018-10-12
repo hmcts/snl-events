@@ -203,6 +203,7 @@ public class HearingPartServiceTest {
 
     private Hearing createHearing() {
         Hearing h = new Hearing();
+
         h.addHearingPart(createHearingPart());
 
         return h;
@@ -210,6 +211,7 @@ public class HearingPartServiceTest {
 
     private Session createSession() {
         Session session = new Session();
+
         session.setId(UUID.randomUUID());
 
         return session;

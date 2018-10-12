@@ -203,12 +203,14 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
             .filter(st -> st.getCode().equals("small-claims")).findFirst().get();
 
     }
+
     private HearingType getHearingType() {
         return hearingTypeRepository.findAll()
             .stream()
             .filter(st -> st.getCode().equals("K-ASAJ")).findFirst().get();
 
     }
+
     private CaseType getCaseType() {
         return caseTypeRepository.findAll()
             .stream()
