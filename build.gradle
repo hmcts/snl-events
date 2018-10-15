@@ -56,7 +56,7 @@ sonarqube {
     property "sonar.exclusions", ""
     property "sonar.test.exclusions", ""
     property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*,"
-    + "**/ProblemRepository*, **/HearingPartService*"
+    + "**/ProblemRepository*,**/HearingPartService*"
   }
 }
 
