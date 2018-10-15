@@ -35,7 +35,7 @@ public class HearingWithSessionsResponse {
         this.caseTitle = hearing.getCaseTitle();
         this.caseType = hearing.getCaseType().getDescription();
         this.hearingType = hearing.getHearingType().getDescription();
-        this.duration = hearing.getDuration().toMinutes();
+        this.duration = hearing.getDuration().getSeconds();
         this.scheduleStart = hearing.getScheduleStart();
         this.scheduleEnd = hearing.getScheduleEnd();
         this.priority = hearing.getPriority().toString();
