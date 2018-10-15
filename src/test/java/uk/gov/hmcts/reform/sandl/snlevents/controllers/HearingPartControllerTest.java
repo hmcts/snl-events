@@ -51,7 +51,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingPartController.class)
@@ -189,7 +188,7 @@ public class HearingPartControllerTest {
         val ut = createUserTransaction();
 
         when(hearingPartService.assignHearingPartToSessionWithTransaction(createUuid(), createAssignment()))
-        .thenReturn(ut);
+            .thenReturn(ut);
 
         val response = mvc.callAndMapResponse(put(URL + "/" + createUuid()), createAssignment(),
             UserTransaction.class);
@@ -203,9 +202,9 @@ public class HearingPartControllerTest {
         return assignment;
     }
 
-    private HearingPartResponse createHearingPartResponse(UUID hpID) {
+    private HearingPartResponse createHearingPartResponse(UUID hpId) {
         val hp = createHearingPart();
-        hp.setId(hpID);
+        hp.setId(hpId);
 
         return new HearingPartResponse(hp);
     }
