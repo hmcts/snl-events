@@ -54,7 +54,7 @@ sonarqube {
     property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*,**/ProblemRepository*,**/HearingPartService*"
     property "sonar.test.exclusions", ""
-    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*,**/ProblemRepository*,**/HearingPartService*"
+    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
   }
 }
 
