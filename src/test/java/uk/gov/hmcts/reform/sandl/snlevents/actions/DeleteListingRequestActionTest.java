@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -85,6 +86,13 @@ public class DeleteListingRequestActionTest {
         UUID id = action.getUserTransactionId();
 
         assertThat(id).isEqualTo(createUuid(TRANSACTION_ID));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void getAndValidateEntities_throwsExceptionOnNullHearing() {
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(null);
+
+        action.getAndValidateEntities();
     }
 
     @Test

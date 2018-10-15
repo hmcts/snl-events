@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -66,14 +65,19 @@ public class RevertChangesManagerTest {
     }
 
     @Test
-    @Ignore
     public void revertChanges_handleHearing_whenCounterActionIsUpdate() throws IOException {
         Hearing h = createHearing();
+        Hearing prevHearing = createHearing();
+        prevHearing.setCaseTitle("PRE");
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(h);
         val transaction = createUserTransactionWithHearingUpdate();
+        when(objectMapper.readValue(any(String.class), eq(Hearing.class))).thenReturn(prevHearing);
+
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
             .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
+
+        verify(hearingRepository, times(1)).save(prevHearing);
     }
 
     @Test
@@ -178,7 +182,16 @@ public class RevertChangesManagerTest {
     }
 
     private Hearing createHearing() {
-        return createHearingPart().getHearing();
+        val hp = new HearingPart();
+        hp.setVersion(0L);
+        val h = new Hearing();
+
+        hp.setHearingId(createUuid());
+        hp.setHearing(h);
+
+        h.addHearingPart(hp);
+
+        return h;
     }
 
     private UUID createUuid() {
