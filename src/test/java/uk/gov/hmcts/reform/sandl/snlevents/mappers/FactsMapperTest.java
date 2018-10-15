@@ -221,14 +221,14 @@ public class FactsMapperTest {
     @Test
     public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapHearingPartToRuleJsonMessage(createHearingPart());
-        val expected = "{\"id\":\"123e4567-e89b-12d3-a456-426655440000\"," +
-            "\"sessionId\":null," +
-            "\"caseTypeCode\":\"case-type\"," +
-            "\"hearingTypeCode\":\"hearing-type-2\"," +
-            "\"duration\":86400," +
-            "\"scheduleStart\":\"-999999999-01-01T00:00:00+18:00\"," +
-            "\"scheduleEnd\":\"+999999999-12-31T23:59:59.999999999-18:00\"," +
-            "\"createdAt\":\"-999999999-01-01T00:00:00+18:00\"}";
+        val expected = "{\"id\":\"123e4567-e89b-12d3-a456-426655440000\","
+            + "\"sessionId\":null,"
+            + "\"caseTypeCode\":\"case-type\","
+            + "\"hearingTypeCode\":\"hearing-type-2\","
+            + "\"duration\":86400,"
+            + "\"scheduleStart\":\"-999999999-01-01T00:00:00+18:00\","
+            + "\"scheduleEnd\":\"+999999999-12-31T23:59:59.999999999-18:00\","
+            + "\"createdAt\":\"-999999999-01-01T00:00:00+18:00\"}";
 
         assertThat(mapped).isEqualTo(expected);
     }
