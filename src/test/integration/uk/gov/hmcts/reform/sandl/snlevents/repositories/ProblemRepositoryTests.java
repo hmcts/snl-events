@@ -25,6 +25,11 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
     ProblemRepository problemRepository;
 
     @Test
+    public void getProblems_queryIsDefined() {
+        assertThat(problemRepository.getProblems).isNotEmpty();
+    }
+
+    @Test
     public void addSession_shouldSetCorrespondentRelationInSession() {
         Problem nowWarning = generateProblem(OffsetDateTime.now(), WARNING);
         Problem threeHourAgoCritical = generateProblem(OffsetDateTime.now().minusHours(3), CRITICAL);

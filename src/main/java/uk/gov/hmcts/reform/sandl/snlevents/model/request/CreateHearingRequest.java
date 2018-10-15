@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateHearingPartRequest implements UserTransactional {
+public class CreateHearingRequest implements UserTransactional {
 
     @NotNull
     private UUID id;

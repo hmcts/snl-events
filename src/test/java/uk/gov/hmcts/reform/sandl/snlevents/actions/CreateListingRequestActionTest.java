@@ -10,15 +10,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -33,17 +34,18 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class CreateListingRequestActionTest {
 
-    private static final String ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String HEARING_PART_ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String HEARING_ID = "38692091-8165-43a5-8c63-977723a77228";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
 
     private CreateListingRequestAction action;
 
-    private CreateHearingPartRequest createHearingPartRequest;
+    private CreateHearingRequest createHearingRequest;
 
     private HearingPart hearingPart;
 
     @Mock
-    private HearingPartRepository hearingPartRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
     private HearingTypeRepository hearingTypeRepository;
@@ -52,24 +54,27 @@ public class CreateListingRequestActionTest {
     private CaseTypeRepository caseTypeRepository;
 
     @Spy
-    private HearingPartMapper hearingPartMapper;
+    private HearingMapper hearingMapper;
 
     @Spy
     private FactsMapper factsMapper;
 
     @Before
     public void setup() {
-        this.createHearingPartRequest = createCreateHearingPart();
+        this.createHearingRequest = createCreateHearingPart();
         this.action = new CreateListingRequestAction(
-            createHearingPartRequest,
-            hearingPartMapper,
-            hearingPartRepository,
+            createHearingRequest,
+            hearingMapper,
             hearingTypeRepository,
-            caseTypeRepository
+            caseTypeRepository,
+            hearingRepository
         );
         this.hearingPart = createHearingPart();
 
-        when(hearingPartRepository.save(any(HearingPart.class))).thenReturn(hearingPart);
+        when(hearingRepository.save(any(Hearing.class))).thenReturn(createHearing());
+        when(hearingMapper.mapToHearingPart(createHearingRequest)).thenReturn(createHearingPart());
+        when(caseTypeRepository.findOne(createHearingRequest.getCaseTypeCode())).thenReturn(new CaseType());
+        when(hearingTypeRepository.findOne(createHearingRequest.getHearingTypeCode())).thenReturn(new HearingType());
     }
 
     @Test
@@ -82,7 +87,7 @@ public class CreateListingRequestActionTest {
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
         UUID[] ids = action.getAssociatedEntitiesIds();
 
-        assertThat(ids).isEqualTo(new UUID[] {createUuid(ID)});
+        assertThat(ids).isEqualTo(new UUID[] {createUuid(HEARING_ID)});
     }
 
     @Test
@@ -115,12 +120,18 @@ public class CreateListingRequestActionTest {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
         expectedTransactionData.add(new UserTransactionData("hearingPart",
-            createUuid(ID),
+            createUuid(HEARING_PART_ID),
             null,
             "create",
             "delete",
-            0)
-        );
+            0));
+
+        expectedTransactionData.add(new UserTransactionData("hearing",
+            createUuid(HEARING_ID),
+            null,
+            "create",
+            "delete",
+            1));
 
         action.act();
 
@@ -129,21 +140,24 @@ public class CreateListingRequestActionTest {
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
     }
 
-    private CreateHearingPartRequest createCreateHearingPart() {
-        val chp = new CreateHearingPartRequest();
-        chp.setId(createUuid(ID));
+    private CreateHearingRequest createCreateHearingPart() {
+        val chp = new CreateHearingRequest();
+        chp.setId(createUuid(HEARING_ID));
         chp.setCaseTypeCode("ct");
         chp.setUserTransactionId(createUuid(TRANSACTION_ID));
 
         return chp;
     }
 
+    private Hearing createHearing() {
+        val hearing = new Hearing();
+        hearing.setId(createUuid(HEARING_ID));
+        return new Hearing();
+    }
+
     private HearingPart createHearingPart() {
         val hp = new HearingPart();
-        hp.setId(createUuid(ID));
-        CaseType caseType = new CaseType("ct", "desc");
-        hp.setCaseType(caseType);
-        hp.setHearingType(new HearingType("code", "description"));
+        hp.setId(createUuid(HEARING_PART_ID));
 
         return hp;
     }

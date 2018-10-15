@@ -9,6 +9,7 @@ import lombok.val;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
@@ -85,8 +86,8 @@ public class FactsMapper {
         return objectMapper.writeValueAsString(factSession);
     }
 
-    public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
-        return mapDbHearingPartToRuleJsonMessage(hearingPart);
+    public String mapHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
+        return mapDbHearingToRuleJsonMessage(hearing);
     }
 
     public String mapDbSessionToRuleJsonMessage(Session session) {
@@ -109,22 +110,24 @@ public class FactsMapper {
         try {
             return objectMapper.writeValueAsString(factSession);
         } catch (JsonProcessingException e) {
-            throw new WebServiceException("Cannot map session to fact", e);
+            throw new WebServiceException("Cannot map session to ft", e);
         }
     }
 
-    public String mapDbHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
+    public String mapDbHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
         FactHearingPart factHearingPart = new FactHearingPart();
 
-        factHearingPart.setId(hearingPart.getId().toString());
-        factHearingPart.setDuration(hearingPart.getDuration());
-        factHearingPart.setCaseTypeCode(hearingPart.getCaseType().getCode());
-        factHearingPart.setHearingTypeCode(hearingPart.getHearingType().getCode());
-        factHearingPart.setScheduleStart(hearingPart.getScheduleStart());
-        factHearingPart.setScheduleEnd(hearingPart.getScheduleEnd());
-        factHearingPart.setCreatedAt(hearingPart.getCreatedAt());
-        if (hearingPart.getSession() != null) {
-            factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        factHearingPart.setId(hearing.getId().toString());
+        factHearingPart.setDuration(hearing.getDuration());
+        factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
+        factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
+        factHearingPart.setScheduleStart(hearing.getScheduleStart());
+        factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
+        factHearingPart.setCreatedAt(hearing.getCreatedAt());
+
+        HearingPart hearingPart = hearing.getHearingParts().get(0); // @TODO temporary solution
+        if (hearingPart.getSessionId() != null) {
+            factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
 
         Optional.ofNullable(hearingPart.getSession()).ifPresent(
@@ -198,5 +201,27 @@ public class FactsMapper {
 
     private FactHearingType mapDbHearingTypeToFactHearingType(HearingType ht) {
         return new FactHearingType(ht.getCode(), ht.getDescription());
+    }
+
+    public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
+        Hearing hearing = hearingPart.getHearing();
+        FactHearingPart factHearingPart = new FactHearingPart();
+
+        factHearingPart.setId(hearing.getId().toString());
+        factHearingPart.setDuration(hearing.getDuration());
+        factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
+        factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
+        factHearingPart.setScheduleStart(hearing.getScheduleStart());
+        factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
+        factHearingPart.setCreatedAt(hearing.getCreatedAt());
+
+        if (hearingPart.getSession() != null) {
+            factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        }
+
+        Optional.ofNullable(hearingPart.getSession()).ifPresent(
+            s -> factHearingPart.setSessionId(s.getId().toString()));
+
+        return objectMapper.writeValueAsString(factHearingPart);
     }
 }

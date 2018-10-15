@@ -144,15 +144,27 @@ values ('26571383-0a2f-434f-9971-b230f9364748' ,'8d65caf8-1337-4938-8f98-5f6e37e
 null, '2018-04-26 11:30:00', 6000, 'fast-track');
 
 -- hearings
-INSERT INTO hearing_part (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, session_id, start, created_at, created_by)
-VALUES ('b262fc78-dc98-484b-849b-7b96d7753918','1234','case title 1','fast-track','preliminary-hearing',3600,'2018-05-02','2018-06-02',NULL,NULL, '2018-03-01 7:11:11', 'joe_script');
+INSERT INTO hearing (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, start, created_at, created_by)
+VALUES ('b262fc78-dc98-484b-849b-7b96d7753918','1234','case title 1','fast-track','preliminary-hearing',3600,'2018-05-02','2018-06-02',NULL, '2018-03-01 7:11:11', 'joe_script');
 
-INSERT INTO hearing_part (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, session_id, start, created_at, created_by)
-VALUES ('13d4e4da-e817-4e7d-8e29-ed467c5d5d2f','abcde','case title 2','small-claims','trial',3600,'2018-05-02','2018-06-02',NULL,NULL, '2018-03-01 7:11:11', 'joe_script');
+INSERT INTO hearing (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, start, created_at, created_by)
+VALUES ('13d4e4da-e817-4e7d-8e29-ed467c5d5d2f','abcde','case title 2','small-claims','trial',3600,'2018-05-02','2018-06-02',NULL, '2018-03-01 7:11:11', 'joe_script');
 
-INSERT INTO hearing_part (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, session_id, start, created_at, created_by)
-VALUES ('dd77dbe1-7527-4dc7-b18a-6898a4a92b7d','9999','case title 3','multi-track','trial',1800,'2018-05-02','2018-06-02',NULL,NULL, '2018-03-01 7:11:11', 'joe_script');
+INSERT INTO hearing (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, start, created_at, created_by)
+VALUES ('dd77dbe1-7527-4dc7-b18a-6898a4a92b7d','9999','case title 3','multi-track','trial',1800,'2018-05-02','2018-06-02',NULL, '2018-03-01 7:11:11', 'joe_script');
 
-INSERT INTO hearing_part (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, session_id, start, created_at, created_by)
-VALUES ('cf3a7605-5d27-45ef-a1a3-6424fe0a7376','7777','case title 4','fast-track','adjourned-hearing',900,'2018-03-02','2018-06-02',
-'7fd158b2-1025-49ca-bc82-09f4c60e2672', '2018-04-25 11:30:00', '2018-03-01 7:11:11', 'joe_script');
+INSERT INTO hearing (id, case_number, case_title, case_type_code, hearing_type_code, duration, schedule_start, schedule_end, start, created_at, created_by)
+VALUES ('cf3a7605-5d27-45ef-a1a3-6424fe0a7376','7777','case title 4','fast-track','adjourned-hearing',900,'2018-03-02','2018-06-02', '2018-04-25 11:30:00', '2018-03-01 7:11:11', 'joe_script');
+
+-- new hearing_parts to uncomment later on
+INSERT INTO hearing_part (id, session_id, hearing_id, created_at, created_by)
+VALUES ('66878d57-6301-44dd-a4cb-e75be5187165', NULL, 'b262fc78-dc98-484b-849b-7b96d7753918', '2018-03-01 7:11:11', 'joe_script');
+
+INSERT INTO hearing_part (id, session_id, hearing_id, created_at, created_by)
+VALUES ('a11d3818-b237-4c89-b6dd-0f9bfef3d05a', NULL, '13d4e4da-e817-4e7d-8e29-ed467c5d5d2f', '2018-03-01 7:11:11', 'joe_script');
+
+INSERT INTO hearing_part (id, session_id, hearing_id, created_at, created_by)
+VALUES ('23d8db2e-80cc-4e8a-8558-9f7e1cc08c86', NULL, 'dd77dbe1-7527-4dc7-b18a-6898a4a92b7d', '2018-03-01 7:11:11', 'joe_script');
+
+INSERT INTO hearing_part (id, session_id, hearing_id, created_at, created_by)
+VALUES ('21bd456f-c0db-4f1b-98fb-1ed44ec91cd9', '7fd158b2-1025-49ca-bc82-09f4c60e2672', 'cf3a7605-5d27-45ef-a1a3-6424fe0a7376', '2018-03-01 7:11:11', 'joe_script');

@@ -13,16 +13,18 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +48,7 @@ public class UpdateListingRequestActionTest {
     private UpdateListingRequest ulr;
 
     @Mock
-    private HearingPartRepository hearingPartRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -70,18 +72,21 @@ public class UpdateListingRequestActionTest {
         ulr.setHearingTypeCode(HEARING_TYPE_CODE);
 
         this.action = new UpdateListingRequestAction(ulr,
-            hearingPartRepository,
             entityManager,
             objectMapper,
             hearingTypeRepository,
-            caseTypeRepository);
+            caseTypeRepository,
+            hearingRepository
+        );
 
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(createUuid(ID));
-        hearingPart.setHearingType(HEARING_TYPE);
-        hearingPart.setCaseType(CASE_TYPE);
-        Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
-        when(hearingPartRepository.save(Matchers.any(HearingPart.class))).thenReturn(hearingPart);
+        Hearing hearing = new Hearing();
+        hearing.setId(createUuid(ID));
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+        hearing.setHearingParts(Arrays.asList(new HearingPart()));
+
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
+        when(hearingRepository.save(Matchers.any(Hearing.class))).thenReturn(hearing);
         when(caseTypeRepository.findOne(eq(CASE_TYPE_CODE))).thenReturn(CASE_TYPE);
         when(hearingTypeRepository.findOne(eq(HEARING_TYPE_CODE))).thenReturn(HEARING_TYPE);
     }
@@ -120,26 +125,30 @@ public class UpdateListingRequestActionTest {
         action.getAndValidateEntities();
         action.act();
 
-        ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
 
-        Mockito.verify(hearingPartRepository).save(captor.capture());
+        Mockito.verify(hearingRepository).save(captor.capture());
 
-        HearingPart expectedHearingPart = new HearingPart();
-
-        expectedHearingPart.setId(ulr.getId());
-
-        assertThat(captor.getValue().getId()).isEqualTo(expectedHearingPart.getId());
+        assertThat(captor.getValue().getId()).isEqualTo(ulr.getId());
     }
 
     @Test
     public void getUserTransactionData_returnsCorrectData() {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
+        expectedTransactionData.add(new UserTransactionData("hearing",
             ulr.getId(),
             Mockito.any(),
             "update",
             "update",
+            0)
+        );
+
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            null,
+            null,
+            "lock",
+            "unlock",
             0)
         );
 
