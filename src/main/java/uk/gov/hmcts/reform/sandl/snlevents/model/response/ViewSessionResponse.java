@@ -1,0 +1,33 @@
+package uk.gov.hmcts.reform.sandl.snlevents.model.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ViewSessionResponse {
+    private UUID id;
+    private OffsetDateTime start;
+    private Long duration;
+    private String roomName;
+    private String judgeName;
+    private String sessionType;
+    //it's only placeholder for fetching notes by snl-notes service
+    private Boolean[] notes;
+
+    public ViewSessionResponse(Session session) {
+        this.id = session.getId();
+        this.start = session.getStart();
+        this.duration = session.getDuration().toMinutes();
+        this.roomName = session.getRoom().getName();
+        this.judgeName = session.getPerson().getName();
+        this.sessionType = session.getSessionType().getDescription();
+        this.notes = new Boolean[0];
+    }
+}

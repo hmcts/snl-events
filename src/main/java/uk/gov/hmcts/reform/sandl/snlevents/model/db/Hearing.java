@@ -68,6 +68,7 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private OffsetDateTime scheduleEnd;
 
+    // todo dodaj reserved judge jako model
     private UUID reservedJudgeId;
 
     private String communicationFacilitator;
