@@ -27,8 +27,6 @@ public class HearingWithSessionsResponse {
     private String communicationFacilitator;
     private String reservedToJudge;
     private List<ViewSessionResponse> sessions;
-    //placeholder for fetching notes by snl-notes service
-    private Boolean[] notes;
 
     public HearingWithSessionsResponse(Hearing hearing) {
         this.id = hearing.getId();
@@ -47,6 +45,5 @@ public class HearingWithSessionsResponse {
             .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        this.notes = new Boolean[0];
     }
 }

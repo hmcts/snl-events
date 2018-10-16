@@ -18,8 +18,6 @@ public class ViewSessionResponse {
     private String roomName;
     private String judgeName;
     private String sessionType;
-    //it's only placeholder for fetching notes by snl-notes service
-    private Boolean[] notes;
 
     public ViewSessionResponse(Session session) {
         this.id = session.getId();
@@ -28,6 +26,5 @@ public class ViewSessionResponse {
         this.roomName = session.getRoom().getName();
         this.judgeName = session.getPerson().getName();
         this.sessionType = session.getSessionType().getDescription();
-        this.notes = new Boolean[0];
     }
 }
