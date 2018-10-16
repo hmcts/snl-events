@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.mappers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -16,9 +15,6 @@ import java.util.UUID;
 
 @Component
 public class HearingMapper {
-    @Autowired
-    EntityManager entityManager;
-
     public HearingPart mapToHearingPart(CreateHearingRequest createHearingRequest) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
@@ -29,7 +25,8 @@ public class HearingMapper {
 
     public Hearing mapToHearing(CreateHearingRequest createHearingRequest,
                                 CaseTypeRepository caseTypeRepository,
-                                HearingTypeRepository hearingTypeRepository) {
+                                HearingTypeRepository hearingTypeRepository,
+                                EntityManager entityManager) {
         Hearing hearing = new Hearing();
         hearing.setId(createHearingRequest.getId());
         hearing.setCaseNumber(createHearingRequest.getCaseNumber());
@@ -43,7 +40,7 @@ public class HearingMapper {
         hearing.setScheduleEnd(createHearingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(createHearingRequest.getCommunicationFacilitator());
         hearing.setReservedJudge(
-            this.entityManager.getReference(Person.class, createHearingRequest.getReservedJudgeId())
+            entityManager.getReference(Person.class, createHearingRequest.getReservedJudgeId())
         );
         hearing.setPriority(createHearingRequest.getPriority());
 

@@ -84,7 +84,7 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
     private Person reservedJudge;
 
     public UUID getReservedJudgeId() {
-        return this.reservedJudge.getId();
+        return this.reservedJudge != null ? this.reservedJudge.getId() : null;
     }
 
     @CreatedDate
