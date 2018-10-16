@@ -18,14 +18,18 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
@@ -67,6 +71,9 @@ public class HearingPartControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private HearingPartRepository hearingPartRepository;
+
+    @MockBean
+    private HearingRepository hearingRepository;
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
@@ -142,6 +149,19 @@ public class HearingPartControllerTest {
     }
 
     @Test
+    public void updateHearingPartAction_updateHearingPartAction() throws Exception {
+        val ut = createUserTransaction();
+        when(actionService.execute(any())).thenReturn(ut);
+
+        val updateBody = createUpdateListingRequest();
+        val response = mvc.callAndMapResponse(
+            put(URL + "/update"), objectMapper.writeValueAsString(updateBody), UserTransaction.class
+        );
+
+        assertThat(response).isEqualTo(ut);
+    }
+
+    @Test
     public void deleteHearingPartAction_deletesHearingPart() throws Exception {
         val ut = createUserTransaction();
         when(actionService.execute(any())).thenReturn(ut);
@@ -153,6 +173,42 @@ public class HearingPartControllerTest {
         assertThat(response).isEqualTo(ut);
     }
 
+    @Test
+    public void getHearingPartResponse_shouldReturnValidResponse() throws Exception {
+        when(hearingPartRepository.findOne(createUuid())).thenReturn(createHearingPart());
+
+        val response = mvc.getAndMapResponse(URL + "/" + createUuid(),
+            HearingPartResponse.class);
+
+        assertThat(response).isEqualTo(createHearingPartResponse(createUuid()));
+    }
+
+    @Test
+    public void assignHearingPartToSession_shouldAssignProperly() throws Exception {
+        val ut = createUserTransaction();
+
+        when(hearingPartService.assignHearingPartToSessionWithTransaction(createUuid(), createAssignment()))
+            .thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(put(URL + "/" + createUuid()), createAssignment(),
+            UserTransaction.class);
+
+        assertThat(response).isEqualTo(ut);
+    }
+
+    private HearingPartSessionRelationship createAssignment() {
+        val assignment = new HearingPartSessionRelationship();
+
+        return assignment;
+    }
+
+    private HearingPartResponse createHearingPartResponse(UUID hpId) {
+        val hp = createHearingPart();
+        hp.setId(hpId);
+
+        return new HearingPartResponse(hp);
+    }
+
     private List<HearingPartResponse> crateHearingPartResponse() {
         return Arrays.asList(createHearingPart())
             .stream()
@@ -161,7 +217,19 @@ public class HearingPartControllerTest {
     }
 
     private HearingPart createHearingPart() {
-        return new HearingPart();
+        val hearingPart = new HearingPart();
+        hearingPart.setId(createUuid());
+        hearingPart.setHearing(createHearing());
+
+        return hearingPart;
+    }
+
+    private Hearing createHearing() {
+        val hearing = new Hearing();
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+
+        return hearing;
     }
 
     private UserTransaction createUserTransaction() {
@@ -192,6 +260,26 @@ public class HearingPartControllerTest {
         chp.setUserTransactionId(UUID.randomUUID());
 
         return chp;
+    }
+
+    private UpdateListingRequest createUpdateListingRequest() {
+        val ulr = new UpdateListingRequest();
+        ulr.setId(createUuid());
+        ulr.setDuration(createDuration());
+        ulr.setScheduleStart(createOffsetDateTime());
+        ulr.setScheduleEnd(createOffsetDateTime());
+        ulr.setCaseTypeCode(CASE_TYPE_CODE);
+        ulr.setCaseNumber(CASE_NUMBER);
+        ulr.setCaseTitle(TITLE);
+        ulr.setHearingTypeCode(HEARING_TYPE_CODE);
+        ulr.setDuration(createDuration());
+        ulr.setPriority(Priority.Low);
+        ulr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
+        ulr.setReservedJudgeId(RESERVED_JUDGE_ID);
+        ulr.setUserTransactionId(UUID.randomUUID());
+        ulr.setVersion(0L);
+
+        return ulr;
     }
 
     private OffsetDateTime createOffsetDateTime() {

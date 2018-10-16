@@ -126,8 +126,8 @@ public class FactsMapper {
         factHearingPart.setCreatedAt(hearing.getCreatedAt());
 
         HearingPart hearingPart = hearing.getHearingParts().get(0); // @TODO temporary solution
-        if (hearingPart.getSession() != null) {
-            factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        if (hearingPart.getSessionId() != null) {
+            factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
 
         Optional.ofNullable(hearingPart.getSession()).ifPresent(

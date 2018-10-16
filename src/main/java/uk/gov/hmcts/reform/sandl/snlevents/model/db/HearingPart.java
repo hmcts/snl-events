@@ -11,16 +11,18 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
@@ -46,7 +48,7 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Column(name = "session_id", updatable = false, insertable = false)
     private UUID sessionId;
 
-//    private OffsetDateTime start;
+    //private OffsetDateTime start;
 
     private boolean isDeleted;
 

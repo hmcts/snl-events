@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
 import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
+import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.NullOrNotBlank;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -31,8 +32,10 @@ public class UpsertSession implements UserTransactional {
 
     private String sessionType;
 
+    @NullOrNotBlank
     private String personId;
 
+    @NullOrNotBlank
     private String roomId;
 
     private Long version;

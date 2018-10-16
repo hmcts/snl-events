@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
 import javax.persistence.EntityManager;
 
 public class DeleteListingRequestAction extends Action implements RulesProcessable {
@@ -87,7 +88,8 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(prepareDeleteUserTransactionData("hearing", hearing.getId(), currentHearingAsString));
+        userTransactionDataList.add(prepareDeleteUserTransactionData("hearing", hearing.getId(),
+            currentHearingAsString));
 
         currentHearingPartsMap.forEach((id, jsonValue) ->
             userTransactionDataList.add(prepareDeleteUserTransactionData("hearingPart", id, jsonValue)));
@@ -95,7 +97,8 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         return userTransactionDataList;
     }
 
-    private UserTransactionData prepareDeleteUserTransactionData(String entityName, UUID entityId, String currentEntityString) {
+    private UserTransactionData prepareDeleteUserTransactionData(String entityName, UUID entityId,
+                                                                 String currentEntityString) {
         return new UserTransactionData(entityName,
             entityId,
             currentEntityString,

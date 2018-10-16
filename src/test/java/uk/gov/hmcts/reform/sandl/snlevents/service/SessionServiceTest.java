@@ -11,7 +11,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -28,7 +31,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.testdata.builders.HearingPartBuilder;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -62,6 +64,7 @@ public class SessionServiceTest {
     private static final String SESSION_TYPE_DESC = "session-type-desc";
     private static final String UUID_STRING = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
     private static final String JUDGE_NAME = "judge-name";
+    private static final String HEARING_ID = "7684d2a2-6bf2-4a20-a75a-c6593fcc7c63";
     public static final LocalDate START_DATE = LocalDate.MIN;
     public static final LocalDate END_DATE = LocalDate.MAX;
 
@@ -187,7 +190,7 @@ public class SessionServiceTest {
 
     @Test
     public void saveWithTransaction_startsTransaction() {
-        when(userTransactionService.startTransaction(eq(createUuid()), any(List.class)))
+        when(userTransactionService.startTransaction(eq(createUuid(UUID_STRING)), any(List.class)))
             .thenReturn(createUserTransaction());
         when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
 
@@ -195,7 +198,7 @@ public class SessionServiceTest {
 
         assertThat(transaction).isEqualToComparingFieldByFieldRecursively(createUserTransaction());
         verify(userTransactionService, times(1))
-            .startTransaction(eq(createUuid()), eq(createUserTransactionDataList()));
+            .startTransaction(eq(createUuid(UUID_STRING)), eq(createUserTransactionDataList()));
     }
 
     @Test
@@ -240,7 +243,7 @@ public class SessionServiceTest {
 
     private UserTransaction createUserTransaction(UserTransactionStatus status) {
         UserTransaction transaction = new UserTransaction();
-        transaction.setId(createUuid());
+        transaction.setId(createUuid(UUID_STRING));
         transaction.setStatus(status);
 
         return transaction;
@@ -254,7 +257,7 @@ public class SessionServiceTest {
         Session session = new Session();
         session.setSessionType(new SessionType(SESSION_TYPE, SESSION_TYPE_DESC));
         session.setDuration(createDuration());
-        session.setId(createUuid());
+        session.setId(createUuid(UUID_STRING));
         session.setPerson(getPerson());
         session.setRoom(getRoom());
         session.setStart(OFFSET_DATE_TIME);
@@ -271,8 +274,8 @@ public class SessionServiceTest {
         return new Person();
     }
 
-    private UUID createUuid() {
-        return UUID.fromString(UUID_STRING);
+    private UUID createUuid(String id) {
+        return UUID.fromString(id);
     }
 
     private Duration createDuration() {
@@ -285,7 +288,7 @@ public class SessionServiceTest {
 
     private SessionInfo createSessionInfo() {
         return new SessionInfo(
-            createUuid(),
+            createUuid(UUID_STRING),
             OFFSET_DATE_TIME,
             createDuration(),
             getPerson(),
@@ -301,6 +304,9 @@ public class SessionServiceTest {
 
     private HearingPart createHearingPart() {
         val hp = new HearingPart();
+        val h = createHearing();
+        hp.setHearing(h);
+        hp.setHearingId(h.getId());
 
         return hp;
     }
@@ -313,12 +319,20 @@ public class SessionServiceTest {
         return Arrays.asList(createHearingPart());
     }
 
+    private Hearing createHearing() {
+        val hearing = new Hearing();
+        hearing.setId(createUuid(HEARING_ID));
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+        return hearing;
+    }
+
     private UpsertSession createUpsertSession() {
         UpsertSession session = new UpsertSession();
         session.setSessionType(SESSION_TYPE);
         session.setDuration(createDuration());
-        session.setId(createUuid());
-        session.setUserTransactionId(createUuid());
+        session.setId(createUuid(UUID_STRING));
+        session.setUserTransactionId(createUuid(UUID_STRING));
         session.setStart(OFFSET_DATE_TIME);
         session.setRoomId(UUID_STRING);
         session.setPersonId(UUID_STRING);
@@ -330,7 +344,7 @@ public class SessionServiceTest {
     private List<UserTransactionData> createUserTransactionDataList() {
         return Arrays.asList(new UserTransactionData(
             "session",
-            createUuid(),
+            createUuid(UUID_STRING),
             null,
             "insert",
             "delete",
