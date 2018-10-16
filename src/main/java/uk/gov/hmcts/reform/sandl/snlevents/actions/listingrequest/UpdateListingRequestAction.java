@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -66,7 +67,9 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setScheduleStart(updateListingRequest.getScheduleStart());
         hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
-        hearing.setReservedJudgeId(updateListingRequest.getReservedJudgeId());
+        hearing.setReservedJudge(
+            this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
+        );
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
         hearingRepository.save(hearing);

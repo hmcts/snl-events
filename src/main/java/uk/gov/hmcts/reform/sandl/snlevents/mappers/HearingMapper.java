@@ -1,18 +1,24 @@
 package uk.gov.hmcts.reform.sandl.snlevents.mappers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 
+import javax.persistence.EntityManager;
 import java.util.UUID;
 
 @Component
 public class HearingMapper {
+    @Autowired
+    EntityManager entityManager;
+
     public HearingPart mapToHearingPart(CreateHearingRequest createHearingRequest) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
@@ -36,7 +42,9 @@ public class HearingMapper {
         hearing.setScheduleStart(createHearingRequest.getScheduleStart());
         hearing.setScheduleEnd(createHearingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(createHearingRequest.getCommunicationFacilitator());
-        hearing.setReservedJudgeId(createHearingRequest.getReservedJudgeId());
+        hearing.setReservedJudge(
+            this.entityManager.getReference(Person.class, createHearingRequest.getReservedJudgeId())
+        );
         hearing.setPriority(createHearingRequest.getPriority());
 
         return hearing;

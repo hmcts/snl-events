@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class HearingWithSessionsResponse {
     private String communicationFacilitator;
     private String reservedToJudge;
     private List<ViewSessionResponse> sessions;
-    //it's only placeholder for fetching notes by snl-notes service
+    //placeholder for fetching notes by snl-notes service
     private Boolean[] notes;
 
     public HearingWithSessionsResponse(Hearing hearing) {
@@ -40,11 +41,11 @@ public class HearingWithSessionsResponse {
         this.scheduleEnd = hearing.getScheduleEnd();
         this.priority = hearing.getPriority().toString();
         this.communicationFacilitator = hearing.getCommunicationFacilitator();
-        this.reservedToJudge = "@todo: to get this we need to change Hearing to have Reserved Judge not just his id";
+        this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : "";
         this.sessions = hearing.getHearingParts()
             .stream()
             .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
-            .filter(h -> h != null)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
         this.notes = new Boolean[0];
     }

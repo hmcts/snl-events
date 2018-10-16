@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Where;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -27,10 +26,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -68,9 +69,6 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private OffsetDateTime scheduleEnd;
 
-    // todo dodaj reserved judge jako model
-    private UUID reservedJudgeId;
-
     private String communicationFacilitator;
 
     private OffsetDateTime start;
@@ -79,6 +77,15 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
     private Priority priority;
 
     private boolean isDeleted;
+
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @JoinColumn(name = "reservedJudgeId")
+    private Person reservedJudge;
+
+    public UUID getReservedJudgeId() {
+        return this.reservedJudge.getId();
+    }
 
     @CreatedDate
     @Column(updatable = false)
