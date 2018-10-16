@@ -85,7 +85,7 @@ public class HearingPartService {
     public UserTransaction assignWithTransaction(Hearing hearing, UUID transactionId,
                                                  Session currentSession,
                                                  Session targetSession, String beforeHearing,
-                                                 String beforeHearingPart) throws JsonProcessingException {
+                                                 String beforeHearingPart) {
         Hearing savedHearingPart = hearingRepository.save(hearing);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();

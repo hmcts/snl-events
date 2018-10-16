@@ -38,7 +38,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
 
     @Test
     public void getProblems_queryIsDefined() {
-        assertThat(problemRepository.getProblems).isNotEmpty();
+        assertThat(problemRepository.GET_PROBLEMS).isNotEmpty();
     }
 
     @Test

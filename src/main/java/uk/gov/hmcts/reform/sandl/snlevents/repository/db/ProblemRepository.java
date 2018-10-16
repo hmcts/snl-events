@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface ProblemRepository extends PagingAndSortingRepository<Problem, String> {
-    String getProblems = "SELECT problem FROM Problem problem "
+    String GET_PROBLEMS = "SELECT problem FROM Problem problem "
         + "ORDER BY CASE severity "
         + "         WHEN 'Critical'  THEN '0' "
         + "         WHEN 'Urgent' THEN '1' "
@@ -21,11 +21,14 @@ public interface ProblemRepository extends PagingAndSortingRepository<Problem, S
         + "         ELSE '2' "
         + "         END, created_at desc, id desc";
 
-    @Query(getProblems)
+    @Query(GET_PROBLEMS)
     Page<Problem> getAllSortedBySeverityAndCreatedAt(Pageable pageable);
 
-    @Query(getProblems)
-    @Deprecated() //This function has been replaced with getAllSortedBySeverityAndCreatedAt pagable
+    /**
+     * @deprecated (This function has been replaced with getAllSortedBySeverityAndCreatedAt pagable)
+     */
+    @Query(GET_PROBLEMS)
+    @Deprecated()
     List<Problem> getAllSortedBySeverityAndCreatedAt();
 
     @Query("SELECT problem "
