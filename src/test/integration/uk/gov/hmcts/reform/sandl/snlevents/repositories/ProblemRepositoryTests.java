@@ -110,24 +110,23 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
 
     @Test
     public void getProblemsByReferenceEntityId_shouldReturnProblemsForReferencedEntity() {
-        String entityId = UUID.randomUUID().toString();
-        String problemId = UUID.randomUUID().toString();
-
         Problem nowWarning = generateProblem(OffsetDateTime.now(), WARNING);
         nowWarning.setReferences(new ArrayList<>());
         nowWarning.getReferences().add(generateProblemReference("one"));
         nowWarning.getReferences().add(generateProblemReference("two"));
 
+        String problemId = UUID.randomUUID().toString();
+
         Problem threeHourAgoCritical = generateProblem(problemId, OffsetDateTime.now().minusHours(3), CRITICAL);
         threeHourAgoCritical.setReferences(new ArrayList<>());
         threeHourAgoCritical.getReferences().add(generateProblemReference("three"));
+        String entityId = UUID.randomUUID().toString();
         threeHourAgoCritical.getReferences().add(generateProblemReference(entityId, "here is my entity id"));
         threeHourAgoCritical.getReferences().add(generateProblemReference("four"));
 
         Problem hourAgoUrgent = generateProblem(OffsetDateTime.now().minusHours(1), URGENT);
         hourAgoUrgent.setReferences(new ArrayList<>());
         hourAgoUrgent.getReferences().add(generateProblemReference("five"));
-
 
         List<Problem> problems = new ArrayList<>();
         problems.add(nowWarning);
@@ -148,22 +147,22 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
     @Test
     public void getProblemsByUserTransactionId_shouldReturnProblemsForUserTransaction() {
         UUID userTransactionId = UUID.randomUUID();
-        String problemId = UUID.randomUUID().toString();
-
         UserTransaction userTransaction = new UserTransaction(userTransactionId,
             UserTransactionStatus.INPROGRESS, UserTransactionRulesProcessingStatus.COMPLETE);
+        userTransactionRepository.save(userTransaction);
 
+        String problemId = UUID.randomUUID().toString();
         Problem nowWarning = generateProblem(OffsetDateTime.now(), WARNING);
-        Problem threeHourAgoCritical = generateProblem(problemId, userTransactionId, OffsetDateTime.now().minusHours(3), CRITICAL);
+        Problem threeHourAgoCritical = generateProblem(problemId,
+            userTransactionId,
+            OffsetDateTime.now().minusHours(3), CRITICAL);
         Problem hourAgoUrgent = generateProblem(OffsetDateTime.now().minusHours(1), URGENT);
-
 
         List<Problem> problems = new ArrayList<>();
         problems.add(nowWarning);
         problems.add(threeHourAgoCritical);
         problems.add(hourAgoUrgent);
 
-        userTransactionRepository.save(userTransaction);
         problemRepository.save(problems);
 
         List<Problem> problemsByUTranId = problemRepository.getProblemsByUserTransactionId(userTransactionId);
@@ -181,7 +180,8 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
         return generateProblem(problemId, null, createdAt, severity);
     }
 
-    private Problem generateProblem(String problemId, UUID userTransactionId, OffsetDateTime createdAt, String severity) {
+    private Problem generateProblem(String problemId, UUID userTransactionId,
+                                    OffsetDateTime createdAt, String severity) {
         Problem problem = new Problem();
         problem.setId(problemId);
         problem.setCreatedAt(createdAt);
