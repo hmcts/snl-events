@@ -67,11 +67,15 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setScheduleStart(updateListingRequest.getScheduleStart());
         hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
-        hearing.setReservedJudge(
-            this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
-        );
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
+
+        if(updateListingRequest.getReservedJudgeId() != null) {
+            hearing.setReservedJudge(
+                this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
+            );
+        }
+
         hearingRepository.save(hearing);
     }
 

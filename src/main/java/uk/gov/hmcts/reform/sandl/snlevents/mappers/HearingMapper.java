@@ -39,10 +39,13 @@ public class HearingMapper {
         hearing.setScheduleStart(createHearingRequest.getScheduleStart());
         hearing.setScheduleEnd(createHearingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(createHearingRequest.getCommunicationFacilitator());
-        hearing.setReservedJudge(
-            entityManager.getReference(Person.class, createHearingRequest.getReservedJudgeId())
-        );
         hearing.setPriority(createHearingRequest.getPriority());
+
+        if(createHearingRequest.getReservedJudgeId() != null) {
+            hearing.setReservedJudge(
+                entityManager.getReference(Person.class, createHearingRequest.getReservedJudgeId())
+            );
+        }
 
         return hearing;
     }
