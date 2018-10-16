@@ -52,7 +52,7 @@ sonarqube {
     property "sonar.projectKey", "snl-events"
     property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/*Test*.exec"
     property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
-    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*,**/ProblemRepository*,**/HearingPartService*"
+    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
     property "sonar.test.exclusions", ""
     property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
   }
