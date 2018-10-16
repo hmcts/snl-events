@@ -76,12 +76,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: false
     properties:
       hibernate:
         dialect: uk.gov.hmcts.reform.sandl.snlevents.config.H2DbExtendedDialect
-        show_sql: true
-        use_sql_comments: true
-        format_sql: true
 #      tomcat:
 #        max-active: 10
 #        max-idle: 10
