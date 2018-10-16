@@ -19,7 +19,7 @@ public interface ProblemRepository extends PagingAndSortingRepository<Problem, S
         + "         WHEN 'Urgent' THEN '1' "
         + "         WHEN 'Warning'  THEN '2' "
         + "         ELSE '2' "
-        + "         END, created_at desc";
+        + "         END, created_at desc, id desc";
 
     @Query(getProblems)
     Page<Problem> getAllSortedBySeverityAndCreatedAt(Pageable pageable);
