@@ -66,6 +66,8 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @LastModifiedBy
     private String modifiedBy;
 
+    private OffsetDateTime start;
+
     @ManyToOne
     @JsonIgnore
     @Audited(targetAuditMode = NOT_AUDITED)

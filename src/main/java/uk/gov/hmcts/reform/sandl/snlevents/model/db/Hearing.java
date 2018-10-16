@@ -70,8 +70,6 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private String communicationFacilitator;
 
-    private OffsetDateTime start;
-
     @Enumerated(EnumType.ORDINAL)
     private Priority priority;
 
