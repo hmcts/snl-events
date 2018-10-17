@@ -11,15 +11,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Problem;
 import java.util.List;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ProblemQueries.GET_PROBLEMS;
+
 @Repository
 public interface ProblemRepository extends PagingAndSortingRepository<Problem, String> {
-    String GET_PROBLEMS = "SELECT problem FROM Problem problem "
-        + "ORDER BY CASE severity "
-        + "         WHEN 'Critical'  THEN '0' "
-        + "         WHEN 'Urgent' THEN '1' "
-        + "         WHEN 'Warning'  THEN '2' "
-        + "         ELSE '2' "
-        + "         END, created_at desc, id desc";
 
     @Query(GET_PROBLEMS)
     Page<Problem> getAllSortedBySeverityAndCreatedAt(Pageable pageable);

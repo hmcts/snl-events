@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.models.BaseIntegrationModelTest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ProblemRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ProblemQueries;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
 
     @Test
     public void getProblems_queryIsDefined() {
-        assertThat(problemRepository.GET_PROBLEMS).isNotEmpty();
+        assertThat(ProblemQueries.GET_PROBLEMS).isNotEmpty();
     }
 
     @Test
