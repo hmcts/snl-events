@@ -26,7 +26,6 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     private AmendSessionRequest amendSessionRequest;
     private SessionRepository sessionRepository;
     private EntityManager entityManager;
-    private ObjectMapper objectMapper;
 
     private Session session;
     private String currentSessionAsString;

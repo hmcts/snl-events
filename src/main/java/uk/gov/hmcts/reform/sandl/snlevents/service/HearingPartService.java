@@ -84,11 +84,11 @@ public class HearingPartService {
                                                  Session currentSession,
                                                  Session targetSession, String beforeHearing,
                                                  String beforeHearingPart) {
-        Hearing savedHearingPart = hearingRepository.save(hearing);
+        Hearing savedHearing = hearingRepository.save(hearing);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearing",
-                savedHearingPart.getId(),
+                savedHearing.getId(),
                 beforeHearing,
                 "update",
                 "update",
