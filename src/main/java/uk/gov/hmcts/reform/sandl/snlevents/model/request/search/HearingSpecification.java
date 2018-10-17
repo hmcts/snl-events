@@ -15,8 +15,11 @@ public class HearingSpecification implements Specification<Hearing> {
 
     @Override
     public Predicate toPredicate(Root<Hearing> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        if (criteria.getOperation().equalsIgnoreCase(":")) {
+        ComparisonOperations operation = criteria.getOperation();
+        if (operation.equals(ComparisonOperations.EQUALS)) {
             return cb.equal(root.get(criteria.getKey()), criteria.getValue());
+        } else if (operation.equals(ComparisonOperations.IN)) {
+            return root.get(criteria.getKey()).in(criteria.getValue());
         }
         return null;
     }
