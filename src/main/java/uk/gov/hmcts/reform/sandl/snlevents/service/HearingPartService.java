@@ -171,7 +171,7 @@ public class HearingPartService {
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
         hearingPart.setSession(targetSession);
-        hearing.setStart(assignment.getStart());
+        hearingPart.setStart(assignment.getStart());
 
         String msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         UserTransaction ut = assignWithTransaction(hearing,
