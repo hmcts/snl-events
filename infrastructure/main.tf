@@ -6,8 +6,8 @@ locals {
   envInUse = "${(var.env == "preview" || var.env == "spreview") ? "aat" : var.env}"
   shortEnv = "${(var.env == "preview" || var.env == "spreview") ? var.deployment_namespace : var.env}"
 
-  aat_rules_url = "http://snl-rules-aat.service.core-compute-aat.internal"
-  local_rules_url = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+  aat_rules_url = "http://${var.product}-rules-aat-vm.service.core-compute-aat.internal"
+  local_rules_url = "http://${var.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   rules_url = "${var.env == "preview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
