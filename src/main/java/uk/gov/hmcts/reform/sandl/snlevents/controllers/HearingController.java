@@ -76,7 +76,7 @@ public class HearingController {
             // return hearingPartService.getAllHearingPartsThat(isListed.get(), hearingSearchCriteria, pageRequest);
         }
 
-        Specification<Hearing> specification = hearingSpecificationBuilder.of(searchCriteriaList).build();
+        Specification<Hearing> specification = new HearingSpecificationBuilder().of(searchCriteriaList).build();
 
         return hearingRepository.findAll(specification)
             .stream()
