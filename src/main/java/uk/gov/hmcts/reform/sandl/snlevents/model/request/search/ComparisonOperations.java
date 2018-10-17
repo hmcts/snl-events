@@ -8,5 +8,8 @@ public enum ComparisonOperations {
     EQUALS,
 
     @JsonProperty("in")
-    IN
+    IN,
+
+    @JsonProperty("like")
+    LIKE
 }

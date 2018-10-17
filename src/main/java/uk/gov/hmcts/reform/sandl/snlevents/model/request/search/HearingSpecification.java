@@ -20,7 +20,10 @@ public class HearingSpecification implements Specification<Hearing> {
             return cb.equal(root.get(criteria.getKey()), criteria.getValue());
         } else if (operation.equals(ComparisonOperations.IN)) {
             return root.get(criteria.getKey()).in(criteria.getValue());
+        } else if (operation.equals(ComparisonOperations.LIKE)) {
+            return cb.like(root.get(criteria.getKey()), "%" + criteria.getValue().toString() + "%");
+        } else {
+            return null;
         }
-        return null;
     }
 }
