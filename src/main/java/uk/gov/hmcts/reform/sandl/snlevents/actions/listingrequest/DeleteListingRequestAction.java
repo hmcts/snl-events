@@ -23,7 +23,6 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     private DeleteListingRequest deleteListingRequest;
     private HearingRepository hearingRepository;
     private EntityManager entityManager;
-    private ObjectMapper objectMapper;
     private Hearing hearing;
     private String currentHearingAsString;
     private HashMap<UUID, String> currentHearingPartsMap = new HashMap<>();
