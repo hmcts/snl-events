@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
-import uk.gov.hmcts.reform.sandl.snlevents.model.specifications.HearingSpecificationBuilder;
-import uk.gov.hmcts.reform.sandl.snlevents.model.specifications.SearchCriteria;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.HearingSpecificationBuilder;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.model.specifications;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
