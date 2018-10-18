@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class HearingController {
     private HearingRepository hearingRepository;
 
     @Autowired
-    private HearingSpecificationBuilder hearingSpecificationBuilder;
+    private EntityManager entityManager;
 
     @Autowired
     private HearingPartService hearingPartService;
@@ -76,7 +77,7 @@ public class HearingController {
             // return hearingPartService.getAllHearingPartsThat(isListed.get(), hearingSearchCriteria, pageRequest);
         }
 
-        Specification<Hearing> specification = new HearingSpecificationBuilder().of(searchCriteriaList).build();
+        Specification<Hearing> specification = new HearingSpecificationBuilder(entityManager).of(searchCriteriaList).build();
 
         return hearingRepository.findAll(specification)
             .stream()

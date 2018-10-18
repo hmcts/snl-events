@@ -11,5 +11,8 @@ public enum ComparisonOperations {
     IN,
 
     @JsonProperty("like")
-    LIKE
+    LIKE,
+
+    @JsonProperty("listingStatus")
+    LISTING_STATUS
 }

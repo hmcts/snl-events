@@ -85,7 +85,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: false
+    show-sql: true
 #      properties:
 #        charSet: UTF-8
 #      tomcat:

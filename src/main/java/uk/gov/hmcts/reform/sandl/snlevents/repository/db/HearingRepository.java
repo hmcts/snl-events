@@ -8,5 +8,5 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import java.util.UUID;
 
 @Repository
-public interface HearingRepository  extends JpaRepository<Hearing, UUID>, JpaSpecificationExecutor<Hearing> {
+public interface HearingRepository extends JpaRepository<Hearing, UUID>, JpaSpecificationExecutor<Hearing> {
 }
