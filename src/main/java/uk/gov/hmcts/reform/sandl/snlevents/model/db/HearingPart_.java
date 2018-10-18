@@ -8,4 +8,5 @@ import java.util.UUID;
 public class HearingPart_ {
     public static volatile SingularAttribute<HearingPart, UUID> id;
     public static volatile SingularAttribute<HearingPart, UUID> hearingId;
+    public static volatile SingularAttribute<HearingPart, UUID> sessionId;
 }

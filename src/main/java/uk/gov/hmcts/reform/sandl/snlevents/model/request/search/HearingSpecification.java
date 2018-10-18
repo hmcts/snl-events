@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.request.search;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -31,11 +32,14 @@ public class HearingSpecification implements Specification<Hearing> {
             Subquery<HearingPart> subquery = query.subquery(HearingPart.class);
             Root<HearingPart> hpRoot = subquery.from(HearingPart.class);
             subquery.select(hpRoot);
-            subquery.where(cb.equal(hpRoot.get("hearingId"), root),cb.isNotNull(hpRoot.get("sessionId")));
-            //cb.and(subquery, );
+            if (criteria.getValue().toString().equals("listed")) {
+                subquery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), root),cb.isNotNull(hpRoot.get(HearingPart_.sessionId)));
+            } else if (criteria.getValue().toString().equals("unlisted")) {
+                subquery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), root),cb.isNull(hpRoot.get(HearingPart_.sessionId)));
+            } else {
+                throw new IllegalArgumentException("criteria.value:" + criteria.getValue());
+            }
             return cb.exists(subquery);
-            //throw new RuntimeException("Operation not implemented!");
-            //return cb.isNotNull(root.get("id"));
         } else if (operation.equals(ComparisonOperations.EQUALS)) {
             return cb.equal(root.get(criteria.getKey()), criteria.getValue());
         } else if (operation.equals(ComparisonOperations.IN)) {
