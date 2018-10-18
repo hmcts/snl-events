@@ -23,8 +23,8 @@ public class ViewSessionResponse {
         this.id = session.getId();
         this.start = session.getStart();
         this.duration = session.getDuration().toMinutes();
-        this.roomName = session.getRoom().getName();
-        this.judgeName = session.getPerson().getName();
+        this.roomName = session.getRoom() != null ? session.getRoom().getName() : null;
+        this.judgeName = session.getPerson() != null ? session.getPerson().getName() : null;
         this.sessionType = session.getSessionType().getDescription();
     }
 }
