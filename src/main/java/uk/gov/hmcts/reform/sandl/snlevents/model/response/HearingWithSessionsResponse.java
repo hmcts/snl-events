@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +21,7 @@ public class HearingWithSessionsResponse {
     private String caseTitle;
     private String caseType;
     private String hearingType;
-    private Long duration;
+    private Duration duration;
     private OffsetDateTime scheduleStart;
     private OffsetDateTime scheduleEnd;
     private String priority;
@@ -34,7 +35,7 @@ public class HearingWithSessionsResponse {
         this.caseTitle = hearing.getCaseTitle();
         this.caseType = hearing.getCaseType().getDescription();
         this.hearingType = hearing.getHearingType().getDescription();
-        this.duration = hearing.getDuration().getSeconds();
+        this.duration = hearing.getDuration();
         this.scheduleStart = hearing.getScheduleStart();
         this.scheduleEnd = hearing.getScheduleEnd();
         this.priority = hearing.getPriority().toString();
