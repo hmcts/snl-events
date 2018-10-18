@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,23 +13,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.search.ComparisonOperations;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.search.HearingSpecification;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.search.HearingSpecificationBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.search.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
-import javax.persistence.EntityManager;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -43,10 +35,10 @@ public class HearingController {
     private HearingRepository hearingRepository;
 
     @Autowired
-    private EntityManager entityManager;
+    private HearingPartService hearingPartService;
 
     @Autowired
-    private HearingPartService hearingPartService;
+    private HearingService hearingService;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
@@ -71,17 +63,8 @@ public class HearingController {
         @RequestParam(value = "size", required = false) Optional<Integer> size,
         @RequestBody(required = false) List<SearchCriteria> searchCriteriaList) {
         PageRequest pageRequest =
-            (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : null;
+            (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : new PageRequest(1, 10);
 
-        if (isListed.isPresent()) {
-            // return hearingPartService.getAllHearingPartsThat(isListed.get(), hearingSearchCriteria, pageRequest);
-        }
-
-        Specification<Hearing> specification = new HearingSpecificationBuilder(entityManager).of(searchCriteriaList).build();
-
-        return hearingRepository.findAll(specification)
-            .stream()
-            .map(HearingInfo::new)
-            .collect(Collectors.toList());
+        return hearingService.search(searchCriteriaList, pageRequest);
     }
 }
