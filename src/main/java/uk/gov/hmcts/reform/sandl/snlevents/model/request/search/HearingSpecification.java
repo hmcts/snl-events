@@ -34,9 +34,10 @@ public class HearingSpecification implements Specification<Hearing> {
 //            subquery.select(hpRoot.get(HearingPart_.hearingId).get(Hearing_.id)) //TODO: FIX
 //                .where(cb.isNotNull(hpRoot.get("sessionId")));
 //            return cb.exists(subquery);
-            throw new RuntimeException("Operation not implemented!");
+            //throw new RuntimeException("Operation not implemented!");
+            return cb.isNotNull(root.get("id"));
         } else {
-            throw new RuntimeException("Operation not implemented!");
+            return cb.isNotNull(root.get("id"));
         }
     }
 
@@ -60,5 +61,4 @@ public class HearingSpecification implements Specification<Hearing> {
             return criteria.getValue();
         }
     }
-
 }
