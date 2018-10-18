@@ -2,10 +2,12 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.EntityManager;
 
 public class HearingSpecificationBuilder {
@@ -36,7 +38,7 @@ public class HearingSpecificationBuilder {
 
         List<Specification<Hearing>> specs = new ArrayList<>();
         for (SearchCriteria param : searchCriteriaList) {
-            specs.add(new HearingSpecification(param));
+            specs.add(getSpecification(param));
         }
 
         Specification<Hearing> result = specs.get(0);
@@ -45,5 +47,43 @@ public class HearingSpecificationBuilder {
         }
 
         return result;
+    }
+
+    private Specification<Hearing> getSpecification(SearchCriteria criteria) {
+        ComparisonOperations operation = criteria.getOperation();
+        if (criteria.getKey().equals("listingStatus")
+            && operation.equals(ComparisonOperations.EQUALS)) {
+            return HearingSpecifications.isListed(criteria.getValue().toString().equals("listed"));
+        } else if (operation.equals(ComparisonOperations.EQUALS)) {
+            return SearchCriteriaSpecifications.equals(criteria.getKey(), criteria.getValue());
+        } else if (operation.equals(ComparisonOperations.IN)) {
+            return SearchCriteriaSpecifications.in(criteria.getKey(), getArrayValues(criteria.getKey(),
+                (List<String>) criteria.getValue()));
+        } else if (operation.equals(ComparisonOperations.LIKE)) {
+            return SearchCriteriaSpecifications.like(criteria.getKey(), criteria.getValue());
+        } else {
+            throw new IllegalArgumentException("Hearing SearchCriteria keys or values not supported");
+        }
+    }
+
+
+    private Object getArrayValues(String criteriaKey, List<String> criteriaValue) {
+        if (criteriaKey.equals("reservedJudgeId")) {
+            List<String> values = (criteriaValue);
+            List<UUID> toReturn = new ArrayList<>();
+            for (String value : values) {
+                toReturn.add(UUID.fromString(value));
+            }
+            return toReturn;
+        } else if (criteriaKey.equals("caseType")) {
+            List<String> values = ((List<String>)criteriaValue);
+            List<CaseType> toReturn = new ArrayList<>();
+            for (String value : values) {
+                toReturn.add(new CaseType(value, ""));
+            }
+            return toReturn;
+        } else {
+            return criteriaValue;
+        }
     }
 }
