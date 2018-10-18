@@ -1,5 +1,4 @@
 variable "product" {
-  type        = "string"
   default     = "snl"
   description = "Scheduling and Listing "
 }
@@ -9,18 +8,15 @@ variable "raw_product" {
 }
 
 variable "component" {
-  type        = "string"
   default     = "events"
   description = "Scheduling and Listing "
 }
 
 variable "deployment_namespace" {
-  type        = "string"
   default     = ""
 }
 
 variable "location" {
-  type    = "string"
   default = "UK South"
 }
 
@@ -41,9 +37,6 @@ variable "jenkins_AAD_objectId" {
   description                 = "(Required) The Azure AD object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies."
 }
 
-variable "external_host_name" {
-  default = "snl-events.reform.hmcts.net"
-}
 variable "subscription" {}
 
 variable "appinsights_instrumentation_key" {
@@ -65,13 +58,11 @@ variable "product_group_object_id" {
 }
 
 variable "db_user" {
-  type        = "string"
   default     = "snlevents"
   description = "Database user name"
 }
 
 variable "db_name" {
-  type        = "string"
   default     = "snleventsdb"
   description = "Database name"
 }

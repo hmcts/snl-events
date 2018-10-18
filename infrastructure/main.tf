@@ -6,16 +6,16 @@ locals {
   envInUse = "${(var.env == "preview" || var.env == "spreview") ? "aat" : var.env}"
   shortEnv = "${(var.env == "preview" || var.env == "spreview") ? var.deployment_namespace : var.env}"
 
+  product = "${var.env == "preview" || var.env == "spreview" ? var.raw_product : var.product}"
   aat_rules_url = "http://${var.raw_product}-rules-aat-vm.service.core-compute-aat.internal"
   local_rules_url = "http://${var.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   rules_url = "${var.env == "preview" || var.env == "spreview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
-  sharedResourcesProduct = "${var.env == "preview" || var.env == "spreview" ? var.raw_product : var.product}"
-  vaultName = "${local.sharedResourcesProduct}-${local.envInUse}"
-  sharedResourceGroup = "${local.sharedResourcesProduct}-shared-infrastructure-${local.envInUse}"
-  sharedAspName = "${local.sharedResourcesProduct}-${local.envInUse}"
-  sharedAspRg = "${local.sharedResourcesProduct}-shared-infrastructure-${local.envInUse}"
+  vaultName = "${local.product}-${local.envInUse}"
+  sharedResourceGroup = "${local.product}-shared-infrastructure-${local.envInUse}"
+  sharedAspName = "${local.product}-${local.envInUse}"
+  sharedAspRg = "${local.product}-shared-infrastructure-${local.envInUse}"
   asp_name = "${(var.env == "preview" || var.env == "spreview") ? "null" : local.sharedAspName}"
   asp_rg = "${(var.env == "preview" || var.env == "spreview") ? "null" : local.sharedAspRg}"
 }
@@ -37,7 +37,7 @@ module "snl-events" {
   ilbIp                = "${var.ilbIp}"
   is_frontend          = false
   subscription         = "${var.subscription}"
-  additional_host_name = "${var.external_host_name}"
+  additional_host_name = "${local.product}-${var.env}.snl-events.reform.hmcts.net"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   asp_rg               = "${local.asp_rg}"
   asp_name             = "${local.asp_name}"
@@ -73,7 +73,7 @@ module "postgres-snl-events" {
 # region save DB details to Azure Key Vault
 module "snl-vault" {
   source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
-  name = "${local.sharedResourcesProduct}-${var.component}-${local.shortEnv}"
+  name = "${local.product}-${var.component}-${local.shortEnv}"
   product = "${var.product}"
   env = "${var.env}"
   tenant_id = "${var.tenant_id}"
