@@ -63,7 +63,7 @@ public class HearingController {
         @RequestParam(value = "size", required = false) Optional<Integer> size,
         @RequestBody(required = false) List<SearchCriteria> searchCriteriaList) {
         PageRequest pageRequest =
-            (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : new PageRequest(1, 10);
+            (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : new PageRequest(0, 10);
 
         return hearingService.search(searchCriteriaList, pageRequest);
     }

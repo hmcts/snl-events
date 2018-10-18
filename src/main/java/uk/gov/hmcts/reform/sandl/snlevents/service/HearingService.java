@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -23,13 +24,11 @@ public class HearingService {
     @Autowired
     private EntityManager entityManager;
 
-    public Iterable<HearingInfo> search(List<SearchCriteria> searchCriteriaList, PageRequest pageRequest) {
+    public Iterable<HearingInfo> search(List<SearchCriteria> searchCriteriaList, Pageable pegable) {
 
         Specification<Hearing> specification = new HearingSpecificationBuilder(entityManager).of(searchCriteriaList).build();
 
-        return hearingRepository.findAll(specification)
-            .stream()
-            .map(HearingInfo::new)
-            .collect(Collectors.toList());
+        return hearingRepository.findAll(specification, pegable)
+            .map(HearingInfo::new);
     }
 }
