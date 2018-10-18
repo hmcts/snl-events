@@ -2,12 +2,15 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.persistence.EntityManager;
 
 public class HearingSpecificationBuilder {
@@ -66,24 +69,28 @@ public class HearingSpecificationBuilder {
         }
     }
 
-
     private Object getArrayValues(String criteriaKey, List<String> criteriaValue) {
         if (criteriaKey.equals("reservedJudgeId")) {
-            List<String> values = (criteriaValue);
-            List<UUID> toReturn = new ArrayList<>();
-            for (String value : values) {
-                toReturn.add(UUID.fromString(value));
-            }
-            return toReturn;
+            return mapToObjectList(UUID::fromString, criteriaValue);
         } else if (criteriaKey.equals("caseType")) {
-            List<String> values = ((List<String>)criteriaValue);
-            List<CaseType> toReturn = new ArrayList<>();
-            for (String value : values) {
-                toReturn.add(new CaseType(value, ""));
-            }
-            return toReturn;
+            return mapToObjectList(value -> new CaseType(value, ""), criteriaValue);
+        } else if (criteriaKey.equals("hearingType")) {
+            return mapToObjectList(value -> new HearingType(value, ""), criteriaValue);
+        } else if (criteriaKey.equals("priority")) {
+            return mapToObjectList(Priority::valueOf, criteriaValue);
+        } else if (criteriaKey.equals("communicationFacilitator")) {
+            return mapToObjectList(value -> value, criteriaValue);
         } else {
             return criteriaValue;
         }
     }
+
+    private <T> List mapToObjectList(Function<String, T> operation, List<String> criteria) {
+        List<T> toReturn = new ArrayList<>();
+        for (String value : criteria) {
+            toReturn.add(operation.apply(value));
+        }
+        return toReturn;
+    }
+
 }
