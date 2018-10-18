@@ -1,23 +1,20 @@
-package uk.gov.hmcts.reform.sandl.snlevents.model.request.search;
+package uk.gov.hmcts.reform.sandl.snlevents.model.specifications;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart_;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing_;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 @AllArgsConstructor
 public class HearingSpecification implements Specification<Hearing> {

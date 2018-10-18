@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.model.request.search;
+package uk.gov.hmcts.reform.sandl.snlevents.model.specifications;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,6 +13,4 @@ public enum ComparisonOperations {
     @JsonProperty("like")
     LIKE,
 
-    @JsonProperty("listingStatus")
-    LISTING_STATUS
 }

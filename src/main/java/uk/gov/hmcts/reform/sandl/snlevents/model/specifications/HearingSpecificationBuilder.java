@@ -1,12 +1,12 @@
-package uk.gov.hmcts.reform.sandl.snlevents.model.request.search;
+package uk.gov.hmcts.reform.sandl.snlevents.model.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 
 public class HearingSpecificationBuilder {
 
