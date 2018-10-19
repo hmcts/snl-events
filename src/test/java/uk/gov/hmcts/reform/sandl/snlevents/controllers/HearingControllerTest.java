@@ -13,16 +13,19 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc(secure = false)
 public class HearingControllerTest {
     public static final String URL = "/hearing";
-    private static final UUID UUID = java.util.UUID.fromString("f9a3867b-0d15-419d-bd98-40d247139131");
+    private static final UUID ID = java.util.UUID.fromString("f9a3867b-0d15-419d-bd98-40d247139131");
 
     @Autowired
     private EventsMockMvc mvc;
@@ -50,7 +53,7 @@ public class HearingControllerTest {
 
     @Test
     public void getHearingById_shouldReturnProperHearing() throws Exception {
-        val uuid = UUID.randomUUID();
+        val uuid = ID.randomUUID();
         val hearing = createHearing();
         hearing.setId(uuid);
         when(hearingRepository.findOne(uuid)).thenReturn(hearing);
@@ -63,10 +66,10 @@ public class HearingControllerTest {
     public void assignHearingToSession_shouldReturnUserTransaction() throws Exception {
         val ut = createUserTransaction();
 
-        when(hearingPartService.assignHearingToSessionWithTransaction(UUID, createAssignment()))
+        when(hearingPartService.assignHearingToSessionWithTransaction(ID, createAssignment()))
             .thenReturn(ut);
 
-        val response = mvc.callAndMapResponse(put(URL + "/" + UUID), createAssignment(),
+        val response = mvc.callAndMapResponse(put(URL + "/" + ID), createAssignment(),
             UserTransaction.class);
 
         assertThat(response).isEqualTo(ut);
@@ -74,7 +77,7 @@ public class HearingControllerTest {
 
     private UserTransaction createUserTransaction() {
         var ut = new UserTransaction();
-        ut.setId(UUID.randomUUID());
+        ut.setId(ID.randomUUID());
 
         return ut;
     }
@@ -89,6 +92,26 @@ public class HearingControllerTest {
         Hearing h = new Hearing();
         h.setHearingType(new HearingType("code", "desc"));
         h.setCaseType(new CaseType("code", "desc"));
+        h.setPriority(Priority.High);
         return h;
+    }
+
+    @Test
+    public void getHearingByIdWithSessionsReturnsHearingWithSessions() throws Exception {
+        val hearing = createHearing();
+        hearing.setId(ID);
+
+        when(hearingRepository.findOne(ID)).thenReturn(hearing);
+
+        val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
+
+        val expectedResponse = new HearingWithSessionsResponse();
+        expectedResponse.setId(ID);
+        expectedResponse.setPriority(Priority.High.toString());
+        expectedResponse.setCaseType("desc");
+        expectedResponse.setHearingType("desc");
+        expectedResponse.setSessions(Collections.emptyList());
+
+        assertThat(response).isEqualTo(expectedResponse);
     }
 }

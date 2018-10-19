@@ -40,7 +40,7 @@ public class HearingWithSessionsResponse {
         this.scheduleEnd = hearing.getScheduleEnd();
         this.priority = hearing.getPriority().toString();
         this.communicationFacilitator = hearing.getCommunicationFacilitator();
-        this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : "";
+        this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
             .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
