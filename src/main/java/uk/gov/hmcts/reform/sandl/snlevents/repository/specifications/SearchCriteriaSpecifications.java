@@ -14,7 +14,7 @@ public class SearchCriteriaSpecifications {
         };
     }
 
-    public static Specification<Hearing> in(String criteriaKey, Object values) {
+    public static Specification<Hearing> in(String criteriaKey, Object...values) {
         return (root, query, cb) -> {
             return root.get(criteriaKey).in(values);
         };
