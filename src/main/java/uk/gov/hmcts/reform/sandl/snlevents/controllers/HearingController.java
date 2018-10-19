@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,8 +59,7 @@ public class HearingController {
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Iterable<HearingSearchResponse> searchHearings(
-        @RequestParam("isListed") Optional<Boolean> isListed,
+    public List<HearingSearchResponse> searchHearings(
         @RequestParam(value = "page", required = false) Optional<Integer> page,
         @RequestParam(value = "size", required = false) Optional<Integer> size,
         @RequestBody(required = false) List<SearchCriteria> searchCriteriaList) {
