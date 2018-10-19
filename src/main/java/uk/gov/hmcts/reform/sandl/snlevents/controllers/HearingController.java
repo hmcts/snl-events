@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -57,7 +58,7 @@ public class HearingController {
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Iterable<HearingInfo> searchHearings(
+    public Iterable<HearingSearchResponse> searchHearings(
         @RequestParam("isListed") Optional<Boolean> isListed,
         @RequestParam(value = "page", required = false) Optional<Integer> page,
         @RequestParam(value = "size", required = false) Optional<Integer> size,
