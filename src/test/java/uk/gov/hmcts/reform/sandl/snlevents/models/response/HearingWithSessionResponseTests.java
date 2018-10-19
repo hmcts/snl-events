@@ -22,21 +22,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 public class HearingWithSessionResponseTests {
 
-    private static final UUID ID =UUID.randomUUID();
+    private static final UUID ID = UUID.randomUUID();
     private static final String CASE_NUMBER = "case-number";
     private static final String CASE_TITLE = "case-title";
     private static final String HEARING_TYPE_DESCRIPTION = "ht-description";
     private static final String CASE_TYPE_DESCRIPTION = "ct-description";
     private static final Duration DURATION = Duration.ofMinutes(10);
-    private static final OffsetDateTime SCHEDULE_START = OffsetDateTime.of(1,1,1,1,1,1,1,ZoneOffset.UTC);
-    private static final OffsetDateTime SCHEDULE_END = OffsetDateTime.of(2,2,2,2,2,2,2,ZoneOffset.UTC);
+    private static final OffsetDateTime SCHEDULE_START = OffsetDateTime.of(1, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+    private static final OffsetDateTime SCHEDULE_END = OffsetDateTime.of(2, 2, 2, 2, 2, 2, 2, ZoneOffset.UTC);
     private static final Priority PRIORITY = Priority.High;
     private static final String COMMUNICATION_FACILITATOR = "communication-facilitator";
     private static final String JUDGE_NAME = "judge-name";
 
     @Test
-    public void hearingWithSessionResponseMapsHearingFromDb()
-    {
+    public void hearingWithSessionResponseMapsHearingFromDb() {
         val hearing = createHearing();
 
         val expectedResponse = createExpectedResponse();

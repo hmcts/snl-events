@@ -70,7 +70,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
 
-        if(updateListingRequest.getReservedJudgeId() != null) {
+        if (updateListingRequest.getReservedJudgeId() != null) {
             hearing.setReservedJudge(
                 this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
             );
@@ -127,6 +127,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {updateListingRequest.getId()};
+        return new UUID[]{updateListingRequest.getId()};
     }
 }

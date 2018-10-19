@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 
-import javax.persistence.EntityManager;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 @Component
 public class HearingMapper {
@@ -41,7 +41,7 @@ public class HearingMapper {
         hearing.setCommunicationFacilitator(createHearingRequest.getCommunicationFacilitator());
         hearing.setPriority(createHearingRequest.getPriority());
 
-        if(createHearingRequest.getReservedJudgeId() != null) {
+        if (createHearingRequest.getReservedJudgeId() != null) {
             hearing.setReservedJudge(
                 entityManager.getReference(Person.class, createHearingRequest.getReservedJudgeId())
             );

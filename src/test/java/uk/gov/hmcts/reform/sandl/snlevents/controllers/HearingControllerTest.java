@@ -58,7 +58,8 @@ public class HearingControllerTest {
         hearing.setId(uuid);
         when(hearingRepository.findOne(uuid)).thenReturn(hearing);
 
-        val response = mvc.getAndMapResponse(URL + "/" + uuid, new TypeReference<HearingInfo>() {});
+        val response = mvc.getAndMapResponse(URL + "/" + uuid, new TypeReference<HearingInfo>() {
+        });
         assertThat(response.getId()).isEqualTo(hearing.getId());
     }
 
@@ -103,8 +104,6 @@ public class HearingControllerTest {
 
         when(hearingRepository.findOne(ID)).thenReturn(hearing);
 
-        val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
-
         val expectedResponse = new HearingWithSessionsResponse();
         expectedResponse.setId(ID);
         expectedResponse.setPriority(Priority.High.toString());
@@ -112,6 +111,7 @@ public class HearingControllerTest {
         expectedResponse.setHearingType("desc");
         expectedResponse.setSessions(Collections.emptyList());
 
+        val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);
     }
 }
