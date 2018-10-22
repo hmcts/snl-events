@@ -1,10 +1,10 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repositories;
+package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.data.domain.PageRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -13,28 +13,28 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
-import uk.gov.hmcts.reform.sandl.snlevents.models.BaseIntegrationModelTest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.HearingSpecifications;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteriaSpecifications;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.ComparisonOperations;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteria;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class HearingRepositoryTests extends BaseIntegrationModelTest {
-
+public class HearingServiceTests extends BaseIntegrationTest {
     public static final String CASE_NUMBER_123 = "123";
     public static final String SMALL_CLAIMS = "small-claims";
     public static final String FAST_TRACK = "fast-track";
@@ -46,6 +46,9 @@ public class HearingRepositoryTests extends BaseIntegrationModelTest {
     private final CaseType smallClaims = new CaseType(SMALL_CLAIMS, "SC");
     private final CaseType fastTrack = new CaseType(FAST_TRACK, "FT");
     private final HearingType trial = new HearingType("trial", "Trial");
+
+    private final PageRequest firstPage = new PageRequest(0, 10);
+
     @Autowired
     HearingRepository hearingRepository;
     @Autowired
@@ -58,6 +61,9 @@ public class HearingRepositoryTests extends BaseIntegrationModelTest {
     CaseTypeRepository caseTypeRepository;
     @Autowired
     HearingTypeRepository hearingTypeRepository;
+
+    @Autowired
+    HearingService hearingService;
 
     @Before
     public void setup() {
@@ -98,9 +104,9 @@ public class HearingRepositoryTests extends BaseIntegrationModelTest {
         hearingPart2.setId(UUID.randomUUID());
         hearingPart2.setHearingId(hearing2.getId());
 
-        sessionRepository.save(session);
-        hearingRepository.save(hearing);
-        hearingRepository.save(hearing2);
+        sessionRepository.saveAndFlush(session);
+        hearingRepository.saveAndFlush(hearing);
+        hearingRepository.saveAndFlush(hearing2);
         hearingPartRepository.saveAndFlush(hearingPart);
         hearingPartRepository.saveAndFlush(hearingPart2);
     }
@@ -108,129 +114,125 @@ public class HearingRepositoryTests extends BaseIntegrationModelTest {
     @Test
     public void findAll_withSpecificationOnOperationEquals_shouldReturnOneResult_forAMatch() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(SearchCriteriaSpecifications.equals(CASE_NUMBER_FIELD, CASE_NUMBER_123));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria(CASE_NUMBER_FIELD, ComparisonOperations.EQUALS, CASE_NUMBER_123);
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(1);
-        assertThat(hearings.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_123);
+        assertThat(responseList.size()).isEqualTo(1);
+        assertThat(responseList.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_123);
     }
 
     @Test
     public void findAll_withSpecificationOnOperationEquals_shouldReturnEmpty_forNoMatch() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(SearchCriteriaSpecifications.equals(CASE_NUMBER_FIELD, "NO_MATCH_NUMBER"));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria(CASE_NUMBER_FIELD, ComparisonOperations.EQUALS, "NO_MATCH_NUMBER");
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(0);
+        assertThat(responseList.size()).isEqualTo(0);
     }
 
     @Test
     public void findAll_withSpecificationOnOperationLike_shouldReturnOneResult_forASingleMatch() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(SearchCriteriaSpecifications.like(CASE_TITLE_FIELD, CASE_NUMBER_123));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria(CASE_TITLE_FIELD, ComparisonOperations.EQUALS, CASE_NUMBER_123);
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(1);
-        assertThat(hearings.get(0).getCaseTitle()).isEqualTo("Title 123");
+        assertThat(responseList.size()).isEqualTo(1);
+        assertThat(responseList.get(0).getCaseTitle()).isEqualTo("Title 123");
     }
 
     @Test
     public void findAll_withSpecificationOnOperationLike_shouldReturnMultipleResult_forManyMatch() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(SearchCriteriaSpecifications.like(CASE_TITLE_FIELD, "Title"));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria(CASE_TITLE_FIELD, ComparisonOperations.LIKE, "Title");
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(2);
-        assertThat(hearings.get(0).getCaseTitle()).isEqualTo("Title 123");
-        assertThat(hearings.get(1).getCaseTitle()).isEqualTo("Title 222");
+        assertThat(responseList.size()).isEqualTo(2);
+        assertThat(responseList.get(0).getCaseTitle()).isEqualTo("Title 123");
+        assertThat(responseList.get(1).getCaseTitle()).isEqualTo("Title 222");
     }
 
     @Test
     public void findAll_withSpecificationOnOperationIn_shouldReturnMultipleResult_forManyMatch() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(SearchCriteriaSpecifications.in(CASE_TYPE_FIELD,
-            new CaseType[] {smallClaims, fastTrack})
-        );
-
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD, ComparisonOperations.IN, Arrays.asList(new String[] {SMALL_CLAIMS, FAST_TRACK}));
+        criteriaList.add(criteria);
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(2);
+        assertThat(responseList.size()).isEqualTo(2);
         // Update below when ordering is added
-//        assertThat(hearings.get(0).getCaseType().getCode()).isEqualTo(SMALL_CLAIMS);
-//        assertThat(hearings.get(1).getCaseType().getCode()).isEqualTo(FAST_TRACK);
+        //TODO
+        assertThat(responseList.get(0).getCaseTypeCode()).isEqualTo(SMALL_CLAIMS);
+        assertThat(responseList.get(1).getCaseTypeCode()).isEqualTo(FAST_TRACK);
     }
 
     @Test
     public void findAll_withSpecificationOnOperationIn_shouldReturnMultipleResult_forManyMatchIgnoringMissingOnes() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(SearchCriteriaSpecifications.in(CASE_TYPE_FIELD,
-            new CaseType[] {new CaseType("missing-in-db-code", ""), smallClaims, fastTrack})
-        );
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD, ComparisonOperations.IN, Arrays.asList(new String[] {"missing-in-db-code", SMALL_CLAIMS, FAST_TRACK}));
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(2);
+        assertThat(responseList.size()).isEqualTo(2);
         // Update below when ordering is added
-//        assertThat(hearings.get(0).getCaseType().getCode()).isEqualTo(SMALL_CLAIMS);
-//        assertThat(hearings.get(1).getCaseType().getCode()).isEqualTo(FAST_TRACK);
+        //TODO
+        assertThat(responseList.get(0).getCaseTypeCode()).isEqualTo(SMALL_CLAIMS);
+        assertThat(responseList.get(1).getCaseTypeCode()).isEqualTo(FAST_TRACK);
     }
 
     @Test
     public void findAll_withHearingSpecifications_isListedTrue_shouldReturnOneMatchingResult() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(HearingSpecifications.isListed(true));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria("listingStatus", ComparisonOperations.EQUALS, "listed");
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(1);
-        assertThat(hearings.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_123);
+        assertThat(responseList.size()).isEqualTo(1);
+        assertThat(responseList.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_123);
     }
 
     @Test
     public void findAll_withHearingSpecifications_isListedFalse_shouldReturnOneMatchingResult() {
         // Given
-        List<Specification<Hearing>> specs = new ArrayList<>();
-        specs.add(HearingSpecifications.isListed(false));
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria("listingStatus", ComparisonOperations.EQUALS, "unlisted");
+        criteriaList.add(criteria);
 
-        Specification<Hearing> specification = Specifications.where(specs.get(0));
         // When
-        final List<Hearing> hearings = hearingRepository.findAll(specification);
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(hearings.size()).isEqualTo(1);
-        assertThat(hearings.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
+        assertThat(responseList.size()).isEqualTo(1);
+        assertThat(responseList.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
     }
-
 }
