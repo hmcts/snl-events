@@ -29,6 +29,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -66,14 +67,21 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private OffsetDateTime scheduleEnd;
 
-    private UUID reservedJudgeId;
-
     private String communicationFacilitator;
 
     @Enumerated(EnumType.ORDINAL)
     private Priority priority;
 
     private boolean isDeleted;
+
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @JoinColumn(name = "reservedJudgeId")
+    private Person reservedJudge;
+
+    public UUID getReservedJudgeId() {
+        return this.reservedJudge != null ? this.reservedJudge.getId() : null;
+    }
 
     @CreatedDate
     @Column(updatable = false)

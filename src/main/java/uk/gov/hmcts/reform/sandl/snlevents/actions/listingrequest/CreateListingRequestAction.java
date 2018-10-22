@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 public class CreateListingRequestAction extends Action implements RulesProcessable {
@@ -29,17 +30,20 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected CaseTypeRepository caseTypeRepository;
     protected HearingMapper hearingMapper;
     protected HearingRepository hearingRepository;
+    private EntityManager entityManager;
 
     public CreateListingRequestAction(CreateHearingRequest createHearingRequest,
                                       HearingMapper hearingMapper,
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository,
-                                      HearingRepository hearingRepository) {
+                                      HearingRepository hearingRepository,
+                                      EntityManager entityManager) {
         this.createHearingRequest = createHearingRequest;
         this.hearingMapper = hearingMapper;
         this.hearingTypeRepository = hearingTypeRepository;
         this.caseTypeRepository = caseTypeRepository;
         this.hearingRepository = hearingRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -47,7 +51,12 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public void act() {
         hearingPart = hearingMapper.mapToHearingPart(createHearingRequest);
 
-        hearing = hearingMapper.mapToHearing(createHearingRequest, caseTypeRepository, hearingTypeRepository);
+        hearing = hearingMapper.mapToHearing(
+            createHearingRequest,
+            caseTypeRepository,
+            hearingTypeRepository,
+            entityManager
+        );
 
         hearing.addHearingPart(hearingPart);
 
