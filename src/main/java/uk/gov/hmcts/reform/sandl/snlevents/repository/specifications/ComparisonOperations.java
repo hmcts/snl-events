@@ -10,6 +10,9 @@ public enum ComparisonOperations {
     @JsonProperty("in")
     IN,
 
+    @JsonProperty("in or null")
+    IN_OR_NULL,
+
     @JsonProperty("like")
     LIKE,
 

@@ -117,6 +117,11 @@ public class HearingService {
             } else if (operation.equals(ComparisonOperations.IN)) {
                 pred = hearingRoot.get(criteria.getKey()).in(getArrayValues(criteria.getKey(),
                     (List<String>) criteria.getValue()));
+            } else if (operation.equals(ComparisonOperations.IN_OR_NULL)) {
+                pred = cb.or(
+                    hearingRoot.get(criteria.getKey()).in(getArrayValues(criteria.getKey(),
+                        (List<String>) criteria.getValue())),
+                    hearingRoot.get(criteria.getKey()).isNull());
 
             } else if (operation.equals(ComparisonOperations.LIKE)) {
                 pred = cb.like(hearingRoot.get(criteria.getKey()), "%" + criteria.getValue().toString() + "%");
