@@ -235,4 +235,17 @@ public class HearingServiceTests extends BaseIntegrationTest {
         assertThat(responseList.size()).isEqualTo(1);
         assertThat(responseList.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
     }
+
+    @Test
+    public void findAll_withEmptyCriteria_ShouldReturnAll() {
+        // Given
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+
+        // When
+        final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
+
+        // Then
+        assertThat(responseList.size()).isEqualTo(1);
+        assertThat(responseList.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
+    }
 }
