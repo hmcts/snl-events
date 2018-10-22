@@ -245,7 +245,6 @@ public class HearingServiceTests extends BaseIntegrationTest {
         final List<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
-        assertThat(responseList.size()).isEqualTo(1);
-        assertThat(responseList.get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
+        assertThat(responseList.size()).isEqualTo(2);
     }
 }
