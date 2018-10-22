@@ -38,27 +38,4 @@ public class HearingSearchResponse implements Serializable {
         return listedCount > 0;
     };
     private OffsetDateTime listingDate;
-
-
-//
-//    public HearingSearchResponse(Hearing hearing) {
-//        this.setId(hearing.getId());
-//        this.setCaseNumber(hearing.getCaseNumber());
-//        this.setCaseTitle(hearing.getCaseTitle());
-//        this.setCaseTypeCode(hearing.getCaseType().getCode());
-//        this.setHearingTypeCode(hearing.getHearingType().getCode());
-//        this.setDuration(hearing.getDuration());
-//        this.setScheduleStart(hearing.getScheduleStart());
-//        this.setScheduleEnd(hearing.getScheduleEnd());
-//        this.setPriority(hearing.getPriority());
-//        this.setReservedJudgeId(hearing.getReservedJudgeId());
-//        this.setReservedJudgeName("will be name here");//TODO
-//        this.setCommunicationFacilitator(hearing.getCommunicationFacilitator());
-//        this.setDeleted(hearing.isDeleted());
-//        this.setVersion(hearing.getVersion());
-//        this.setIsListed(true); //TODO
-//        this.setListingDate(OffsetDateTime.now()); //TODO
-//    }
-
-
 }

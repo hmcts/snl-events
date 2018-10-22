@@ -55,14 +55,8 @@ public class HearingService {
 //        EntityType<Person> Person_ = m.entity(Person.class);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        //CriteriaQuery<HearingSearchResponse> cq = cb.createQuery(HearingSearchResponse.class); //wrapper class
-        //"SELECT TaUser AS tu WHERE tu.userId = :USERID"
-
         CriteriaQuery<HearingSearchResponse> cq = cb.createQuery(HearingSearchResponse.class);
         Root<Hearing> hearingRoot = cq.from(Hearing.class); //root entity
-//        Join<Hearing, Person> judgeJoin = hearingRoot.join("person");
-//        judgeJoin.on(cb.equal(hearingRoot.get("reservedJudgeId"), judgeJoin.get("id")));
-        //cq.select(judgeJoin);
 
 
         //Subquery
@@ -133,10 +127,8 @@ public class HearingService {
             restrictions = cb.and(restrictions, pred);
         }
 
-        //restrictions = cb.and(restrictions, cb.equal(hearingRoot.get("caseNumber"), "Leszek"));
-        //TODO More vs specifications
         cq.where(restrictions);
-        //todo sort order
+        cq.orderBy(cb.asc(hearingRoot.get("caseNumber")), cb.asc(hearingRoot.get("createdAt")));
 
         List<Selection<?>> selections = new LinkedList<>();
         selections.add(hearingRoot.get(Hearing_.id));
@@ -157,27 +149,21 @@ public class HearingService {
         selections.add(sqSent.getSelection());
         selections.add(sqListing.getSelection());
 
-        //val y = entityManager.createQuery(cq.select(cb.construct(HearingSearchResponse.class, sqSent.getSelection()))).getResultList();
-        //val q = entityManager.createQuery(cq.select(cb.construct(HearingSearchResponse.class, sqSent.getSelection())));
+        // one page of results as per pageable
         TypedQuery<HearingSearchResponse> q = entityManager.createQuery(cq.multiselect(selections));
         q.setFirstResult(pageable.getOffset());
         q.setMaxResults(pageable.getPageSize());
 
-        //CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        // total possible results count for paging only
         CriteriaQuery<Long> cqLongCount = cb.createQuery(Long.class);
+        cqLongCount.where(restrictions);
         Root<Hearing> hearingRootCount = cqLongCount.from(Hearing.class);
         CriteriaQuery<Long> select = cqLongCount.select(cb.count(hearingRootCount));
-        select.where(restrictions);
         TypedQuery<Long> cqCount = entityManager.createQuery(select);
         Long qCount = cqCount.getSingleResult();
 
-        Page<HearingSearchResponse> page = new PageImpl<>(q.getResultList(), pageable, qCount);
-
-        return page;
-//        return hearingRepository.findAll(specification, pegable)
-//            .map(HearingSearchResponse::new);
-
-        //https://stackoverflow.com/questions/4662336/subquery-in-select-clause-with-jpa-criteria-api/39515119
+        // run it
+        return new PageImpl<>(q.getResultList(), pageable, qCount);
     }
 
     private Object getArrayValues(String criteriaKey, List<String> criteriaValue) {
