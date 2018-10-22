@@ -1,12 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -19,10 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.ComparisonOperations;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.HearingSpecificationBuilder;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.HearingSpecifications;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteria;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteriaSpecifications;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -34,14 +26,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 
 @Service
 public class HearingService {
