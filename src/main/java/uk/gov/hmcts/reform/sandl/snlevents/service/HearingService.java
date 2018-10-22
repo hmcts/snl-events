@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
@@ -40,7 +42,7 @@ public class HearingService {
     @Autowired
     private EntityManager entityManager;
 
-    public List<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
+    public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
 
 //        Specification<Hearing> specification = new HearingSpecificationBuilder(entityManager)
 //            .of(searchCriteriaList).build();
@@ -136,8 +138,6 @@ public class HearingService {
         cq.where(restrictions);
         //todo sort order
 
-
-
         List<Selection<?>> selections = new LinkedList<>();
         selections.add(hearingRoot.get(Hearing_.id));
         selections.add(hearingRoot.get("caseNumber"));
@@ -163,9 +163,17 @@ public class HearingService {
         q.setFirstResult(pageable.getOffset());
         q.setMaxResults(pageable.getPageSize());
 
-        //Page<HearingSearchResponse> page = new PageImpl<>(q.getResultList());
+        //CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cqLongCount = cb.createQuery(Long.class);
+        Root<Hearing> hearingRootCount = cqLongCount.from(Hearing.class);
+        CriteriaQuery<Long> select = cqLongCount.select(cb.count(hearingRootCount));
+        select.where(restrictions);
+        TypedQuery<Long> cqCount = entityManager.createQuery(select);
+        Long qCount = cqCount.getSingleResult();
 
-        return q.getResultList();
+        Page<HearingSearchResponse> page = new PageImpl<>(q.getResultList(), pageable, qCount);
+
+        return page;
 //        return hearingRepository.findAll(specification, pegable)
 //            .map(HearingSearchResponse::new);
 

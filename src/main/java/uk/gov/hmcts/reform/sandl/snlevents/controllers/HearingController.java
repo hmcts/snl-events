@@ -59,7 +59,7 @@ public class HearingController {
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<HearingSearchResponse> searchHearings(
+    public Page<HearingSearchResponse> searchHearings(
         @RequestParam(value = "page", required = false) Optional<Integer> page,
         @RequestParam(value = "size", required = false) Optional<Integer> size,
         @RequestBody(required = false) List<SearchCriteria> searchCriteriaList) {
