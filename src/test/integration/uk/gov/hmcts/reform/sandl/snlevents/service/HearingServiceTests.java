@@ -92,14 +92,13 @@ public class HearingServiceTests extends BaseIntegrationTest {
         hearing2.setCaseNumber(CASE_NUMBER_222);
         hearing2.setCaseTitle("Title 222");
         hearing2.setPriority(Priority.Low);
-        hearing2.setCaseType(smallClaims);
+        hearing2.setCaseType(fastTrack);
         hearing2.setHearingType(trial);
 
         final HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
         hearingPart.setSessionId(session.getId());
         hearingPart.setHearingId(hearing.getId());
-
 
         final HearingPart hearingPart2 = new HearingPart();
         hearingPart2.setId(UUID.randomUUID());
@@ -145,7 +144,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public void findAll_withSpecificationOnOperationLike_shouldReturnOneResult_forASingleMatch() {
         // Given
         List<SearchCriteria> criteriaList = new ArrayList<>();
-        SearchCriteria criteria = new SearchCriteria(CASE_TITLE_FIELD, ComparisonOperations.EQUALS, CASE_NUMBER_123);
+        SearchCriteria criteria = new SearchCriteria(CASE_NUMBER_FIELD, ComparisonOperations.EQUALS, CASE_NUMBER_123);
         criteriaList.add(criteria);
 
         // When
@@ -178,13 +177,12 @@ public class HearingServiceTests extends BaseIntegrationTest {
         List<SearchCriteria> criteriaList = new ArrayList<>();
         SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD, ComparisonOperations.IN, Arrays.asList(new String[] {SMALL_CLAIMS, FAST_TRACK}));
         criteriaList.add(criteria);
+
         // When
         final Page<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(2);
-        // Update below when ordering is added
-        //TODO
         assertThat(responseList.getContent().get(0).getCaseTypeCode()).isEqualTo(SMALL_CLAIMS);
         assertThat(responseList.getContent().get(1).getCaseTypeCode()).isEqualTo(FAST_TRACK);
     }
@@ -201,8 +199,6 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(2);
-        // Update below when ordering is added
-        //TODO
         assertThat(responseList.getContent().get(0).getCaseTypeCode()).isEqualTo(SMALL_CLAIMS);
         assertThat(responseList.getContent().get(1).getCaseTypeCode()).isEqualTo(FAST_TRACK);
     }
@@ -247,5 +243,20 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void findAll_withEmptyCriteria_2Pages() {
+        // Given
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        PageRequest pagable = new PageRequest(0, 1);
+
+        // When
+        final Page<HearingSearchResponse> responseList = hearingService.search(criteriaList, pagable);
+
+        // Then
+        assertThat(responseList.getTotalPages()).isEqualTo(2);
+        assertThat(responseList.getTotalElements()).isEqualTo(2);
+        assertThat(responseList.getContent().size()).isEqualTo(1);
     }
 }
