@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -45,6 +46,11 @@ public class HearingController {
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
         return new HearingInfo(hearingRepository.findOne(id));
+    }
+
+    @GetMapping(path = "/{id}/with-sessions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public HearingWithSessionsResponse getHearingByIdWithSessions(@PathVariable("id") UUID id) {
+        return new HearingWithSessionsResponse(hearingRepository.findOne(id));
     }
 
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)

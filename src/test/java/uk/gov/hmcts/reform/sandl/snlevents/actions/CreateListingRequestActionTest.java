@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -53,6 +54,9 @@ public class CreateListingRequestActionTest {
     @Mock
     private CaseTypeRepository caseTypeRepository;
 
+    @Mock
+    private EntityManager entityManager;
+
     @Spy
     private HearingMapper hearingMapper;
 
@@ -67,7 +71,8 @@ public class CreateListingRequestActionTest {
             hearingMapper,
             hearingTypeRepository,
             caseTypeRepository,
-            hearingRepository
+            hearingRepository,
+            entityManager
         );
         this.hearingPart = createHearingPart();
 
@@ -87,7 +92,7 @@ public class CreateListingRequestActionTest {
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
         UUID[] ids = action.getAssociatedEntitiesIds();
 
-        assertThat(ids).isEqualTo(new UUID[] {createUuid(HEARING_ID)});
+        assertThat(ids).isEqualTo(new UUID[]{createUuid(HEARING_ID)});
     }
 
     @Test
