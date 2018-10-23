@@ -63,7 +63,7 @@ public class HearingService {
         Subquery<String> sqPerson = cq.subquery(String.class);
         Root<Person> sqPersonNU = sqPerson.from(Person.class);
         sqPerson.where(
-            cb.equal(sqPersonNU.get("id"), hearingRoot.get("reservedJudgeId"))  //join subquery with main query
+            cb.equal(sqPersonNU.get("id"), hearingRoot)  //join subquery with main query
         );
         sqPerson.select(cb.greatest(sqPersonNU.<String>get("name")));
 
@@ -141,7 +141,7 @@ public class HearingService {
         selections.add(hearingRoot.get("duration"));
         selections.add(hearingRoot.get("scheduleStart"));
         selections.add(hearingRoot.get("scheduleEnd"));
-        selections.add(hearingRoot.get("reservedJudgeId"));
+        selections.add(hearingRoot.get("reservedJudge").get("id"));
         selections.add(sqPerson.getSelection());
         selections.add(hearingRoot.get("communicationFacilitator"));
         selections.add(hearingRoot.get("priority"));
