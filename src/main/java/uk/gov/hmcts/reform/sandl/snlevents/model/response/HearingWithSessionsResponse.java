@@ -45,9 +45,9 @@ public class HearingWithSessionsResponse {
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
-            .sorted(comparing(hearingPart -> hearingPart.getSession().getStart()))
-            .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
-            .filter(Objects::nonNull)
+            .filter(h -> h.getSession() != null)
+            .map(h -> new ViewSessionResponse(h.getSession()))
+            .sorted(comparing(sessionResponse -> sessionResponse.getStart()))
             .collect(Collectors.toList());
     }
 }
