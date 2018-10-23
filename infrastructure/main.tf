@@ -7,8 +7,8 @@ locals {
   shortEnv = "${(var.env == "preview" || var.env == "spreview") ? var.deployment_namespace : var.env}"
 
   product = "${var.env == "preview" || var.env == "spreview" ? var.raw_product : var.product}"
-  aat_rules_url = "http://${var.raw_product}-rules-aat-vm.service.core-compute-aat.internal"
-  local_rules_url = "http://${var.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+  aat_rules_url = "http://${local.product}-rules-aat-vm.service.core-compute-aat.internal"
+  local_rules_url = "http://${local.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   rules_url = "${var.env == "preview" || var.env == "spreview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
@@ -37,7 +37,7 @@ module "snl-events" {
   ilbIp                = "${var.ilbIp}"
   is_frontend          = false
   subscription         = "${var.subscription}"
-  additional_host_name = "${local.product}-${var.env}.snl-events.reform.hmcts.net"
+  additional_host_name = "${var.external_host_name}"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   asp_rg               = "${local.asp_rg}"
   asp_name             = "${local.asp_name}"
