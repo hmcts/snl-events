@@ -44,7 +44,7 @@ public class HearingMapperTests {
     }
 
     @Test
-    public void mapToHearingParts_fromCreateHearingPartRequestWithZeroSessionToCreate_shouldReturnObjectWithoutHearingParts() {
+    public void mapToHearingParts_withZeroSessionToCreate_shouldReturnObjectWithoutHearingParts() {
         val chpr = new CreateHearingRequest();
         chpr.setId(ID);
         chpr.setNumberOfSessions(0);

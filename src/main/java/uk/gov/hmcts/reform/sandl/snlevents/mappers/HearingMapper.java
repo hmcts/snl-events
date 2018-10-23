@@ -19,10 +19,10 @@ import javax.persistence.EntityManager;
 public class HearingMapper {
 
     public List<HearingPart> mapToHearingParts(CreateHearingRequest createHearingRequest) {
-// TODO: Think if this is needed, or BeanValidation is sufficient
-//        if (createHearingRequest.getNumberOfSessions() == 0) {
-//            throw new RuntimeException("New Hearing Should have NumberOfSession > 0");
-//        }
+        //TODO: Think if this is needed, or BeanValidation is sufficient
+        //if (createHearingRequest.getNumberOfSessions() == 0) {
+        //throw new RuntimeException("New Hearing Should have NumberOfSession > 0");
+        //}
         List<HearingPart> parts = new ArrayList<>();
         for (int i = 0; i < createHearingRequest.getNumberOfSessions(); i++) {
             HearingPart hearingPart = new HearingPart();
