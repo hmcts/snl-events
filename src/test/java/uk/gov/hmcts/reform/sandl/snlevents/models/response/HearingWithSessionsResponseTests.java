@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.linesOf;
 
 @RunWith(SpringRunner.class)
 public class HearingWithSessionsResponseTests {
@@ -65,9 +64,9 @@ public class HearingWithSessionsResponseTests {
         val response = new HearingWithSessionsResponse(hearing);
 
         // assert correct order of sessions
-        assert(response.getSessions().get(0).getStart().getDayOfMonth() == 1);
-        assert(response.getSessions().get(2).getStart().getDayOfMonth() == 3);
-        assert(response.getSessions().get(1).getStart().getDayOfMonth() == 2);
+        assertThat(response.getSessions().get(0).getStart().getDayOfMonth()).isEqualTo(1);
+        assertThat(response.getSessions().get(1).getStart().getDayOfMonth()).isEqualTo(2);
+        assertThat(response.getSessions().get(2).getStart().getDayOfMonth()).isEqualTo(3);
     }
 
     private HearingPart createHearingPartWithSession(int day) {
