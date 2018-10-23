@@ -43,6 +43,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public static final String CASE_TITLE_FIELD = "caseTitle";
     public static final String CASE_NUMBER_FIELD = "caseNumber";
     public static final String CASE_NUMBER_222 = "222";
+    public static final String JUDGE_ID = "1143b1ea-1813-4acc-8b08-f37d1db59492";
 
     private final CaseType smallClaims = new CaseType(SMALL_CLAIMS, "SC");
     private final CaseType fastTrack = new CaseType(FAST_TRACK, "FT");
@@ -75,7 +76,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
         session.setDuration(Duration.ofHours(1));
         session.setStart(OffsetDateTime.now());
 
-        final Person judgeLinda = personRepository.getOne(UUID.fromString("1143b1ea-1813-4acc-8b08-f37d1db59492"));
+        final Person judgeLinda = personRepository.getOne(UUID.fromString(JUDGE_ID));
 
         final Hearing hearing = new Hearing();
         hearing.setId(UUID.randomUUID());
@@ -236,6 +237,23 @@ public class HearingServiceTests extends BaseIntegrationTest {
     }
 
     @Test
+    public void findAll_withHearingSpecifications_JudgeId_shouldReturnOneMatchingResult() {
+        // Given
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+        SearchCriteria criteria = new SearchCriteria("reservedJudge.id",
+            ComparisonOperations.IN_OR_NULL, Arrays.asList(new String[] { JUDGE_ID }));
+        criteriaList.add(criteria);
+
+        // When
+        final Page<HearingSearchResponse> responseList = hearingService.search(criteriaList, firstPage);
+
+        // Then
+        assertThat(responseList.getContent().size()).isEqualTo(2);
+        assertThat(responseList.getContent().get(0).getReservedJudgeId().toString()).isEqualTo(JUDGE_ID);
+        assertThat(responseList.getContent().get(1).getReservedJudgeId()).isNull();
+    }
+
+    @Test
     public void findAll_withEmptyCriteria_ShouldReturnAll() {
         // Given
         List<SearchCriteria> criteriaList = new ArrayList<>();
@@ -262,3 +280,5 @@ public class HearingServiceTests extends BaseIntegrationTest {
         assertThat(responseList.getContent().size()).isEqualTo(1);
     }
 }
+
+

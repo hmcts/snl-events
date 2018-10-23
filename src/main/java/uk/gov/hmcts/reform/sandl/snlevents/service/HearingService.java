@@ -28,6 +28,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
@@ -111,13 +112,27 @@ public class HearingService {
             } else if (operation.equals(ComparisonOperations.EQUALS)) {
                 pred =  cb.equal(hearingRoot.get(criteria.getKey()), criteria.getValue());
             } else if (operation.equals(ComparisonOperations.IN)) {
-                pred = hearingRoot.get(criteria.getKey()).in(getArrayValues(criteria.getKey(),
+                String key = criteria.getKey();
+                Path<Object> rootKey = null;
+                if (key.contains(".")) {
+                    rootKey = hearingRoot.get(key.split("\\.") [0]).get(key.split("\\.") [1]);
+                } else {
+                    rootKey = hearingRoot.get(key);
+                }
+                pred = rootKey.in(getArrayValues(key,
                     (List<String>) criteria.getValue()));
             } else if (operation.equals(ComparisonOperations.IN_OR_NULL)) {
+                String key = criteria.getKey();
+                Path<Object> rootKey = null;
+                if (key.contains(".")) {
+                    rootKey = hearingRoot.get(key.split("\\.") [0]).get(key.split("\\.") [1]);
+                } else {
+                    rootKey = hearingRoot.get(key);
+                }
                 pred = cb.or(
-                    hearingRoot.get(criteria.getKey()).in(getArrayValues(criteria.getKey(),
+                    rootKey.in(getArrayValues(key,
                         (List<String>) criteria.getValue())),
-                    hearingRoot.get(criteria.getKey()).isNull());
+                    rootKey.isNull());
 
             } else if (operation.equals(ComparisonOperations.LIKE)) {
                 pred = cb.like(hearingRoot.get(criteria.getKey()), "%" + criteria.getValue().toString() + "%");
@@ -167,7 +182,7 @@ public class HearingService {
     }
 
     private Object getArrayValues(String criteriaKey, List<String> criteriaValue) {
-        if (criteriaKey.equals("reservedJudgeId")) {
+        if (criteriaKey.equals("reservedJudge.id")) {
             return mapToObjectList(UUID::fromString, criteriaValue);
         } else if (criteriaKey.equals("caseType")) {
             return mapToObjectList(value -> new CaseType(value, ""), criteriaValue);
