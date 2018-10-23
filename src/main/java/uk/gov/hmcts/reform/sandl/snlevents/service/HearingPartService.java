@@ -149,7 +149,7 @@ public class HearingPartService {
                                                                  HearingSessionRelationship assignment)
                                                                         throws IOException {
         Hearing hearing = hearingRepository.findOne(hearingId);
-        Session targetSession = sessionRepository.findOne(assignment.getSessionId());
+        Session targetSession = sessionRepository.findOne(assignment.getSessionsData().get(0).getSessionId());
 
         return targetSession == null || areTransactionsInProgress(hearing, assignment)
                 ? userTransactionService.transactionConflicted(assignment.getUserTransactionId())
@@ -185,7 +185,7 @@ public class HearingPartService {
         return userTransactionService.isAnyBeingTransacted(hearing.getId(),
                 hearing.getHearingParts().get(0).getId(),
                 hearing.getHearingParts().get(0).getSessionId(),
-                assignment.getSessionId());
+                assignment.getSessionsData().get(0).getSessionId());
     }
 
     private boolean areTransactionsInProgress(HearingPart hearingPart, HearingPartSessionRelationship assignment) {
