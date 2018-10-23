@@ -85,7 +85,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
         hearing.setCaseType(smallClaims);
         hearing.setHearingType(trial);
         hearing.setCommunicationFacilitator("Sign Language");
-        hearing.setReservedJudgeId(judgeLinda.getId());
+        hearing.setReservedJudge(judgeLinda);
 
         final Hearing hearing2 = new Hearing();
         hearing2.setId(UUID.randomUUID());
@@ -99,16 +99,18 @@ public class HearingServiceTests extends BaseIntegrationTest {
         hearingPart.setId(UUID.randomUUID());
         hearingPart.setSessionId(session.getId());
         hearingPart.setHearingId(hearing.getId());
+        session.addHearingPart(hearingPart);
 
         final HearingPart hearingPart2 = new HearingPart();
         hearingPart2.setId(UUID.randomUUID());
         hearingPart2.setHearingId(hearing2.getId());
 
+        hearing.addHearingPart(hearingPart);
+        hearing2.addHearingPart(hearingPart2);
+
         sessionRepository.saveAndFlush(session);
         hearingRepository.saveAndFlush(hearing);
         hearingRepository.saveAndFlush(hearing2);
-        hearingPartRepository.saveAndFlush(hearingPart);
-        hearingPartRepository.saveAndFlush(hearingPart2);
     }
 
     @Test

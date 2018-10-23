@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,8 @@ public class HearingSearchResponse implements Serializable {
     private String communicationFacilitator;
     private Priority priority;
     private Long version;
+
+    @JsonIgnore
     private Long listedCount;
     public Boolean getIsListed(){
         return listedCount > 0;
