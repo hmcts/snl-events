@@ -43,6 +43,7 @@ public class HearingWithSessionsResponse {
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
+            //TODO: filter for null should be before and then safely ViewSessionResponse::new
             .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());

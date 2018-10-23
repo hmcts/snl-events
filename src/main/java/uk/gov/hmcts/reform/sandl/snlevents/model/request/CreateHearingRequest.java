@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -40,6 +41,10 @@ public class CreateHearingRequest implements UserTransactional {
     @NotNull
     @MinDuration(minMinutes = 1)
     private Duration duration;
+
+    @NotNull
+    @Min(1)
+    private Integer numberOfSession;
 
     private OffsetDateTime scheduleStart;
 

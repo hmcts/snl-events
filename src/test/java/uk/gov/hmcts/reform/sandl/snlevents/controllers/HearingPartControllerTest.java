@@ -12,6 +12,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
@@ -149,6 +153,16 @@ public class HearingPartControllerTest {
     }
 
     @Test
+    public void createHearingPartAction_RequiresNumberOfSessionValue_toBeValid() throws Exception {
+        val hearingPart = createCreateHearingPart();
+        hearingPart.setNumberOfSession(0);
+        mvc.getMockMvc().perform(
+            put(URL + "/create").content(objectMapper.writeValueAsString(hearingPart))
+        ).andExpect(MockMvcResultMatchers.status().is4xxClientError());
+
+    }
+
+    @Test
     public void updateHearingPartAction_updateHearingPartAction() throws Exception {
         val ut = createUserTransaction();
         when(actionService.execute(any())).thenReturn(ut);
@@ -258,6 +272,7 @@ public class HearingPartControllerTest {
         chp.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         chp.setReservedJudgeId(RESERVED_JUDGE_ID);
         chp.setUserTransactionId(UUID.randomUUID());
+        chp.setNumberOfSession(1);
 
         return chp;
     }
@@ -277,6 +292,7 @@ public class HearingPartControllerTest {
         ulr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         ulr.setReservedJudgeId(RESERVED_JUDGE_ID);
         ulr.setUserTransactionId(UUID.randomUUID());
+        ulr.setNumberOfSession(1);
         ulr.setVersion(0L);
 
         return ulr;

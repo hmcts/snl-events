@@ -10,17 +10,27 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
 @Component
 public class HearingMapper {
-    public HearingPart mapToHearingPart(CreateHearingRequest createHearingRequest) {
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(UUID.randomUUID());
-        hearingPart.setHearingId(createHearingRequest.getId());
 
-        return hearingPart;
+    public List<HearingPart> mapToHearingParts(CreateHearingRequest createHearingRequest) {
+// Think if this is needed, or BeanValidation is sufficient
+//        if (createHearingRequest.getNumberOfSession() == 0) {
+//            throw new RuntimeException("New Hearing Should have NumberOfSession > 0");
+//        }
+        List<HearingPart> parts = new ArrayList<>();
+        for (Integer i = 0; i < createHearingRequest.getNumberOfSession(); i++) {
+            HearingPart hearingPart = new HearingPart();
+            hearingPart.setId(UUID.randomUUID());
+            hearingPart.setHearingId(createHearingRequest.getId());
+            parts.add(hearingPart);
+        }
+        return parts;
     }
 
     public Hearing mapToHearing(CreateHearingRequest createHearingRequest,
