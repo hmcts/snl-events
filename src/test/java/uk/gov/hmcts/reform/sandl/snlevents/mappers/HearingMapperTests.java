@@ -19,7 +19,7 @@ public class HearingMapperTests {
     public void mapToHearingParts_fromCreateHearingPartRequestWithOneSessionToCreate_shouldSetProperties() {
         val chpr = new CreateHearingRequest();
         chpr.setId(ID);
-        chpr.setNumberOfSession(1);
+        chpr.setNumberOfSessions(1);
 
         val hp = new HearingMapper().mapToHearingParts(chpr);
 
@@ -32,7 +32,7 @@ public class HearingMapperTests {
     public void mapToHearingParts_withTwoSessionsToCreate_shouldReturnObjectWithTwoHearingParts() {
         val chpr = new CreateHearingRequest();
         chpr.setId(ID);
-        chpr.setNumberOfSession(2);
+        chpr.setNumberOfSessions(2);
 
         val hp = new HearingMapper().mapToHearingParts(chpr);
 
@@ -47,7 +47,7 @@ public class HearingMapperTests {
     public void mapToHearingParts_fromCreateHearingPartRequestWithZeroSessionToCreate_shouldReturnObjectWithoutHearingParts() {
         val chpr = new CreateHearingRequest();
         chpr.setId(ID);
-        chpr.setNumberOfSession(0);
+        chpr.setNumberOfSessions(0);
 
         val hp = new HearingMapper().mapToHearingParts(chpr);
 

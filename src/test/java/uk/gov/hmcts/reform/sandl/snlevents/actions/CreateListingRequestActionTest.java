@@ -192,7 +192,7 @@ public class CreateListingRequestActionTest {
         chp.setId(createUuid(HEARING_ID));
         chp.setCaseTypeCode("ct");
         chp.setUserTransactionId(createUuid(TRANSACTION_ID));
-        chp.setNumberOfSession(numberOfSessions);
+        chp.setNumberOfSessions(numberOfSessions);
 
         return chp;
     }
