@@ -90,7 +90,7 @@ public class HearingService {
 
         Predicate restrictions = cb.conjunction();
 
-        for (SearchCriteria criteria: searchCriteriaList             ) {
+        for (SearchCriteria criteria: searchCriteriaList) {
             ComparisonOperations operation = criteria.getOperation();
             Predicate pred = null;
             if (criteria.getKey().equals("listingStatus")

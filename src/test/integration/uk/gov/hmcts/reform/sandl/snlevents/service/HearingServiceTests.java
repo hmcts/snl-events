@@ -178,7 +178,8 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public void findAll_withSpecificationOnOperationIn_shouldReturnMultipleResult_forManyMatch() {
         // Given
         List<SearchCriteria> criteriaList = new ArrayList<>();
-        SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD, ComparisonOperations.IN, Arrays.asList(new String[] {SMALL_CLAIMS, FAST_TRACK}));
+        SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD,
+            ComparisonOperations.IN, Arrays.asList(new String[] {SMALL_CLAIMS, FAST_TRACK}));
         criteriaList.add(criteria);
 
         // When
@@ -194,7 +195,8 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public void findAll_withSpecificationOnOperationIn_shouldReturnMultipleResult_forManyMatchIgnoringMissingOnes() {
         // Given
         List<SearchCriteria> criteriaList = new ArrayList<>();
-        SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD, ComparisonOperations.IN, Arrays.asList(new String[] {"missing-in-db-code", SMALL_CLAIMS, FAST_TRACK}));
+        SearchCriteria criteria = new SearchCriteria(CASE_TYPE_FIELD,
+            ComparisonOperations.IN, Arrays.asList(new String[] {"missing-in-db-code", SMALL_CLAIMS, FAST_TRACK}));
         criteriaList.add(criteria);
 
         // When
