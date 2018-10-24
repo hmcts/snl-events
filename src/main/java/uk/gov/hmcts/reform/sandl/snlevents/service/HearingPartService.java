@@ -173,7 +173,6 @@ public class HearingPartService {
         entityManager.detach(hearing);
         hearing.setVersion(assignment.getHearingVersion());
 
-        //hearingParts
         List<String> previousHearingPartsData = new ArrayList<>();
         List<String> factsMessages = new ArrayList<>();
 
@@ -186,10 +185,14 @@ public class HearingPartService {
                 Session session = targetSessions.get(index.getAndIncrement());
                 hp.setSessionId(session.getId());
                 hp.setSession(session);
-                hp.setStart(session.getStart());
+                if (targetSessions.size() > 1) {
+                    hp.setStart(session.getStart());
+                } else {
+                    hp.setStart(assignment.getStart());
+                }
                 factsMessages.add(factsMapper.mapHearingToRuleJsonMessage(hp));
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
 
