@@ -45,47 +45,41 @@ public class HearingService {
 
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
 
-//        Specification<Hearing> specification = new HearingSpecificationBuilder(entityManager)
-//            .of(searchCriteriaList).build();
-
-//        Specification<Hearing> query = new HearingSearchQueryBuilder(entityManager)
-//            .of(searchCriteriaList).build();
-
-//        Metamodel m = entityManager.getMetamodel();
-//        EntityType<Hearing> Hearing_ = m.entity(Hearing.class);
-//        EntityType<Person> Person_ = m.entity(Person.class);
-
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<HearingSearchResponse> cq = cb.createQuery(HearingSearchResponse.class);
         Root<Hearing> hearingRoot = cq.from(Hearing.class); //root entity
 
+        //Subquery
+        Subquery<String> subqueryPerson = cq.subquery(String.class);
+        Root<Person> subqueryPersonRoot = subqueryPerson.from(Person.class);
+        subqueryPerson.where(
+            //join subquery with main query
+            cb.equal(subqueryPersonRoot.get("id"), hearingRoot)
+        );
+        subqueryPerson.select(cb.greatest(subqueryPersonRoot.<String>get("name")));
+
 
         //Subquery
-        Subquery<String> sqPerson = cq.subquery(String.class);
-        Root<Person> sqPersonNU = sqPerson.from(Person.class);
-        sqPerson.where(
-            cb.equal(sqPersonNU.get("id"), hearingRoot)  //join subquery with main query
-        );
-        sqPerson.select(cb.greatest(sqPersonNU.<String>get("name")));
-
-
-        //Subquery
-        Subquery<Long> sqSent = cq.subquery(Long.class);
-        Root<HearingPart> sqSentNU = sqSent.from(HearingPart.class);
-        sqSent.select(cb.count(sqSentNU));
-        sqSent.where(
-            cb.equal(sqSentNU.get(HearingPart_.hearingId), hearingRoot),  //join subquery with main query
-            cb.isNotNull(sqSentNU.get(HearingPart_.sessionId))
+        Subquery<Long> subqueryListingCount = cq.subquery(Long.class);
+        Root<HearingPart> subqueryListingCountRoot = subqueryListingCount.from(HearingPart.class);
+        subqueryListingCount.select(cb.count(subqueryListingCountRoot));
+        subqueryListingCount.where(
+            //join subquery with main query
+            cb.equal(subqueryListingCountRoot.get(HearingPart_.hearingId), hearingRoot),
+            // additional filters
+            cb.isNotNull(subqueryListingCountRoot.get(HearingPart_.sessionId))
         );
 
         //Subquery
-        Subquery<OffsetDateTime> sqListing = cq.subquery(OffsetDateTime.class);
-        Root<HearingPart> sqListingNU = sqListing.from(HearingPart.class);
-        sqListing.where(
-            cb.equal(sqListingNU.get(HearingPart_.hearingId), hearingRoot),  //join subquery with main query
-            cb.isNotNull(sqListingNU.get(HearingPart_.sessionId))
+        Subquery<OffsetDateTime> subqueryListingStart = cq.subquery(OffsetDateTime.class);
+        Root<HearingPart> subqueryListingStartRoot = subqueryListingStart.from(HearingPart.class);
+        subqueryListingStart.where(
+            //join subquery with main query
+            cb.equal(subqueryListingStartRoot.get(HearingPart_.hearingId), hearingRoot),
+            // additional filters
+            cb.isNotNull(subqueryListingStartRoot.get(HearingPart_.sessionId))
         );
-        sqListing.select(cb.least(sqListingNU.<OffsetDateTime>get("start")));
+        subqueryListingStart.select(cb.least(subqueryListingStartRoot.<OffsetDateTime>get("start")));
 
 
         Predicate restrictions = cb.conjunction();
@@ -157,12 +151,12 @@ public class HearingService {
         selections.add(hearingRoot.get("scheduleStart"));
         selections.add(hearingRoot.get("scheduleEnd"));
         selections.add(hearingRoot.get("reservedJudge").get("id"));
-        selections.add(sqPerson.getSelection());
+        selections.add(subqueryPerson.getSelection());
         selections.add(hearingRoot.get("communicationFacilitator"));
         selections.add(hearingRoot.get("priority"));
         selections.add(hearingRoot.get("version"));
-        selections.add(sqSent.getSelection());
-        selections.add(sqListing.getSelection());
+        selections.add(subqueryListingCount.getSelection());
+        selections.add(subqueryListingStart.getSelection());
 
         // one page of results as per pageable
         TypedQuery<HearingSearchResponse> q = entityManager.createQuery(cq.multiselect(selections));
@@ -175,10 +169,9 @@ public class HearingService {
         Root<Hearing> hearingRootCount = cqLongCount.from(Hearing.class);
         CriteriaQuery<Long> select = cqLongCount.select(cb.count(hearingRootCount));
         TypedQuery<Long> cqCount = entityManager.createQuery(select);
-        Long qCount = cqCount.getSingleResult();
+        Long resultsCount = cqCount.getSingleResult();
 
-        // run it
-        return new PageImpl<>(q.getResultList(), pageable, qCount);
+        return new PageImpl<>(q.getResultList(), pageable, resultsCount);
     }
 
     private Object getArrayValues(String criteriaKey, List<String> criteriaValue) {

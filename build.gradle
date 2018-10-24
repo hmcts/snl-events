@@ -1,3 +1,4 @@
+
 plugins {
   id 'application'
   id 'checkstyle'
@@ -16,6 +17,14 @@ version = '0.0.1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+apply plugin: 'idea'
+
+idea {
+  module {
+    sourceDirs += file("out/production/classes/generated")
+  }
+}
 
 checkstyle {
   maxWarnings = 0
@@ -124,6 +133,7 @@ dependencies {
   compile 'org.hibernate:hibernate-java8:5.2.11.Final'
   compile 'org.hibernate:hibernate-core:5.2.11.Final'
   compile 'org.hibernate:hibernate-entitymanager:5.2.11.Final'
+
   compile group: 'org.hibernate', name: 'hibernate-envers', version: '5.2.11.Final'
 
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformLogging
@@ -133,11 +143,15 @@ dependencies {
 
   compile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '1.2.5.RELEASE'
 
+  compile "org.hibernate:hibernate-jpamodelgen:5.2.11.Final"
+  annotationProcessor "org.hibernate:hibernate-jpamodelgen:5.2.11.Final"
+
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.6'
   testCompile group: 'com.h2database', name: 'h2', version: '1.4.197'
   testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0', ext: 'pom'
 }
+
 
 jar {
   archiveName 'snl-events.jar'
