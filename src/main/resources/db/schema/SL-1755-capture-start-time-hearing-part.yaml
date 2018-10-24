@@ -1,0 +1,20 @@
+databaseChangeLog:
+- changeSet:
+    id: SL-1755-capture-start-time-hearing-part
+    author: rkruk
+    changes:
+    - dropColumn:
+        columnName: start
+        tableName: hearing
+    - addColumn:
+        columns:
+        - column:
+            name: start
+            type: TIMESTAMP WITH TIME ZONE
+        tableName: hearing_part
+    - addColumn:
+        columns:
+        - column:
+            name: start
+            type: TIMESTAMP WITH TIME ZONE
+        tableName: hearing_part_aud
