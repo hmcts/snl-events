@@ -14,5 +14,3 @@ public class HearingSessionRelationship {
     List<SessionAssignmentData> sessionsData;
     OffsetDateTime start;
 }
-
-
