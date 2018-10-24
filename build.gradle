@@ -154,7 +154,6 @@ dependencies {
   testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.18.0', ext: 'pom'
 }
 
-
 jar {
   archiveName 'snl-events.jar'
 
@@ -162,7 +161,6 @@ jar {
     attributes('Implementation-Version': project.version.toString())
   }
 }
-
 
 sourceSets {
   common {
@@ -190,7 +188,6 @@ sourceSets {
 
 configurations {
   functionalCompile.extendsFrom testCompile
-  functionalRuntime.extendsFrom testRuntime
   integrationSourcesCompile.extendsFrom testCompile
   integrationSourcesRuntime.extendsFrom testRuntime
 }
