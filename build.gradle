@@ -106,6 +106,7 @@ def versions = [
 dependencies {
   compile 'org.projectlombok:lombok:1.18.2'
   apt "org.projectlombok:lombok:1.18.2"
+  annotationProcessor 'org.projectlombok:lombok:1.18.2'
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
@@ -146,6 +147,7 @@ dependencies {
   compile "org.hibernate:hibernate-jpamodelgen:5.2.11.Final"
   annotationProcessor "org.hibernate:hibernate-jpamodelgen:5.2.11.Final"
 
+
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.6'
   testCompile group: 'com.h2database', name: 'h2', version: '1.4.197'
@@ -160,6 +162,7 @@ jar {
     attributes('Implementation-Version': project.version.toString())
   }
 }
+
 
 sourceSets {
   common {
@@ -182,6 +185,7 @@ sourceSets {
     compileClasspath += main.output + test.output + common.output
     runtimeClasspath += main.output + test.output + common.output
   }
+
 }
 
 configurations {
