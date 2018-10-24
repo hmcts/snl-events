@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
