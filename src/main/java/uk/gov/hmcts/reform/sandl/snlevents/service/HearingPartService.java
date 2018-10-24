@@ -161,7 +161,7 @@ public class HearingPartService {
 
         List<Session> targetSessions = sessionRepository.findSessionByIdIn(sessionIds);
 
-        return targetSessions == null || areTransactionsInProgress(hearing, assignment)
+        return targetSessions.isEmpty() || areTransactionsInProgress(hearing, assignment)
                 ? userTransactionService.transactionConflicted(assignment.getUserTransactionId())
                 : assignHearingToSessionWithTransaction(hearing, targetSessions, assignment);
     }
