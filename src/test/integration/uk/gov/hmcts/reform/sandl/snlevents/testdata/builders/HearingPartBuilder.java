@@ -23,6 +23,7 @@ public class HearingPartBuilder {
     private String hearingTypeCode = "hearing-type-code";
     private String hearingTypeDesc = "hearing-type-code";
     private Long version;
+    private UUID hearingId;
 
     public HearingType hearingType = new HearingType(hearingTypeCode, hearingTypeDesc);
     public CaseType caseType = new CaseType(caseTypeCode, caseTypeDesc);
@@ -52,16 +53,16 @@ public class HearingPartBuilder {
         return this;
     }
 
+    public HearingPartBuilder withHearingId(UUID id) {
+        this.hearingId = id;
+        return this;
+    }
+
     public HearingPart build() {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(id);
         hearingPart.setCreatedAt(createdAt);
-        hearingPart.setDuration(duration);
-        hearingPart.setCaseType(caseType);
-        hearingPart.setCaseNumber(caseNumber);
-        hearingPart.setCaseTitle(caseTitle);
         hearingPart.setVersion(version);
-        hearingPart.setHearingType(hearingType);
 
         return hearingPart;
     }

@@ -5,14 +5,18 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import uk.gov.hmcts.reform.sandl.snlevents.fakerules.BaseIntegrationTestWithFakeRules;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
@@ -36,6 +40,9 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @Autowired
     HearingPartService hearingPartService;
+
+    @Autowired
+    HearingRepository hearingRepository;
 
     @Autowired
     SessionRepository sessionRepository;
@@ -71,62 +78,79 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @Test
     public void assignHearingPartToSessionWithTransaction_shouldWorkInTransactionalManner() throws Exception {
-        HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
-        assertThat(savedHearingPart.getSessionId()).isNull();
+        Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(UUID.randomUUID());
+        hearing.addHearingPart(hearingPart);
+        hearing.setCaseType(getCaseType());
+        hearing.setHearingType(getHearingType());
+
+        Hearing savedHearing = hearingRepository.save(hearing);
+        assertThat(savedHearing.getHearingParts().get(0).getSessionId()).isNull();
 
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
-        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
-            savedSession.getId(), UUID.randomUUID()
+        HearingSessionRelationship hearingSessionRelationship = createRelationship(
+            savedSession.getId(), UUID.randomUUID(), savedHearing.getId()
         );
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(),
-            hearingPartSessionRelationship);
+        UserTransaction ut = hearingPartService.assignHearingToSessionWithTransaction(
+            savedHearing.getId(),
+            hearingSessionRelationship);
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
         ut = userTransactionService.commit(ut.getId());
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.COMMITTED);
 
-        HearingPart hearingPartAfterAssignment = hearingPartRepository.findOne(savedHearingPart.getId());
+        HearingPart hearingPartAfterAssignment = hearingPartRepository.findOne(hearingPart.getId());
 
         assertThat(hearingPartAfterAssignment.getSessionId()).isEqualTo(savedSession.getId());
     }
 
     @Test
     public void assignHearingPartToSessionWithTransaction_shouldReturnConflict() throws Exception {
-        HearingPart savedHearingPart = hearingPartRepository.save(hearingPartBuilder.withId(UUID.randomUUID()).build());
+        Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(UUID.randomUUID());
+        hearing.addHearingPart(hearingPart);
+        hearing.setCaseType(getCaseType());
+        hearing.setHearingType(getHearingType());
+
+        Hearing savedHearing = hearingRepository.save(hearing);
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
-        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
-            savedSession.getId(), UUID.randomUUID()
+        HearingSessionRelationship hearingSessionRelationship = createRelationship(
+            savedSession.getId(), UUID.randomUUID(), UUID.randomUUID()
         );
 
-        //do what assignHearingPartToSessionWithTransaction does but without doing detach
+        //do what assignHearingToSessionWithTransaction does but without doing detach
         //detach makes using this method second time throw 'possible non-threadsafe access to session'
         //we want to set started transaction state without detaching hearingPart we are going to use in next step
         UserTransaction ut = hearingPartService.assignWithTransaction(
-            savedHearingPart,
-            hearingPartSessionRelationship.getUserTransactionId(),
-            savedHearingPart.getSession(),
-            savedSession
+            savedHearing,
+            hearingSessionRelationship.getUserTransactionId(),
+            null,
+            savedSession,
+            "das", "das"
         );
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
-        hearingPartSessionRelationship.setHearingPartVersion(savedHearingPart.getVersion());
-        UserTransaction conflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(),
-            hearingPartSessionRelationship
+        hearingSessionRelationship.setHearingVersion(savedHearing.getVersion());
+        UserTransaction conflictingUt = hearingPartService.assignHearingToSessionWithTransaction(
+            savedHearing.getId(),
+            hearingSessionRelationship
         );
 
         assertThat(conflictingUt.getStatus()).isEqualTo(UserTransactionStatus.CONFLICT);
 
         userTransactionService.commit(ut.getId());
 
-        UserTransaction nonConflictingUt = hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(),
-            hearingPartSessionRelationship
+        UserTransaction nonConflictingUt = hearingPartService.assignHearingToSessionWithTransaction(
+            savedHearing.getId(),
+            hearingSessionRelationship
         );
 
         assertThat(nonConflictingUt.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
@@ -135,40 +159,62 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     @Test(expected = OptimisticLockingFailureException.class)
     public void assignHearingPartToSessionWithTransaction_throwsException_whenHearingPartIsLocked() throws IOException {
-        //GIVEN latest version of HearingPart is 2
-        HearingPart savedHearingPart = hearingPartRepository.save(
-            hearingPartBuilder.withId(UUID.randomUUID()).withVersion(2L).build()
-        );
+        //GIVEN latest version of HearingPart is different than newer one
+
+        Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(UUID.randomUUID());
+        hearing.addHearingPart(hearingPart);
+        hearing.setCaseType(getCaseType());
+        hearing.setHearingType(getHearingType());
+
+        Hearing savedHearing = hearingRepository.save(hearing);
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
         entityManager.flush();
 
-        HearingPartSessionRelationship hearingPartSessionRelationship = createRelationship(
-            savedSession.getId(), UUID.randomUUID()
+        HearingSessionRelationship hearingSessionRelationship = createRelationship(
+            savedSession.getId(), UUID.randomUUID(), UUID.randomUUID()
         );
 
         //WHEN we try to assign Session to HearingPart with older version
-        hearingPartSessionRelationship.setHearingPartVersion(1L);
-        hearingPartService.assignHearingPartToSessionWithTransaction(
-            savedHearingPart.getId(), hearingPartSessionRelationship
+        hearingSessionRelationship.setHearingVersion(1L);
+        hearingPartService.assignHearingToSessionWithTransaction(
+            savedHearing.getId(), hearingSessionRelationship
         );
         //THEN Optimistic Locking prevents us to do so
     }
 
-    private HearingPartSessionRelationship createRelationship(UUID sessionUuid, UUID userTransactionId) {
-        HearingPartSessionRelationship hearingPartSessionRelationship = new HearingPartSessionRelationship();
-        hearingPartSessionRelationship.setSessionId(sessionUuid);
-        hearingPartSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
-        hearingPartSessionRelationship.setUserTransactionId(userTransactionId);
-        hearingPartSessionRelationship.setSessionVersion(0);
-        hearingPartSessionRelationship.setHearingPartVersion(0);
+    private HearingSessionRelationship createRelationship(UUID sessionUuid, UUID hearingId, UUID userTransactionId) {
+        HearingSessionRelationship hearingSessionRelationship = new HearingSessionRelationship();
+        hearingSessionRelationship.setSessionId(sessionUuid);
+        hearingSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
+        hearingSessionRelationship.setUserTransactionId(userTransactionId);
+        hearingSessionRelationship.setSessionVersion(0);
+        hearingSessionRelationship.setHearingVersion(0);
+        hearingSessionRelationship.setHearingId(hearingId);
 
-        return hearingPartSessionRelationship;
+        return hearingSessionRelationship;
     }
 
     private SessionType getSessionType() {
         return sessionTypeRepository.findAll()
             .stream()
             .filter(st -> st.getCode().equals("small-claims")).findFirst().get();
+
+    }
+
+    private HearingType getHearingType() {
+        return hearingTypeRepository.findAll()
+            .stream()
+            .filter(st -> st.getCode().equals("K-ASAJ")).findFirst().get();
+
+    }
+
+    private CaseType getCaseType() {
+        return caseTypeRepository.findAll()
+            .stream()
+            .filter(st -> st.getCode().equals("K-Fast Track")).findFirst().get();
 
     }
 }

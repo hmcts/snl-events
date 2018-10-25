@@ -2,13 +2,14 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingPartMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingPartRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -16,37 +17,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
 public class CreateListingRequestAction extends Action implements RulesProcessable {
 
-    protected CreateHearingPartRequest createHearingPartRequest;
+    protected CreateHearingRequest createHearingRequest;
     protected HearingPart hearingPart;
+    protected Hearing hearing;
 
-    protected HearingPartRepository hearingPartRepository;
     protected HearingTypeRepository hearingTypeRepository;
     protected CaseTypeRepository caseTypeRepository;
-    protected HearingPartMapper hearingPartMapper;
+    protected HearingMapper hearingMapper;
+    protected HearingRepository hearingRepository;
+    private EntityManager entityManager;
 
-    public CreateListingRequestAction(CreateHearingPartRequest createHearingPartRequest,
-                                      HearingPartMapper hearingPartMapper,
-                                      HearingPartRepository hearingPartRepository,
+    public CreateListingRequestAction(CreateHearingRequest createHearingRequest,
+                                      HearingMapper hearingMapper,
                                       HearingTypeRepository hearingTypeRepository,
-                                      CaseTypeRepository caseTypeRepository) {
-        this.createHearingPartRequest = createHearingPartRequest;
-        this.hearingPartMapper = hearingPartMapper;
-        this.hearingPartRepository = hearingPartRepository;
+                                      CaseTypeRepository caseTypeRepository,
+                                      HearingRepository hearingRepository,
+                                      EntityManager entityManager) {
+        this.createHearingRequest = createHearingRequest;
+        this.hearingMapper = hearingMapper;
         this.hearingTypeRepository = hearingTypeRepository;
         this.caseTypeRepository = caseTypeRepository;
+        this.hearingRepository = hearingRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
+    @Transactional
     public void act() {
-        hearingPart = hearingPartMapper.mapToHearingPart(
-            createHearingPartRequest,
+        hearingPart = hearingMapper.mapToHearingPart(createHearingRequest);
+
+        hearing = hearingMapper.mapToHearing(
+            createHearingRequest,
             caseTypeRepository,
-            hearingTypeRepository
+            hearingTypeRepository,
+            entityManager
         );
 
-        hearingPart = hearingPartRepository.save(hearingPart);
+        hearing.addHearingPart(hearingPart);
+
+        hearingRepository.save(hearing);
     }
 
     @Override
@@ -58,7 +72,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg;
         try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -70,24 +84,28 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        userTransactionDataList.add(new UserTransactionData("hearingPart",
-            hearingPart.getId(),
-            null,
-            "create",
-            "delete",
-            0)
-        );
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hearingPart.getId(), 0));
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
         return userTransactionDataList;
     }
 
+    private UserTransactionData prepareCreateUserTransactionData(String entity, UUID entityId, int actionOrder) {
+        return new UserTransactionData(entity,
+            entityId,
+            null,
+            "create",
+            "delete",
+            actionOrder);
+    }
+
     @Override
     public UUID getUserTransactionId() {
-        return this.createHearingPartRequest.getUserTransactionId();
+        return this.createHearingRequest.getUserTransactionId();
     }
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {this.createHearingPartRequest.getId()};
+        return new UUID[] {this.createHearingRequest.getId()};
     }
 }

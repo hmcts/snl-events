@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,16 +11,19 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,12 +36,13 @@ public class DeleteListingRequestActionTest {
 
     private static final String ID = "123e4567-e89b-12d3-a456-426655440001";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String HEARING_PART_ID = "c16792d6-696d-4758-871b-30d3e75d2ed4";
 
     private DeleteListingRequestAction action;
     private DeleteListingRequest dlr;
 
     @Mock
-    private HearingPartRepository hearingPartRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -48,20 +53,19 @@ public class DeleteListingRequestActionTest {
     @Before
     public void setup() {
         dlr = new DeleteListingRequest();
-        dlr.setHearingPartId(createUuid(ID));
+        dlr.setHearingId(createUuid(ID));
         dlr.setUserTransactionId(createUuid(TRANSACTION_ID));
-        dlr.setHearingPartVersion(1L);
+        dlr.setHearingVersion(1L);
 
         this.action = new DeleteListingRequestAction(dlr,
-            hearingPartRepository,
+            hearingRepository,
             entityManager,
             objectMapper);
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
-        hearingPart.setHearingType(new HearingType("hearing-type-code", "hearing-type-description"));
-        hearingPart.setCaseType(new CaseType("case-type-code", "case-type-description"));
-        Mockito.when(hearingPartRepository.findOne(createUuid(ID))).thenReturn(hearingPart);
+
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(createHearing());
     }
 
     @Test
@@ -84,6 +88,13 @@ public class DeleteListingRequestActionTest {
         assertThat(id).isEqualTo(createUuid(TRANSACTION_ID));
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void getAndValidateEntities_throwsExceptionOnNullHearing() {
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(null);
+
+        action.getAndValidateEntities();
+    }
+
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
         action.getAndValidateEntities();
@@ -98,9 +109,9 @@ public class DeleteListingRequestActionTest {
         action.getAndValidateEntities();
         action.act();
 
-        ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
 
-        Mockito.verify(hearingPartRepository).save(captor.capture());
+        Mockito.verify(hearingRepository).save(captor.capture());
 
         assertThat(captor.getValue().isDeleted()).isEqualTo(true);
     }
@@ -109,9 +120,17 @@ public class DeleteListingRequestActionTest {
     public void getUserTransactionData_returnsCorrectData() {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
+        expectedTransactionData.add(new UserTransactionData("hearing",
+            dlr.getHearingId(),
+            null,
+            "delete",
+            "create",
+            0)
+        );
+
         expectedTransactionData.add(new UserTransactionData("hearingPart",
-            dlr.getHearingPartId(),
-            Mockito.any(),
+            createUuid(HEARING_PART_ID),
+            null,
             "delete",
             "create",
             0)
@@ -126,6 +145,20 @@ public class DeleteListingRequestActionTest {
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
     }
 
+    private Hearing createHearing() {
+        val hearing = new Hearing();
+        hearing.setId(dlr.getHearingId());
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+        hearing.setHearingParts(Arrays.asList(createHearingPart()));
+        return hearing;
+    }
+
+    private HearingPart createHearingPart() {
+        val hearingPart = new HearingPart();
+        hearingPart.setId(createUuid(HEARING_PART_ID));
+        return hearingPart;
+    }
 
     private UUID createUuid(String uuid) {
         return UUID.fromString(uuid);

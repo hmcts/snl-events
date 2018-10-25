@@ -11,18 +11,16 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
@@ -42,24 +40,6 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Id
     private UUID id;
 
-    private String caseNumber;
-
-    private String caseTitle;
-
-    @ManyToOne
-    @Audited(targetAuditMode = NOT_AUDITED)
-    private CaseType caseType;
-
-    @ManyToOne
-    @Audited(targetAuditMode = NOT_AUDITED)
-    private HearingType hearingType;
-
-    private Duration duration;
-
-    private OffsetDateTime scheduleStart;
-
-    private OffsetDateTime scheduleEnd;
-
     @ManyToOne
     @JsonIgnore
     @Audited(targetAuditMode = NOT_AUDITED)
@@ -68,14 +48,7 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Column(name = "session_id", updatable = false, insertable = false)
     private UUID sessionId;
 
-    private UUID reservedJudgeId;
-
-    private String communicationFacilitator;
-
-    private OffsetDateTime start;
-
-    @Enumerated(EnumType.ORDINAL)
-    private Priority priority;
+    //private OffsetDateTime start;
 
     private boolean isDeleted;
 
@@ -92,4 +65,14 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     @LastModifiedBy
     private String modifiedBy;
+
+    private OffsetDateTime start;
+
+    @ManyToOne
+    @JsonIgnore
+    @Audited(targetAuditMode = NOT_AUDITED)
+    private Hearing hearing;
+
+    @Column(name = "hearing_id", updatable = false, insertable = false)
+    private UUID hearingId;
 }
