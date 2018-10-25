@@ -43,19 +43,6 @@ pmd {
   ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
-project.tasks['sonarqube'].dependsOn test
-sonarqube {
-  properties {
-    property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
-    property "sonar.projectKey", "snl-events"
-    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationFakeRulesTests.exec"
-    property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
-    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
-    property "sonar.test.exclusions", ""
-    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
-  }
-}
-
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
     rules.all { ComponentSelection selection ->
@@ -218,11 +205,26 @@ jacoco {
 }
 
 jacocoTestReport {
+  dependsOn test, integrationTests, integrationFakeRulesTests
   executionData(test, integrationTests, integrationFakeRulesTests)
   reports {
     xml.enabled = true
     csv.enabled = false
+    html.destination file("${buildDir}/reports/jacoco/html")
     xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+  }
+}
+
+project.tasks['sonarqube'].dependsOn test, integrationTests, integrationFakeRulesTests
+sonarqube {
+  properties {
+    property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
+    property "sonar.projectKey", "snl-events"
+    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationFakeRulesTests.exec"
+    property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
+    property "sonar.test.exclusions", ""
+    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
   }
 }
 
