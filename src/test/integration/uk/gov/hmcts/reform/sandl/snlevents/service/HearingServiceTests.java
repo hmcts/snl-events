@@ -220,6 +220,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(1);
+        assertThat(responseList.getContent().get(0).getIsListed()).isTrue();
         assertThat(responseList.getContent().get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_123);
     }
 
@@ -235,6 +236,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(1);
+        assertThat(responseList.getContent().get(0).getIsListed()).isFalse();
         assertThat(responseList.getContent().get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
     }
 
