@@ -48,7 +48,7 @@ jacoco {
 }
 
 jacocoTestReport {
-  executionData(test)
+  executionData(test, integrationTests, integrationFakeRulesTests)
   reports {
     xml.enabled = true
     csv.enabled = false
