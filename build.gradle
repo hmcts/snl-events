@@ -205,7 +205,7 @@ jacoco {
 }
 
 jacocoTestReport {
-  dependsOn test, integrationTests, integrationFakeRulesTests
+  //dependsOn test, integrationTests, integrationFakeRulesTests
   executionData(test, integrationTests, integrationFakeRulesTests)
   reports {
     xml.enabled = true
@@ -215,7 +215,7 @@ jacocoTestReport {
   }
 }
 
-project.tasks['sonarqube'].dependsOn test, integrationTests, integrationFakeRulesTests
+//project.tasks['sonarqube'].dependsOn test, integrationTests, integrationFakeRulesTests
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
