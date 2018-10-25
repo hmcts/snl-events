@@ -21,8 +21,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.ComparisonOperations;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.specifications.SearchCriteria;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;

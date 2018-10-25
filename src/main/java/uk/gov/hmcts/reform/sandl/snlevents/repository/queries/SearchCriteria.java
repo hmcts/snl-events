@@ -1,8 +1,9 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository.specifications;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
 
 @Data
 @AllArgsConstructor

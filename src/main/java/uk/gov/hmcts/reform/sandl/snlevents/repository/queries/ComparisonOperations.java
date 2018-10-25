@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository.specifications;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
