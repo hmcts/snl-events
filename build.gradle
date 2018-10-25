@@ -220,7 +220,7 @@ sonarqube {
   properties {
     property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
     property "sonar.projectKey", "snl-events"
-    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationFakeRulesTests.exec"
+    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationFakeRulesTests.exec,${project.buildDir}/jacoco/integrationTests.exec"
     property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
     property "sonar.test.exclusions", ""
