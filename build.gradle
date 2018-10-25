@@ -43,19 +43,6 @@ pmd {
   ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
-jacoco {
-  toolVersion = "0.8.1"
-}
-
-jacocoTestReport {
-  executionData(test, integrationTests, integrationFakeRulesTests)
-  reports {
-    xml.enabled = true
-    csv.enabled = false
-    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
-  }
-}
-
 project.tasks['sonarqube'].dependsOn test
 sonarqube {
   properties {
@@ -203,12 +190,12 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
   }
 }
 
-task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+task functional(type: Test, description: 'Runs the functional tests on a running application.', group: 'Verification') {
   testClassesDirs = sourceSets.functional.output.classesDirs
   classpath = sourceSets.functional.runtimeClasspath
 }
 
-task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests iwth wiremock.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationSources.output.classesDirs
   classpath = sourceSets.integrationSources.runtimeClasspath
 
@@ -217,12 +204,25 @@ task integrationFakeRulesTests(type: Test, description: 'Runs the integration te
   }
 }
 
-task integrationTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+task integrationTests(type: Test, description: 'Runs the integration tests with SpringBoot server.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationSources.output.classesDirs
   classpath = sourceSets.integrationSources.runtimeClasspath
 
   useJUnit {
     includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTest'
+  }
+}
+
+jacoco {
+  toolVersion = "0.8.1"
+}
+
+jacocoTestReport {
+  executionData(test, integrationTests, integrationFakeRulesTests)
+  reports {
+    xml.enabled = true
+    csv.enabled = false
+    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
