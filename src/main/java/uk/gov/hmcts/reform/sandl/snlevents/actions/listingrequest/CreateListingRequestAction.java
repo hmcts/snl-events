@@ -74,7 +74,6 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg;
         try {
-            //TODO wait for KZ implementation of multipart handling
             msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -87,12 +86,11 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        int orderNr;
-        for (orderNr = 0; orderNr < hearingParts.size(); orderNr++) {
+        hearingParts.forEach(hp -> {
             userTransactionDataList.add(prepareCreateUserTransactionData(
-                "hearingPart", hearingParts.get(orderNr).getId(), orderNr));
-        }
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), orderNr));
+                "hearingPart", hp.getId(), 0));
+        });
+        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
         return userTransactionDataList;
     }
