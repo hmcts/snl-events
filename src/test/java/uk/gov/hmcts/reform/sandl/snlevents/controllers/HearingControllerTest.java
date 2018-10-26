@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsRes
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -45,8 +46,13 @@ public class HearingControllerTest {
 
     @MockBean
     private HearingPartService hearingPartService;
+
+    @MockBean
+    private HearingService hearingService;
+
     @MockBean
     private HearingRepository hearingRepository;
+
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
