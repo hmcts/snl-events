@@ -184,7 +184,7 @@ task functional(type: Test, description: 'Runs the functional tests on a running
   classpath = sourceSets.functional.runtimeClasspath
 }
 
-task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests iwth wiremock.', group: 'Verification') {
+task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests with wiremock.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationSources.output.classesDirs
   classpath = sourceSets.integrationSources.runtimeClasspath
 
