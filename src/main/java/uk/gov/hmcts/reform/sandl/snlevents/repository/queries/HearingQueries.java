@@ -44,8 +44,6 @@ public class HearingQueries {
     @Autowired
     private EntityManager entityManager;
 
-
-
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -160,30 +158,29 @@ public class HearingQueries {
     }
 
     private Predicate createInOrNullPredicate(CriteriaBuilder cb, Root<Hearing> hearingRoot, SearchCriteria criteria) {
-        Predicate where;
-        String key = criteria.getKey();
-        Path<Object> rootKey = null;
+        Path<Object> rootKey = getRootKeyFromFieldName(hearingRoot, criteria.getKey());
+
+        return cb.or(
+            rootKey.in(getArrayValues(criteria.getKey(), (List<String>) criteria.getValue())),
+            rootKey.isNull());
+    }
+
+    private Path<Object> getRootKeyFromFieldName(Root<Hearing> hearingRoot, String key) {
+        Path<Object> rootKey;
+
         if (key.contains(".")) {
             rootKey = hearingRoot.get(key.split("\\.") [0]).get(key.split("\\.") [1]);
         } else {
             rootKey = hearingRoot.get(key);
         }
-        where = cb.or(
-            rootKey.in(getArrayValues(key,
-                (List<String>) criteria.getValue())),
-            rootKey.isNull());
-        return where;
+
+        return rootKey;
     }
 
     private Predicate createInPredicate(Root<Hearing> hearingRoot, SearchCriteria criteria) {
-        String key = criteria.getKey();
-        Path<Object> rootKey = null;
-        if (key.contains(".")) {
-            rootKey = hearingRoot.get(key.split("\\.") [0]).get(key.split("\\.") [1]);
-        } else {
-            rootKey = hearingRoot.get(key);
-        }
-        return rootKey.in(getArrayValues(key, (List<String>) criteria.getValue()));
+        Path<Object> rootKey = getRootKeyFromFieldName(hearingRoot, criteria.getKey());
+
+        return rootKey.in(getArrayValues(criteria.getKey(), (List<String>) criteria.getValue()));
     }
 
     private Predicate createEqualsPredicate(CriteriaBuilder cb, Root<Hearing> hearingRoot, SearchCriteria criteria) {
