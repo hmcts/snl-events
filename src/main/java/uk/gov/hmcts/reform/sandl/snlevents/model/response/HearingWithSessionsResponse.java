@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -28,6 +30,7 @@ public class HearingWithSessionsResponse {
     private String communicationFacilitator;
     private String reservedToJudge;
     private List<ViewSessionResponse> sessions;
+    private List<VersionInfo> hearingPartsVersions;
 
     public HearingWithSessionsResponse(Hearing hearing) {
         this.id = hearing.getId();
@@ -46,5 +49,12 @@ public class HearingWithSessionsResponse {
             .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+        this.hearingPartsVersions = hearing.getHearingParts().stream().map(hp -> {
+            val versionInfo = new VersionInfo();
+            versionInfo.setId(hp.getId());
+            versionInfo.setVersion(hp.getVersion());
+
+            return versionInfo;
+        }).collect(Collectors.toList());
     }
 }
