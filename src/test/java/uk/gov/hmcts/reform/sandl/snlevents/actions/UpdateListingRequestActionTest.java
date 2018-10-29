@@ -114,10 +114,11 @@ public class UpdateListingRequestActionTest {
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
         action.getAndValidateEntities();
-        FactMessage factMessage = action.generateFactMessage();
+        List<FactMessage> factMessages = action.generateFactMessages();
 
-        assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
-        assertThat(factMessage.getData()).isNotNull();
+        assertThat(factMessages.size()).isEqualTo(1);
+        assertThat(factMessages.get(0).getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
+        assertThat(factMessages.get(0).getData()).isNotNull();
     }
 
     @Test

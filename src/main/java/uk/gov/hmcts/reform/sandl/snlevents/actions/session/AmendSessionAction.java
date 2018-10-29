@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
@@ -26,7 +27,6 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     private AmendSessionRequest amendSessionRequest;
     private SessionRepository sessionRepository;
     private EntityManager entityManager;
-    private ObjectMapper objectMapper;
 
     private Session session;
     private String currentSessionAsString;
@@ -72,10 +72,10 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     }
 
     @Override
-    public FactMessage generateFactMessage() {
+    public List<FactMessage> generateFactMessages() {
         val msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
 
-        return new FactMessage(RulesService.UPSERT_SESSION, msg);
+        return Arrays.asList(new FactMessage(RulesService.UPSERT_SESSION, msg));
     }
 
     @Override

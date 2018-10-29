@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,7 +86,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     }
 
     @Override
-    public FactMessage generateFactMessage() {
+    public List<FactMessage> generateFactMessages() {
         String msg = null;
         //try {
         //    msg = factsMapper.mapHearingToRuleJsonMessage(hearingPart); @TODO use Action instead of service
@@ -93,7 +94,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         //    throw new RuntimeException(e);
         //}
 
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        return Arrays.asList(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
     }
 
     @Override

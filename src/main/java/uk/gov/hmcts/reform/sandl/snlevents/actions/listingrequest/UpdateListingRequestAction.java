@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
@@ -89,15 +90,15 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
+    public List<FactMessage> generateFactMessages() {
         String msg = null;
         try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
+            msg = factsMapper.mapHearingToRuleJsonMessage(hearing.getHearingParts().get(0));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        return Arrays.asList(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
     }
 
     @Override

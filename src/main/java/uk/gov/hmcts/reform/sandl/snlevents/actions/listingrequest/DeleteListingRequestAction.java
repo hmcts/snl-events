@@ -13,9 +13,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -23,7 +25,6 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     private DeleteListingRequest deleteListingRequest;
     private HearingRepository hearingRepository;
     private EntityManager entityManager;
-    private ObjectMapper objectMapper;
     private Hearing hearing;
     private String currentHearingAsString;
     private HashMap<UUID, String> currentHearingPartsMap = new HashMap<>();
@@ -73,16 +74,18 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
-        String msg = null;
+    public List<FactMessage> generateFactMessages() {
+        return hearing.getHearingParts().stream().map(hp -> {
+            String msg;
 
-        try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+            try {
+                msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
 
-        return new FactMessage(RulesService.DELETE_HEARING_PART, msg);
+            return new FactMessage(RulesService.DELETE_HEARING_PART, msg);
+        }).collect(Collectors.toList());
     }
 
     @Override

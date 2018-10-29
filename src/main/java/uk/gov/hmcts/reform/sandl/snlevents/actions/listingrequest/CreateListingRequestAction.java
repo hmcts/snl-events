@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
@@ -14,8 +15,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -69,15 +72,18 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
-        String msg;
-        try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public List<FactMessage> generateFactMessages() {
+        return hearing.getHearingParts().stream().map(hp -> {
+            String msg;
 
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+            try {
+                msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        }).collect(Collectors.toList());
     }
 
     @Override
