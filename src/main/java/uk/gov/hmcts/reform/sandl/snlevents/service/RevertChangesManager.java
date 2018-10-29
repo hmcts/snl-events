@@ -92,6 +92,16 @@ public class RevertChangesManager {
             hearingRepository.save(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
             hearingRepository.delete(utd.getEntityId());
+        } else if ("create".equals(utd.getCounterAction())) {
+            hearing = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
+            hearing.setDeleted(false);
+
+            List<HearingPart> hearingParts = hearingPartRepository
+                .getHearingPartsByHearingIdIgnoringWhereDeletedClause(hearing.getId());
+            hearingParts.forEach(hp -> hp.setDeleted(false));
+
+            hearingPartRepository.save(hearingParts);
+            hearingRepository.save(hearing);
         }
 
     }
