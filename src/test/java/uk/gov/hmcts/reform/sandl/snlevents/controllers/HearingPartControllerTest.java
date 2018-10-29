@@ -289,7 +289,6 @@ public class HearingPartControllerTest {
         ulr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         ulr.setReservedJudgeId(RESERVED_JUDGE_ID);
         ulr.setUserTransactionId(UUID.randomUUID());
-        ulr.setNumberOfSessions(1);
         ulr.setVersion(0L);
 
         return ulr;
