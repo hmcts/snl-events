@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
