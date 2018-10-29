@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.val;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
-import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactAvailability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactCaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingType;
@@ -152,22 +150,6 @@ public class FactsMapper {
         factPerson.setName(person.getName());
 
         return objectMapper.writeValueAsString(factPerson);
-    }
-
-    public String mapDbAvailabilityToRuleJsonMessage(Availability availability) throws JsonProcessingException {
-        FactAvailability factAvailability = new FactAvailability();
-
-        factAvailability.setId(availability.getId().toString());
-        factAvailability.setDuration(availability.getDuration());
-        factAvailability.setStart(availability.getStart());
-        if (availability.getPerson() != null) {
-            factAvailability.setJudgeId(availability.getPerson().getId().toString());
-        }
-        if (availability.getRoom() != null) {
-            factAvailability.setRoomId(availability.getRoom().getId().toString());
-        }
-
-        return objectMapper.writeValueAsString(factAvailability);
     }
 
     public String mapTimeToRuleJsonMessage(DateTimePartValue dateTimePartValue) throws JsonProcessingException {
