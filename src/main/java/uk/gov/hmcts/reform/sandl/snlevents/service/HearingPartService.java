@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
@@ -85,12 +83,12 @@ public class HearingPartService {
     public UserTransaction assignWithTransaction(Hearing hearing, UUID transactionId,
                                                  Session currentSession,
                                                  Session targetSession, String beforeHearing,
-                                                 String beforeHearingPart) throws JsonProcessingException {
-        Hearing savedHearingPart = hearingRepository.save(hearing);
+                                                 String beforeHearingPart) {
+        Hearing savedHearing = hearingRepository.save(hearing);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearing",
-                savedHearingPart.getId(),
+                savedHearing.getId(),
                 beforeHearing,
                 "update",
                 "update",
@@ -171,9 +169,9 @@ public class HearingPartService {
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
         hearingPart.setSession(targetSession);
-        hearing.setStart(assignment.getStart());
+        hearingPart.setStart(assignment.getStart());
 
-        String msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
+        String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPart);
         UserTransaction ut = assignWithTransaction(hearing,
                 assignment.getUserTransactionId(),
                 hearingPart.getSession(),
