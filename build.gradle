@@ -1,5 +1,6 @@
 plugins {
   id 'application'
+  id "java"
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
@@ -17,6 +18,18 @@ version = '0.0.1'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+apply plugin: 'java'
+apply plugin: 'idea'
+
+idea {
+  module {
+    // stays here but to consider if this is a good idea longterm
+    // because it requires to build the project at lest once so intellij
+    // it up
+    sourceDirs += file("out/production/classes/production")
+  }
+}
+
 checkstyle {
   maxWarnings = 0
   toolVersion = '8.8'
@@ -30,32 +43,6 @@ pmd {
   sourceSets = [sourceSets.main, sourceSets.test]
   reportsDir = file("$project.buildDir/reports/pmd")
   ruleSetFiles = files("config/pmd/ruleset.xml")
-}
-
-jacoco {
-  toolVersion = "0.8.1"
-}
-
-jacocoTestReport {
-  executionData(test)
-  reports {
-    xml.enabled = true
-    csv.enabled = false
-    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
-  }
-}
-
-project.tasks['sonarqube'].dependsOn test
-sonarqube {
-  properties {
-    property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
-    property "sonar.projectKey", "snl-events"
-    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/*Test*.exec"
-    property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
-    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*,**/ProblemRepository*,**/HearingPartService*"
-    property "sonar.test.exclusions", ""
-    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*,**/ProblemRepository*,**/HearingPartService*"
-  }
 }
 
 dependencyUpdates.resolutionStrategy = {
@@ -97,6 +84,7 @@ def versions = [
 dependencies {
   compile 'org.projectlombok:lombok:1.18.2'
   apt "org.projectlombok:lombok:1.18.2"
+  annotationProcessor 'org.projectlombok:lombok:1.18.2'
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
@@ -121,10 +109,11 @@ dependencies {
 
   compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
 
-  compile 'org.hibernate:hibernate-java8:5.2.11.Final'
-  compile 'org.hibernate:hibernate-core:5.2.11.Final'
-  compile 'org.hibernate:hibernate-entitymanager:5.2.11.Final'
-  compile group: 'org.hibernate', name: 'hibernate-envers', version: '5.2.11.Final'
+  compile 'org.hibernate:hibernate-java8:5.2.17.Final'
+  compile 'org.hibernate:hibernate-core:5.2.17.Final'
+  compile 'org.hibernate:hibernate-entitymanager:5.2.17.Final'
+
+  compile group: 'org.hibernate', name: 'hibernate-envers', version: '5.2.17.Final'
 
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-httpcomponents', version: versions.reformLogging
@@ -132,6 +121,10 @@ dependencies {
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.springHystrix
 
   compile group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '1.2.5.RELEASE'
+
+  compile "org.hibernate:hibernate-jpamodelgen:5.2.17.Final"
+  annotationProcessor "org.hibernate:hibernate-jpamodelgen:5.2.17.Final"
+
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.6'
@@ -168,11 +161,11 @@ sourceSets {
     compileClasspath += main.output + test.output + common.output
     runtimeClasspath += main.output + test.output + common.output
   }
+
 }
 
 configurations {
   functionalCompile.extendsFrom testCompile
-  functionalRuntime.extendsFrom testRuntime
   integrationSourcesCompile.extendsFrom testCompile
   integrationSourcesRuntime.extendsFrom testRuntime
 }
@@ -186,12 +179,12 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
   }
 }
 
-task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+task functional(type: Test, description: 'Runs the functional tests on a running application.', group: 'Verification') {
   testClassesDirs = sourceSets.functional.output.classesDirs
   classpath = sourceSets.functional.runtimeClasspath
 }
 
-task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+task integrationFakeRulesTests(type: Test, description: 'Runs the integration tests with wiremock.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationSources.output.classesDirs
   classpath = sourceSets.integrationSources.runtimeClasspath
 
@@ -200,12 +193,38 @@ task integrationFakeRulesTests(type: Test, description: 'Runs the integration te
   }
 }
 
-task integrationTests(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+task integrationTests(type: Test, description: 'Runs the integration tests with SpringBoot server.', group: 'Verification') {
   testClassesDirs = sourceSets.integrationSources.output.classesDirs
   classpath = sourceSets.integrationSources.runtimeClasspath
 
   useJUnit {
     includeCategories 'uk.gov.hmcts.reform.sandl.snlevents.testcategories.IntegrationTest'
+  }
+}
+
+jacoco {
+  toolVersion = "0.8.1"
+}
+
+jacocoTestReport {
+  executionData(test, integrationTests, integrationFakeRulesTests)
+  reports {
+    xml.enabled = true
+    csv.enabled = false
+    html.destination file("${buildDir}/reports/jacoco/html")
+    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+  }
+}
+
+sonarqube {
+  properties {
+    property "sonar.projectName", "Reform :: Scheduling & Listing :: snl-events POC build extension"
+    property "sonar.projectKey", "snl-events"
+    property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationFakeRulesTests.exec,${project.buildDir}/jacoco/integrationTests.exec"
+    property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
+    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
+    property "sonar.test.exclusions", ""
+    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
   }
 }
 
