@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType_;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing_;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person_;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session_;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 
@@ -29,6 +31,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -191,66 +195,67 @@ public class HearingQueries {
                                                    CriteriaQuery<HearingSearchResponse> cq,
                                                    Root<Hearing> hearingRoot,
                                                    boolean isListed) {
-        Subquery<HearingPart> subquery = cq.subquery(HearingPart.class);
-        Root<HearingPart> hpRoot = subquery.from(HearingPart.class);
-        subquery.select(hpRoot);
+        Subquery<HearingPart> subQuery = cq.subquery(HearingPart.class);
+        Root<HearingPart> hpRoot = subQuery.from(HearingPart.class);
+        subQuery.select(hpRoot);
         if (isListed) {
-            subquery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), hearingRoot),
+            subQuery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), hearingRoot),
                 cb.isNotNull(hpRoot.get(HearingPart_.sessionId)));
         } else {
-            subquery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), hearingRoot),
+            subQuery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), hearingRoot),
                 cb.isNull(hpRoot.get(HearingPart_.sessionId)));
         }
-        return  cb.exists(subquery);
+        return  cb.exists(subQuery);
     }
 
     private Subquery<OffsetDateTime> createListingStartSelect(CriteriaBuilder cb,
-                                                              CriteriaQuery<HearingSearchResponse> cq,
-                                                              Root<Hearing> hearingRoot) {
-        Subquery<OffsetDateTime> subqueryListingStart = cq.subquery(OffsetDateTime.class);
+                                                                 CriteriaQuery<HearingSearchResponse> cq,
+                                                                 Root<Hearing> hearingRoot) {
+        Subquery<OffsetDateTime> subQueryListingStart = cq.subquery(OffsetDateTime.class);
 
-        Root<HearingPart> subqueryListingStartRoot = subqueryListingStart.from(HearingPart.class);
-        subqueryListingStart.where(
+        Root<HearingPart> subQueryListingStartRoot = subQueryListingStart.from(HearingPart.class);
+        Join<HearingPart, Session> join = subQueryListingStartRoot.join(HearingPart_.session, JoinType.INNER);
+        subQueryListingStart.where(
             //join subquery with main query
-            cb.equal(subqueryListingStartRoot.get(HearingPart_.hearingId), hearingRoot),
+            cb.equal(subQueryListingStartRoot.get(HearingPart_.hearingId), hearingRoot),
             // additional filters
-            cb.isNotNull(subqueryListingStartRoot.get(HearingPart_.sessionId))
+            cb.isNotNull(subQueryListingStartRoot.get(HearingPart_.sessionId))
         );
-        subqueryListingStart.select(cb.least(subqueryListingStartRoot.<OffsetDateTime>get(HearingPart_.start)));
+        subQueryListingStart.select(cb.least(join.<OffsetDateTime>get(Session_.start)));
 
-        return subqueryListingStart;
+        return subQueryListingStart;
     }
 
     private Subquery<Long> createListingCountSelect(CriteriaBuilder cb,
                                                     CriteriaQuery<HearingSearchResponse> cq,
                                                     Root<Hearing> hearingRoot) {
-        Subquery<Long> subqueryListingCount = cq.subquery(Long.class);
+        Subquery<Long> subQueryListingCount = cq.subquery(Long.class);
 
-        Root<HearingPart> subqueryListingCountRoot = subqueryListingCount.from(HearingPart.class);
-        subqueryListingCount.select(cb.count(subqueryListingCountRoot));
-        subqueryListingCount.where(
+        Root<HearingPart> subQueryListingCountRoot = subQueryListingCount.from(HearingPart.class);
+        subQueryListingCount.select(cb.count(subQueryListingCountRoot));
+        subQueryListingCount.where(
             //join subquery with main query
-            cb.equal(subqueryListingCountRoot.get(HearingPart_.hearingId), hearingRoot),
+            cb.equal(subQueryListingCountRoot.get(HearingPart_.hearingId), hearingRoot),
             // additional filters
-            cb.isNotNull(subqueryListingCountRoot.get(HearingPart_.sessionId))
+            cb.isNotNull(subQueryListingCountRoot.get(HearingPart_.sessionId))
         );
 
-        return subqueryListingCount;
+        return subQueryListingCount;
     }
 
     private Subquery<String> createPersonNameSelect(CriteriaBuilder cb,
                                                     CriteriaQuery<HearingSearchResponse> cq,
                                                     Root<Hearing> hearingRoot) {
-        Subquery<String> subqueryPerson = cq.subquery(String.class);
+        Subquery<String> subQueryPerson = cq.subquery(String.class);
 
-        Root<Person> subqueryPersonRoot = subqueryPerson.from(Person.class);
-        subqueryPerson.where(
+        Root<Person> subQueryPersonRoot = subQueryPerson.from(Person.class);
+        subQueryPerson.where(
             //join subquery with main query
-            cb.equal(subqueryPersonRoot.get("id"), hearingRoot)
+            cb.equal(subQueryPersonRoot.get("id"), hearingRoot)
         );
-        subqueryPerson.select(cb.greatest(subqueryPersonRoot.<String>get(Person_.name)));
+        subQueryPerson.select(cb.greatest(subQueryPersonRoot.<String>get(Person_.name)));
 
-        return subqueryPerson;
+        return subQueryPerson;
     }
 
     private Object getArrayValues(String criteriaKey, List<String> criteriaValue) {

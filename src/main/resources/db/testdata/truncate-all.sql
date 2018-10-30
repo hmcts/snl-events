@@ -1,6 +1,5 @@
 TRUNCATE table hearing_part CASCADE;
 TRUNCATE table session CASCADE;
-TRUNCATE table availability CASCADE;
 TRUNCATE table person CASCADE;
 TRUNCATE table room CASCADE;
 TRUNCATE table problem_reference CASCADE;

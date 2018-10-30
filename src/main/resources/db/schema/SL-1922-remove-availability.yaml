@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+        id: remove_availability_table
+        author: kpakur
+        changes:
+          - dropTable:
+              cascadeConstraints: true
+              tableName: availability
