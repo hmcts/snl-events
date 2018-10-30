@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 import javax.transaction.Transactional;

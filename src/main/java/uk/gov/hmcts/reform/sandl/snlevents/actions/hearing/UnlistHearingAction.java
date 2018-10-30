@@ -45,10 +45,10 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         HearingRepository hearingRepository,
         HearingPartRepository hearingPartRepository,
         ObjectMapper objectMapper) {
-            this.unlistHearingRequest = unlistHearingRequest;
-            this.hearingRepository = hearingRepository;
-            this.hearingPartRepository = hearingPartRepository;
-            this.objectMapper = objectMapper;
+        this.unlistHearingRequest = unlistHearingRequest;
+        this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
