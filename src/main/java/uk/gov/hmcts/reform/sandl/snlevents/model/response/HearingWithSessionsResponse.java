@@ -10,9 +10,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 @Data
 @AllArgsConstructor
@@ -46,8 +47,9 @@ public class HearingWithSessionsResponse {
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
-            .map(h -> h.getSession() != null ? new ViewSessionResponse(h.getSession()) : null)
-            .filter(Objects::nonNull)
+            .filter(hp -> hp.getSession() != null)
+            .map(hp -> new ViewSessionResponse(hp.getSession()))
+            .sorted(comparing(ViewSessionResponse::getStart))
             .collect(Collectors.toList());
         this.hearingPartsVersions = hearing.getHearingParts().stream().map(hp -> {
             val versionInfo = new VersionInfo();

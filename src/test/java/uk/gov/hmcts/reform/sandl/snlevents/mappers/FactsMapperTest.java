@@ -5,7 +5,6 @@ import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -205,20 +204,6 @@ public class FactsMapperTest {
     }
 
     @Test
-    public void mapDbAvailabilityToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapDbAvailabilityToRuleJsonMessage(createAvailability());
-        val expected = "{"
-            + "\"id\":\"" + ID + "\","
-            + "\"judgeId\":\"" + PERSON_ID + "\","
-            + "\"roomId\":\"" + ROOM_ID + "\","
-            + "\"start\":\"" + START_MAPPED + "\","
-            + "\"duration\":" + DURATION_MAPPED
-            + "}";
-
-        assertThat(mapped).isEqualTo(expected);
-    }
-
-    @Test
     public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapHearingPartToRuleJsonMessage(createHearingPart());
         val expected = "{\"id\":\"123e4567-e89b-12d3-a456-426655440000\","
@@ -231,17 +216,6 @@ public class FactsMapperTest {
             + "\"createdAt\":\"-999999999-01-01T00:00:00+18:00\"}";
 
         assertThat(mapped).isEqualTo(expected);
-    }
-
-    private Availability createAvailability() {
-        val a = new Availability();
-        a.setId(createUuid());
-        a.setDuration(createDuration());
-        a.setStart(START);
-        a.setPerson(createPerson());
-        a.setRoom(createRoom());
-
-        return a;
     }
 
     @Test

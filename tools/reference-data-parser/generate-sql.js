@@ -83,15 +83,12 @@ readXlsxFile(fileName, { sheet: 1 })
       console.log(sqlStatement);
   });
 
-  console.log(generateAvailabilitySQL(judgeIds, roomIds));
-  
   const unusedRooms = roomNames.filter((roomName) => roomName.hasBeenUsed === false)
   if (unusedRooms.length != 0) {
     console.error()
     console.error('Following rooms arent used in second sheet');
     unusedRooms.forEach(roomName => console.error(roomName.description));
     console.error()
-    console.error('Generated SQL statements for these rooms - THERE ARENT INCLUDED IN AVAILABILITY');
     unusedRooms.forEach(roomName => console.error(generateRoomSQLWithNullRoomType(roomName.description)));
   }
 });
@@ -118,7 +115,6 @@ function printTruncateSQL() {
   console.log(`
   TRUNCATE table hearing_part CASCADE;
   TRUNCATE table session CASCADE;
-  TRUNCATE table availability CASCADE;
   TRUNCATE table person CASCADE;
   TRUNCATE table room CASCADE;
   TRUNCATE table problem_reference CASCADE;
@@ -159,21 +155,21 @@ function generateSessionTypeHearingTypeJoinTableSQL(tableNameA, descriptionA, ta
 function generateRoomSQL(tableNameA, descriptionA, tableNameB, descriptionB) {
   const roomType = (tableNameA.toLowerCase().indexOf("room_type") >= 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
   const room = (tableNameA.toLowerCase().indexOf("room_type") < 0) ? [tableNameA, descriptionA] : [tableNameB, descriptionB];
-  
+
   const usedRoomDescriptionIndex = roomNames.findIndex((roomName) => roomName.description === room[1]);
-  
+
   if (usedRoomDescriptionIndex > -1) {
     roomNames[usedRoomDescriptionIndex].hasBeenUsed = true;
   } else {
     console.error(`Room with name/description ${room[1]} do not exist on first sheet`)
   }
-  
+
     const roomId = uuidv4();
     roomIds.push(roomId);
   return `INSERT INTO room (id, name, room_type_code) VALUES ('${roomId}', '${room[1]}', (Select code from room_type where description = '${roomType[1]}'));`;
 }
 
-function generateRoomSQLWithNullRoomType(roomName) { 
+function generateRoomSQLWithNullRoomType(roomName) {
   const roomId = uuidv4();
   roomIdOfRoomWithOutRoomType.push(roomId);
   return `INSERT INTO room (id, name, room_type_code) VALUES ('${roomId}', '${roomName}', NULL);`;
@@ -248,32 +244,4 @@ function extractDescriptionFrom(cell) {
   return cell.slice(cell.indexOf("(") + 1, cell.lastIndexOf(")")).trim();
 }
 
-function generateAvailabilitySQL(judgeIds, roomsIds) {
-    function createJudgeAvailability(judgeIds) {
-        return judgeIds.map(judgeId => {
-            return `((SELECT uuid_generate_v4()), startDateTime, 28800, '${judgeId}', null)`;
-        });
-    }
 
-    function createRoomsValues(roomIds) {
-        return roomIds.map(roomId => {
-            return `((SELECT uuid_generate_v4()), startDateTime, 28800, null, '${roomId}')`;
-        });
-    }
-    const values = createJudgeAvailability(judgeIds).concat(createRoomsValues(roomsIds));
-    return `
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-    DO $$
-    DECLARE startDateTime timestamp with time zone = '${moment().format('YYYY-MM-DD')} 07:00:00+00';
-    BEGIN
-    FOR counter IN 1..365 LOOP
-        IF (extract(dow from startDateTime) NOT IN (0,6)) THEN
-            INSERT INTO availability (id, start, duration, person_id, room_id ) VALUES
-            ${values.join(',\n')};
-        END IF;
-        startDateTime = startDateTime + interval '1' day;
-    END LOOP;
-    END; $$
-    `;
-}
