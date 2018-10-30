@@ -138,21 +138,21 @@ public class FactsMapperTest {
 
     }
 
-//    @Test
-//    public void mapDbHearingToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-//        val mapped = factsMapper.mapHearingToRuleJsonMessage(createHearing().g);
-//        val expected = "{"
-//            + "\"id\":\"" + ID + "\","
-//            + "\"sessionId\":\"" + SESSION_ID + "\","
-//            + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
-//            + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
-//            + "\"duration\":" + DURATION_MAPPED + ","
-//            + "\"scheduleStart\":\"" + START_MAPPED + "\","
-//            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
-//            + "\"createdAt\":\"" + START_MAPPED + "\""
-//            + "}";
-//        assertThat(mapped).isEqualTo(expected);
-//    }
+    @Test
+    public void mapDbHearingToRuleJsonMessage_mapsOk() throws JsonProcessingException {
+        val mapped = factsMapper.mapHearingToRuleJsonMessage(createHearing().getHearingParts().get(0));
+        val expected = "{"
+            + "\"id\":\"" + ID + "\","
+            + "\"sessionId\":\"" + SESSION_ID + "\","
+            + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
+            + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"scheduleStart\":\"" + START_MAPPED + "\","
+            + "\"scheduleEnd\":\"" + END_MAPPED + "\","
+            + "\"createdAt\":\"" + START_MAPPED + "\""
+            + "}";
+        assertThat(mapped).isEqualTo(expected);
+    }
 
     @Test
     public void mapDbSessionTypeToRuleJsonMessage_mapsOk() throws JsonProcessingException {
