@@ -72,7 +72,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg;
         try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
+            msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

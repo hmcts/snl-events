@@ -30,6 +30,7 @@ public class HearingInfo implements Serializable {
     private String communicationFacilitator;
     private Boolean deleted;
     private Long version;
+    private int numberOfSessionsNeeded;
 
     public HearingInfo(Hearing hearing) {
         this.setId(hearing.getId());
@@ -45,5 +46,6 @@ public class HearingInfo implements Serializable {
         this.setCommunicationFacilitator(hearing.getCommunicationFacilitator());
         this.setDeleted(hearing.isDeleted());
         this.setVersion(hearing.getVersion());
+        this.setNumberOfSessionsNeeded(hearing.getHearingParts().size());
     }
 }
