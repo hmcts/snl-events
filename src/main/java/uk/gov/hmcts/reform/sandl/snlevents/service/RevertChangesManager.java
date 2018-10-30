@@ -102,6 +102,17 @@ public class RevertChangesManager {
 
             hearingPartRepository.save(hearingParts);
             hearingRepository.save(hearing);
+
+            hearingParts.forEach(hp -> {
+                String msg;
+                try {
+                    msg = factsMapper.mapHearingPartToRuleJsonMessage(hp);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            });
         }
 
     }
