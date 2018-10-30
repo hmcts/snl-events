@@ -130,30 +130,6 @@ public class FactsMapper {
         }
     }
 
-    // to be removed?
-    @Deprecated
-    public String mapDbHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
-        FactHearingPart factHearingPart = new FactHearingPart();
-
-        factHearingPart.setId(hearing.getId().toString());
-        factHearingPart.setDuration(hearing.getDuration());
-        factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
-        factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
-        factHearingPart.setScheduleStart(hearing.getScheduleStart());
-        factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
-        factHearingPart.setCreatedAt(hearing.getCreatedAt());
-
-        HearingPart hearingPart = hearing.getHearingParts().get(0); // @TODO temporary solution
-        if (hearingPart.getSessionId() != null) {
-            factHearingPart.setSessionId(hearingPart.getSessionId().toString());
-        }
-
-        Optional.ofNullable(hearingPart.getSession()).ifPresent(
-            s -> factHearingPart.setSessionId(s.getId().toString()));
-
-        return objectMapper.writeValueAsString(factHearingPart);
-    }
-
     public String mapDbRoomToRuleJsonMessage(Room room) throws JsonProcessingException {
         FactRoom factRoom = new FactRoom();
 

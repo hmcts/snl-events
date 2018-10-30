@@ -147,53 +147,6 @@ public class RevertChangesManager {
         }
     }
 
-    @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
-//    private void handleHearingPart(UserTransactionData utd) {
-//        HearingPart hp = hearingPartRepository.findById(utd.getEntityId());
-//
-//        if ("update".equals(utd.getCounterAction())) {
-//            HearingPart previousHearingPart = new HearingPart();
-//            String msg = null;
-//
-//            try {
-//                previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
-//
-//                //msg = factsMapper.mapDbHearingToRuleJsonMessage(
-//                //hearingRepository.findOne(previousHearingPart.getHearingId())); @TODO if we change the rules
-//                //to have both entities
-//                //hearing and hearingPart then we would have to send a hearingPart here
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//
-//            //rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
-//
-//            entityManager.detach(previousHearingPart);
-//
-//            previousHearingPart.setVersion(hp.getVersion());
-//            entityManager.merge(previousHearingPart);
-//
-//            previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
-//            if (previousHearingPart.getSessionId() != null) {
-//                previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
-//
-//            }
-//
-//            hearingPartRepository.save(previousHearingPart);
-//        } else if ("delete".equals(utd.getCounterAction())) {
-//            hearingPartRepository.delete(utd.getEntityId());
-//
-//            String msg = null;
-//            try {
-//                msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//
-//            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_HEARING_PART, msg);
-//        }
-//    }
-
     private void handleSession(UserTransactionData utd) {
         if ("delete".equals(utd.getCounterAction())) {
             Session session = sessionRepository.findOne(utd.getEntityId());
