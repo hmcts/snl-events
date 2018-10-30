@@ -16,13 +16,41 @@ public class HearingMapperTests {
     private static final UUID ID = UUID.randomUUID();
 
     @Test
-    public void mapToHearingPart_fromCreateHearingPartRequest_shouldSetProperties() {
+    public void mapToHearingParts_fromCreateHearingPartRequestWithOneSessionToCreate_shouldSetProperties() {
         val chpr = new CreateHearingRequest();
         chpr.setId(ID);
+        chpr.setNumberOfSessions(1);
 
-        val hp = new HearingMapper().mapToHearingPart(chpr);
+        val hp = new HearingMapper().mapToHearingParts(chpr);
 
-        assertThat(hp.getId()).isNotNull();
-        assertThat(hp.getHearingId()).isEqualTo(ID);
+        assertThat(hp.size()).isEqualTo(1);
+        assertThat(hp.get(0).getId()).isNotNull();
+        assertThat(hp.get(0).getHearingId()).isEqualTo(ID);
+    }
+
+    @Test
+    public void mapToHearingParts_withTwoSessionsToCreate_shouldReturnObjectWithTwoHearingParts() {
+        val chpr = new CreateHearingRequest();
+        chpr.setId(ID);
+        chpr.setNumberOfSessions(2);
+
+        val hp = new HearingMapper().mapToHearingParts(chpr);
+
+        assertThat(hp.size()).isEqualTo(2);
+        assertThat(hp.get(0).getId()).isNotNull();
+        assertThat(hp.get(0).getHearingId()).isEqualTo(ID);
+        assertThat(hp.get(1).getId()).isNotNull();
+        assertThat(hp.get(1).getHearingId()).isEqualTo(ID);
+    }
+
+    @Test
+    public void mapToHearingParts_withZeroSessionToCreate_shouldReturnObjectWithoutHearingParts() {
+        val chpr = new CreateHearingRequest();
+        chpr.setId(ID);
+        chpr.setNumberOfSessions(0);
+
+        val hp = new HearingMapper().mapToHearingParts(chpr);
+
+        assertThat(hp.size()).isEqualTo(0);
     }
 }
