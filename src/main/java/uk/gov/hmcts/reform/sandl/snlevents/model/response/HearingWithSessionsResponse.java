@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,8 +44,9 @@ public class HearingWithSessionsResponse {
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
-            .filter(h -> h.getSession() != null)
-            .map(h -> new ViewSessionResponse(h.getSession()))
+            .filter(hp -> hp.getSession() != null)
+            .map(hp -> new ViewSessionResponse(hp.getSession()))
+            .sorted(comparing(ViewSessionResponse::getStart))
             .collect(Collectors.toList());
     }
 }
