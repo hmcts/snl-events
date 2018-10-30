@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-import java.time.OffsetDateTime;
+
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
