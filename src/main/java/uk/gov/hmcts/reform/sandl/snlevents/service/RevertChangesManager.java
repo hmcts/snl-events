@@ -76,18 +76,17 @@ public class RevertChangesManager {
                 throw new RuntimeException(e);
             }
 
-            previousHearing.getHearingParts().stream()
-                .forEach(hp -> {
-                    String msg;
-                    try {
-                        // For some reason after serialization haring is null event thought hearingId is set
-                        hp.setHearing(hearing);
-                        msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-                        rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            previousHearing.getHearingParts().stream().forEach(hp -> {
+                String msg;
+                try {
+                    // For some reason after serialization hearing is null even though hearingId is set
+                    hp.setHearing(hearing);
+                    msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+                    rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             entityManager.detach(hearing);
 
