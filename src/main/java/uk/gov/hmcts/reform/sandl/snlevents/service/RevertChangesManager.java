@@ -127,23 +127,22 @@ public class RevertChangesManager {
 
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
+                previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
 
-                //msg = factsMapper.mapDbHearingToRuleJsonMessage(
-                //hearingRepository.findOne(previousHearingPart.getHearingId())); @TODO if we change the rules
+                msg = factsMapper.mapHearingToRuleJsonMessage(previousHearingPart);
                 //to have both entities
                 //hearing and hearingPart then we would have to send a hearingPart here
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            //rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
             entityManager.detach(previousHearingPart);
 
             previousHearingPart.setVersion(hp.getVersion());
             entityManager.merge(previousHearingPart);
 
-            previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
             if (previousHearingPart.getSessionId() != null) {
                 previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
 

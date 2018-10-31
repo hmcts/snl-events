@@ -76,7 +76,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         String msg = null;
 
         try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
+            msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

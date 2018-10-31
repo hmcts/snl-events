@@ -228,4 +228,4 @@ sonarqube {
   }
 }
 
-test.finalizedBy integrationFakeRulesTests
+test.finalizedBy integrationTests, integrationFakeRulesTests

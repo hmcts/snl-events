@@ -23,7 +23,7 @@ import javax.transaction.Transactional;
 public class CreateListingRequestAction extends Action implements RulesProcessable {
 
     protected CreateHearingRequest createHearingRequest;
-    protected HearingPart hearingPart;
+    protected List<HearingPart> hearingParts;
     protected Hearing hearing;
 
     protected HearingTypeRepository hearingTypeRepository;
@@ -49,7 +49,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     @Override
     @Transactional
     public void act() {
-        hearingPart = hearingMapper.mapToHearingPart(createHearingRequest);
+        hearingParts = hearingMapper.mapToHearingParts(createHearingRequest);
 
         hearing = hearingMapper.mapToHearing(
             createHearingRequest,
@@ -58,7 +58,9 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
             entityManager
         );
 
-        hearing.addHearingPart(hearingPart);
+        hearingParts.forEach(hearingPart -> {
+            hearing.addHearingPart(hearingPart);
+        });
 
         hearingRepository.save(hearing);
     }
@@ -72,7 +74,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public FactMessage generateFactMessage() {
         String msg;
         try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
+            msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -84,7 +86,10 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hearingPart.getId(), 0));
+        hearingParts.forEach(hp -> {
+            userTransactionDataList.add(prepareCreateUserTransactionData(
+                "hearingPart", hp.getId(), 0));
+        });
         userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
         return userTransactionDataList;
