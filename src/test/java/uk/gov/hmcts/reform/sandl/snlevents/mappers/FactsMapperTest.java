@@ -144,7 +144,7 @@ public class FactsMapperTest {
     public void mapDbHearingToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapDbHearingToRuleJsonMessage(createHearing());
         val expected = "{"
-            + "\"id\":\"" + HP_IDrn t + "\","
+            + "\"id\":\"" + HP_ID + "\","
             + "\"sessionId\":\"" + SESSION_ID + "\","
             + "\"caseTypeCode\":\"" + CASE_TYPE_CODE + "\","
             + "\"hearingTypeCode\":\"" + HEARING_TYPE_CODE + "\","
