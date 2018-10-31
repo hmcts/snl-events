@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -20,13 +21,14 @@ public class HearingPartResponse implements Serializable {
 
     private Long version;
 
+    private OffsetDateTime start;
+
     public HearingPartResponse(HearingPart hearingPart) {
         this.id = hearingPart.getId();
         this.sessionId = hearingPart.getSessionId();
         this.version = hearingPart.getVersion();
-
+        this.start = hearingPart.getStart();
         this.hearingInfo = new HearingInfo(hearingPart.getHearing()); // @TODO lazy loading requires refactor
         // in the future because of performance issues
     }
 }
-
