@@ -135,7 +135,6 @@ public class FactsMapper {
     public String mapDbHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
         FactHearingPart factHearingPart = new FactHearingPart();
 
-        factHearingPart.setId(hearing.getId().toString());
         factHearingPart.setDuration(hearing.getDuration());
         factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
         factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
@@ -144,6 +143,8 @@ public class FactsMapper {
         factHearingPart.setCreatedAt(hearing.getCreatedAt());
 
         HearingPart hearingPart = hearing.getHearingParts().get(0); // @TODO temporary solution
+        factHearingPart.setId(hearingPart.getId().toString());
+
         if (hearingPart.getSessionId() != null) {
             factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
