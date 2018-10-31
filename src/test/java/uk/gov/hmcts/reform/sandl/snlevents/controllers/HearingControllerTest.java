@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
@@ -120,5 +122,17 @@ public class HearingControllerTest {
 
         val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    public void unlistHearing_shouldReturnUserTransaction() throws Exception {
+        val ut = createUserTransaction();
+
+        when(hearingService.unlist(any())).thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(put(URL), new UnlistHearingRequest(),
+            UserTransaction.class);
+
+        assertThat(response).isEqualTo(ut);
     }
 }
