@@ -112,17 +112,6 @@ public class CreateListingRequestActionTest {
         assertThat(factMessages.get(0).getData()).isNotNull();
     }
 
-    // ?
-    @Test
-    public void generateFactMessage_throwsException() {
-        action.act();
-        List<FactMessage> factMessages = action.generateFactMessages();
-
-        assertThat(factMessages.size()).isEqualTo(1);
-        assertThat(factMessages.get(0).getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
-        assertThat(factMessages.get(0).getData()).isNotNull();
-    }
-
     @Test
     public void getUserTransactionData_returnsCorrectData() {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();

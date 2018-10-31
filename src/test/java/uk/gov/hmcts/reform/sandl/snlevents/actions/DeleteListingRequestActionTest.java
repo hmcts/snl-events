@@ -62,10 +62,11 @@ public class DeleteListingRequestActionTest {
             entityManager,
             objectMapper);
 
+        Hearing hearing = createHearing();
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
 
-        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(createHearing());
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
     }
 
     @Test
@@ -151,13 +152,14 @@ public class DeleteListingRequestActionTest {
         hearing.setId(dlr.getHearingId());
         hearing.setCaseType(new CaseType());
         hearing.setHearingType(new HearingType());
-        hearing.setHearingParts(Arrays.asList(createHearingPart()));
+        hearing.setHearingParts(Arrays.asList(createHearingPart(hearing)));
         return hearing;
     }
 
-    private HearingPart createHearingPart() {
+    private HearingPart createHearingPart(Hearing hearing) {
         val hearingPart = new HearingPart();
         hearingPart.setId(createUuid(HEARING_PART_ID));
+        hearingPart.setHearing(hearing);
         return hearingPart;
     }
 

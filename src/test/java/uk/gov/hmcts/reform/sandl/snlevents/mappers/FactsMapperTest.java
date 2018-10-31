@@ -99,6 +99,8 @@ public class FactsMapperTest {
         h.setScheduleEnd(END);
         h.setCreatedAt(START);
         val hp = new HearingPart();
+        hp.setHearing(h);
+        hp.setId(createUuid());
         hp.setSessionId(createUuid(SESSION_ID));
         h.setHearingParts(Arrays.asList(hp));
 
@@ -139,7 +141,7 @@ public class FactsMapperTest {
     }
 
     @Test
-    public void mapDbHearingToRuleJsonMessage_mapsOk() throws JsonProcessingException {
+    public void mapDbHearingToRuleJsonMessage_mapsOk() {
         val mapped = factsMapper.mapHearingToRuleJsonMessage(createHearing().getHearingParts().get(0));
         val expected = "{"
             + "\"id\":\"" + ID + "\","

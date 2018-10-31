@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -17,9 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,15 +63,12 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        List<UUID> ids = new LinkedList<>(Arrays.asList(unlistHearingRequest.getHearingId()));
-        val hearingPartsIds = hearing.getHearingParts().stream().map(HearingPart::getId).collect(Collectors.toList());
-        val sessionsIds = hearing.getHearingParts().stream()
+        val ids = hearing.getHearingParts().stream().map(HearingPart::getId).collect(Collectors.toList());
+        ids.addAll(hearing.getHearingParts().stream()
             .map(HearingPart::getSessionId)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-        ids.addAll(hearingPartsIds);
-        ids.addAll(sessionsIds);
+            .collect(Collectors.toList()));
+        ids.add(unlistHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);
     }
@@ -80,7 +76,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public void act() {
         if (sessions.isEmpty()) {
-            throw new RuntimeException("Hearing parts assigned to Hearing haven't been listed yet");
+            throw new EntityNotFoundException("Hearing parts assigned to Hearing haven't been listed yet");
         }
 
         originalHearingParts = mapHearingPartsToStrings(hearingParts);
@@ -102,7 +98,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             .filter(hpv -> hpv.getId().equals(hp.getId()))
             .findFirst();
         return hpvi.orElseThrow(() ->
-            new RuntimeException("Couldn't find version for hearing part with id " + hp.getId().toString())
+            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
         );
     }
 
@@ -119,9 +115,9 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             )
         );
 
-        userTransactionDataList.add(getLockedEntityTransactionData("hearing", hearing.getId()));
+        userTransactionDataList.add(prepareLockedEntityTransactionData("hearing", hearing.getId()));
         sessions.stream().forEach(s ->
-            userTransactionDataList.add(getLockedEntityTransactionData("session", s.getId()))
+            userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
         );
 
         return userTransactionDataList;
@@ -132,12 +128,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         List<FactMessage> msgs = new ArrayList<>();
 
         hearingParts.forEach(hp -> {
-            String msg;
-            try {
-                msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             msgs.add(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
         });
 
@@ -149,7 +140,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         return unlistHearingRequest.getUserTransactionId();
     }
 
-    private UserTransactionData getLockedEntityTransactionData(String entity, UUID id) {
+    private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
         return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
     }
 

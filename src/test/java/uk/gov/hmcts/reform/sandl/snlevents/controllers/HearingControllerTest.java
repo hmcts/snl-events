@@ -116,6 +116,7 @@ public class HearingControllerTest {
         expectedResponse.setCaseType("desc");
         expectedResponse.setHearingType("desc");
         expectedResponse.setSessions(Collections.emptyList());
+        expectedResponse.setHearingPartsVersions(Collections.emptyList());
 
         val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);

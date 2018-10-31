@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
@@ -73,14 +72,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     @Override
     public List<FactMessage> generateFactMessages() {
         return hearing.getHearingParts().stream().map(hp -> {
-            String msg;
-
-            try {
-                msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
         }).collect(Collectors.toList());
     }
