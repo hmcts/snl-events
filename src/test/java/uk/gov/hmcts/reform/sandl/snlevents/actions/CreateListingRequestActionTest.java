@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 public class CreateListingRequestActionTest {
 
     private static final String HEARING_PART_ID = "123e4567-e89b-12d3-a456-426655440000";
+    private static final String HEARING_PART_ID2 = "123e4567-e89b-12d3-a456-426655440001";
     private static final String HEARING_ID = "38692091-8165-43a5-8c63-977723a77228";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
 
@@ -65,7 +68,7 @@ public class CreateListingRequestActionTest {
 
     @Before
     public void setup() {
-        this.createHearingRequest = createCreateHearingPart();
+        this.createHearingRequest = createCreateHearingPart(1);
         this.action = new CreateListingRequestAction(
             createHearingRequest,
             hearingMapper,
@@ -74,10 +77,12 @@ public class CreateListingRequestActionTest {
             hearingRepository,
             entityManager
         );
-        this.hearingPart = createHearingPart();
+        this.hearingPart = createHearingPart(HEARING_PART_ID);
 
         when(hearingRepository.save(any(Hearing.class))).thenReturn(createHearing());
-        when(hearingMapper.mapToHearingPart(createHearingRequest)).thenReturn(createHearingPart());
+        when(hearingMapper.mapToHearingParts(createHearingRequest)).thenReturn(
+            Collections.singletonList(createHearingPart(HEARING_PART_ID))
+        );
         when(caseTypeRepository.findOne(createHearingRequest.getCaseTypeCode())).thenReturn(new CaseType());
         when(hearingTypeRepository.findOne(createHearingRequest.getHearingTypeCode())).thenReturn(new HearingType());
     }
@@ -137,11 +142,49 @@ public class CreateListingRequestActionTest {
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
     }
 
-    private CreateHearingRequest createCreateHearingPart() {
+    @Test
+    public void getUserTransactionData_withMultupleHearingParts_returnsCorrectData() {
+        List<UserTransactionData> expectedTransactionData = new ArrayList<>();
+
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            createUuid(HEARING_PART_ID),
+            null,
+            "create",
+            "delete",
+            0));
+
+
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            createUuid(HEARING_PART_ID2),
+            null,
+            "create",
+            "delete",
+            0));
+
+        expectedTransactionData.add(new UserTransactionData("hearing",
+            createUuid(HEARING_ID),
+            null,
+            "create",
+            "delete",
+            1));
+
+        when(hearingMapper.mapToHearingParts(createHearingRequest)).thenReturn(Arrays.asList(
+            createHearingPart(HEARING_PART_ID), createHearingPart(HEARING_PART_ID2))
+        );
+
+        action.act();
+
+        List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
+
+        assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
+    }
+
+    private CreateHearingRequest createCreateHearingPart(int numberOfSessions) {
         val chp = new CreateHearingRequest();
         chp.setId(createUuid(HEARING_ID));
         chp.setCaseTypeCode("ct");
         chp.setUserTransactionId(createUuid(TRANSACTION_ID));
+        chp.setNumberOfSessions(numberOfSessions);
 
         return chp;
     }
@@ -152,9 +195,9 @@ public class CreateListingRequestActionTest {
         return new Hearing();
     }
 
-    private HearingPart createHearingPart() {
+    private HearingPart createHearingPart(String hearingPartId) {
         val hp = new HearingPart();
-        hp.setId(createUuid(HEARING_PART_ID));
+        hp.setId(createUuid(hearingPartId));
 
         return hp;
     }

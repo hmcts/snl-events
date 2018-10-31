@@ -21,4 +21,6 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
     List<Session> findSessionByStartBetweenAndPerson_UsernameEquals(OffsetDateTime startDate,
                                                                OffsetDateTime endDate,
                                                                String judge);
+
+    List<Session> findSessionByIdIn(List<UUID> ids);
 }
