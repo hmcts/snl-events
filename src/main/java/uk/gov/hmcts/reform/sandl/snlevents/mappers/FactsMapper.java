@@ -210,7 +210,7 @@ public class FactsMapper {
         Hearing hearing = hearingPart.getHearing();
         FactHearingPart factHearingPart = new FactHearingPart();
 
-        factHearingPart.setId(hearing.getId().toString());
+        factHearingPart.setId(hearingPart.getId().toString());
         factHearingPart.setDuration(hearing.getDuration());
         factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
         factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());

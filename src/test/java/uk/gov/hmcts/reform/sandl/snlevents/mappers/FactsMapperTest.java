@@ -51,7 +51,7 @@ public class FactsMapperTest {
     private static final String SESSION_ID = "83537f81-b730-4754-aba4-0277b7882824";
     private static final String PERSON_ID = "1fa92e14-ce0e-4a1f-b352-53f1581d771f";
     private static final String ROOM_ID = "3a8b6e05-afb9-4b2a-b87d-152971d0607a";
-    private static final UUID HP_ID = UUID.randomUUID();
+    private static final String HP_ID = "d26119ab-f3fa-47c9-9733-047b744a0c8a";
 
     public static final int VALUE = 123;
     private static final String PERSON_NAME = "Grzesiek";
@@ -100,7 +100,7 @@ public class FactsMapperTest {
         h.setScheduleEnd(END);
         h.setCreatedAt(START);
         val hp = new HearingPart();
-        hp.setId(HP_ID);
+        hp.setId(createUuid(HP_ID));
         hp.setSessionId(createUuid(SESSION_ID));
         h.setHearingParts(Arrays.asList(hp));
 
@@ -117,6 +117,7 @@ public class FactsMapperTest {
         h.setScheduleEnd(END);
         h.setCreatedAt(START);
         val hp = new HearingPart();
+        hp.setId(createUuid(HP_ID));
         hp.setSessionId(createUuid(SESSION_ID));
         h.setHearingParts(Arrays.asList(hp));
         hp.setHearing(h);
@@ -208,7 +209,7 @@ public class FactsMapperTest {
     @Test
     public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
         val mapped = factsMapper.mapHearingPartToRuleJsonMessage(createHearingPart());
-        val expected = "{\"id\":\"123e4567-e89b-12d3-a456-426655440000\","
+        val expected = "{\"id\":\"d26119ab-f3fa-47c9-9733-047b744a0c8a\","
             + "\"sessionId\":null,"
             + "\"caseTypeCode\":\"case-type\","
             + "\"hearingTypeCode\":\"hearing-type-2\","
