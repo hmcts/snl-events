@@ -195,7 +195,7 @@ public class HearingPartService {
                 throw new RuntimeException(e);
             }
         });
-        
+
         UserTransaction ut = assignWithTransaction(hearing,
                 assignment.getUserTransactionId(),
                 targetSessions, beforeHearing, previousHearingPartsData);
