@@ -76,7 +76,7 @@ public class HearingController {
         return hearingService.search(searchCriteriaList, pageRequest);
     }
 
-    @PutMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity unlist(@RequestBody UnlistHearingRequest unlistHearingRequest) {
         return ok(hearingService.unlist(unlistHearingRequest));
     }

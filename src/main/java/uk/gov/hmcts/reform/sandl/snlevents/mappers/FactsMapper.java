@@ -100,9 +100,6 @@ public class FactsMapper {
             factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
 
-        Optional.ofNullable(hearingPart.getSession()).ifPresent(
-            s -> factHearingPart.setSessionId(s.getId().toString()));
-
         try {
             return objectMapper.writeValueAsString(factHearingPart);
         } catch (JsonProcessingException e) {

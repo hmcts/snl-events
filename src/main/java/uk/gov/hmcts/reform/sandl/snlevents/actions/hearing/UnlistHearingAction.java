@@ -92,16 +92,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         hearingPartRepository.save(hearingParts);
     }
 
-    private VersionInfo getVersionInfo(HearingPart hp) {
-        Optional<VersionInfo> hpvi = unlistHearingRequest.getHearingPartsVersions()
-            .stream()
-            .filter(hpv -> hpv.getId().equals(hp.getId()))
-            .findFirst();
-        return hpvi.orElseThrow(() ->
-            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
-        );
-    }
-
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
@@ -138,6 +128,16 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public UUID getUserTransactionId() {
         return unlistHearingRequest.getUserTransactionId();
+    }
+
+    private VersionInfo getVersionInfo(HearingPart hp) {
+        Optional<VersionInfo> hpvi = unlistHearingRequest.getHearingPartsVersions()
+            .stream()
+            .filter(hpv -> hpv.getId().equals(hp.getId()))
+            .findFirst();
+        return hpvi.orElseThrow(() ->
+            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
+        );
     }
 
     private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
