@@ -26,6 +26,7 @@ import javax.persistence.EntityManager;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,38 +71,38 @@ public class RevertChangesManagerTest {
         Hearing h = createHearing();
         Hearing prevHearing = createHearing();
         prevHearing.setCaseTitle("PRE");
-        when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(h));
+        when(hearingRepository.findById(any())).thenReturn(Optional.of(h));
         val transaction = createUserTransactionWithHearingUpdate();
-        when(objectMapper.readValue(any(String.class), eq(Hearing.class))).thenReturn(prevHearing);
+        when(objectMapper.readValue(anyString(), eq(Hearing.class))).thenReturn(prevHearing);
 
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
-            .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
+            .postMessage(isNull(), eq(RulesService.UPSERT_HEARING_PART), isNull());
 
         verify(hearingRepository, times(1)).save(prevHearing);
     }
 
     @Test
     public void revertChanges_deletesSessionInRuleService_ifCounterActionIsDelete() throws IOException {
-        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.of(createSession()));
+        when(sessionRepository.findById(any())).thenReturn(Optional.of(createSession()));
         val transaction = createUserTransactionWithSessionDelete();
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
-            .postMessage(any(UUID.class), eq(RulesService.DELETE_SESSION), anyString());
+            .postMessage(isNull(), eq(RulesService.DELETE_SESSION), isNull());
     }
 
     @Test
     public void revertChanges_deleteHearingPart() throws IOException {
-        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingPartRepository.findByIdWithHearing(any())).thenReturn(createHearingPart());
         val transaction = createUserTransactionWithHearingPartDelete();
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
-            .postMessage(any(UUID.class), eq(RulesService.DELETE_HEARING_PART), anyString());
+            .postMessage(isNull(), eq(RulesService.DELETE_HEARING_PART), isNull());
     }
 
     @Test
     public void revertChanges_updateHearingPart() throws IOException {
-        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingPartRepository.findByIdWithHearing(any())).thenReturn(createHearingPart());
         when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(createHearingPart());
         val transaction = createUserTransactionWithHearingPartUpsert();
         revertChangesManager.revertChanges(transaction);
@@ -111,7 +112,7 @@ public class RevertChangesManagerTest {
 
     @Test(expected = EntityNotFoundException.class)
     public void revertChanges_throwsException_whenSessionIsNotFound() throws IOException {
-        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+        when(sessionRepository.findById(any())).thenReturn(Optional.empty());
         revertChangesManager.revertChanges(createUserTransactionWithSessionDelete());
     }
 
@@ -153,6 +154,7 @@ public class RevertChangesManagerTest {
         val data = new UserTransactionData();
         data.setEntity("hearing");
         data.setCounterAction("update");
+        data.setBeforeData("");
         transaction.addUserTransactionData(data);
 
         return transaction;
