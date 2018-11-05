@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -9,7 +10,9 @@ import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.testactions.RulesProcessableTestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.testactions.TestAction;
+import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.mockito.Matchers.any;
@@ -67,7 +70,9 @@ public class ActionServiceTest {
     @Test
     public void execute_CallsRulesServiceWhenInstanceOfRulesProcessable() {
         UUID id = UUID.randomUUID();
+        val factMsgs = Arrays.asList(new FactMessage("Test", "Test"));
         when(mockRulesProcessableTestAction.getUserTransactionId()).thenReturn(id);
+        when(mockRulesProcessableTestAction.generateFactMessages()).thenReturn(factMsgs);
 
         actionService.execute(mockRulesProcessableTestAction);
 
