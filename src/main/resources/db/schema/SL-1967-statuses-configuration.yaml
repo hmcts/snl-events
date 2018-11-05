@@ -56,7 +56,7 @@ databaseChangeLog:
             value: true
         tableName: status_config
 - changeSet:
-    id: add-statuse-column-to-hearing-and-hearing-part
+    id: add-statuses-column-to-hearing-and-hearing-part
     author: rkruk
     changes:
     - addColumn:
