@@ -18,7 +18,7 @@ databaseChangeLog:
             name: can_be_unlisted
             type: boolean
         - column:
-            name: count_in_duration
+            name: count_in_utilization
             type: boolean
 - changeSet:
     id: insert-statuses
@@ -37,7 +37,7 @@ databaseChangeLog:
               name: can_be_unlisted
               value: false
           - column:
-              name: count_in_duration
+              name: count_in_utilization
               value: false
         tableName: status_config
     - insert:
@@ -52,7 +52,7 @@ databaseChangeLog:
             name: can_be_unlisted
             value: true
         - column:
-            name: count_in_duration
+            name: count_in_utilization
             value: true
         tableName: status_config
 - changeSet:
