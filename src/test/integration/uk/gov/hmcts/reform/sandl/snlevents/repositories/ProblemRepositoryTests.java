@@ -61,7 +61,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
         problems.add(fiveMinutesAgoWarning);
         problems.add(withoutCreatedAtAndDifferentSeverity);
 
-        problemRepository.save(problems);
+        problemRepository.saveAll(problems);
 
         List<Problem> sortedProblems = problemRepository.getAllSortedBySeverityAndCreatedAt();
 
@@ -94,7 +94,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
         problems.add(fiveMinutesAgoWarning);
         problems.add(withoutCreatedAtAndDifferentSeverity);
 
-        problemRepository.save(problems);
+        problemRepository.saveAll(problems);
 
         Page<Problem> sortedProblemsPage = problemRepository.getAllSortedBySeverityAndCreatedAt(new PageRequest(0, 20));
 
@@ -134,7 +134,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
         problems.add(threeHourAgoCritical);
         problems.add(hourAgoUrgent);
 
-        problemRepository.save(problems);
+        problemRepository.saveAll(problems);
 
         List<Problem> problemsByRef = problemRepository.getProblemsByReferenceEntityId(entityId);
 
@@ -164,7 +164,7 @@ public class ProblemRepositoryTests extends BaseIntegrationModelTest  {
         problems.add(threeHourAgoCritical);
         problems.add(hourAgoUrgent);
 
-        problemRepository.save(problems);
+        problemRepository.saveAll(problems);
 
         List<Problem> problemsByUTranId = problemRepository.getProblemsByUserTransactionId(userTransactionId);
 
