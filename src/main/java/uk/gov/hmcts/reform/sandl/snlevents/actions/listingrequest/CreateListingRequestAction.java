@@ -59,9 +59,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
             entityManager
         );
 
-        hearingParts.forEach(hearingPart -> {
-            hearing.addHearingPart(hearingPart);
-        });
+        hearingParts.forEach(hearingPart -> hearing.addHearingPart(hearingPart));
 
         hearingRepository.save(hearing);
     }

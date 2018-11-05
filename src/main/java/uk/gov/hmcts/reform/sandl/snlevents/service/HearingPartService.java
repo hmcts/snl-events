@@ -100,19 +100,19 @@ public class HearingPartService {
 
         AtomicInteger index = new AtomicInteger();
 
-        hearing.getHearingParts().forEach(hp -> {
+        hearing.getHearingParts().forEach(hp ->
             userTransactionDataList.add(new UserTransactionData("hearingPart",
                 hp.getId(),
                 previousHearingParts.get(index.getAndIncrement()),
                 "update",
                 "update",
                 1
-                ));
-        });
+                ))
+        );
 
-        targetSessions.forEach(session -> {
-            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()));
-        });
+        targetSessions.forEach(session ->
+            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()))
+        );
 
         return userTransactionService.startTransaction(transactionId, userTransactionDataList);
     }

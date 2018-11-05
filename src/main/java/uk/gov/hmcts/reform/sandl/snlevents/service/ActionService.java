@@ -25,7 +25,7 @@ public class ActionService {
 
         action.getAndValidateEntities();
 
-        // TODO move action.generateUserTransactionData() here in order to save entity state before act
+        // TO DO move action.generateUserTransactionData() here in order to save entity state before act
 
         if (userTransactionService.isAnyBeingTransacted(action.getAssociatedEntitiesIds())) {
             return userTransactionService.transactionConflicted(transactionId);
