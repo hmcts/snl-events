@@ -27,10 +27,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 public class UnlistHearingActionTest {
@@ -102,7 +103,7 @@ public class UnlistHearingActionTest {
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
         action.getAndValidateEntities();
         UUID[] ids = action.getAssociatedEntitiesIds();
-        UUID[] expectedUUIDs = new UUID[]{
+        UUID[] expectedUuids = new UUID[]{
             HEARING_ID_TO_BE_UNLISTED,
             HEARING_PART_ID_A,
             HEARING_PART_ID_B,
@@ -110,8 +111,8 @@ public class UnlistHearingActionTest {
             SESSION_ID_B
         };
 
-        assertThat(ids.length).isEqualTo(expectedUUIDs.length);
-        assertTrue(Arrays.asList(ids).containsAll(Arrays.asList(expectedUUIDs)));
+        assertThat(ids.length).isEqualTo(expectedUuids.length);
+        assertTrue(Arrays.asList(ids).containsAll(Arrays.asList(expectedUuids)));
     }
 
     @Test
@@ -131,7 +132,7 @@ public class UnlistHearingActionTest {
     }
 
     @Test
-    public void getUserTransactionId_shouldReturnUUID() {
+    public void getUserTransactionId_shouldReturnUuid() {
         assertNotNull(action.getUserTransactionId());
     }
 
@@ -149,17 +150,19 @@ public class UnlistHearingActionTest {
     }
 
     private void assertThatContainsHearigPart(List<UserTransactionData> userTransactionData, UUID hearingPartId) {
-        val hearingBUSerTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == hearingPartId).findFirst().get();
-        assertThat(hearingBUSerTransactionData.getEntity()).isEqualTo("hearingPart");
-        assertThat(hearingBUSerTransactionData.getAction()).isEqualTo("update");
-        assertThat(hearingBUSerTransactionData.getCounterAction()).isEqualTo("update");
+        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == hearingPartId)
+            .findFirst().get();
+        assertThat(hearingUserTransactionData.getEntity()).isEqualTo("hearingPart");
+        assertThat(hearingUserTransactionData.getAction()).isEqualTo("update");
+        assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("update");
     }
 
     private void assertThatContainsEntity(List<UserTransactionData> userTransactionData, String entity, UUID id) {
-        val hearingBUSerTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == id).findFirst().get();
-        assertThat(hearingBUSerTransactionData.getEntity()).isEqualTo(entity);
-        assertThat(hearingBUSerTransactionData.getAction()).isEqualTo("lock");
-        assertThat(hearingBUSerTransactionData.getCounterAction()).isEqualTo("unlock");
+        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == id)
+            .findFirst().get();
+        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entity);
+        assertThat(hearingUserTransactionData.getAction()).isEqualTo("lock");
+        assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("unlock");
     }
 
     private static VersionInfo getVersionInfo(UUID id, Long version) {
