@@ -25,9 +25,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ProblemController.class)
+@WebMvcTest(value = ProblemController.class, secure = false)
 @Import(TestConfiguration.class)
-@AutoConfigureMockMvc(secure = false)
 public class ProblemControllerTest {
     public static final String URL = "/problems";
 

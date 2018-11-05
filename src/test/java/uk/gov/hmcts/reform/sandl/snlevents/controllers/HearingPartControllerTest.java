@@ -7,7 +7,6 @@ import lombok.var;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -54,9 +53,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(HearingPartController.class)
+@WebMvcTest(value = HearingPartController.class, secure = false)
 @Import(TestConfiguration.class)
-@AutoConfigureMockMvc(secure = false)
 public class HearingPartControllerTest {
     public static final String CASE_TYPE_CODE = "type";
     public static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE,"case-type-desc");

@@ -23,9 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(PersonController.class)
+@WebMvcTest(value = PersonController.class, secure = false)
 @Import(TestConfiguration.class)
-@AutoConfigureMockMvc(secure = false)
 public class PersonControllerTest {
 
     @MockBean

@@ -30,14 +30,14 @@
               class="com.microsoft.applicationinsights.logback.ApplicationInsightsAppender">
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
       <appender-ref ref="aiAppender" />
       <appender-ref ref="rolling" />
     </root>
 
-    <logger name="uk.gov.hmcts.reform.sandl" level="DEBUG" />
+    <logger name="uk.gov.hmcts.reform.sandl" level="INFO" />
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

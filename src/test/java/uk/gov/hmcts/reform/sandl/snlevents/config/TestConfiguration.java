@@ -24,9 +24,4 @@ public class TestConfiguration {
     public S2SAuthenticationConfig s2SAuthenticationConfig() {
         return new S2SAuthenticationConfig();
     }
-
-    @Bean
-    public ServiceAuthenticationEntryPoint unauthorizedHandler() {
-        return new ServiceAuthenticationEntryPoint();
-    };
 }

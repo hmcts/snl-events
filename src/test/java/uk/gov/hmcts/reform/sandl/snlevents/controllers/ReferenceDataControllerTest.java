@@ -31,9 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ReferenceDataController.class)
+@WebMvcTest(value = ReferenceDataController.class, secure = false)
 @Import(TestConfiguration.class)
-@AutoConfigureMockMvc(secure = false)
 public class ReferenceDataControllerTest {
     public static final String URL_ROOM_TYPES = "/reference/room-types";
     public static final String URL_SESSION_TYPES = "/reference/session-types";
