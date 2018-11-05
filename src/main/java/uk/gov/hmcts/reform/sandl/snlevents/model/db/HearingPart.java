@@ -48,8 +48,6 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Column(name = "session_id", updatable = false, insertable = false)
     private UUID sessionId;
 
-    //private OffsetDateTime start;
-
     private boolean isDeleted;
 
     @CreatedDate
