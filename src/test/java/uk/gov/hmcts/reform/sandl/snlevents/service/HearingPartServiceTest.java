@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -154,7 +152,8 @@ public class HearingPartServiceTest {
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
 
-        Mockito.when(objectMapper.writeValueAsString(isA(HearingPart.class))).thenThrow(new JsonProcessingException("") {});
+        Mockito.when(objectMapper.writeValueAsString(isA(HearingPart.class)))
+            .thenThrow(new JsonProcessingException("") {});
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingSessionRelationship()
