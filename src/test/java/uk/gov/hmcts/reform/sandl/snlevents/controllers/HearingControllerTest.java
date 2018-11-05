@@ -130,7 +130,7 @@ public class HearingControllerTest {
 
         when(hearingService.unlist(any())).thenReturn(ut);
 
-        val response = mvc.callAndMapResponse(put(URL), new UnlistHearingRequest(),
+        val response = mvc.callAndMapResponse(put(URL + "/unlist"), new UnlistHearingRequest(),
             UserTransaction.class);
 
         assertThat(response).isEqualTo(ut);
