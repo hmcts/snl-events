@@ -24,7 +24,7 @@ public interface HearingPartRepository extends JpaRepository<HearingPart, UUID> 
     List<HearingPart> findBySessionIsNull();
 
     @Query(value = "select hp from HearingPart hp JOIN FETCH hp.hearing where hp.id = :uuid")
-    HearingPart findById(@Param("uuid") UUID uuid);
+    HearingPart findByIdWithHearing(@Param("uuid") UUID uuid);
 
     @Query(nativeQuery = true,
         value = "select cast(title as varchar(100)) as title, cast(hearings as int) as hearings, \n"

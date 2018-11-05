@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -85,10 +86,10 @@ public class UpdateListingRequestActionTest {
         hearing.setHearingType(new HearingType());
         hearing.setHearingParts(Arrays.asList(new HearingPart()));
 
-        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
+        Mockito.when(hearingRepository.findById(createUuid(ID))).thenReturn(Optional.of(hearing));
         when(hearingRepository.save(Matchers.any(Hearing.class))).thenReturn(hearing);
-        when(caseTypeRepository.findOne(eq(CASE_TYPE_CODE))).thenReturn(CASE_TYPE);
-        when(hearingTypeRepository.findOne(eq(HEARING_TYPE_CODE))).thenReturn(HEARING_TYPE);
+        when(caseTypeRepository.findById(eq(CASE_TYPE_CODE))).thenReturn(Optional.of(CASE_TYPE));
+        when(hearingTypeRepository.findById(eq(HEARING_TYPE_CODE))).thenReturn(Optional.of(HEARING_TYPE));
     }
 
     @Test

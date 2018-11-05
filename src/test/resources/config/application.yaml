@@ -52,15 +52,10 @@ fact-propagation:
       - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
 
-liquibase:
-  enabled: true
-  change-log: classpath:db/db-testdata-changelog.yaml
-  drop-first: true
-  user: sa
-  password:
-
 #If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:
+  main:
+      allow-bean-definition-overriding: true
   application:
     name: snl-events-tests
   datasource:
@@ -70,6 +65,12 @@ spring:
       properties:
         charSet: UTF-8
       driver-class-name: org.h2.Driver
+  liquibase:
+      enabled: true
+      change-log: classpath:db/db-testdata-changelog.yaml
+      drop-first: true
+      user: sa
+      password:
   jpa:
     hibernate:
       ddl-auto: validate

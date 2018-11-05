@@ -186,7 +186,7 @@ public class HearingPartControllerTest {
 
     @Test
     public void getHearingPartResponse_shouldReturnValidResponse() throws Exception {
-        when(hearingPartRepository.findOne(createUuid())).thenReturn(createHearingPart());
+        when(hearingPartRepository.findByIdWithHearing(createUuid())).thenReturn(createHearingPart());
 
         val response = mvc.getAndMapResponse(URL + "/" + createUuid(),
             HearingPartResponse.class);

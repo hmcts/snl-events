@@ -31,8 +31,8 @@ public class HearingTypeTests extends BaseIntegrationModelTest  {
 
         hearingTypeRepository.saveAndFlush(hearingType);
 
-        SessionType savedSessionType = sessionTypeRepository.findOne(REF_TYPE_CODE);
-        HearingType savedHearingType = hearingTypeRepository.findOne(MAIN_TYPE_CODE);
+        SessionType savedSessionType = sessionTypeRepository.findById(REF_TYPE_CODE).orElse(null);
+        HearingType savedHearingType = hearingTypeRepository.findById(MAIN_TYPE_CODE).orElse(null);
 
         assertThat(savedSessionType.getHearingTypes().size()).isEqualTo(1);
         assertThat(savedHearingType.getSessionTypes().contains(sessionType)).isTrue();
@@ -45,8 +45,8 @@ public class HearingTypeTests extends BaseIntegrationModelTest  {
 
         hearingTypeRepository.saveAndFlush(hearingType);
 
-        CaseType savedCaseType = caseTypeRepository.findOne(REF_TYPE_CODE);
-        HearingType savedHearingType = hearingTypeRepository.findOne(MAIN_TYPE_CODE);
+        CaseType savedCaseType = caseTypeRepository.findById(REF_TYPE_CODE).orElse(null);
+        HearingType savedHearingType = hearingTypeRepository.findById(MAIN_TYPE_CODE).orElse(null);
 
         assertThat(savedCaseType.getHearingTypes().size()).isEqualTo(1);
         assertThat(savedHearingType.getCaseTypes().contains(caseType)).isTrue();

@@ -38,8 +38,8 @@
 //
 //    @Override
 //    public void getAndValidateEntities() {
-//        hearingPart = hearingPartRepository.findOne(hearingPartId);
-//        targetSession = sessionRepository.findOne(hearingSessionRelationship.getSessionId());
+//        hearingPart = hearingPartRepository.findByIdWithHearing(hearingPartId);
+//        targetSession = sessionRepository.findByIdWithHearing(hearingSessionRelationship.getSessionId());
 //        if (targetSession == null) {
 //            throw new RuntimeException("Target session cannot be null!");
 //        } else if (hearingPart == null) {

@@ -105,7 +105,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         ut = userTransactionService.commit(ut.getId());
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.COMMITTED);
 
-        HearingPart hearingPartAfterAssignment = hearingPartRepository.findOne(hearingPart.getId());
+        HearingPart hearingPartAfterAssignment = hearingPartRepository.findByIdWithHearing(hearingPart.getId());
 
         assertThat(hearingPartAfterAssignment.getSessionId()).isEqualTo(savedSession.getId());
     }

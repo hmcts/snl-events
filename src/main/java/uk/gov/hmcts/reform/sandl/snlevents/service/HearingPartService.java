@@ -79,8 +79,8 @@ public class HearingPartService {
         return hearingPartRepository.save(hearingPart);
     }
 
-    public HearingPart findOne(UUID id) {
-        return hearingPartRepository.findOne(id);
+    public HearingPart findById(UUID id) {
+        return hearingPartRepository.findByIdWithHearing(id);
     }
 
     public UserTransaction assignWithTransaction(Hearing hearing, UUID transactionId,
@@ -152,7 +152,7 @@ public class HearingPartService {
     public UserTransaction assignHearingToSessionWithTransaction(UUID hearingId,
                                                                  HearingSessionRelationship assignment)
                                                                         throws IOException {
-        Hearing hearing = hearingRepository.findOne(hearingId);
+        Hearing hearing = hearingRepository.findById(hearingId).orElse(null);
         List<UUID> sessionIds = assignment.getSessionsData()
             .stream()
             .map(SessionAssignmentData::getSessionId)
@@ -227,8 +227,8 @@ public class HearingPartService {
     public UserTransaction assignHearingPartToSessionWithTransaction(UUID hearingPartId,
                                                                      HearingPartSessionRelationship assignment)
         throws IOException {
-        HearingPart hearingPart = hearingPartRepository.findOne(hearingPartId);
-        Session targetSession = sessionRepository.findOne(assignment.getSessionData().getSessionId());
+        HearingPart hearingPart = hearingPartRepository.findByIdWithHearing(hearingPartId);
+        Session targetSession = sessionRepository.findById(assignment.getSessionData().getSessionId()).orElse(null);
 
         return targetSession == null || areTransactionsInProgress(hearingPart, assignment)
             ? userTransactionService.transactionConflicted(assignment.getUserTransactionId())

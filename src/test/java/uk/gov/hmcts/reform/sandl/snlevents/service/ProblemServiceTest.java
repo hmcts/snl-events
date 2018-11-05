@@ -72,20 +72,20 @@ public class ProblemServiceTest {
 
     @Test
     public void removeIfExistDeletesProblemsIfItExists() {
-        when(problemRepository.exists(PROBLEM_ID)).thenReturn(true);
+        when(problemRepository.existsById(PROBLEM_ID)).thenReturn(true);
 
         problemService.removeIfExist(PROBLEM_ID);
 
-        verify(problemRepository, times(1)).delete(PROBLEM_ID);
+        verify(problemRepository, times(1)).deleteById(PROBLEM_ID);
     }
 
     @Test
     public void removeIfExistDoesNothingWhenProblemDoesNotExist() {
-        when(problemRepository.exists(PROBLEM_ID)).thenReturn(false);
+        when(problemRepository.existsById(PROBLEM_ID)).thenReturn(false);
 
         problemService.removeIfExist(PROBLEM_ID);
 
-        verify(problemRepository, times(0)).delete(PROBLEM_ID);
+        verify(problemRepository, times(0)).deleteById(PROBLEM_ID);
     }
 
     @Test

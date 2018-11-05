@@ -38,6 +38,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -113,7 +114,7 @@ public class SessionServiceTest {
     @Test
     public void getSessionById_returnsSessionFromRepository() {
         Session repositorySession = createSession();
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(repositorySession);
+        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.of(repositorySession));
 
         Session serviceSession = sessionService.getSessionById(UUID.randomUUID());
 
@@ -178,10 +179,10 @@ public class SessionServiceTest {
 
     @Test
     public void save_savesSessionToRepository() {
-        when(roomRepository.findOne(any(UUID.class))).thenReturn(getRoom());
-        when(personRepository.findOne(any(UUID.class))).thenReturn(getPerson());
-        when(sessionTypeRepository.findOne(any(String.class)))
-            .thenReturn(new SessionType(SESSION_TYPE, SESSION_TYPE_DESC));
+        when(roomRepository.findById(any(UUID.class))).thenReturn(Optional.of((getRoom())));
+        when(personRepository.findById(any(UUID.class))).thenReturn(Optional.of(getPerson()));
+        when(sessionTypeRepository.findById(any(String.class)))
+            .thenReturn(Optional.of(new SessionType(SESSION_TYPE, SESSION_TYPE_DESC)));
 
         Session savedSession = sessionService.save(createUpsertSession());
         verify(sessionRepository, times(1)).save(any(Session.class));
@@ -192,7 +193,8 @@ public class SessionServiceTest {
     public void saveWithTransaction_startsTransaction() {
         when(userTransactionService.startTransaction(eq(createUuid(UUID_STRING)), any(List.class)))
             .thenReturn(createUserTransaction());
-        when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
+        when(sessionTypeRepository.findById(any(String.class)))
+            .thenReturn(Optional.of(new SessionType("code", "desc")));
 
         UserTransaction transaction = sessionService.saveWithTransaction(createUpsertSession());
 
@@ -210,8 +212,9 @@ public class SessionServiceTest {
             .thenReturn(false);
         when(userTransactionService.startTransaction(any(UUID.class), any(List.class)))
             .thenReturn(createUserTransaction());
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
-        when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
+        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.of(session));
+        when(sessionTypeRepository.findById(any(String.class)))
+            .thenReturn(Optional.of(new SessionType("code", "desc")));
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).then(returnsFirstArg());
         when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session))).thenReturn(message);
 
@@ -226,7 +229,7 @@ public class SessionServiceTest {
     public void updateSession_indicatesConflict_whenTransactionIsInProgress() throws IOException {
         when(userTransactionService.isAnyBeingTransacted(any(UUID.class)))
             .thenReturn(true);
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
+        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.of(createSession()));
 
         UserTransaction ut = createUserTransaction(UserTransactionStatus.CONFLICT);
         when(userTransactionService.transactionConflicted(any(UUID.class)))

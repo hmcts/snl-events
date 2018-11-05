@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +63,7 @@ public class HearingControllerTest {
         val uuid = ID.randomUUID();
         val hearing = createHearing();
         hearing.setId(uuid);
-        when(hearingRepository.findOne(uuid)).thenReturn(hearing);
+        when(hearingRepository.findById(uuid)).thenReturn(Optional.of(hearing));
 
         val response = mvc.getAndMapResponse(URL + "/" + uuid, new TypeReference<HearingInfo>() {
         });
@@ -108,7 +109,7 @@ public class HearingControllerTest {
         val hearing = createHearing();
         hearing.setId(ID);
 
-        when(hearingRepository.findOne(ID)).thenReturn(hearing);
+        when(hearingRepository.findById(ID)).thenReturn(Optional.of(hearing));
 
         val expectedResponse = new HearingWithSessionsResponse();
         expectedResponse.setId(ID);

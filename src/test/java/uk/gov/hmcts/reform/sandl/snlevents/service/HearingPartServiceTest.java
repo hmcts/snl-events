@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
@@ -128,8 +129,8 @@ public class HearingPartServiceTest {
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
         //target session exists
         when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
-        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
-        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(createHearing()));
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingSessionRelationship()
@@ -145,8 +146,8 @@ public class HearingPartServiceTest {
         when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
         //target session exists
         when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
-        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
-        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(createHearing()));
         //there's transaction in progress
         when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class),
             any(UUID.class)))
@@ -180,7 +181,7 @@ public class HearingPartServiceTest {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
         //target session doesn't exist
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(null);
+        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
@@ -195,9 +196,9 @@ public class HearingPartServiceTest {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
         //target session exists
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
-        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
-        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.of(createSession()));
+        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(createHearing()));
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()
@@ -207,12 +208,12 @@ public class HearingPartServiceTest {
     }
 
     @Test
-    public void findOne_CallsRepo() {
-        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+    public void findById_CallsRepo() {
+        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
 
-        hearingPartService.findOne(UUID.randomUUID());
+        hearingPartService.findById(UUID.randomUUID());
 
-        verify(hearingPartRepository).findOne(any(UUID.class));
+        verify(hearingPartRepository).findByIdWithHearing(any(UUID.class));
     }
 
     private UserTransaction createUserTransaction() {

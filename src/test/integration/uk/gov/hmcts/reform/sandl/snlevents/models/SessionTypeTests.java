@@ -43,8 +43,8 @@ public class SessionTypeTests extends BaseIntegrationModelTest  {
 
         sessionTypeRepository.saveAndFlush(sessionType);
 
-        SessionType savedSessionType = sessionTypeRepository.findOne(MAIN_TYPE_CODE);
-        Session savedSession = sessionRepository.findOne(sessionId);
+        SessionType savedSessionType = sessionTypeRepository.findById(MAIN_TYPE_CODE).orElse(null);
+        Session savedSession = sessionRepository.findById(sessionId).orElse(null);
 
         assertThat(savedSessionType.getSessions().size()).isEqualTo(1);
         assertThat(savedSession.getSessionType()).isEqualTo(sessionType);
@@ -57,8 +57,8 @@ public class SessionTypeTests extends BaseIntegrationModelTest  {
 
         sessionTypeRepository.saveAndFlush(sessionType);
 
-        CaseType savedCaseType = caseTypeRepository.findOne(REF_TYPE_CODE);
-        SessionType savedSessionType = sessionTypeRepository.findOne(MAIN_TYPE_CODE);
+        CaseType savedCaseType = caseTypeRepository.findById(REF_TYPE_CODE).orElse(null);
+        SessionType savedSessionType = sessionTypeRepository.findById(MAIN_TYPE_CODE).orElse(null);
 
         assertThat(savedSessionType.getCaseTypes().size()).isEqualTo(1);
         assertThat(savedCaseType.getSessionTypes().contains(sessionType)).isTrue();
@@ -71,8 +71,8 @@ public class SessionTypeTests extends BaseIntegrationModelTest  {
 
         sessionTypeRepository.saveAndFlush(sessionType);
 
-        HearingType savedHearingType = hearingTypeRepository.findOne(REF_TYPE_CODE);
-        SessionType savedSessionType = sessionTypeRepository.findOne(MAIN_TYPE_CODE);
+        HearingType savedHearingType = hearingTypeRepository.findById(REF_TYPE_CODE).orElse(null);
+        SessionType savedSessionType = sessionTypeRepository.findById(MAIN_TYPE_CODE).orElse(null);
 
         assertThat(savedSessionType.getHearingTypes().size()).isEqualTo(1);
         assertThat(savedHearingType.getSessionTypes().contains(sessionType)).isTrue();

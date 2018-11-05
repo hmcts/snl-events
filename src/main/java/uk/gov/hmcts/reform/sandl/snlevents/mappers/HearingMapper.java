@@ -37,9 +37,9 @@ public class HearingMapper {
         hearing.setId(createHearingRequest.getId());
         hearing.setCaseNumber(createHearingRequest.getCaseNumber());
         hearing.setCaseTitle(createHearingRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(createHearingRequest.getCaseTypeCode());
+        CaseType caseType = caseTypeRepository.findById(createHearingRequest.getCaseTypeCode()).orElse(null);
         hearing.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(createHearingRequest.getHearingTypeCode());
+        HearingType hearingType = hearingTypeRepository.findById(createHearingRequest.getHearingTypeCode()).orElse(null);
         hearing.setHearingType(hearingType);
         hearing.setDuration(createHearingRequest.getDuration());
         hearing.setScheduleStart(createHearingRequest.getScheduleStart());

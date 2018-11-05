@@ -60,22 +60,23 @@ fact-propagation:
     delete-sessionType:
       - ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
 
-liquibase:
-  enabled: ${ENABLE_DB_MIGRATE_IN_SERVICE:true}
-  change-log: classpath:db/db-testdata-changelog.yaml
-
 azure:
   application-insights:
     instrumentation-key: ${APPINSIGHTS_INSTRUMENTATIONKEY:dummy}
 
-#If you use a database then uncomment below lines and update db properties accordingly leaving tomcat connection settings unchanged.
 spring:
+  main:
+      allow-bean-definition-overriding: true
   application:
-    name: Scheduling and Listng Events
+      name: Scheduling and Listng Events
   datasource:
       url: jdbc:postgresql://${SNL_EVENTS_DB_HOST:localhost}:${SNL_EVENTS_DB_PORT:5432}/${SNL_EVENTS_DB_NAME:snl}${SNL_EVENTS_DB_PARAMS:?}
       username: ${SNL_EVENTS_DB_USERNAME:snluser}
       password: ${SNL_EVENTS_DB_PASSWORD:snlpass}
+      driver-class-name: org.postgresql.Driver
+  liquibase:
+      enabled: ${ENABLE_DB_MIGRATE_IN_SERVICE:true}
+      change-log: classpath:db/db-testdata-changelog.yaml
   jpa:
     hibernate:
       ddl-auto: validate

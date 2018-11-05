@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionReposito
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,8 +51,8 @@ public class UserTransactionServiceTest {
     }
 
     @Test
-    public void getUserTransactionById_should_call_findOne_on_userTransactionRepository() {
-        when(userTransactionRepository.findOne(any(UUID.class))).thenReturn(ut);
+    public void getUserTransactionById_should_call_findById_on_userTransactionRepository() {
+        when(userTransactionRepository.findById(any(UUID.class))).thenReturn(Optional.of(ut));
         this.userTransactionService.getUserTransactionById(someId);
         assertThat(this.userTransactionService.getUserTransactionById(someId)).isEqualTo(ut);
     }
@@ -86,7 +87,7 @@ public class UserTransactionServiceTest {
 
     @Test
     public void commit_should_set_transactionStatus_to_committed() {
-        when(userTransactionRepository.findOne(this.someId)).thenReturn(ut);
+        when(userTransactionRepository.findById(this.someId)).thenReturn(Optional.of(ut));
 
         UserTransaction userTransaction = this.userTransactionService.commit(this.someId);
 
@@ -95,7 +96,7 @@ public class UserTransactionServiceTest {
 
     @Test
     public void rollback_should_set_transactionStatus_to_rolledback() {
-        when(userTransactionRepository.findOne(this.someId)).thenReturn(ut);
+        when(userTransactionRepository.findById(this.someId)).thenReturn(Optional.of(ut));
 
         UserTransaction userTransaction = this.userTransactionService.rollback(this.someId);
 

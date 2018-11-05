@@ -41,7 +41,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public void getAndValidateEntities() {
-        hearing = hearingRepository.findOne(deleteListingRequest.getHearingId());
+        hearing = hearingRepository.findById(deleteListingRequest.getHearingId()).orElse(null);
 
         if (hearing == null) {
             throw new EntityNotFoundException("Hearing not found");

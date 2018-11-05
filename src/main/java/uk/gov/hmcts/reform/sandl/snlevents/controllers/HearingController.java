@@ -45,12 +45,12 @@ public class HearingController {
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
-        return new HearingInfo(hearingRepository.findOne(id));
+        return new HearingInfo(hearingRepository.findById(id).orElse(null));
     }
 
     @GetMapping(path = "/{id}/with-sessions", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingWithSessionsResponse getHearingByIdWithSessions(@PathVariable("id") UUID id) {
-        return new HearingWithSessionsResponse(hearingRepository.findOne(id));
+        return new HearingWithSessionsResponse(hearingRepository.findById(id).orElse(null));
     }
 
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)

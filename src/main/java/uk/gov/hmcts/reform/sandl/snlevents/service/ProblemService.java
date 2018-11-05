@@ -99,8 +99,8 @@ public class ProblemService {
     }
 
     public void removeIfExist(String id) {
-        if (problemRepository.exists(id)) {
-            problemRepository.delete(id);
+        if (problemRepository.existsById(id)) {
+            problemRepository.deleteById(id);
         }
     }
 

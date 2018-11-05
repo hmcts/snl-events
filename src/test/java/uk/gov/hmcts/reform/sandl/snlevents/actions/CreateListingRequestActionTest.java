@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
@@ -83,8 +84,10 @@ public class CreateListingRequestActionTest {
         when(hearingMapper.mapToHearingParts(createHearingRequest)).thenReturn(
             Collections.singletonList(createHearingPart(HEARING_PART_ID))
         );
-        when(caseTypeRepository.findOne(createHearingRequest.getCaseTypeCode())).thenReturn(new CaseType());
-        when(hearingTypeRepository.findOne(createHearingRequest.getHearingTypeCode())).thenReturn(new HearingType());
+        when(caseTypeRepository.findById(createHearingRequest.getCaseTypeCode()))
+            .thenReturn(Optional.of(new CaseType()));
+        when(hearingTypeRepository.findById(createHearingRequest.getHearingTypeCode()))
+            .thenReturn(Optional.of(new HearingType()));
     }
 
     @Test

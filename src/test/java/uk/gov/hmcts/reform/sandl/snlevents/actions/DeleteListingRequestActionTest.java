@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -65,7 +66,7 @@ public class DeleteListingRequestActionTest {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
 
-        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(createHearing());
+        Mockito.when(hearingRepository.findById(createUuid(ID))).thenReturn(Optional.of(createHearing()));
     }
 
     @Test
@@ -90,7 +91,7 @@ public class DeleteListingRequestActionTest {
 
     @Test(expected = EntityNotFoundException.class)
     public void getAndValidateEntities_throwsExceptionOnNullHearing() {
-        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(null);
+        Mockito.when(hearingRepository.findById(createUuid(ID))).thenReturn(Optional.empty());
 
         action.getAndValidateEntities();
     }

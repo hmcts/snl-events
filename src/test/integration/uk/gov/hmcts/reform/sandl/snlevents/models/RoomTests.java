@@ -29,8 +29,8 @@ public class RoomTests extends BaseIntegrationModelTest  {
 
         roomRepository.saveAndFlush(room);
 
-        RoomType savedRoomType = roomTypeRepository.findOne(REF_TYPE_CODE);
-        Room savedRoom = roomRepository.findOne(roomId);
+        RoomType savedRoomType = roomTypeRepository.findById(REF_TYPE_CODE).orElse(null);
+        Room savedRoom = roomRepository.findById(roomId).orElse(null);
 
         assertThat(savedRoomType.getRooms().size()).isEqualTo(1);
         assertThat(savedRoom.getRoomType()).isEqualTo(roomType);

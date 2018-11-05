@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SAuthenticationConfig;
+import uk.gov.hmcts.reform.sandl.snlevents.security.ServiceAuthenticationEntryPoint;
 
 @org.springframework.boot.test.context.TestConfiguration
 public class TestConfiguration {
@@ -23,4 +24,9 @@ public class TestConfiguration {
     public S2SAuthenticationConfig s2SAuthenticationConfig() {
         return new S2SAuthenticationConfig();
     }
+
+    @Bean
+    public ServiceAuthenticationEntryPoint unauthorizedHandler() {
+        return new ServiceAuthenticationEntryPoint();
+    };
 }

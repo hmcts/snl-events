@@ -109,7 +109,7 @@ public class HearingQueries {
                                                                   List<Selection<?>> selections) {
         TypedQuery<HearingSearchResponse> q = entityManager.createQuery(cq.multiselect(selections));
 
-        q.setFirstResult(pageable.getOffset());
+        q.setFirstResult(Long.valueOf(pageable.getOffset()).intValue());
         q.setMaxResults(pageable.getPageSize());
 
         return q;

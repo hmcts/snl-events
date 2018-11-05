@@ -85,11 +85,11 @@ public class SessionService {
     }
 
     public Session getSessionById(UUID id) {
-        return sessionRepository.findOne(id);
+        return sessionRepository.findById(id).orElse(null);
     }
 
     public SessionInfo getSessionInfoById(UUID id) {
-        return sessionDbToSessionInfo.apply(sessionRepository.findOne(id));
+        return sessionDbToSessionInfo.apply(sessionRepository.findById(id).orElse(null));
     }
 
     //nottodo move entity manager to repository
@@ -156,22 +156,22 @@ public class SessionService {
         session.setDuration(upsertSession.getDuration());
         session.setStart(upsertSession.getStart());
         if (upsertSession.getSessionType() != null && !upsertSession.getSessionType().isEmpty()) {
-            val sessionType = sessionTypeRepository.findOne(upsertSession.getSessionType());
+            val sessionType = sessionTypeRepository.findById(upsertSession.getSessionType()).orElse(null);
             session.setSessionType(sessionType);
         }
 
         if (upsertSession.getRoomId() != null && !upsertSession.getRoomId().isEmpty()) {
-            Room room = roomRepository.findOne(getUuidFromString(upsertSession.getRoomId()));
+            Room room = roomRepository.findById(getUuidFromString(upsertSession.getRoomId())).orElse(null);
             session.setRoom(room);
         }
 
         if (upsertSession.getPersonId() != null && !upsertSession.getPersonId().isEmpty()) {
-            Person person = personRepository.findOne(getUuidFromString(upsertSession.getPersonId()));
+            Person person = personRepository.findById(getUuidFromString(upsertSession.getPersonId())).orElse(null);
             session.setPerson(person);
         }
 
         if (upsertSession.getSessionTypeCode() != null && !upsertSession.getSessionTypeCode().isEmpty()) {
-            SessionType sessionType = sessionTypeRepository.findOne(upsertSession.getSessionTypeCode());
+            SessionType sessionType = sessionTypeRepository.findById(upsertSession.getSessionTypeCode()).orElse(null);
             session.setSessionType(sessionType);
         }
 
@@ -212,7 +212,7 @@ public class SessionService {
         Optional.ofNullable(upsertSession.getDuration()).ifPresent(session::setDuration);
         Optional.ofNullable(upsertSession.getStart()).ifPresent(session::setStart);
         Optional.ofNullable(upsertSession.getSessionType()).ifPresent(sessionTypeCode -> {
-            val sessionType = sessionTypeRepository.findOne(sessionTypeCode);
+            val sessionType = sessionTypeRepository.findById(sessionTypeCode).orElse(null);
             session.setSessionType(sessionType);
         });
 
@@ -251,12 +251,12 @@ public class SessionService {
     private void setResources(Session session, UpsertSession upsertSession) {
         Optional.ofNullable(upsertSession.getRoomId()).ifPresent(id -> {
             UUID roomId = getUuidFromString(upsertSession.getRoomId());
-            Room room = (roomId == null) ? null : roomRepository.findOne(roomId);
+            Room room = (roomId == null) ? null : roomRepository.findById(roomId).orElse(null);
             session.setRoom(room);
         });
         Optional.ofNullable(upsertSession.getPersonId()).ifPresent(id -> {
             UUID personId = getUuidFromString(upsertSession.getPersonId());
-            Person person = (personId == null) ? null : personRepository.findOne(personId);
+            Person person = (personId == null) ? null : personRepository.findById(personId).orElse(null);
             session.setPerson(person);
         });
     }

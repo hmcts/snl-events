@@ -29,7 +29,7 @@ public class UserTransactionService {
     private RevertChangesManager revertChangesManager;
 
     public UserTransaction getUserTransactionById(UUID id) {
-        return userTransactionRepository.findOne(id);
+        return userTransactionRepository.findById(id).orElse(null);
     }
 
     @Transactional
@@ -51,14 +51,14 @@ public class UserTransactionService {
 
     @Transactional
     public UserTransaction commit(UUID id) {
-        UserTransaction ut = userTransactionRepository.findOne(id);
+        UserTransaction ut = userTransactionRepository.findById(id).orElse(null);
         ut.setStatus(UserTransactionStatus.COMMITTED);
         return userTransactionRepository.save(ut);
     }
 
     @Transactional
     public UserTransaction rollback(UUID id) {
-        UserTransaction ut = userTransactionRepository.findOne(id);
+        UserTransaction ut = userTransactionRepository.findById(id).orElse(null);
 
         revertChangesManager.revertChanges(ut);
         //todo implement and check optimistic locking using version, don't need to detach entity

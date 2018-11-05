@@ -67,7 +67,7 @@ public class RevertChangesManager {
     }
 
     private void handleHearing(UserTransactionData utd) {
-        Hearing hearing = hearingRepository.findOne(utd.getEntityId());
+        Hearing hearing = hearingRepository.findById(utd.getEntityId()).orElse(null);
 
         if ("update".equals(utd.getCounterAction())) {
             Hearing previousHearing = new Hearing();
@@ -87,18 +87,19 @@ public class RevertChangesManager {
             previousHearing.setVersion(hearing.getVersion());
             entityManager.merge(previousHearing);
 
-            previousHearing.getHearingParts().get(0).setHearing(hearingRepository.findOne(previousHearing.getId()));
+            previousHearing.getHearingParts().get(0).setHearing(
+                hearingRepository.findById(previousHearing.getId()).orElse(null));
 
             hearingRepository.save(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
-            hearingRepository.delete(utd.getEntityId());
+            hearingRepository.deleteById(utd.getEntityId());
         }
 
     }
 
     @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
-        HearingPart hp = hearingPartRepository.findById(utd.getEntityId());
+        HearingPart hp = hearingPartRepository.findByIdWithHearing(utd.getEntityId());
 
         if ("update".equals(utd.getCounterAction())) {
             HearingPart previousHearingPart = new HearingPart();
@@ -106,7 +107,8 @@ public class RevertChangesManager {
 
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
-                previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
+                previousHearingPart.setHearing(
+                    hearingRepository.findById(previousHearingPart.getHearingId()).orElse(null));
 
                 msg = factsMapper.mapHearingToRuleJsonMessage(previousHearingPart);
                 //to have both entities
@@ -123,13 +125,14 @@ public class RevertChangesManager {
             entityManager.merge(previousHearingPart);
 
             if (previousHearingPart.getSessionId() != null) {
-                previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
+                previousHearingPart.setSession(
+                    sessionRepository.findById(previousHearingPart.getSessionId()).orElse(null));
 
             }
 
             hearingPartRepository.save(previousHearingPart);
         } else if ("delete".equals(utd.getCounterAction())) {
-            hearingPartRepository.delete(utd.getEntityId());
+            hearingPartRepository.deleteById(utd.getEntityId());
 
             String msg = null;
             try {
@@ -144,18 +147,18 @@ public class RevertChangesManager {
 
     private void handleSession(UserTransactionData utd) {
         if ("delete".equals(utd.getCounterAction())) {
-            Session session = sessionRepository.findOne(utd.getEntityId());
+            Session session = sessionRepository.findById(utd.getEntityId()).orElse(null);
 
             if (session == null) {
                 throw new EntityNotFoundException("session not found");
             }
 
-            sessionRepository.delete(utd.getEntityId());
+            sessionRepository.deleteById(utd.getEntityId());
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
 
         } else if ("update".equals(utd.getCounterAction())) {
-            Session session = sessionRepository.findOne(utd.getEntityId());
+            Session session = sessionRepository.findById(utd.getEntityId()).orElse(null);
 
             Session previousSession;
             String msg;

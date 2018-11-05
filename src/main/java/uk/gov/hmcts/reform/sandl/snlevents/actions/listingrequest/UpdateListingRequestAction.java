@@ -59,9 +59,9 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
         hearing.setCaseNumber(updateListingRequest.getCaseNumber());
         hearing.setCaseTitle(updateListingRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(updateListingRequest.getCaseTypeCode());
+        CaseType caseType = caseTypeRepository.findById(updateListingRequest.getCaseTypeCode()).orElse(null);
         hearing.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingTypeCode());
+        HearingType hearingType = hearingTypeRepository.findById(updateListingRequest.getHearingTypeCode()).orElse(null);
         hearing.setHearingType(hearingType);
         hearing.setDuration(updateListingRequest.getDuration());
         hearing.setScheduleStart(updateListingRequest.getScheduleStart());
@@ -81,7 +81,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public void getAndValidateEntities() {
-        hearing = hearingRepository.findOne(updateListingRequest.getId());
+        hearing = hearingRepository.findById(updateListingRequest.getId()).orElse(null);
 
         if (hearing == null) {
             throw new EntityNotFoundException("Hearing not found");

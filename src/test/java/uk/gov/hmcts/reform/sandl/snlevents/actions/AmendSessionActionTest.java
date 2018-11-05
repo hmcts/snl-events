@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
@@ -75,7 +76,7 @@ public class AmendSessionActionTest {
         Session session = new Session();
         session.setId(ID);
         session.setStart(dateTime);
-        Mockito.when(sessionRepository.findOne(ID)).thenReturn(session);
+        Mockito.when(sessionRepository.findById(ID)).thenReturn(Optional.of(session));
     }
 
     @Test

@@ -73,7 +73,7 @@ public class HearingPartController {
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingPartResponse getHearingPartById(@PathVariable("id") UUID id) {
-        return new HearingPartResponse(hearingPartRepository.findOne(id));
+        return new HearingPartResponse(hearingPartRepository.findByIdWithHearing(id));
     }
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)

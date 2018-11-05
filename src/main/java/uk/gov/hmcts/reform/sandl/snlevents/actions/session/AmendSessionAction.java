@@ -67,7 +67,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
     @Override
     public void getAndValidateEntities() {
-        session  = sessionRepository.findOne(amendSessionRequest.getId());
+        session  = sessionRepository.findById(amendSessionRequest.getId()).orElse(null);
     }
 
     @Override
