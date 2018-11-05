@@ -106,4 +106,9 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
         hearingPart.setHearing(this);
         hearingParts.add(hearingPart);
     }
+
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @JoinColumn(name="status")
+    private StatusConfig status;
 }

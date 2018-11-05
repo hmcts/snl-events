@@ -75,6 +75,12 @@ databaseChangeLog:
         referencedColumnNames: status
         referencedTableName: status_config
     - addColumn:
+        tableName: hearing_aud
+        columns:
+        - column:
+            name: status
+            type: varchar(30)
+    - addColumn:
         tableName: hearing_part
         columns:
         - column:
@@ -89,3 +95,9 @@ databaseChangeLog:
         constraintName: fk_hearing_part_status_code_status_config
         referencedColumnNames: status
         referencedTableName: status_config
+    - addColumn:
+        tableName: hearing_part_aud
+        columns:
+        - column:
+            name: status
+            type: varchar(30)

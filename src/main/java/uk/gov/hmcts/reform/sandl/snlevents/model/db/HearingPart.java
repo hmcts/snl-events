@@ -22,6 +22,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
@@ -73,4 +74,9 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     @Column(name = "hearing_id", updatable = false, insertable = false)
     private UUID hearingId;
+
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @JoinColumn(name="status")
+    private StatusConfig status;
 }
