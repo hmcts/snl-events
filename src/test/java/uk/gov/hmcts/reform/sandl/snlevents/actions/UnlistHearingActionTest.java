@@ -164,7 +164,7 @@ public class UnlistHearingActionTest {
     }
 
     @Test(expected = SnlRuntimeException.class)
-    public void generateFactMessages_whenObjectIsInvalud_shouldThrowSnlRuntimeException() throws JsonProcessingException {
+    public void act_whenObjectIsInvalid_shouldThrowSnlRuntimeException() throws JsonProcessingException {
         action.getAndValidateEntities();
         Mockito.when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
         action.act();
