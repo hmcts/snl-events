@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -192,7 +193,7 @@ public class HearingPartService {
                 }
                 factsMessages.add(factsMapper.mapHearingToRuleJsonMessage(hp));
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new SnlRuntimeException(e);
             }
         });
 
