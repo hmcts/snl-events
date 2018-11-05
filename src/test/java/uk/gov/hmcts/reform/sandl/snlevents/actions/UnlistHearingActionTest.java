@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.Before;
@@ -10,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -20,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -30,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -149,6 +154,22 @@ public class UnlistHearingActionTest {
         assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
     }
 
+    @Test
+    public void generateFactMessages_shouldReturnMsgForUpdatedHearingParts() {
+        action.getAndValidateEntities();
+        val generatedFactMsgs = action.generateFactMessages();
+
+        assertThat(generatedFactMsgs.size()).isEqualTo(2);
+        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.UPSERT_HEARING_PART);
+    }
+
+    @Test(expected = SnlRuntimeException.class)
+    public void generateFactMessages_whenObjectIsInvalud_shouldThrowSnlRuntimeException() throws JsonProcessingException {
+        action.getAndValidateEntities();
+        Mockito.when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+        action.act();
+    }
+
     private void assertThatContainsHearigPart(List<UserTransactionData> userTransactionData, UUID hearingPartId) {
         val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == hearingPartId)
             .findFirst().get();
@@ -163,6 +184,10 @@ public class UnlistHearingActionTest {
         assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entity);
         assertThat(hearingUserTransactionData.getAction()).isEqualTo("lock");
         assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("unlock");
+    }
+
+    private void assertThatAllMsgsAreTypeOf(List<FactMessage> factMessages, String type) {
+        factMessages.stream().forEach(fm -> assertThat(fm.getType()).isEqualTo(type));
     }
 
     private static VersionInfo getVersionInfo(UUID id, Long version) {
