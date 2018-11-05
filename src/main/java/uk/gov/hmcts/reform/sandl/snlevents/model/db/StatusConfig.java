@@ -3,9 +3,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.io.Serializable;
 
 @Entity
 @AllArgsConstructor

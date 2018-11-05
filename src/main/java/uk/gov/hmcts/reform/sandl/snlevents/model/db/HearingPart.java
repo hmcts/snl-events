@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Where;
 import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedBy;
@@ -34,6 +35,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @EntityListeners(AuditingEntityListener.class)
+@DynamicInsert
 @Where(clause = "is_deleted=false")
 @SuppressWarnings("squid:S3437")
 public class HearingPart extends VersionedEntity implements Serializable, HistoryAuditable {
@@ -77,6 +79,6 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     @ManyToOne
     @Audited(targetAuditMode = NOT_AUDITED)
-    @JoinColumn(name="status")
+    @JoinColumn(name = "status", nullable = false)
     private StatusConfig status;
 }

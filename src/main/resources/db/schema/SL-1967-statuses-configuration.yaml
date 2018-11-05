@@ -67,7 +67,7 @@ databaseChangeLog:
             type: varchar(30)
             defaultValue: "Unlisted"
             constraints:
-              nullable: true
+              nullable: false
     - addForeignKeyConstraint:
         baseColumnNames: status
         baseTableName: hearing
@@ -88,7 +88,7 @@ databaseChangeLog:
             type: varchar(30)
             defaultValue: "Unlisted"
             constraints:
-              nullable: true
+              nullable: false
     - addForeignKeyConstraint:
         baseColumnNames: status
         baseTableName: hearing_part
