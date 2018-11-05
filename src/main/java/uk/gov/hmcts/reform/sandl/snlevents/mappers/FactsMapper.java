@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.val;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -103,7 +104,7 @@ public class FactsMapper {
         try {
             return objectMapper.writeValueAsString(factHearingPart);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new SnlRuntimeException(e);
         }
     }
 

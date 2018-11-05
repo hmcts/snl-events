@@ -6,6 +6,7 @@ import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -145,13 +146,13 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     }
 
     private Map<UUID, String> mapHearingPartsToStrings(List<HearingPart> hearingParts) {
-        Map<UUID, String> originalIdStringPair = new HashMap<UUID, String>();
+        Map<UUID, String> originalIdStringPair = new HashMap<>();
         hearingParts.stream().forEach(hp -> {
             try {
                 String hearingPartString = objectMapper.writeValueAsString(hp);
                 originalIdStringPair.put(hp.getId(), hearingPartString);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new SnlRuntimeException(e);
             }
         });
 

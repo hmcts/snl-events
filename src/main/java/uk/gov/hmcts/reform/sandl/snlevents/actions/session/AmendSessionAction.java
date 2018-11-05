@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -46,7 +47,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         try {
             currentSessionAsString = objectMapper.writeValueAsString(session);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new ServiceException("Given session couldn't be converted into string");
         }
 
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
