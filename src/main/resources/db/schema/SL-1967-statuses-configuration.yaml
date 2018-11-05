@@ -71,7 +71,7 @@ databaseChangeLog:
     - addForeignKeyConstraint:
         baseColumnNames: status
         baseTableName: hearing
-        constraintName: fk_status_code_status_config
+        constraintName: fk_hearing_status_code_status_config
         referencedColumnNames: status
         referencedTableName: status_config
     - addColumn:
@@ -86,6 +86,6 @@ databaseChangeLog:
     - addForeignKeyConstraint:
         baseColumnNames: status
         baseTableName: hearing_part
-        constraintName: fk_status_code_status_config
+        constraintName: fk_hearing_part_status_code_status_config
         referencedColumnNames: status
         referencedTableName: status_config
