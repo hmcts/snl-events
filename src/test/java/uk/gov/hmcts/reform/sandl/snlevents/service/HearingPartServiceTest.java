@@ -33,7 +33,8 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -126,11 +127,11 @@ public class HearingPartServiceTest {
     public void assignHearingToSessionWithTransaction_assignsThemSession_whenTheresNoTransactionInProgress()
         throws IOException {
         UserTransaction transaction = createUserTransaction();
-        when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
+        when(userTransactionService.rulesProcessed(any())).thenReturn(transaction);
         //target session exists
         when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
-        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
-        when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(createHearing()));
+        when(hearingPartRepository.findByIdWithHearing(any())).thenReturn(createHearingPart());
+        when(hearingRepository.findById(any())).thenReturn(Optional.of(createHearing()));
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingSessionRelationship()
@@ -143,14 +144,13 @@ public class HearingPartServiceTest {
     public void assignHearingToSessionWithTransaction_indicatesConflict_whenTransactionIsInProgress()
         throws IOException {
         UserTransaction transaction = createUserTransaction();
-        when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
+        when(userTransactionService.transactionConflicted(isNull())).thenReturn(transaction);
         //target session exists
         when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
         when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(createHearing()));
         //there's transaction in progress
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class),
-            any(UUID.class)))
+        when(userTransactionService.isAnyBeingTransacted(any()))
             .thenReturn(true);
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
@@ -164,7 +164,7 @@ public class HearingPartServiceTest {
     public void assignHearingToSessionWithTransaction_indicatesConflict_whenTargetSessionDoesNotExist()
         throws IOException {
         UserTransaction transaction = createUserTransaction();
-        when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
+        when(userTransactionService.transactionConflicted(isNull())).thenReturn(transaction);
         //target session doesn't exist
         when(sessionRepository.findSessionByIdIn(any())).thenReturn(new ArrayList<>());
 
@@ -179,7 +179,7 @@ public class HearingPartServiceTest {
     public void assignHearingPartToSessionWithTransaction_indicatesConflict_whenTargetSessionDoesNotExist()
         throws IOException {
         UserTransaction transaction = createUserTransaction();
-        when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
+        when(userTransactionService.transactionConflicted(isNull())).thenReturn(transaction);
         //target session doesn't exist
         when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
@@ -194,11 +194,11 @@ public class HearingPartServiceTest {
     public void assignHearingPartToSessionWithTransaction_assignsThemSession_whenTheresNoTransactionInProgress()
         throws IOException {
         UserTransaction transaction = createUserTransaction();
-        when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
+        when(userTransactionService.rulesProcessed(isNull())).thenReturn(transaction);
         //target session exists
-        when(sessionRepository.findById(any(UUID.class))).thenReturn(Optional.of(createSession()));
-        when(hearingPartRepository.findByIdWithHearing(any(UUID.class))).thenReturn(createHearingPart());
-        when(hearingRepository.findById(any(UUID.class))).thenReturn(Optional.of(createHearing()));
+        when(sessionRepository.findById(any())).thenReturn(Optional.of(createSession()));
+        when(hearingPartRepository.findByIdWithHearing(any())).thenReturn(createHearingPart());
+        when(hearingRepository.findById(any())).thenReturn(Optional.of(createHearing()));
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingPartToSessionWithTransaction(
             createUuid(), createHearingPartSessionRelationship()

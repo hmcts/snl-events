@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.DateTimePartValue;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
