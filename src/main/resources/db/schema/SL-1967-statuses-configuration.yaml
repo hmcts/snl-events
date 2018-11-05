@@ -65,6 +65,7 @@ databaseChangeLog:
         - column:
             name: status
             type: varchar(30)
+            defaultValue: "Unlisted"
             constraints:
               nullable: true
     - addForeignKeyConstraint:
@@ -79,6 +80,7 @@ databaseChangeLog:
         - column:
             name: status
             type: varchar(30)
+            defaultValue: "Unlisted"
             constraints:
               nullable: true
     - addForeignKeyConstraint:
