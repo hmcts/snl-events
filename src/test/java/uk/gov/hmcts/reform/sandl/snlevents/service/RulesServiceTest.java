@@ -56,21 +56,21 @@ public class RulesServiceTest {
     public void postMessage_postsToFactMessageService_whenMatchingSubscriberIsFound() throws IOException {
         //GIVEN there's a subscriber for type "1"
         when(subscribersConfiguration.getSubscribers()).thenReturn(createSubscribers(TYPE));
-        when(restTemplate.postForEntity(anyString(), anyString(), any()))
+        when(restTemplate.postForEntity(anyString(), any(), any()))
             .thenReturn(createResponseEntity());
 
         //WHEN we post fact of type "1"
         rulesService.postMessage(TYPE, DATA);
 
         //THEN fact is posted
-        verify(factMessageService, times(1)).handle(any(UUID.class), eq(BODY));
+        verify(factMessageService, times(1)).handle(any(), eq(BODY));
     }
 
     @Test
     public void postMessage_doesNothing_whenNoMatchingSubscriberIsFound() throws IOException {
         //GIVEN there's a subscriber for type "another"
         when(subscribersConfiguration.getSubscribers()).thenReturn(createSubscribers("another"));
-        when(restTemplate.postForEntity(anyString(), anyString(), any()))
+        when(restTemplate.postForEntity(anyString(), any(), any()))
             .thenReturn(createResponseEntity());
 
         //WHEN we post fact of type "1"
