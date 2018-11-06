@@ -10,13 +10,9 @@ databaseChangeLog:
             name: number_of_sessions
             type: int
             defaultValueNumeric: 1
-            constraints:
-              nullable: false
         - column:
             name: is_multisession
             type: boolean
-            constraints:
-              nullable: false
 
 - changeSet:
     id: number-of-sessions-hearing-aud
@@ -29,13 +25,9 @@ databaseChangeLog:
             name: number_of_sessions
             type: int
             defaultValueNumeric: 1
-            constraints:
-              nullable: false
         - column:
             name: is_multisession
             type: boolean
-            constraints:
-              nullable: false
         - sqlFile:
             comment: setting is_multisession flag
             encoding: utf8
@@ -44,3 +36,25 @@ databaseChangeLog:
             relativeToChangelogFile: true
             splitStatements: true
             stripComments: true
+
+- changeSet:
+    id: number-of-sessions-hearing-constraints
+    author: ataylor
+    changes:
+    - addNotNullConstraint:
+        tableName: hearing
+        columnName: number_of_sessions
+    - addNotNullConstraint:
+        tableName: hearing
+        columnName: is_multisession
+
+- changeSet:
+    id: number-of-sessions-hearing-aud-constraints
+    author: ataylor
+    changes:
+    - addNotNullConstraint:
+        tableName: hearing_aud
+        columnName: number_of_sessions
+    - addNotNullConstraint:
+        tableName: hearing_aud
+        columnName: is_multisession

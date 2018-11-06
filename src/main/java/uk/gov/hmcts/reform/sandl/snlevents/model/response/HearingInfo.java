@@ -48,5 +48,6 @@ public class HearingInfo implements Serializable {
         this.setDeleted(hearing.isDeleted());
         this.setVersion(hearing.getVersion());
         this.setNumberOfSessions(hearing.getNumberOfSessions());
+        this.setIsMultiSession(hearing.getIsMultiSession());
     }
 }
