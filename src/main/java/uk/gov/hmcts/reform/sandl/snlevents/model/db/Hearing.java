@@ -63,6 +63,8 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private Duration duration;
 
+    private Integer numberOfSessions;
+
     private OffsetDateTime scheduleStart;
 
     private OffsetDateTime scheduleEnd;
