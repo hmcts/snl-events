@@ -19,16 +19,19 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
 import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
@@ -45,8 +48,13 @@ public class HearingControllerTest {
 
     @MockBean
     private HearingPartService hearingPartService;
+
+    @MockBean
+    private HearingService hearingService;
+
     @MockBean
     private HearingRepository hearingRepository;
+
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
@@ -110,8 +118,21 @@ public class HearingControllerTest {
         expectedResponse.setCaseType("desc");
         expectedResponse.setHearingType("desc");
         expectedResponse.setSessions(Collections.emptyList());
+        expectedResponse.setHearingPartsVersions(Collections.emptyList());
 
         val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    public void unlistHearing_shouldReturnUserTransaction() throws Exception {
+        val ut = createUserTransaction();
+
+        when(hearingService.unlist(any())).thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(put(URL + "/unlist"), new UnlistHearingRequest(),
+            UserTransaction.class);
+
+        assertThat(response).isEqualTo(ut);
     }
 }

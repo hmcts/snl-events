@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.hibernate.service.spi.ServiceException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -24,6 +27,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 
 @RunWith(SpringRunner.class)
 public class AmendSessionActionTest {
@@ -94,6 +98,22 @@ public class AmendSessionActionTest {
         UUID[] ids = action.getAssociatedEntitiesIds();
 
         assertThat(ids).isEqualTo(new UUID[]{ID});
+    }
+
+    @Test
+    public void generateFactMessages_shouldReturnOneElementWithTypeUpsertSession() {
+        action.getAndValidateEntities();
+        val factMsgs = action.generateFactMessages();
+
+        assertThat(factMsgs.size()).isEqualTo(1);
+        assertThat(factMsgs.get(0).getType()).isEqualTo(RulesService.UPSERT_SESSION);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void act_shouldThrowServiceException() throws JsonProcessingException {
+        action.getAndValidateEntities();
+        Mockito.when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+        action.act();
     }
 
     @Test

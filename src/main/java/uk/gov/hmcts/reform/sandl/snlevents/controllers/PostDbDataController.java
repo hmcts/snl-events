@@ -6,14 +6,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Availability;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.AvailabilityRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -44,10 +42,7 @@ public class PostDbDataController {
     private RoomRepository roomRepository;
 
     @Autowired
-    private AvailabilityRepository availabilityRepository;
-
-    @Autowired
-    private HearingRepository hearingRepository;
+    private HearingPartRepository hearingPartRepository;
 
     @Autowired
     private SessionTypeRepository sessionTypeRepository;
@@ -69,18 +64,13 @@ public class PostDbDataController {
             rulesService.postMessage(RulesService.UPSERT_JUDGE, msg);
         }
 
-        for (Availability availability : availabilityRepository.findAll()) {
-            String msg = factsMapper.mapDbAvailabilityToRuleJsonMessage(availability);
-            rulesService.postMessage(RulesService.UPSERT_AVAILABILITY, msg);
-        }
-
         for (Session session : sessionRepository.findAll()) {
             String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
             rulesService.postMessage(RulesService.UPSERT_SESSION, msg);
         }
 
-        for (Hearing hearing : hearingRepository.findAll()) {
-            String msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
+        for (HearingPart hearingPart : hearingPartRepository.findAll()) {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPart);
             rulesService.postMessage(RulesService.UPSERT_HEARING_PART, msg);
         }
 

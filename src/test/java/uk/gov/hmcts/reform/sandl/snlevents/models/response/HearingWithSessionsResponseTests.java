@@ -7,20 +7,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-public class HearingWithSessionResponseTests {
+public class HearingWithSessionsResponseTests {
 
     private static final UUID ID = UUID.randomUUID();
     private static final String CASE_NUMBER = "case-number";
@@ -35,7 +40,7 @@ public class HearingWithSessionResponseTests {
     private static final String JUDGE_NAME = "judge-name";
 
     @Test
-    public void hearingWithSessionResponseMapsHearingFromDb() {
+    public void hearingWithSessionsResponseConstructor_mapsHearingFromDb() {
         val hearing = createHearing();
 
         val expectedResponse = createExpectedResponse();
@@ -45,17 +50,57 @@ public class HearingWithSessionResponseTests {
         assertThat(response).isEqualTo(expectedResponse);
     }
 
-    private Hearing createHearing() {
+    @Test
+    public void hearingWithSessionsResponseConstructor_sortsSessionsByStartAscending() {
+        val hearing = createMinimalHearing();
+
+        hearing.setHearingParts(
+            Arrays.asList(
+                createHearingPartWithSession(1),
+                createHearingPartWithSession(3),
+                createHearingPartWithSession(2)
+            )
+        );
+
+        val response = new HearingWithSessionsResponse(hearing);
+
+        // assert correct order of sessions
+        assertThat(response.getSessions().get(0).getStart().getDayOfMonth()).isEqualTo(1);
+        assertThat(response.getSessions().get(1).getStart().getDayOfMonth()).isEqualTo(2);
+        assertThat(response.getSessions().get(2).getStart().getDayOfMonth()).isEqualTo(3);
+    }
+
+    private HearingPart createHearingPartWithSession(int day) {
+        val sessionType = new SessionType();
+        sessionType.setDescription("desc");
+
+        val session = new Session();
+        session.setSessionType(sessionType);
+        session.setStart(OffsetDateTime.of(2000, 1, day, 0, 0, 0, 0, ZoneOffset.UTC));
+
+        val hearingPart = new HearingPart();
+        hearingPart.setSession(session);
+
+        return hearingPart;
+    }
+
+    private Hearing createMinimalHearing() {
         val hearing = new Hearing();
+        hearing.setCaseType(createCaseType());
+        hearing.setHearingType(createHearingType());
+        hearing.setPriority(PRIORITY);
+
+        return hearing;
+    }
+
+    private Hearing createHearing() {
+        val hearing = createMinimalHearing();
         hearing.setId(ID);
         hearing.setCaseNumber(CASE_NUMBER);
         hearing.setCaseTitle(CASE_TITLE);
-        hearing.setCaseType(createCaseType());
-        hearing.setHearingType(createHearingType());
         hearing.setDuration(DURATION);
         hearing.setScheduleStart(SCHEDULE_START);
         hearing.setScheduleEnd(SCHEDULE_END);
-        hearing.setPriority(PRIORITY);
         hearing.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         hearing.setReservedJudge(createPerson());
 
@@ -76,6 +121,7 @@ public class HearingWithSessionResponseTests {
         response.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         response.setReservedToJudge(JUDGE_NAME);
         response.setSessions(Collections.emptyList());
+        response.setHearingPartsVersions(new ArrayList<>());
 
         return response;
     }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -23,7 +24,7 @@ import javax.transaction.Transactional;
 public class CreateListingRequestAction extends Action implements RulesProcessable {
 
     protected CreateHearingRequest createHearingRequest;
-    protected HearingPart hearingPart;
+    protected List<HearingPart> hearingParts;
     protected Hearing hearing;
 
     protected HearingTypeRepository hearingTypeRepository;
@@ -49,7 +50,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     @Override
     @Transactional
     public void act() {
-        hearingPart = hearingMapper.mapToHearingPart(createHearingRequest);
+        hearingParts = hearingMapper.mapToHearingParts(createHearingRequest);
 
         hearing = hearingMapper.mapToHearing(
             createHearingRequest,
@@ -58,7 +59,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
             entityManager
         );
 
-        hearing.addHearingPart(hearingPart);
+        hearingParts.forEach(hearingPart -> hearing.addHearingPart(hearingPart));
 
         hearingRepository.save(hearing);
     }
@@ -69,22 +70,20 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
-        String msg;
-        try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+    public List<FactMessage> generateFactMessages() {
+        return hearing.getHearingParts().stream().map(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        }).collect(Collectors.toList());
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hearingPart.getId(), 0));
+        hearingParts.forEach(hp ->
+            userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hp.getId(), 0))
+        );
         userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
         return userTransactionDataList;
