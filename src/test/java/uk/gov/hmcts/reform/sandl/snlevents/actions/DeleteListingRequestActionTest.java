@@ -62,10 +62,11 @@ public class DeleteListingRequestActionTest {
             entityManager,
             objectMapper);
 
+        Hearing hearing = createHearing();
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(createUuid(ID));
 
-        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(createHearing());
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
     }
 
     @Test
@@ -98,10 +99,11 @@ public class DeleteListingRequestActionTest {
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
         action.getAndValidateEntities();
-        FactMessage factMessage = action.generateFactMessage();
+        List<FactMessage> factMessages = action.generateFactMessages();
 
-        assertThat(factMessage.getType()).isEqualTo(RulesService.DELETE_HEARING_PART);
-        assertThat(factMessage.getData()).isNotNull();
+        assertThat(factMessages.size()).isEqualTo(1);
+        assertThat(factMessages.get(0).getType()).isEqualTo(RulesService.DELETE_HEARING_PART);
+        assertThat(factMessages.get(0).getData()).isNotNull();
     }
 
     @Test
@@ -150,13 +152,14 @@ public class DeleteListingRequestActionTest {
         hearing.setId(dlr.getHearingId());
         hearing.setCaseType(new CaseType());
         hearing.setHearingType(new HearingType());
-        hearing.setHearingParts(Arrays.asList(createHearingPart()));
+        hearing.setHearingParts(Arrays.asList(createHearingPart(hearing)));
         return hearing;
     }
 
-    private HearingPart createHearingPart() {
+    private HearingPart createHearingPart(Hearing hearing) {
         val hearingPart = new HearingPart();
         hearingPart.setId(createUuid(HEARING_PART_ID));
+        hearingPart.setHearing(hearing);
         return hearingPart;
     }
 

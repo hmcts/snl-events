@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
@@ -90,15 +91,11 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
-        String msg = null;
-        try {
-            msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+    public List<FactMessage> generateFactMessages() {
+        return hearing.getHearingParts().stream().map(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        }).collect(Collectors.toList());
     }
 
     @Override
