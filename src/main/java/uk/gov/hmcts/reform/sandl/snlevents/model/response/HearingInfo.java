@@ -31,6 +31,7 @@ public class HearingInfo implements Serializable {
     private Boolean deleted;
     private Long version;
     private Integer numberOfSessions;
+    private Boolean isMultiSession;
 
     public HearingInfo(Hearing hearing) {
         this.setId(hearing.getId());

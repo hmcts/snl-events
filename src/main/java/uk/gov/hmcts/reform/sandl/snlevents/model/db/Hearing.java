@@ -65,6 +65,9 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private Integer numberOfSessions;
 
+    @Column(name = "is_multisession")
+    private Boolean isMultiSession;
+
     private OffsetDateTime scheduleStart;
 
     private OffsetDateTime scheduleEnd;

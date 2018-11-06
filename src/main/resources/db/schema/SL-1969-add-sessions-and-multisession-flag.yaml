@@ -1,0 +1,46 @@
+databaseChangeLog:
+- changeSet:
+    id: number-of-sessions-hearing
+    author: ataylor
+    changes:
+    - addColumn:
+        tableName: hearing
+        columns:
+        - column:
+            name: number_of_sessions
+            type: int
+            defaultValueNumeric: 1
+            constraints:
+              nullable: false
+        - column:
+            name: is_multisession
+            type: boolean
+            constraints:
+              nullable: false
+
+- changeSet:
+    id: number-of-sessions-hearing-aud
+    author: ataylor
+    changes:
+    - addColumn:
+        tableName: hearing_aud
+        columns:
+        - column:
+            name: number_of_sessions
+            type: int
+            defaultValueNumeric: 1
+            constraints:
+              nullable: false
+        - column:
+            name: is_multisession
+            type: boolean
+            constraints:
+              nullable: false
+        - sqlFile:
+            comment: setting is_multisession flag
+            encoding: utf8
+            endDelimiter: \nGO
+            path: ../fixtures/SL-1969-migrate-multisession.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
