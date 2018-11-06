@@ -35,7 +35,7 @@ public class RulesProcessableTestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
+    public List<FactMessage> generateFactMessages() {
         return null;
     }
 }

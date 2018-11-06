@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
@@ -73,5 +74,10 @@ public class HearingController {
             (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : new PageRequest(0, 10);
 
         return hearingService.search(searchCriteriaList, pageRequest);
+    }
+
+    @PutMapping(path = "/unlist", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity unlist(@RequestBody UnlistHearingRequest unlistHearingRequest) {
+        return ok(hearingService.unlist(unlistHearingRequest));
     }
 }

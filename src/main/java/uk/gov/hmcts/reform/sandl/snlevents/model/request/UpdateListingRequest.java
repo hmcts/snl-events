@@ -52,6 +52,7 @@ public class UpdateListingRequest {
 
     @NotNull
     private UUID userTransactionId;
+
     @NotNull
     private Long version;
 }
