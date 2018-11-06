@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -18,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
@@ -45,7 +47,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         try {
             currentSessionAsString = objectMapper.writeValueAsString(session);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new ServiceException("Given session couldn't be converted into string");
         }
 
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
@@ -71,10 +73,10 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     }
 
     @Override
-    public FactMessage generateFactMessage() {
+    public List<FactMessage> generateFactMessages() {
         val msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
 
-        return new FactMessage(RulesService.UPSERT_SESSION, msg);
+        return Arrays.asList(new FactMessage(RulesService.UPSERT_SESSION, msg));
     }
 
     @Override

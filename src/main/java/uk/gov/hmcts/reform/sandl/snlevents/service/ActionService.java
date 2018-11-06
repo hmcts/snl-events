@@ -25,6 +25,8 @@ public class ActionService {
 
         action.getAndValidateEntities();
 
+        // TO DO move action.generateUserTransactionData() here in order to save entity state before act
+
         if (userTransactionService.isAnyBeingTransacted(action.getAssociatedEntitiesIds())) {
             return userTransactionService.transactionConflicted(transactionId);
         }
@@ -36,7 +38,8 @@ public class ActionService {
             action.generateUserTransactionData());
 
         if (action instanceof RulesProcessable) {
-            rulesService.postMessage(transactionId,((RulesProcessable) action).generateFactMessage());
+            ((RulesProcessable) action).generateFactMessages()
+                .forEach(factMessage -> rulesService.postMessage(transactionId, factMessage));
         }
 
         return userTransactionService.rulesProcessed(ut);
