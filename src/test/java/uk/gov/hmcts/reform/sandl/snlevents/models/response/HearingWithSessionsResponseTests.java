@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsRes
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
@@ -120,6 +121,7 @@ public class HearingWithSessionsResponseTests {
         response.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         response.setReservedToJudge(JUDGE_NAME);
         response.setSessions(Collections.emptyList());
+        response.setHearingPartsVersions(new ArrayList<>());
 
         return response;
     }

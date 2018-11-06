@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -33,6 +36,7 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -130,6 +134,26 @@ public class HearingPartServiceTest {
         when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+
+        UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
+            createUuid(), createHearingSessionRelationship()
+        );
+
+        assertThat(returnedTransaction).isEqualTo(transaction);
+    }
+
+    @Test(expected = SnlRuntimeException.class)
+    public void assignHearingToSessionWithTransaction_throwException_whenObjectMapperCantConvertHearingPart()
+        throws IOException {
+        UserTransaction transaction = createUserTransaction();
+        when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
+        //target session exists
+        when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
+        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+
+        Mockito.when(objectMapper.writeValueAsString(isA(HearingPart.class)))
+            .thenThrow(new JsonProcessingException("") {});
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingSessionRelationship()

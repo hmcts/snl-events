@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -58,9 +59,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
             entityManager
         );
 
-        hearingParts.forEach(hearingPart -> {
-            hearing.addHearingPart(hearingPart);
-        });
+        hearingParts.forEach(hearingPart -> hearing.addHearingPart(hearingPart));
 
         hearingRepository.save(hearing);
     }
@@ -71,25 +70,20 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
-        String msg;
-        try {
-            msg = factsMapper.mapDbHearingToRuleJsonMessage(hearing);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+    public List<FactMessage> generateFactMessages() {
+        return hearing.getHearingParts().stream().map(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        }).collect(Collectors.toList());
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-        hearingParts.forEach(hp -> {
-            userTransactionDataList.add(prepareCreateUserTransactionData(
-                "hearingPart", hp.getId(), 0));
-        });
+        hearingParts.forEach(hp ->
+            userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hp.getId(), 0))
+        );
         userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
         return userTransactionDataList;

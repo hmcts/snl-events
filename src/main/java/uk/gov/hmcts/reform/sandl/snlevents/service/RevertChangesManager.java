@@ -62,25 +62,26 @@ public class RevertChangesManager {
         } else if ("hearing".equals(utd.getEntity())) {
             handleHearing(utd);
         }
-
-
     }
 
     private void handleHearing(UserTransactionData utd) {
-        Hearing hearing = hearingRepository.findOne(utd.getEntityId());
 
         if ("update".equals(utd.getCounterAction())) {
-            Hearing previousHearing = new Hearing();
-            String msg = null;
+            Hearing hearing = hearingRepository.findOne(utd.getEntityId());
+            Hearing previousHearing;
 
             try {
                 previousHearing = objectMapper.readValue(utd.getBeforeData(), Hearing.class);
-                msg = factsMapper.mapDbHearingToRuleJsonMessage(previousHearing);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            previousHearing.getHearingParts().stream().forEach(hp -> {
+                // For some reason after serialization hearing is null even though hearingId is set
+                hp.setHearing(hearing);
+                String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            });
 
             entityManager.detach(hearing);
 
@@ -93,15 +94,15 @@ public class RevertChangesManager {
         } else if ("delete".equals(utd.getCounterAction())) {
             hearingRepository.delete(utd.getEntityId());
         } else if ("create".equals(utd.getCounterAction())) {
-            hearing = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
-            hearing.setDeleted(false);
+            Hearing deletedHearing = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
+            deletedHearing.setDeleted(false);
 
             List<HearingPart> hearingParts = hearingPartRepository
-                .getHearingPartsByHearingIdIgnoringWhereDeletedClause(hearing.getId());
+                .getHearingPartsByHearingIdIgnoringWhereDeletedClause(deletedHearing.getId());
             hearingParts.forEach(hp -> hp.setDeleted(false));
 
             hearingPartRepository.save(hearingParts);
-            hearingRepository.save(hearing);
+            hearingRepository.save(deletedHearing);
 
             hearingParts.forEach(hp -> {
                 String msg;
@@ -114,10 +115,8 @@ public class RevertChangesManager {
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
             });
         }
-
     }
 
-    @SuppressWarnings("squid:S1172") // to be removed when method below will be implemented in a  better way
     private void handleHearingPart(UserTransactionData utd) {
         HearingPart hp = hearingPartRepository.findById(utd.getEntityId());
 
@@ -152,13 +151,7 @@ public class RevertChangesManager {
         } else if ("delete".equals(utd.getCounterAction())) {
             hearingPartRepository.delete(utd.getEntityId());
 
-            String msg = null;
-            try {
-                msg = factsMapper.mapDbHearingToRuleJsonMessage(hp.getHearing());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_HEARING_PART, msg);
         }
     }

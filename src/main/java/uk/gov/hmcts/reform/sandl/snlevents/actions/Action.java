@@ -9,5 +9,5 @@ public abstract class Action implements IAction, UserTransactionable {
 
     protected FactsMapper factsMapper = new FactsMapper();
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper objectMapper;
 }
