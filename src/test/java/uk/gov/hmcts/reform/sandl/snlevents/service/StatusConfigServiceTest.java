@@ -30,7 +30,7 @@ public class StatusConfigServiceTest {
         statusConfigService.getStatusConfigs();
         statusConfigService.getStatusConfigs();
 
-        verify(statusConfigRepository, times(1));
+        verify(statusConfigRepository, times(1)).findAll();
     }
 
     private List<StatusConfig> createStatuses() {
