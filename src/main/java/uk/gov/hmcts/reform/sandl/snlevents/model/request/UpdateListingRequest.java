@@ -42,10 +42,10 @@ public class UpdateListingRequest {
 
     @NotNull
     @Min(1)
-    private Integer numberOfSessions;
+    private int numberOfSessions;
 
     @NotNull
-    private Boolean isMultiSession;
+    private boolean isMultiSession;
 
     private OffsetDateTime scheduleStart;
 
