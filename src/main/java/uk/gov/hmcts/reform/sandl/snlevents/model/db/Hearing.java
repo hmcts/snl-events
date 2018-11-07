@@ -46,7 +46,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @DynamicInsert
 @Where(clause = "is_deleted=false")
 @SuppressWarnings("squid:S3437")
-public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable {
+public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable, Statusable {
 
     @Id
     private UUID id;
