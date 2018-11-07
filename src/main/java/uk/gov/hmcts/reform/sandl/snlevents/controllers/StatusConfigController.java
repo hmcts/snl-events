@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.StatusConfigResponse;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.StatusConfigRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/status-config")
 public class StatusConfigController {
+
     @Autowired
-    private StatusConfigRepository statusConfigRepository;
+    private StatusConfigService statusConfigService;
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<StatusConfigResponse> getAllStatuses() {
-        return statusConfigRepository.findAll()
+        return statusConfigService.getStatusConfigs()
             .stream()
             .map(StatusConfigResponse::new)
             .collect(Collectors.toList());

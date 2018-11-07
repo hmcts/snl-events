@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StatusConfigResponse implements Serializable {
-    private String status;
+    private Status status;
 
     private boolean canBeListed;
 
