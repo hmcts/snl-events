@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
@@ -66,9 +68,15 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setScheduleStart(updateListingRequest.getScheduleStart());
         hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
-        hearing.setReservedJudgeId(updateListingRequest.getReservedJudgeId());
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
+
+        if (updateListingRequest.getReservedJudgeId() != null) {
+            hearing.setReservedJudge(
+                this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
+            );
+        }
+
         hearingRepository.save(hearing);
     }
 
@@ -82,15 +90,11 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     }
 
     @Override
-    public FactMessage generateFactMessage() {
-        String msg = null;
-        try {
-            msg = factsMapper.mapHearingToRuleJsonMessage(hearing);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+    public List<FactMessage> generateFactMessages() {
+        return hearing.getHearingParts().stream().map(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -120,6 +124,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[] {updateListingRequest.getId()};
+        return new UUID[]{updateListingRequest.getId()};
     }
 }

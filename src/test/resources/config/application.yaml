@@ -36,9 +36,6 @@ fact-propagation:
     upsert-judge:
       - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
-    upsert-availability:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
     upsert-year:
       - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
       - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings

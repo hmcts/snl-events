@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 import uk.gov.hmcts.reform.sandl.snlevents.testdata.helpers.OffsetDateTimeHelper;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -109,7 +111,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
     }
 
     @Test
-    public void assignHearingPartToSessionWithTransaction_shouldReturnConflict() throws Exception {
+    public void assignHearingToSessionWithTransaction_shouldReturnConflict() throws Exception {
         Hearing hearing = new Hearing();
         hearing.setId(UUID.randomUUID());
         HearingPart hearingPart = new HearingPart();
@@ -131,9 +133,8 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         UserTransaction ut = hearingPartService.assignWithTransaction(
             savedHearing,
             hearingSessionRelationship.getUserTransactionId(),
-            null,
-            savedSession,
-            "das", "das"
+            Arrays.asList(savedSession),
+            "das", Arrays.asList("das")
         );
 
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
@@ -187,10 +188,9 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
 
     private HearingSessionRelationship createRelationship(UUID sessionUuid, UUID hearingId, UUID userTransactionId) {
         HearingSessionRelationship hearingSessionRelationship = new HearingSessionRelationship();
-        hearingSessionRelationship.setSessionId(sessionUuid);
+        hearingSessionRelationship.setSessionsData(Arrays.asList(new SessionAssignmentData(sessionUuid, 0)));
         hearingSessionRelationship.setStart(OffsetDateTimeHelper.january2018());
         hearingSessionRelationship.setUserTransactionId(userTransactionId);
-        hearingSessionRelationship.setSessionVersion(0);
         hearingSessionRelationship.setHearingVersion(0);
         hearingSessionRelationship.setHearingId(hearingId);
 

@@ -7,7 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -24,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +36,7 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -109,12 +114,12 @@ public class HearingPartServiceTest {
     }
 
     @Test
-    public void assignWithTransaction_startsTransaction() throws JsonProcessingException {
+    public void assignWithTransaction_startsTransaction() {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.startTransaction(any(UUID.class), any(List.class))).thenReturn(transaction);
 
         UserTransaction returnedTransaction = hearingPartService.assignWithTransaction(
-            createHearing(), createUuid(), createSession(), createSession(), "das", "Das"
+            createHearing(), createUuid(), createSessions(), "das", Arrays.asList("daa")
         );
 
         assertThat(returnedTransaction).isEqualTo(transaction);
@@ -126,9 +131,29 @@ public class HearingPartServiceTest {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
         //target session exists
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
+        when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+
+        UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
+            createUuid(), createHearingSessionRelationship()
+        );
+
+        assertThat(returnedTransaction).isEqualTo(transaction);
+    }
+
+    @Test(expected = SnlRuntimeException.class)
+    public void assignHearingToSessionWithTransaction_throwException_whenObjectMapperCantConvertHearingPart()
+        throws IOException {
+        UserTransaction transaction = createUserTransaction();
+        when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
+        //target session exists
+        when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
+        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
+
+        Mockito.when(objectMapper.writeValueAsString(isA(HearingPart.class)))
+            .thenThrow(new JsonProcessingException("") {});
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingSessionRelationship()
@@ -143,12 +168,12 @@ public class HearingPartServiceTest {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
         //target session exists
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
+        when(sessionRepository.findSessionByIdIn(any())).thenReturn(createSessions());
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(createHearing());
         //there's transaction in progress
         when(userTransactionService.isAnyBeingTransacted(any(UUID.class), any(UUID.class),
-            any(UUID.class), any(UUID.class)))
+            any(UUID.class)))
             .thenReturn(true);
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
@@ -164,7 +189,7 @@ public class HearingPartServiceTest {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.transactionConflicted(any(UUID.class))).thenReturn(transaction);
         //target session doesn't exist
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(null);
+        when(sessionRepository.findSessionByIdIn(any())).thenReturn(new ArrayList<>());
 
         UserTransaction returnedTransaction = hearingPartService.assignHearingToSessionWithTransaction(
             createUuid(), createHearingSessionRelationship()
@@ -189,7 +214,7 @@ public class HearingPartServiceTest {
     }
 
     @Test
-    public void assignHearingPArtToSessionWithTransaction_assignsThemSession_whenTheresNoTransactionInProgress()
+    public void assignHearingPartToSessionWithTransaction_assignsThemSession_whenTheresNoTransactionInProgress()
         throws IOException {
         UserTransaction transaction = createUserTransaction();
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).thenReturn(transaction);
@@ -250,15 +275,29 @@ public class HearingPartServiceTest {
         return session;
     }
 
+    private List<Session> createSessions() {
+        Session session = new Session();
+
+        session.setId(UUID.randomUUID());
+
+        return Arrays.asList(session);
+    }
+
     private UUID createUuid() {
         return UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
     }
 
     private HearingSessionRelationship createHearingSessionRelationship() {
-        return new HearingSessionRelationship();
+        HearingSessionRelationship relationship = new HearingSessionRelationship();
+        relationship.setSessionsData(Arrays.asList(new SessionAssignmentData()));
+
+        return relationship;
     }
 
     private HearingPartSessionRelationship createHearingPartSessionRelationship() {
-        return new HearingPartSessionRelationship();
+        HearingPartSessionRelationship relationship = new HearingPartSessionRelationship();
+        relationship.setSessionData(new SessionAssignmentData());
+
+        return relationship;
     }
 }

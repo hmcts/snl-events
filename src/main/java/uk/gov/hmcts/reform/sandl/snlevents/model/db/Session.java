@@ -17,6 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.CascadeType;
@@ -62,7 +63,7 @@ public class Session extends VersionedEntity implements Serializable, HistoryAud
     @OneToMany(mappedBy = "session")
     @JsonIgnore
     @NotAudited
-    private List<HearingPart> hearingParts;
+    private List<HearingPart> hearingParts = new ArrayList<>();
 
     @NotNull
     @EqualsAndHashCode.Exclude
@@ -92,5 +93,10 @@ public class Session extends VersionedEntity implements Serializable, HistoryAud
     public void setSessionType(SessionType sessionType) {
         this.sessionType = sessionType;
         sessionType.getSessions().add(this);
+    }
+
+    public void addHearingPart(HearingPart hearingPart) {
+        hearingPart.setSession(this);
+        hearingParts.add(hearingPart);
     }
 }

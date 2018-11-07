@@ -96,7 +96,8 @@ public class HearingPartController {
             hearingMapper,
             hearingTypeRepository,
             caseTypeRepository,
-            hearingRepository
+            hearingRepository,
+            entityManager
         );
 
         UserTransaction ut = actionService.execute(action);
