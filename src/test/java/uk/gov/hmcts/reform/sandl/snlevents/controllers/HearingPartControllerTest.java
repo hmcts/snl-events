@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -101,6 +102,10 @@ public class HearingPartControllerTest {
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
     private HearingTypeRepository hearingTypeRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private SessionRepository sessionRepository;
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
@@ -198,8 +203,7 @@ public class HearingPartControllerTest {
     public void assignHearingPartToSession_shouldAssignProperly() throws Exception {
         val ut = createUserTransaction();
 
-        when(hearingPartService.assignHearingPartToSessionWithTransaction(createUuid(), createAssignment()))
-            .thenReturn(ut);
+        when(actionService.execute(any())).thenReturn(ut);
 
         val response = mvc.callAndMapResponse(put(URL + "/" + createUuid()), createAssignment(),
             UserTransaction.class);

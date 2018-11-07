@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart.AssignHearingPartToSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 
@@ -52,6 +54,9 @@ public class HearingPartController {
 
     @Autowired
     HearingRepository hearingRepository;
+
+    @Autowired
+    SessionRepository sessionRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -120,7 +125,10 @@ public class HearingPartController {
         @PathVariable UUID hearingPartId,
         @RequestBody HearingPartSessionRelationship assignment) throws Exception {
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingPartId, assignment);
+        Action action = new AssignHearingPartToSessionAction(hearingPartId, assignment,
+            hearingPartRepository, sessionRepository, entityManager, objectMapper);
+
+        UserTransaction ut = actionService.execute(action);
 
         return ok(ut);
     }
