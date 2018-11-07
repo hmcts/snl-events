@@ -7,16 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.sandl.snlevents.config.SubscribersConfiguration;
+import uk.gov.hmcts.reform.sandl.snlevents.config.FactPropagationConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -41,7 +39,7 @@ public class RulesService {
     private FactMessageService factMessageService;
 
     @Autowired
-    private SubscribersConfiguration subscribersConfiguration;
+    private FactPropagationConfiguration factPropagationConfiguration;
 
     @Autowired
     private S2SRulesAuthenticationClient s2sAuthService;
@@ -59,27 +57,30 @@ public class RulesService {
         postToSubscribers(userTransactionId, factMessage);
     }
 
-    @HystrixCommand
     private void postToSubscribers(UUID userTransactionId, FactMessage msg) {
-        Map<String, List<String>> subscribers = subscribersConfiguration.getSubscribers();
-
         HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();
         HttpEntity<FactMessage> entity = new HttpEntity<>(msg, headers);
 
-        if (subscribers.containsKey(msg.getType())) {
-            List<String> subscribersEndpoints = subscribers.get(msg.getType());
-            for (String endpoint : subscribersEndpoints) {
-                logger.debug("Sending message type {} to {}", msg.getType(), endpoint);
-                ResponseEntity<String> factMsg = restTemplate.postForEntity(endpoint, entity, String.class);
-                factMessageService.handle(userTransactionId, factMsg.getBody());
-            }
+        List<String> subscribersEndpoints = factPropagationConfiguration.getMsgUrlsForMsgType(msg.getType());
+        for (String endpoint : subscribersEndpoints) {
+            logger.debug("Sending message type {} to {}", msg.getType(), endpoint);
+            ResponseEntity<String> factMsg = postEntity(entity, endpoint);
+            factMessageService.handle(userTransactionId, factMsg.getBody());
         }
     }
 
     @HystrixCommand
-    public String search(String params) {
+    private ResponseEntity<String> postEntity(HttpEntity<FactMessage> entity, String endpoint) {
+        return restTemplate.postForEntity(endpoint, entity, String.class);
+    }
+
+    public List<FactMessage> getReloadStatuses() {
+        // multiple threads?
         HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();
         HttpEntity<FactMessage> entity = new HttpEntity<>(headers);
-        return restTemplate.exchange(searchUrl + params, HttpMethod.GET, entity, String.class).getBody();
+        // return restTemplate.exchange(searchUrl + params, HttpMethod.GET, entity, String.class).getBody();
+        // TODO get from all rules engines
+        // TODO unpack into reloadStatusFact
+        return null;
     }
 }

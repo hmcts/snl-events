@@ -11,46 +11,40 @@ management:
       jwtSecret: "FakeSecret2"
       jwtExpirationInMs: 5000
 
-communication:
-  searchUrl: ${SNL_RULES_URL:http://localhost:8191}/search
-
 fact-propagation:
-  subscribers:
-    insert-session:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
-    upsert-session:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
-    delete-session:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
-    upsert-hearingPart:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-    upsert-room:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
-    upsert-judge:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Search
-    upsert-year:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-    upsert-month:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-    upsert-day:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-    upsert-hour:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
-    upsert-minute:
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
-      - ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
+  engines:
+    - name: Listings
+      reloadStatusUrl: ${SNL_RULES_URL:http://localhost:8091}/reload/status?rulesDefinition=Listings
+      msgUrl: ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+      msgTypes:
+        - upsert-year
+        - upsert-month
+        - upsert-day
+        - upsert-hour
+        - upsert-minute
+        - insert-session
+        - upsert-session
+        - delete-session
+        - insert-hearingPart
+        - upsert-hearingPart
+        - delete-hearingPart
+        - insert-sessionType
+        - upsert-sessionType
+        - delete-sessionType
+    - name: Sessions
+      reloadStatusUrl: ${SNL_RULES_URL:http://localhost:8091}/reload/status?rulesDefinition=Sessions
+      msgUrl: ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      msgTypes:
+        - upsert-year
+        - upsert-month
+        - upsert-day
+        - upsert-hour
+        - upsert-minute
+        - insert-session
+        - upsert-session
+        - delete-session
+        - upsert-room
+        - upsert-judge
 
 liquibase:
   enabled: true
