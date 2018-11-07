@@ -43,6 +43,8 @@ public class UpdateListingRequestActionTest {
     private static final String HEARING_TYPE_CODE = "hearing-type-code";
     private static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-description");
     private static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-description");
+    private static final UUID HP_ID = UUID.randomUUID();
+
 
     private UpdateListingRequestAction action;
     private UpdateListingRequest ulr;
@@ -83,7 +85,11 @@ public class UpdateListingRequestActionTest {
         hearing.setId(createUuid(ID));
         hearing.setCaseType(new CaseType());
         hearing.setHearingType(new HearingType());
-        hearing.setHearingParts(Arrays.asList(new HearingPart()));
+
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(HP_ID);
+        hearingPart.setHearing(hearing);
+        hearing.setHearingParts(Arrays.asList(hearingPart));
 
         Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
         when(hearingRepository.save(Matchers.any(Hearing.class))).thenReturn(hearing);
@@ -114,10 +120,11 @@ public class UpdateListingRequestActionTest {
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
         action.getAndValidateEntities();
-        FactMessage factMessage = action.generateFactMessage();
+        List<FactMessage> factMessages = action.generateFactMessages();
 
-        assertThat(factMessage.getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
-        assertThat(factMessage.getData()).isNotNull();
+        assertThat(factMessages.size()).isEqualTo(1);
+        assertThat(factMessages.get(0).getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
+        assertThat(factMessages.get(0).getData()).isNotNull();
     }
 
     @Test
@@ -145,7 +152,7 @@ public class UpdateListingRequestActionTest {
         );
 
         expectedTransactionData.add(new UserTransactionData("hearingPart",
-            null,
+            HP_ID,
             null,
             "lock",
             "unlock",
@@ -161,6 +168,12 @@ public class UpdateListingRequestActionTest {
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
     }
 
+    private HearingPart createHearingPart() {
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setId(HP_ID);
+
+        return hearingPart;
+    }
 
     private UUID createUuid(String uuid) {
         return UUID.fromString(uuid);

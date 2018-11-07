@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -99,19 +100,19 @@ public class HearingPartService {
 
         AtomicInteger index = new AtomicInteger();
 
-        hearing.getHearingParts().forEach(hp -> {
+        hearing.getHearingParts().forEach(hp ->
             userTransactionDataList.add(new UserTransactionData("hearingPart",
                 hp.getId(),
                 previousHearingParts.get(index.getAndIncrement()),
                 "update",
                 "update",
                 1
-                ));
-        });
+                ))
+        );
 
-        targetSessions.forEach(session -> {
-            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()));
-        });
+        targetSessions.forEach(session ->
+            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()))
+        );
 
         return userTransactionService.startTransaction(transactionId, userTransactionDataList);
     }
@@ -192,7 +193,7 @@ public class HearingPartService {
                 }
                 factsMessages.add(factsMapper.mapHearingToRuleJsonMessage(hp));
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new SnlRuntimeException(e);
             }
         });
 

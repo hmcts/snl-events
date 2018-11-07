@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.val;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -84,7 +85,7 @@ public class FactsMapper {
         return objectMapper.writeValueAsString(factSession);
     }
 
-    public String mapHearingToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
+    public String mapHearingToRuleJsonMessage(HearingPart hearingPart) {
         FactHearingPart factHearingPart = new FactHearingPart();
         Hearing hearing = hearingPart.getHearing();
 
@@ -100,10 +101,11 @@ public class FactsMapper {
             factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
 
-        Optional.ofNullable(hearingPart.getSession()).ifPresent(
-            s -> factHearingPart.setSessionId(s.getId().toString()));
-
-        return objectMapper.writeValueAsString(factHearingPart);
+        try {
+            return objectMapper.writeValueAsString(factHearingPart);
+        } catch (JsonProcessingException e) {
+            throw new SnlRuntimeException(e);
+        }
     }
 
     public String mapDbSessionToRuleJsonMessage(Session session) {
@@ -135,7 +137,6 @@ public class FactsMapper {
     public String mapDbHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
         FactHearingPart factHearingPart = new FactHearingPart();
 
-        factHearingPart.setId(hearing.getId().toString());
         factHearingPart.setDuration(hearing.getDuration());
         factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
         factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
@@ -144,6 +145,8 @@ public class FactsMapper {
         factHearingPart.setCreatedAt(hearing.getCreatedAt());
 
         HearingPart hearingPart = hearing.getHearingParts().get(0); // @TODO temporary solution
+        factHearingPart.setId(hearingPart.getId().toString());
+
         if (hearingPart.getSessionId() != null) {
             factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
@@ -209,7 +212,7 @@ public class FactsMapper {
         Hearing hearing = hearingPart.getHearing();
         FactHearingPart factHearingPart = new FactHearingPart();
 
-        factHearingPart.setId(hearing.getId().toString());
+        factHearingPart.setId(hearingPart.getId().toString());
         factHearingPart.setDuration(hearing.getDuration());
         factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
         factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
@@ -220,9 +223,6 @@ public class FactsMapper {
         if (hearingPart.getSession() != null) {
             factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
         }
-
-        Optional.ofNullable(hearingPart.getSession()).ifPresent(
-            s -> factHearingPart.setSessionId(s.getId().toString()));
 
         return objectMapper.writeValueAsString(factHearingPart);
     }
