@@ -40,7 +40,6 @@ public class UpdateListingRequest {
     private Duration duration;
 
     @NotNull
-    @MinDuration(minMinutes = 1)
     private Integer numberOfSessions;
 
     private OffsetDateTime scheduleStart;
