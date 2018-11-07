@@ -1,159 +1,161 @@
-//package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing;
-//
-//import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
-//import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-//import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
-//import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-//import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
-//import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-//import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
-//import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
-//import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
-//import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-//import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
-//
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.UUID;
-//import java.util.concurrent.atomic.AtomicInteger;
-//import java.util.stream.Collectors;
-//
-//public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
-//
-//    protected HearingSessionRelationship hearingSessionRelationship;
-//    protected UUID hearingPartId;
-//    protected HearingPart hearingPart;
-//    protected List<Session> targetSessions;
-//    protected List<UUID> targetSessionsIds;
-//
-//    protected HearingPartRepository hearingPartRepository;
-//
-//    protected SessionRepository sessionRepository;
-//    private String previousHearingPart;
-//    private String previousHearing;
-//
-//    //Done
-//    public AssignSessionsToHearingAction(UUID hearingPartId,
-//                                         HearingSessionRelationship hearingSessionRelationship,
-//                                         HearingPartRepository hearingPartRepository,
-//                                         SessionRepository sessionRepository) {
-//        this.hearingSessionRelationship = hearingSessionRelationship;
-//        this.hearingPartId = hearingPartId;
-//        this.hearingPartRepository = hearingPartRepository;
-//        this.sessionRepository = sessionRepository;
-//    }
-//
-//    @Override //Done
-//    public void getAndValidateEntities() {
-//        hearingPart = hearingPartRepository.findOne(hearingPartId);
-//
-//        targetSessionsIds = hearingSessionRelationship.getSessionsData().stream()
-//            .map(SessionAssignmentData::getSessionId)
-//            .collect(Collectors.toList());
-//        targetSessions = sessionRepository.findSessionByIdIn(targetSessionsIds);
-//
-//        if (targetSessions == null) {
-//            throw new RuntimeException("Target sessions cannot be null!");
-//        } else if (hearingPart == null) {
-//            throw new RuntimeException("Hearing part cannot be null!");
-//        }
-//    }
-//
-//    //Done
-//    @Override
-//    public UUID[] getAssociatedEntitiesIds() {
-//        final List<UUID> entitiesIds = Arrays.asList(
-//            hearingPart.getId(), hearingPart.getSessionId(), hearingPart.getHearingId()
-//        );
-//        entitiesIds.addAll(targetSessionsIds);
-//
-//        return entitiesIds.toArray(new UUID[0]);
-//    }
-//
-//    @Override
-//    public void act() {
-////        hearingPart.setSession(targetSession);
-////        hearingPart.setSessionId(targetSession.getId());
-////        //hearingPart.setStart(hearingSessionRelationship.getStart());
-//
-//        previousHearingPart = objectMapper.writeValueAsString(hearingPart);
-//        previousHearing = objectMapper.writeValueAsString(hearingPart.getHearing());
-//// Brakuje wersji w requescie        hearingPart.setVersion(assignment.getHearingPartVersion());
-//
-//        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
-//        hearingPart.setSessionId(targetSessionId);
-//        hearingPart.setSession(targetSession);
-//
-//        hearingPartRepository.save(hearingPart);
-//    }
-//
-//    @Override
-//    public List<UserTransactionData> generateUserTransactionData() {
-//
-//        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-//        userTransactionDataList.add(new UserTransactionData("hearing",
-//            savedHearing.getId(),
-//            beforeHearing,
-//            "update",
-//            "update",
-//            0)
-//        );
-//
-//        AtomicInteger index = new AtomicInteger();
-//
-//        userTransactionDataList.add(new UserTransactionData("hearingPart",
-//            hearingPart.getId(),
-//            previousHearingParts.get(index.getAndIncrement()),
-//            "update",
-//            "update",
-//            1
-//        ));
-//
-//        targetSessions.forEach(session ->
-//            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()))
-//        );
-//        //////
-//        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-//        try {
-//            userTransactionDataList.add(new UserTransactionData("hearingPart",
-//                hearingPart.getId(),
-//                objectMapper.writeValueAsString(hearingPart),
-//                "update",
-//                "update",
-//                0)
-//            );
-//        } catch (Exception ex) {
-//            throw new RuntimeException(ex);
-//        }
-//
-//        if (hearingPart.getSession() != null) {
-//            userTransactionDataList.add(getLockedSessionTransactionData(hearingPart.getSession().getId()));
-//        }
-//        userTransactionDataList.add(getLockedSessionTransactionData(targetSession.getId()));
-//
-//        return userTransactionDataList;
-//    }
-//
-//    @Override
-//    public FactMessage generateFactMessage() {
-//        String msg = null;
-//        //try {
-//        //    msg = factsMapper.mapHearingToRuleJsonMessage(hearingPart); @TODO use Action instead of service
-//        //} catch (JsonProcessingException e) {
-//        //    throw new RuntimeException(e);
-//        //}
-//
-//        return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
-//    }
-//
-//    //Done
-//    @Override
-//    public UUID getUserTransactionId() {
-//        return hearingSessionRelationship.getUserTransactionId();
-//    }
-//
-//    private UserTransactionData getLockedSessionTransactionData(UUID id) {
-//        return new UserTransactionData("session", id, null, "lock", "unlock", 0);
-//    }
-//}
+package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+
+public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
+
+    private final EntityManager entityManager;
+    protected HearingSessionRelationship relationship;
+    protected UUID hearingId;
+    protected Hearing hearing;
+    protected List<Session> targetSessions;
+    protected List<UUID> targetSessionsIds;
+    protected List<String> previousHearingParts;
+    protected String previousHearing;
+
+    protected HearingRepository hearingRepository;
+    protected SessionRepository sessionRepository;
+
+    public AssignSessionsToHearingAction(UUID hearingId,
+                                         HearingSessionRelationship relationship,
+                                         HearingRepository hearingRepository,
+                                         SessionRepository sessionRepository,
+                                         EntityManager entityManager,
+                                         ObjectMapper objectMapper) {
+        this.relationship = relationship;
+        this.hearingId = hearingId;
+        this.hearingRepository = hearingRepository;
+        this.sessionRepository = sessionRepository;
+        this.objectMapper = objectMapper;
+        this.entityManager = entityManager;
+    }
+
+    @Override
+    public void getAndValidateEntities() {
+        hearing = hearingRepository.findOne(hearingId);
+
+        targetSessionsIds = relationship.getSessionsData().stream()
+            .map(SessionAssignmentData::getSessionId)
+            .collect(Collectors.toList());
+        targetSessions = sessionRepository.findSessionByIdIn(targetSessionsIds);
+
+        if (targetSessions == null) {
+            throw new RuntimeException("Target sessions cannot be null!");
+        } else if (hearing == null) {
+            throw new RuntimeException("Hearing part cannot be null!");
+        }
+    }
+
+    @Override
+    public UUID[] getAssociatedEntitiesIds() {
+        final List<UUID> entitiesIds = new ArrayList<>();
+        entitiesIds.add(hearing.getId());
+        for (HearingPart hp : hearing.getHearingParts()) {
+            entitiesIds.add(hp.getId());
+            entitiesIds.add(hp.getSessionId());
+        }
+        entitiesIds.addAll(targetSessionsIds);
+
+        return entitiesIds.toArray(new UUID[0]);
+    }
+
+    @Override
+    public void act() {
+        try {
+            previousHearing = objectMapper.writeValueAsString(hearing);
+            entityManager.detach(hearing);
+
+            hearing.setVersion(relationship.getHearingVersion());
+
+            previousHearingParts = new ArrayList<>();
+            AtomicInteger index = new AtomicInteger();
+            for (HearingPart hp : hearing.getHearingParts()) {
+                previousHearingParts.add(objectMapper.writeValueAsString(hp));
+
+                Session session = targetSessions.get(index.getAndIncrement());
+                hp.setSessionId(session.getId());
+                hp.setSession(session);
+                if (targetSessions.size() > 1) {
+                    hp.setStart(session.getStart());
+                } else {
+                    hp.setStart(relationship.getStart());
+                }
+
+            }
+        } catch (JsonProcessingException e) {
+            throw new SnlRuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<UserTransactionData> generateUserTransactionData() {
+        Hearing savedHearing = hearingRepository.save(hearing);
+
+        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
+        userTransactionDataList.add(new UserTransactionData("hearing",
+            savedHearing.getId(),
+            previousHearing,
+            "update",
+            "update",
+            0)
+        );
+
+        AtomicInteger index = new AtomicInteger();
+        for (HearingPart hp : hearing.getHearingParts()) {
+            userTransactionDataList.add(new UserTransactionData("hearingPart",
+                hp.getId(),
+                previousHearingParts.get(index.getAndIncrement()),
+                "update",
+                "update",
+                1
+            ));
+        }
+
+        targetSessions.forEach(session ->
+            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()))
+        );
+
+        return userTransactionDataList;
+    }
+
+    @Override
+    public UUID getUserTransactionId() {
+        return relationship.getUserTransactionId();
+    }
+
+    @Override
+    public List<FactMessage> generateFactMessages() {
+        List<FactMessage> factsMessages = new ArrayList<>();
+        for (HearingPart hp : hearing.getHearingParts()) {
+            factsMessages.add(
+                new FactMessage(RulesService.UPSERT_HEARING_PART, factsMapper.mapHearingToRuleJsonMessage(hp))
+            );
+        }
+        return factsMessages;
+    }
+
+    private UserTransactionData getLockedSessionTransactionData(UUID id) {
+        return new UserTransactionData("session", id, null, "lock", "unlock", 0);
+    }
+}

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AssignSessionsToHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
@@ -21,13 +24,15 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
-import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -39,10 +44,19 @@ public class HearingController {
     private HearingRepository hearingRepository;
 
     @Autowired
-    private HearingPartService hearingPartService;
+    private SessionRepository sessionRepository;
 
     @Autowired
     private HearingService hearingService;
+
+    @Autowired
+    private ActionService actionService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
@@ -59,7 +73,11 @@ public class HearingController {
         @PathVariable UUID hearingId,
         @RequestBody HearingSessionRelationship assignment) throws Exception {
 
-        UserTransaction ut = hearingPartService.assignHearingToSessionWithTransaction(hearingId, assignment);
+        Action action = new AssignSessionsToHearingAction(
+            hearingId, assignment, hearingRepository, sessionRepository, entityManager, objectMapper
+        );
+
+        UserTransaction ut = actionService.execute(action);
 
         return ok(ut);
     }

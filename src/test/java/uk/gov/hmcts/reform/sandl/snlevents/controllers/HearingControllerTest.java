@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import lombok.var;
 import org.junit.Test;
@@ -23,10 +24,13 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
+import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -57,6 +61,21 @@ public class HearingControllerTest {
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
+    private SessionRepository sessionRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private ActionService actionService;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private EntityManager entityManager;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private S2SRulesAuthenticationClient s2SRulesAuthenticationClient;
 
     @Test
@@ -75,8 +94,7 @@ public class HearingControllerTest {
     public void assignHearingToSession_shouldReturnUserTransaction() throws Exception {
         val ut = createUserTransaction();
 
-        when(hearingPartService.assignHearingToSessionWithTransaction(ID, createAssignment()))
-            .thenReturn(ut);
+        when(actionService.execute(any())).thenReturn(ut);
 
         val response = mvc.callAndMapResponse(put(URL + "/" + ID), createAssignment(),
             UserTransaction.class);
