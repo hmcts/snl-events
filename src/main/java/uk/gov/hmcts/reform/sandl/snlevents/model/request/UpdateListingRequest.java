@@ -45,7 +45,7 @@ public class UpdateListingRequest {
     private int numberOfSessions;
 
     @NotNull
-    private boolean isMultiSession;
+    private boolean multiSession;
 
     private OffsetDateTime scheduleStart;
 

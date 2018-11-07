@@ -47,7 +47,7 @@ public class CreateHearingRequest implements UserTransactional {
     private int numberOfSessions;
 
     @NotNull
-    private boolean isMultiSession;
+    private boolean multiSession;
 
     private OffsetDateTime scheduleStart;
 
