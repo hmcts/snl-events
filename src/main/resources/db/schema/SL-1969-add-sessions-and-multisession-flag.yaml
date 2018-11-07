@@ -47,6 +47,8 @@ databaseChangeLog:
     - addNotNullConstraint:
         tableName: hearing
         columnName: number_of_sessions
+        columnDataType: int
     - addNotNullConstraint:
         tableName: hearing
         columnName: is_multisession
+        columnDataType: boolean
