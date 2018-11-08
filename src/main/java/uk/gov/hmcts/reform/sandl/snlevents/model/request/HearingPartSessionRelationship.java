@@ -10,7 +10,6 @@ public class HearingPartSessionRelationship {
     UUID userTransactionId;
     UUID hearingPartId;
     long hearingPartVersion;
-    UUID sessionId;
-    long sessionVersion;
+    SessionAssignmentData sessionData;
     OffsetDateTime start;
 }

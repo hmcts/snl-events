@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Where;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -29,6 +30,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -41,9 +43,10 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @EntityListeners(AuditingEntityListener.class)
+@DynamicInsert
 @Where(clause = "is_deleted=false")
 @SuppressWarnings("squid:S3437")
-public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable {
+public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable, Statusable {
 
     @Id
     private UUID id;
@@ -66,14 +69,21 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private OffsetDateTime scheduleEnd;
 
-    private UUID reservedJudgeId;
-
     private String communicationFacilitator;
 
     @Enumerated(EnumType.ORDINAL)
     private Priority priority;
 
     private boolean isDeleted;
+
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @JoinColumn(name = "reservedJudgeId")
+    private Person reservedJudge;
+
+    public UUID getReservedJudgeId() {
+        return this.reservedJudge != null ? this.reservedJudge.getId() : null;
+    }
 
     @CreatedDate
     @Column(updatable = false)
@@ -98,4 +108,9 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
         hearingPart.setHearing(this);
         hearingParts.add(hearingPart);
     }
+
+    @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @JoinColumn(name = "status", nullable = false)
+    private StatusConfig status;
 }

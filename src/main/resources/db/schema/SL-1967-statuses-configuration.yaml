@@ -1,0 +1,103 @@
+databaseChangeLog:
+- changeSet:
+    id: create-statuses-config-table
+    author: rkruk
+    changes:
+    - createTable:
+        tableName: status_config
+        columns:
+        - column:
+            constraints:
+              primaryKey: true
+            name: status
+            type: varchar(30)
+        - column:
+            name: can_be_listed
+            type: boolean
+        - column:
+            name: can_be_unlisted
+            type: boolean
+        - column:
+            name: count_in_utilization
+            type: boolean
+- changeSet:
+    id: insert-statuses
+    author: rkruk
+    comment: Initial values needed to start the work
+    changes:
+    - insert:
+        columns:
+          - column:
+              name: status
+              value: "Unlisted"
+          - column:
+              name: can_be_listed
+              value: true
+          - column:
+              name: can_be_unlisted
+              value: false
+          - column:
+              name: count_in_utilization
+              value: false
+        tableName: status_config
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Listed"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: true
+        - column:
+            name: count_in_utilization
+            value: true
+        tableName: status_config
+- changeSet:
+    id: add-statuses-column-to-hearing-and-hearing-part
+    author: rkruk
+    changes:
+    - addColumn:
+        tableName: hearing
+        columns:
+        - column:
+            name: status
+            type: varchar(30)
+            defaultValue: "Unlisted"
+            constraints:
+              nullable: false
+    - addForeignKeyConstraint:
+        baseColumnNames: status
+        baseTableName: hearing
+        constraintName: fk_hearing_status_code_status_config
+        referencedColumnNames: status
+        referencedTableName: status_config
+    - addColumn:
+        tableName: hearing_aud
+        columns:
+        - column:
+            name: status
+            type: varchar(30)
+    - addColumn:
+        tableName: hearing_part
+        columns:
+        - column:
+            name: status
+            type: varchar(30)
+            defaultValue: "Unlisted"
+            constraints:
+              nullable: false
+    - addForeignKeyConstraint:
+        baseColumnNames: status
+        baseTableName: hearing_part
+        constraintName: fk_hearing_part_status_code_status_config
+        referencedColumnNames: status
+        referencedTableName: status_config
+    - addColumn:
+        tableName: hearing_part_aud
+        columns:
+        - column:
+            name: status
+            type: varchar(30)
