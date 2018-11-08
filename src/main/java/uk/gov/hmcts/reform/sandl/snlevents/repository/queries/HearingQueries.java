@@ -56,11 +56,12 @@ public class HearingQueries {
 
         Subquery<String> subQueryPerson = createPersonNameSelect(criteriaBuilder, criteriaQuery, hearingRoot);
         Subquery<Long> subQueryListingCount = createListingCountSelect(criteriaBuilder, criteriaQuery, hearingRoot);
+        Subquery<String> subQueryJudgeAssigned = createJudgeAssignedSelect(criteriaBuilder, criteriaQuery, hearingRoot);
         Subquery<OffsetDateTime> subQueryListingStart = createListingStartSelect(criteriaBuilder,
             criteriaQuery, hearingRoot);
 
         List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson,
-            subQueryListingCount, subQueryListingStart);
+            subQueryListingCount, subQueryListingStart, subQueryJudgeAssigned);
 
         Predicate restrictions = createWherePredicates(searchCriteriaList, criteriaBuilder, criteriaQuery, hearingRoot);
         criteriaQuery.where(restrictions);
@@ -80,7 +81,8 @@ public class HearingQueries {
     private List<Selection<?>> createSelections(Root<Hearing> hearingRoot,
                                                 Subquery<String> subQueryPerson,
                                                 Subquery<Long> subQueryListingCount,
-                                                Subquery<OffsetDateTime> subQueryListingStart) {
+                                                Subquery<OffsetDateTime> subQueryListingStart,
+                                                Subquery<String> subQueryJudgeAssigned) {
         List<Selection<?>> selections = new LinkedList<>();
 
         selections.add(hearingRoot.get(Hearing_.id));
@@ -100,6 +102,7 @@ public class HearingQueries {
         selections.add(hearingRoot.get(Hearing_.version));
         selections.add(subQueryListingCount.getSelection());
         selections.add(subQueryListingStart.getSelection());
+        selections.add(subQueryJudgeAssigned.getSelection());
 
         return selections;
     }
@@ -224,6 +227,25 @@ public class HearingQueries {
         subQueryListingStart.select(cb.least(join.<OffsetDateTime>get(Session_.start)));
 
         return subQueryListingStart;
+    }
+
+    private Subquery<String> createJudgeAssignedSelect(CriteriaBuilder cb,
+                                                                 CriteriaQuery<HearingSearchResponse> cq,
+                                                                 Root<Hearing> hearingRoot) {
+        Subquery<String> judgeAssignedSelect = cq.subquery(String.class);
+
+        Root<HearingPart> subQueryListingStartRoot = judgeAssignedSelect.from(HearingPart.class);
+        Join<HearingPart, Session> join = subQueryListingStartRoot.join(HearingPart_.session, JoinType.INNER);
+        Join<Session, Person> personJoin = join.join(Session_.person, JoinType.INNER);
+        judgeAssignedSelect.where(
+            //join subquery with main query
+            cb.equal(subQueryListingStartRoot.get(HearingPart_.hearingId), hearingRoot),
+            // additional filters
+            cb.isNotNull(subQueryListingStartRoot.get(HearingPart_.sessionId))
+        );
+        judgeAssignedSelect.select(cb.least(personJoin.<String>get(Person_.name)));
+
+        return judgeAssignedSelect;
     }
 
     private Subquery<Long> createListingCountSelect(CriteriaBuilder cb,

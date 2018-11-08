@@ -34,6 +34,7 @@ public class HearingSearchResponse implements Serializable {
     @JsonIgnore
     private Long listedCount;
     private OffsetDateTime listingDate;
+    private String personName;
 
     public Boolean getIsListed() {
         return listedCount > 0;
