@@ -30,7 +30,6 @@ public class RulesServiceTest {
     public static final String BODY = "body";
     public static final String TYPE = "1";
     public static final String DATA = "data";
-    public static final String ENDPOINT = "endpoint";
 
     @InjectMocks
     RulesService rulesService;

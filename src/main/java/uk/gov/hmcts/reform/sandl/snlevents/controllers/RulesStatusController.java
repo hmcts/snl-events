@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ReloadRulesService;
 
-import java.io.IOException;
-
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController()

@@ -32,8 +32,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +73,9 @@ public class ReloadRulesService {
     @Autowired
     private SessionTypeRepository sessionTypeRepository;
 
+    @Autowired
+    private Clock clock;
+
     private int year;
     private int month;
     private int day;
@@ -110,7 +113,7 @@ public class ReloadRulesService {
     }
 
     public void reloadDateAndTimeIfNeeded() throws JsonProcessingException {
-        val now = OffsetDateTime.now(ZoneOffset.UTC);
+        val now = OffsetDateTime.now(clock);
         if (now.getYear() != year) {
             sendDateTimePart("year", now.getYear());
             year = now.getYear();
@@ -177,8 +180,8 @@ public class ReloadRulesService {
 
     private void updateReloadStatus(
         FactPropagationEngineConfiguration engine,
-        OffsetDateTime startedAt, OffsetDateTime finshedAt) throws JsonProcessingException {
-        String msg = factsMapper.mapReloadStatusToRuleJsonMessage(startedAt, finshedAt);
+        OffsetDateTime startedAt, OffsetDateTime finishedAt) throws JsonProcessingException {
+        String msg = factsMapper.mapReloadStatusToRuleJsonMessage(startedAt, finishedAt);
         postMessageToEngine(engine, RulesService.UPSERT_RELOAD_STATUS, msg);
     }
 
