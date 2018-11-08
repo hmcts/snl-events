@@ -27,13 +27,13 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     protected UUID hearingPartId;
     protected HearingPart hearingPart;
     protected Session targetSession;
+    protected String previousHearingPart;
+    protected String previousHearing;
+    protected Session previousSession;
 
     protected HearingPartRepository hearingPartRepository;
     protected EntityManager entityManager;
     protected SessionRepository sessionRepository;
-    private String previousHearingPart;
-    private String previousHearing;
-    private Session previousSession;
 
     public AssignHearingPartToSessionAction(UUID hearingPartId,
                                             HearingPartSessionRelationship hearingPartSessionRelationship,
@@ -63,9 +63,13 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        final List<UUID> entitiesIds = Arrays.asList(
-            hearingPart.getId(), hearingPart.getSessionId(), hearingPart.getHearingId(), targetSession.getId()
-        );
+        // below, because Arrays.asList returns AbstractList which does not support add method
+        List<UUID> entitiesIds = new ArrayList<>(Arrays.asList(
+            hearingPart.getId(), hearingPart.getHearingId(), targetSession.getId()
+        ));
+        if (hearingPart.getSessionId() != null) {
+            entitiesIds.add(hearingPart.getSessionId());
+        }
         return entitiesIds.toArray(new UUID[0]);
     }
 
