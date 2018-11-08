@@ -70,6 +70,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
+        hearing.setNumberOfSessions(updateListingRequest.getNumberOfSessions());
 
         if (updateListingRequest.getReservedJudgeId() != null) {
             hearing.setReservedJudge(

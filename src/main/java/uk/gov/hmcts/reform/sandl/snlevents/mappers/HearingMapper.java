@@ -46,6 +46,8 @@ public class HearingMapper {
         hearing.setScheduleEnd(createHearingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(createHearingRequest.getCommunicationFacilitator());
         hearing.setPriority(createHearingRequest.getPriority());
+        hearing.setNumberOfSessions(createHearingRequest.getNumberOfSessions());
+        hearing.setMultiSession(createHearingRequest.isMultiSession());
 
         if (createHearingRequest.getReservedJudgeId() != null) {
             hearing.setReservedJudge(
