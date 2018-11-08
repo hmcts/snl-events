@@ -14,8 +14,8 @@ management:
 fact-propagation:
   engines:
     - name: Listings
-      reloadStatusUrl: ${SNL_RULES_URL:http://localhost:8091}/reload/status?rulesDefinition=Listings
-      msgUrl: ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Listings
+      reloadStatusUrl: ${SNL_RULES_URL:http://localhost:8191}/reload/status?rulesDefinition=Listings
+      msgUrl: ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Listings
       msgTypes:
         - upsert-year
         - upsert-month
@@ -32,8 +32,8 @@ fact-propagation:
         - upsert-sessionType
         - delete-sessionType
     - name: Sessions
-      reloadStatusUrl: ${SNL_RULES_URL:http://localhost:8091}/reload/status?rulesDefinition=Sessions
-      msgUrl: ${SNL_RULES_URL:http://localhost:8091}/msg?rulesDefinition=Sessions
+      reloadStatusUrl: ${SNL_RULES_URL:http://localhost:8191}/reload/status?rulesDefinition=Sessions
+      msgUrl: ${SNL_RULES_URL:http://localhost:8191}/msg?rulesDefinition=Sessions
       msgTypes:
         - upsert-year
         - upsert-month
