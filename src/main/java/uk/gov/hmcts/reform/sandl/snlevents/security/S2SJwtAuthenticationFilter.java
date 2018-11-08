@@ -40,8 +40,16 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
-        s2sAuthenticate(request, response);
+        if (s2SAuthenticationConfig.isEnabled()) {
+            s2sAuthenticate(request, response);
+        } else {
+            s2sAuthenticateAnnonymous();
+        }
         filterChain.doFilter(request, response);
+    }
+
+    private void s2sAuthenticateAnnonymous() {
+        authenticate("annonymous");
     }
 
     private void s2sAuthenticate(HttpServletRequest request, HttpServletResponse response) {
@@ -69,6 +77,10 @@ public class S2SJwtAuthenticationFilter extends OncePerRequestFilter {
         final String userName = (String) claims.get("user");
 
         String currentPrincipalName = String.format("%s:%s", serviceName, userName);
+        authenticate(currentPrincipalName);
+    }
+
+    private void authenticate(String currentPrincipalName) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(currentPrincipalName,
             null, Arrays.asList());
         SecurityContextHolder.getContext().setAuthentication(authentication);

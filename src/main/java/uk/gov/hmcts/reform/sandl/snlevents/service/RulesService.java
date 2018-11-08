@@ -4,7 +4,6 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +26,12 @@ public class RulesService {
     public static final String DELETE_SESSION = "delete-session";
     public static final String DELETE_HEARING_PART = "delete-hearingPart";
     public static final String UPSERT_SESSION_TYPE = "upsert-sessionType";
+    public static final String UPSERT_RELOAD_STATUS = "upsert-reloadStatus";
+
 
     private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
 
     private RestTemplate restTemplate = new RestTemplate();
-
-    @Value("${communication.searchUrl:http://localhost:8091/search}")
-    private String searchUrl;
 
     @Autowired
     private FactMessageService factMessageService;
@@ -70,17 +68,7 @@ public class RulesService {
     }
 
     @HystrixCommand
-    private ResponseEntity<String> postEntity(HttpEntity<FactMessage> entity, String endpoint) {
+    protected ResponseEntity<String> postEntity(HttpEntity<FactMessage> entity, String endpoint) {
         return restTemplate.postForEntity(endpoint, entity, String.class);
-    }
-
-    public List<FactMessage> getReloadStatuses() {
-        // multiple threads?
-        HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();
-        HttpEntity<FactMessage> entity = new HttpEntity<>(headers);
-        // return restTemplate.exchange(searchUrl + params, HttpMethod.GET, entity, String.class).getBody();
-        // TODO get from all rules engines
-        // TODO unpack into reloadStatusFact
-        return null;
     }
 }
