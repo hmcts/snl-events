@@ -16,12 +16,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionQuery;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -79,6 +81,8 @@ public class SessionService {
     private FactsMapper factsMapper;
     @Autowired
     private RulesService rulesService;
+    @Autowired
+    private SearchSessionQuery searchSessionQuery;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -246,6 +250,10 @@ public class SessionService {
         ut = userTransactionService.rulesProcessed(ut);
 
         return ut;
+    }
+
+    public List<SessionSearchResponse> searchForSession() {
+        return searchSessionQuery.search();
     }
 
     private void setResources(Session session, UpsertSession upsertSession) {
