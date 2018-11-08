@@ -79,7 +79,6 @@ public class AssignHearingPartToSessionActionTest {
         action = createAction(request);
 
         mockSessionRepositoryReturnsSession();
-        mockEntityManagerReturnsReferenceToSessionType();
         mockHearingPart();
     }
 
@@ -202,11 +201,6 @@ public class AssignHearingPartToSessionActionTest {
         mockedHearingPart.setHearingId(hearing.getId());
         Mockito.when(hearingPartRepository.findOne(ID)).thenReturn(mockedHearingPart);
         Mockito.when(hearingPartRepository.save(mockedHearingPart)).thenReturn(mockedHearingPart);
-    }
-
-    private void mockEntityManagerReturnsReferenceToSessionType() {
-        Mockito.when(entityManager.getReference(SessionType.class, SESSION_TYPE_CODE))
-            .thenReturn(SESSION_TYPE);
     }
 
     private void mockSessionRepositoryReturnsSession() {
