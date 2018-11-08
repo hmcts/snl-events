@@ -10,10 +10,10 @@ import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 public class FactPropagationConfigurationTest {
-    private final String GOOD_TYPE = "good-type";
+    public static final String GOOD_TYPE = "good-type";
 
     @Test
-    public void getMsgUrlsForMsgType_returns_correct_filtered_results(){
+    public void getMsgUrlsForMsgType_returns_correct_filtered_results() {
         FactPropagationConfiguration conf = createConfig();
 
         val res = conf.getMsgUrlsForMsgType(GOOD_TYPE);
@@ -21,7 +21,7 @@ public class FactPropagationConfigurationTest {
 
 
     @Test
-    public void getMsgUrlsForMsgType_returns_nothing_when_no_type(){
+    public void getMsgUrlsForMsgType_returns_nothing_when_no_type() {
         FactPropagationConfiguration conf = createConfig();
 
         val res = conf.getMsgUrlsForMsgType("doesNotExist");
