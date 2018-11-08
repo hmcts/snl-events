@@ -29,13 +29,13 @@ resource "azurerm_resource_group" "rg" {
 }
 
 module "snl-events" {
-  source               = "git@github.com:hmcts/moj-module-webapp"
+  source               = "git@github.com:hmcts/cnp-module-webapp"
   product              = "${var.product}-${var.component}"
   location             = "${var.location}"
   env                  = "${var.env}"
   ilbIp                = "${var.ilbIp}"
   is_frontend          = false
-  https_only           = true
+  https_only           = "true"
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
@@ -60,7 +60,7 @@ module "snl-events" {
 }
 
 module "postgres-snl-events" {
-  source              = "git@github.com:hmcts/moj-module-postgres?ref=master"
+  source              = "git@github.com:hmcts/cnp-module-postgres?ref=master"
   product             = "${var.product}-${var.component}"
   env                 = "${var.env}"
   location            = "${var.location}"
@@ -72,7 +72,7 @@ module "postgres-snl-events" {
 
 # region save DB details to Azure Key Vault
 module "snl-vault" {
-  source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
+  source = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
   name = "${var.raw_product}-${var.component}-${local.shortEnv}"
   product = "${var.product}"
   env = "${var.env}"
