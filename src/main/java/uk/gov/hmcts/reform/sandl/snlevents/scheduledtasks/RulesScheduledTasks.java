@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.scheduledTasks;
+package uk.gov.hmcts.reform.sandl.snlevents.scheduledtasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

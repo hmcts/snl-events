@@ -104,7 +104,7 @@ public class ReloadRulesService {
             if (reloadStatus == null
                 || (reloadStatus.getFinishedAt() == null)
                 && reloadStatus.getStartedAt().isAfter(OffsetDateTime.now().plusMinutes(60))) {
-               reloadRulesEngine(engine);
+                reloadRulesEngine(engine);
             }
         }
     }
@@ -190,7 +190,8 @@ public class ReloadRulesService {
     }
 
     @HystrixCommand
-    private FactReloadStatus getFactReloadStatus(HttpEntity<FactMessage> entity, FactPropagationEngineConfiguration engine) {
+    private FactReloadStatus getFactReloadStatus(
+        HttpEntity<FactMessage> entity, FactPropagationEngineConfiguration engine) {
         return restTemplate
             .exchange(engine.getReloadStatusUrl(), HttpMethod.GET, entity, FactReloadStatus.class)
             .getBody();
