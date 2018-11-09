@@ -75,11 +75,12 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override
     public void act() {
-        // is this missing:? entityManager.detach(hearingPart);
         try {
             previousHearingPart = objectMapper.writeValueAsString(hearingPart);
             previousHearing = objectMapper.writeValueAsString(hearingPart.getHearing());
             previousSession = hearingPart.getSession();
+
+            entityManager.detach(hearingPart);
             hearingPart.setVersion(relationship.getHearingPartVersion());
 
             UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
