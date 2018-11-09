@@ -26,7 +26,7 @@ import javax.persistence.EntityManager;
 
 public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
 
-    private final EntityManager entityManager;
+    protected final EntityManager entityManager;
     protected HearingSessionRelationship relationship;
     protected UUID hearingId;
     protected Hearing hearing;
@@ -37,6 +37,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     protected HearingRepository hearingRepository;
     protected SessionRepository sessionRepository;
+    protected Hearing savedHearing;
 
     public AssignSessionsToHearingAction(UUID hearingId,
                                          HearingSessionRelationship relationship,
@@ -110,18 +111,18 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);
         }
+        savedHearing = hearingRepository.save(hearing);
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        Hearing savedHearing = hearingRepository.save(hearing);
 
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearing",
             savedHearing.getId(),
             previousHearing,
-            "update",
-            "update",
+            "lock",
+            "unlock",
             0)
         );
 

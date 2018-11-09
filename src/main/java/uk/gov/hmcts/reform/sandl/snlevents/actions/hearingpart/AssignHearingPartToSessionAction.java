@@ -99,8 +99,8 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         userTransactionDataList.add(new UserTransactionData("hearing",
             savedHearingPart.getHearingId(),
             previousHearing,
-            "update",
-            "update",
+            "lock",
+            "unlock",
             0)
         );
 
