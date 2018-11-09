@@ -198,7 +198,10 @@ public class ReloadRulesService {
 
     @HystrixCommand
     private void postMessageToEngine(FactPropagationEngineConfiguration engine, String msgType, String msgData) {
-        val entity = new FactMessage(msgType, msgData);
+        val msg = new FactMessage(msgType, msgData);
+        HttpHeaders headers = this.s2sAuthService.createRulesAuthenticationHeader();
+        HttpEntity<FactMessage> entity = new HttpEntity<>(msg, headers);
+
         ResponseEntity<String> factMsg = restTemplate.postForEntity(engine.getMsgUrl(), entity, String.class);
         factMessageService.handle(null, factMsg.getBody());
     }
