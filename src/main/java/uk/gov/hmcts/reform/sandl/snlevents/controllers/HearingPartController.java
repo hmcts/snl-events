@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,6 +78,11 @@ public class HearingPartController {
     @Autowired
     private HearingMapper hearingMapper;
 
+    @Autowired
+    private StatusServiceManager statusServiceManager;
+    @Autowired
+    private StatusConfigService statusConfigService;
+
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingPartResponse getHearingPartById(@PathVariable("id") UUID id) {
         return new HearingPartResponse(hearingPartRepository.findOne(id));
@@ -102,6 +109,8 @@ public class HearingPartController {
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository,
+            statusConfigService,
+            statusServiceManager,
             entityManager
         );
 
