@@ -23,13 +23,13 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -80,6 +80,22 @@ public class AssignHearingPartToSessionActionTest {
 
         mockSessionRepositoryReturnsSession();
         mockHearingPart();
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_forWrongTargetSession_shouldThrowException() {
+        Mockito.when(sessionRepository.findOne(any(UUID.class)))
+            .thenReturn(null);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_forWrongHearingPartId_shouldThrowException() {
+        Mockito.when(hearingPartRepository.findOne(any(UUID.class)))
+            .thenReturn(null);
+
+        action.getAndValidateEntities();
     }
 
     @Test

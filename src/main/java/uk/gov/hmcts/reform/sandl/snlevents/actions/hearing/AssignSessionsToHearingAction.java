@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -54,16 +55,20 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(hearingId);
+        if (hearing == null || hearing.getHearingParts() == null || hearing.getHearingParts().size() == 0) {
+            throw new SnlEventsException("Hearing cannot be null!");
+        }
 
+        if (relationship.getSessionsData() == null) {
+            throw new SnlEventsException("SessionsData cannot be null!");
+        }
         targetSessionsIds = relationship.getSessionsData().stream()
             .map(SessionAssignmentData::getSessionId)
             .collect(Collectors.toList());
-        targetSessions = sessionRepository.findSessionByIdIn(targetSessionsIds);
 
-        if (targetSessions == null) {
-            throw new RuntimeException("Target sessions cannot be null!");
-        } else if (hearing == null) {
-            throw new RuntimeException("Hearing part cannot be null!");
+        targetSessions = sessionRepository.findSessionByIdIn(targetSessionsIds);
+        if (targetSessions == null || targetSessions.size() == 0) {
+            throw new SnlEventsException("Target sessions cannot be null!");
         }
     }
 
@@ -101,7 +106,6 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
                 } else {
                     hp.setStart(relationship.getStart());
                 }
-
             }
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);

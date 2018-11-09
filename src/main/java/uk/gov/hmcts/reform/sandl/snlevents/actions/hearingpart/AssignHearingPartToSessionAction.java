@@ -55,9 +55,9 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
 
         if (targetSession == null) {
-            throw new RuntimeException("Target sessions cannot be null!");
+            throw new SnlEventsException("Target sessions cannot be null!");
         } else if (hearingPart == null) {
-            throw new RuntimeException("Hearing part cannot be null!");
+            throw new SnlEventsException("Hearing part cannot be null!");
         }
     }
 
