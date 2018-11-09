@@ -107,25 +107,9 @@ public class HearingQueries {
                                                 Subquery<Long> subQueryListingCount,
                                                 Subquery<OffsetDateTime> subQueryListingStart,
                                                 Subquery<String> subQueryJudgeAssigned) {
-        List<Selection<?>> selections = new LinkedList<>();
+        List<Selection<?>> selections = this.createSelections(hearingRoot, subQueryPerson,
+            subQueryListingCount, subQueryListingStart);
 
-        selections.add(hearingRoot.get(Hearing_.id));
-        selections.add(hearingRoot.get(Hearing_.caseNumber));
-        selections.add(hearingRoot.get(Hearing_.caseTitle));
-        selections.add(hearingRoot.get(Hearing_.caseType).get(CaseType_.code));
-        selections.add(hearingRoot.get(Hearing_.caseType).get(CaseType_.description));
-        selections.add(hearingRoot.get(Hearing_.hearingType).get(HearingType_.code));
-        selections.add(hearingRoot.get(Hearing_.hearingType).get(HearingType_.description));
-        selections.add(hearingRoot.get(Hearing_.duration));
-        selections.add(hearingRoot.get(Hearing_.scheduleStart));
-        selections.add(hearingRoot.get(Hearing_.scheduleEnd));
-        selections.add(hearingRoot.get(Hearing_.reservedJudge).get(Person_.id));
-        selections.add(subQueryPerson.getSelection());
-        selections.add(hearingRoot.get(Hearing_.communicationFacilitator));
-        selections.add(hearingRoot.get(Hearing_.priority));
-        selections.add(hearingRoot.get(Hearing_.version));
-        selections.add(subQueryListingCount.getSelection());
-        selections.add(subQueryListingStart.getSelection());
         selections.add(subQueryJudgeAssigned.getSelection());
 
         return selections;
