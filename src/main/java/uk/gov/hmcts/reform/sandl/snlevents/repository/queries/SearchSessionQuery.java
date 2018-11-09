@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -44,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /*
 * SELECT
@@ -86,60 +88,187 @@ FROM (
        FROM session main_session
 * */
 
+class SqlCriteriaMap {
+    public SearchCriteria searchCriteria;
+
+}
+
 @Component
 public class SearchSessionQuery {
 
-    @Autowired
-    HearingRepository hearingRepository;
+    String SEARCH_SESSION_QUERY = "SELECT\n"
+        + "  *,\n"
+        + "  CASE WHEN allocated_duration > 100\n"
+        + "    THEN 0\n"
+        + "  ELSE session_duration - allocated_duration END AS available\n"
+        + "FROM (\n"
+        + "       SELECT\n"
+        + "         *,\n"
+        + "         ROUND(allocated_duration / session_duration * 100, 2) AS utilisation\n"
+        + "       FROM (\n"
+        + "              SELECT\n"
+        + "                p.id                                              AS person_id,\n"
+        + "                p.name                                            AS person_name,\n"
+        + "                r.id                                              AS room_id,\n"
+        + "                r.name                                            AS room_name,\n"
+        + "                st.code                                           AS session_type_code,\n"
+        + "                st.description                                    AS session_type_decription,\n"
+        + "                main_session.id                                   AS session_id,\n"
+        + "                main_session.start                                AS session_start,\n"
+        + "                main_session.duration                             AS session_duration,\n"
+        + "                (SELECT count(id)\n"
+        + "                 FROM hearing_part\n"
+        + "                 WHERE session_id = main_session.id)              AS no_of_hearing_parts,\n"
+        + "                (SELECT SUM(CASE WHEN h.is_multisession = TRUE\n"
+        + "                  THEN s.duration\n"
+        + "                            ELSE h.duration END)\n"
+        + "                 FROM hearing_part\n"
+        + "                   INNER JOIN session s ON hearing_part.session_id = s.id\n"
+        + "                   INNER JOIN hearing h ON hearing_part.hearing_id = h.id\n"
+        + "                 WHERE hearing_part.session_id = main_session.id) AS allocated_duration\n"
+        + "              FROM session main_session\n"
+        + "                LEFT JOIN person p ON main_session.person_id = p.id\n"
+        + "                LEFT JOIN room r ON main_session.room_id = r.id\n"
+        + "                LEFT JOIN session_type st ON main_session.session_type_code = st.code\n"
+        + "            ) AS MAIN_SELECT\n"
+        + "     ) AS OUTTER\n"
+        + "WHERE 1 = 1\n"
+        + "      <WHERE_CLAUSES>\n";
+//        + "      -- start date\n"
+//        + "      AND session_start > '2018-11-06 00:00:00' :: date\n"
+//        + "      -- end date\n"
+//        + "      AND session_start < '2018-11-07 00:00:00' :: date\n"
+//        + "      AND session_type_code IN ('small-claims')\n"
+//        + "      AND person_name IN ('Judge Linda') OR person_name IS NULL\n"
+//        + "      AND utilisation > 0\n"
+//        + "ORDER BY session_start ASC\n"
+//        + "LIMIT :itemsPerPage OFFSET :pageNumber;";
 
     @Autowired
     private EntityManager entityManager;
 
-    public List<SessionSearchResponse> search() {
+    List<String> innerKeys = Arrays.asList("startDate", "endDate", "sessionType", "roomId", "personId");
+//    List<String> outerKeys = Arrays.asList("listingDetails", "listingDetailsCustomFrom", "listingDetailsCustomTo");
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<SessionSearchResponse> criteriaQuery = criteriaBuilder.createQuery(SessionSearchResponse.class);
-        Root<Session> sessionRoot = criteriaQuery.from(Session.class);
+    public List<SessionSearchResponse> search(List<SearchCriteria> searchCriteriaList) {
+        val startTimeCriteria = new SearchCriteria();
+        startTimeCriteria.setKey("startDate");
+        startTimeCriteria.setOperation(ComparisonOperations.EQUALS);
+        startTimeCriteria.setValue("2018-11-06 00:00:00");
 
-        // count allocated
-        Subquery sub  = criteriaQuery.subquery(Duration.class);
-        Root subRoot = sub.from(HearingPart.class);
-        Join<HearingPart, Session> subSessions = subRoot.join(HearingPart_.session);
-        Join<HearingPart, Hearing> subHearing = subRoot.join(HearingPart_.hearing);
+        val personCriteria = new SearchCriteria();
+        personCriteria.setKey("personId");
+        personCriteria.setOperation(ComparisonOperations.IN_OR_NULL);
+        personCriteria.setValue(Arrays.asList("Judge Linda").toArray());
 
-//        criteriaBuilder.treat(Session_.duration, Long.class);
-        Expression<Boolean> isMultisession = criteriaBuilder.equal(subHearing.get(Hearing_.isMultiSession), true);
-        Expression<Long> getSessionDuration = subSessions.get(Session_.duration).as(Long.class);
-        Expression<Long> getHearingDuration = subHearing.get(Hearing_.duration).as(Long.class);
+        searchCriteriaList = Arrays.asList(startTimeCriteria, personCriteria);
 
-        Expression<Long> selectCase = criteriaBuilder.<Long>selectCase().when(isMultisession, getSessionDuration).otherwise(getHearingDuration);
 
-        Expression<Long> sumAllocatedDuration = criteriaBuilder.<Long>sum(selectCase);
 
-        sub.select(sumAllocatedDuration);
-        sub.where(criteriaBuilder.equal(subRoot.get(HearingPart_.sessionId), sessionRoot.get(Session_.id)));
+        List<SearchCriteria> innerSearchCriteria = searchCriteriaList.stream().filter(sc -> innerKeys.contains(sc.getKey())).collect(Collectors.toList());
+//        List<SearchCriteria> outerSearchCriteria = searchCriteriaList.stream().filter(sc -> outerKeys.contains(sc.getKey())).collect(Collectors.toList());
+        String searchSelect = this.SEARCH_SESSION_QUERY;
+        String innerWherePredicate = addInnerWherePredicates(innerSearchCriteria);
+//        String outerWherePredicate = addOuterWherePredicates(outerSearchCriteria);
+        searchSelect = searchSelect.replace("<WHERE_CLAUSES>", innerWherePredicate);
+//        searchSelect = searchSelect.replace("<OUTER_WHERE>", outerWherePredicate);
+        Query sqlQuery = entityManager.createNativeQuery(searchSelect);
+        setParameters(sqlQuery, searchCriteriaList);
 
-        val select = criteriaQuery.multiselect(Arrays.asList(sessionRoot.get(Session_.id),
-                sub.getSelection()));
-//        criteriaQuery.select(
-//            criteriaBuilder.construct(
-//                SessionSearchResponse.class,
-//                sessionRoot.get(Session_.id),
-//                sub.getSelection()
-//            )
-//        );
+//        sqlQuery.
+        val aaa = sqlQuery.getResultList();
 
-        TypedQuery<SessionSearchResponse> query = entityManager.createQuery(select);
+        return null;
 
-        return query.getResultList();
-
-//        List<Selection<?>> selections = new LinkedList<>();
-//        selections.add(sessionRoot.get(Session_.id));
-//        selections.add(sub.getSelection());
-
-//        TypedQuery<SessionSearchResponse> query = entityManager.createQuery(criteriaQuery.multiselect(selections));
-//
-//        return query.getResultList();
     }
+
+    private String addInnerWherePredicates(List<SearchCriteria> searchCriteriaList) {
+        StringBuilder innerWhere = new StringBuilder();
+
+        for (SearchCriteria sc : searchCriteriaList) {
+            String key = sc.getKey();
+            switch (key){
+//                case "startDate":
+//                    innerWhere.append("AND session_start <= :startDate :: date ");
+//                    break;
+//                case "endDate":
+//                    innerWhere.append(String.format("AND main_session.start >= %s ", sc.getValue().toString()));
+//                    break;
+//                case "sessionType":
+//                    innerWhere.append(String.format("AND st.code IN (:sessionTypes) ", sc.getValue().toString()));
+//                    break;
+//                case "roomId":
+//                    innerWhere.append(String.format("AND r.id IN (%s) ", sc.getValue().toString()));
+//                    break;
+//                case "personId":
+//                    if (sc.getOperation() == ComparisonOperations.IN_OR_NULL) {
+//                        innerWhere.append("AND person_id IN (:personId) OR person_id IS NULL");
+//                    } else {
+//                        innerWhere.append("AND person_id IN (:personId)");
+//                    }
+//                    break;
+            }
+        }
+
+        return innerWhere.toString();
+    }
+
+    private void setParameters(Query query, List<SearchCriteria> searchCriteriaList) {
+
+        for (SearchCriteria sc : searchCriteriaList) {
+            String key = sc.getKey();
+            switch (key){
+//                case "startDate":
+//                    query.setParameter("startDate", "2018-11-06 00:00:00"/*sc.getValue()*/);
+//                    break;
+//                case "endDate":
+//                    innerWhere.append(String.format("AND main_session.start >= %s ", sc.getValue().toString()));
+//                    break;
+//                case "sessionType":
+//                    innerWhere.append(String.format("AND st.code IN (:sessionTypes) ", sc.getValue().toString()));
+//                    break;
+//                case "roomId":
+//                    innerWhere.append(String.format("AND r.id IN (%s) ", sc.getValue().toString()));
+//                    break;
+//                case "personId":
+//                    List<String> ids = Arrays.asList("1143b1ea-1813-4acc-8b08-f37d1db59492");
+//                    query.setParameter("personId", ids /*sc.getValue() */);
+//                    break;
+            }
+        }
+    }
+
+//    private String addOuterWherePredicates(List<SearchCriteria> searchCriteriaList) {
+//        String outerWhere = "";
+//
+//        for (SearchCriteria sc : searchCriteriaList) {
+//            String key = sc.getKey();
+//            switch (key){
+//                case "listingDetails":
+//                    String listingDetailOption = sc.getValue().toString();
+//                    switch (listingDetailOption) {
+//                        case "unListed":
+//                           outerWhere += " AND utilisation = 100 ";
+//                           break;
+//                        case "partListed":
+//                            outerWhere += " AND utilisation > 0 AND utilisation < 100 ";
+//                            break;
+//                        case "fullyListed":
+//                            outerWhere += " AND utilisation = 100 ";
+//                            break;
+//                    }
+//                    break;
+//                case "listingDetailsCustomFrom":
+//                    outerWhere += String.format(" AND utilisation > %s ", sc.getValue().toString());
+//                    break;
+//                case "listingDetailsCustomTo":
+//                    outerWhere += String.format(" AND utilisation < %s ", sc.getValue().toString());
+//                    break;
+//            }
+//
+//        }
+//
+//        return outerWhere;
+//    }
 
 }
