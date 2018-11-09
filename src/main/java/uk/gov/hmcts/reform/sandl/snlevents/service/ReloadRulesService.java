@@ -174,8 +174,19 @@ public class ReloadRulesService {
             postMessageToEngine(engine, RulesService.UPSERT_HEARING_PART, msg);
         }
 
+        resetCachedDataParts();
+        reloadDateAndTimeIfNeeded();
+
         updateReloadStatus(engine, startedAt, OffsetDateTime.now());
         logger.info("Finished rules loading " + engine.getName());
+    }
+
+    private void resetCachedDataParts() {
+        year = 0;
+        month = 0;
+        day = 0;
+        hour = 0;
+        minute = 0;
     }
 
     private void updateReloadStatus(
