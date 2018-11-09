@@ -270,6 +270,7 @@ public class HearingPartControllerTest {
         chp.setReservedJudgeId(RESERVED_JUDGE_ID);
         chp.setUserTransactionId(UUID.randomUUID());
         chp.setNumberOfSessions(1);
+        chp.setMultiSession(false);
 
         return chp;
     }
@@ -289,6 +290,8 @@ public class HearingPartControllerTest {
         ulr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         ulr.setReservedJudgeId(RESERVED_JUDGE_ID);
         ulr.setUserTransactionId(UUID.randomUUID());
+        ulr.setNumberOfSessions(1);
+        ulr.setMultiSession(false);
         ulr.setVersion(0L);
 
         return ulr;

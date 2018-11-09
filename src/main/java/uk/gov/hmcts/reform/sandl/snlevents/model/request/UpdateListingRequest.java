@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.validation.annotations.MinDuration;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -38,6 +39,13 @@ public class UpdateListingRequest {
     @NotNull
     @MinDuration(minMinutes = 1)
     private Duration duration;
+
+    @NotNull
+    @Min(1)
+    private int numberOfSessions;
+
+    @NotNull
+    private boolean multiSession;
 
     private OffsetDateTime scheduleStart;
 
