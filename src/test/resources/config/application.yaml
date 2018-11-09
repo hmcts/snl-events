@@ -11,6 +11,9 @@ management:
       jwtSecret: "FakeSecret2"
       jwtExpirationInMs: 5000
 
+scheduler:
+  enabled: false
+
 fact-propagation:
   engines:
     - name: Listings
