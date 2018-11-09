@@ -17,7 +17,7 @@ import javax.transaction.Transactional;
 @EnableScheduling
 @ConditionalOnProperty(
     prefix = "scheduler",
-    name="enabled", havingValue="true")
+    name = "enabled", havingValue = "true")
 public class RulesScheduledTasks {
     private static final Logger logger = LoggerFactory.getLogger(RulesScheduledTasks.class);
 
