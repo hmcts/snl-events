@@ -11,6 +11,8 @@ management:
       jwtSecret: "${SNL_S2S_JWT_SECRET:sialaBabaMak}"
       jwtExpirationInMs: 30000
 
+scheduler:
+  enabled: ${SNL_SCHEDULEDJOB_ENABLED:true}
 
 fact-propagation:
   engines:
