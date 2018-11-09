@@ -151,7 +151,8 @@ public class ReloadRulesServiceTest {
 
     @Test
     public void reloadIfNeeded_reload_if_not_loaded() throws IOException {
-        val now = OffsetDateTime.now(UTC);
+        OffsetDateTime now = OffsetDateTime.of(2018, 11, 11, 14, 10, 0, 0, ZoneOffset.UTC);
+        when(clock.instant()).thenReturn(now.toInstant());
         when(restTemplate.exchange(eq(ENDPOINT), any(), any(), any(Class.class)))
             .thenReturn(createReloadStatusResponse(null));
         when(restTemplate.postForEntity(any(), any(), any(), Mockito.<Object>anyVararg()))
@@ -166,7 +167,8 @@ public class ReloadRulesServiceTest {
 
     @Test
     public void reloadIfNeeded_do_not_reload_if_loaded_already() throws IOException {
-        val now = OffsetDateTime.now(UTC);
+        OffsetDateTime now = OffsetDateTime.of(2018, 11, 11, 14, 10, 0, 0, ZoneOffset.UTC);
+        when(clock.instant()).thenReturn(now.toInstant());
         when(restTemplate.exchange(eq(ENDPOINT), any(), any(), any(Class.class)))
             .thenReturn(createReloadStatusResponse(new FactReloadStatus(now, now.plusMinutes(1))));
 
