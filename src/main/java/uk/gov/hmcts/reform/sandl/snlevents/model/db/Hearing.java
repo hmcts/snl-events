@@ -46,7 +46,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @DynamicInsert
 @Where(clause = "is_deleted=false")
 @SuppressWarnings("squid:S3437")
-public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable {
+public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable, Statusable {
 
     @Id
     private UUID id;
@@ -65,10 +65,10 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     private Duration duration;
 
-    private Integer numberOfSessions;
+    private int numberOfSessions;
 
     @Column(name = "is_multisession")
-    private Boolean isMultiSession;
+    private boolean isMultiSession;
 
     private OffsetDateTime scheduleStart;
 

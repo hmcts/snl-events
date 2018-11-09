@@ -9,14 +9,9 @@ databaseChangeLog:
         - column:
             name: number_of_sessions
             type: int
-            defaultValueNumeric: 1
-            constraints:
-              nullable: false
         - column:
             name: is_multisession
             type: boolean
-            constraints:
-              nullable: false
 
 - changeSet:
     id: number-of-sessions-hearing-aud
@@ -28,19 +23,32 @@ databaseChangeLog:
         - column:
             name: number_of_sessions
             type: int
-            defaultValueNumeric: 1
-            constraints:
-              nullable: false
         - column:
             name: is_multisession
             type: boolean
-            constraints:
-              nullable: false
-        - sqlFile:
-            comment: setting is_multisession flag
-            encoding: utf8
-            endDelimiter: \nGO
-            path: ../fixtures/SL-1969-migrate-multisession.sql
-            relativeToChangelogFile: true
-            splitStatements: true
-            stripComments: true
+
+- changeSet:
+    id: number-of-sessions-and-is-multisession-migration
+    author: ataylor
+    changes:
+    - sqlFile:
+        comment: setting sessions
+        encoding: utf8
+        endDelimiter: \nGO
+        path: ../fixtures/SL-1969-migrate-sessions-and-multisessions.sql
+        relativeToChangelogFile: true
+        splitStatements: true
+        stripComments: true
+
+- changeSet:
+    id: number-of-sessions-hearing-constraints
+    author: ataylor
+    changes:
+    - addNotNullConstraint:
+        tableName: hearing
+        columnName: number_of_sessions
+        columnDataType: int
+    - addNotNullConstraint:
+        tableName: hearing
+        columnName: is_multisession
+        columnDataType: boolean

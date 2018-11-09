@@ -25,8 +25,8 @@ public class HearingWithSessionsResponse {
     private String caseType;
     private String hearingType;
     private Duration duration;
-    private Integer numberOfSessions;
-    private Boolean isMultiSession;
+    private int numberOfSessions;
+    private boolean isMultiSession;
     private OffsetDateTime scheduleStart;
     private OffsetDateTime scheduleEnd;
     private String priority;
@@ -43,7 +43,7 @@ public class HearingWithSessionsResponse {
         this.hearingType = hearing.getHearingType().getDescription();
         this.duration = hearing.getDuration();
         this.numberOfSessions = hearing.getNumberOfSessions();
-        this.isMultiSession = hearing.getIsMultiSession();
+        this.isMultiSession = hearing.isMultiSession();
         this.scheduleStart = hearing.getScheduleStart();
         this.scheduleEnd = hearing.getScheduleEnd();
         this.priority = hearing.getPriority().toString();

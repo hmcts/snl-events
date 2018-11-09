@@ -19,16 +19,18 @@ public class FactMessageService {
     private ProblemService problemService;
 
     public void handle(UUID userTransactionId, String factMsg) {
-        try {
-            JsonNode modifications = objectMapper.readTree(factMsg);
+        if (factMsg != null) {
+            try {
+                JsonNode modifications = objectMapper.readTree(factMsg);
 
-            for (JsonNode item : modifications) {
-                if ("Problem".equals(item.get("type").asText())) {
-                    handleProblem(userTransactionId, item);
+                for (JsonNode item : modifications) {
+                    if ("Problem".equals(item.get("type").asText())) {
+                        handleProblem(userTransactionId, item);
+                    }
                 }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
         }
     }
 

@@ -87,6 +87,8 @@ public class HearingServiceTests extends BaseIntegrationTest {
         hearing.setHearingType(trial);
         hearing.setCommunicationFacilitator("Sign Language");
         hearing.setReservedJudge(judgeLinda);
+        hearing.setNumberOfSessions(1);
+        hearing.setMultiSession(false);
 
         final Hearing hearing2 = new Hearing();
         hearing2.setId(UUID.randomUUID());
@@ -95,6 +97,8 @@ public class HearingServiceTests extends BaseIntegrationTest {
         hearing2.setPriority(Priority.Low);
         hearing2.setCaseType(fastTrack);
         hearing2.setHearingType(trial);
+        hearing2.setNumberOfSessions(1);
+        hearing2.setMultiSession(false);
 
         final HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
