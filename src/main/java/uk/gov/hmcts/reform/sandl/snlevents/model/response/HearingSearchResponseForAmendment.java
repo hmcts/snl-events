@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HearingSearchResponse implements Serializable {
+public class HearingSearchResponseForAmendment implements Serializable {
     private UUID id;
     private String caseNumber;
     private String caseTitle;
@@ -34,6 +34,7 @@ public class HearingSearchResponse implements Serializable {
     @JsonIgnore
     private Long listedCount;
     private OffsetDateTime listingDate;
+    private String personName;
 
     public Boolean getIsListed() {
         return listedCount > 0;

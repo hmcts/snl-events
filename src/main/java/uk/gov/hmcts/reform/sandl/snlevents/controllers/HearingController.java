@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelations
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
@@ -50,7 +51,7 @@ public class HearingController {
     }
 
     @GetMapping(path = "/{id}/for-amendment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HearingSearchResponse getHearingByIdForAmendment(@PathVariable("id") UUID id) {
+    public HearingSearchResponseForAmendment getHearingByIdForAmendment(@PathVariable("id") UUID id) {
         return hearingService.get(id);
     }
 
