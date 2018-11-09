@@ -49,6 +49,11 @@ public class HearingController {
         return new HearingInfo(hearingRepository.findOne(id));
     }
 
+    @GetMapping(path = "/{id}/for-amendment", produces = MediaType.APPLICATION_JSON_VALUE)
+    public HearingSearchResponse getHearingByIdForAmendment(@PathVariable("id") UUID id) {
+        return hearingService.get(id);
+    }
+
     @GetMapping(path = "/{id}/with-sessions", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingWithSessionsResponse getHearingByIdWithSessions(@PathVariable("id") UUID id) {
         return new HearingWithSessionsResponse(hearingRepository.findOne(id));

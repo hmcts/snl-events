@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class HearingService {
@@ -35,6 +36,9 @@ public class HearingService {
     @Autowired
     private ActionService actionService;
 
+    public HearingSearchResponse get(UUID id) {
+        return hearingQueries.get(id);
+    }
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
         return hearingQueries.search(searchCriteriaList, pageable);
     }

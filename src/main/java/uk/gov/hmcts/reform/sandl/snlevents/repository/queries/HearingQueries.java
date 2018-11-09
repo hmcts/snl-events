@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,28 @@ public class HearingQueries {
 
     @Autowired
     private EntityManager entityManager;
+
+    public HearingSearchResponse get(UUID id) {
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<HearingSearchResponse> criteriaQuery = criteriaBuilder.createQuery(HearingSearchResponse.class);
+        Root<Hearing> hearingRoot = criteriaQuery.from(Hearing.class);
+
+        Subquery<String> subQueryPerson = createPersonNameSelect(criteriaBuilder, criteriaQuery, hearingRoot);
+        Subquery<String> subQueryJudgeAssigned = createJudgeAssignedSelect(criteriaBuilder, criteriaQuery, hearingRoot);
+        Subquery<Long> subQueryListingCount = createListingCountSelect(criteriaBuilder, criteriaQuery, hearingRoot);
+        Subquery<OffsetDateTime> subQueryListingStart = createListingStartSelect(criteriaBuilder,
+            criteriaQuery, hearingRoot);
+
+        List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson,
+            subQueryListingCount, subQueryListingStart, subQueryJudgeAssigned);
+
+        SearchCriteria sc = new SearchCriteria("id", ComparisonOperations.EQUALS, id);
+        Predicate restrictions = createWherePredicates(Arrays.asList(sc), criteriaBuilder, criteriaQuery, hearingRoot);
+        criteriaQuery.where(restrictions);
+
+        return entityManager.createQuery(criteriaQuery.multiselect(selections)).getSingleResult();
+    }
 
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
 
@@ -76,6 +99,31 @@ public class HearingQueries {
         List<HearingSearchResponse> queryResults = pageableQuery.getResultList();
 
         return new PageImpl<>(queryResults, pageable, queryResultsCount);
+    }
+
+    private List<Selection<?>> createSelections(Root<Hearing> hearingRoot,
+                                                Subquery<OffsetDateTime> subQueryListingStart,
+                                                Subquery<String> subQueryJudgeAssigned) {
+        List<Selection<?>> selections = new LinkedList<>();
+
+        selections.add(hearingRoot.get(Hearing_.id));
+        selections.add(hearingRoot.get(Hearing_.caseNumber));
+        selections.add(hearingRoot.get(Hearing_.caseTitle));
+        selections.add(hearingRoot.get(Hearing_.caseType).get(CaseType_.code));
+        selections.add(hearingRoot.get(Hearing_.caseType).get(CaseType_.description));
+        selections.add(hearingRoot.get(Hearing_.hearingType).get(HearingType_.code));
+        selections.add(hearingRoot.get(Hearing_.hearingType).get(HearingType_.description));
+        selections.add(hearingRoot.get(Hearing_.duration));
+        selections.add(hearingRoot.get(Hearing_.scheduleStart));
+        selections.add(hearingRoot.get(Hearing_.scheduleEnd));
+        selections.add(hearingRoot.get(Hearing_.reservedJudge).get(Person_.id));
+        selections.add(hearingRoot.get(Hearing_.communicationFacilitator));
+        selections.add(hearingRoot.get(Hearing_.priority));
+        selections.add(hearingRoot.get(Hearing_.version));
+        selections.add(subQueryListingStart.getSelection());
+        selections.add(subQueryJudgeAssigned.getSelection());
+
+        return selections;
     }
 
     private List<Selection<?>> createSelections(Root<Hearing> hearingRoot,
