@@ -105,6 +105,17 @@ public class AssignSessionsToHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_forLowerNumberOfSessionsInDbThenRequested_shouldThrowException() {
+        action.relationship.setSessionsData(Collections.singletonList(
+            new SessionAssignmentData(UUID.randomUUID(), 0)
+        ));
+        Mockito.when(sessionRepository.findSessionByIdIn(anyListOf(UUID.class)))
+            .thenReturn(Collections.emptyList());
+
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_forZeroHearingPartsAttachedToHearing_shouldThrowException() {
         Hearing mockedHearing = createHearing();
         mockedHearing.setHearingParts(Collections.emptyList());

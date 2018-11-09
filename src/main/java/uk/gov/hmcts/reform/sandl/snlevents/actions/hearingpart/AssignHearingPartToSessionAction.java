@@ -52,12 +52,13 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     @Override
     public void getAndValidateEntities() {
         hearingPart = hearingPartRepository.findOne(hearingPartId);
-        targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
+        if (hearingPart == null) {
+            throw new SnlEventsException("Hearing part cannot be null!");
+        }
 
+        targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
         if (targetSession == null) {
             throw new SnlEventsException("Target sessions cannot be null!");
-        } else if (hearingPart == null) {
-            throw new SnlEventsException("Hearing part cannot be null!");
         }
     }
 

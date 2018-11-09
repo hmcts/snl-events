@@ -71,6 +71,11 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         if (targetSessions == null || targetSessions.isEmpty()) {
             throw new SnlEventsException("Target sessions cannot be null!");
         }
+        if (targetSessions.size() != targetSessionsIds.size()) {
+            throw new SnlEventsException("Number of sessions in DB is different then in request!");
+        }
+        // Missing a check for numberOfSessions returned from db against number of hearingParts(that can be used)
+        // until a proper story will arise
     }
 
     @Override
