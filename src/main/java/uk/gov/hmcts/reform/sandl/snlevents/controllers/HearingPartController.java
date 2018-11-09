@@ -123,7 +123,7 @@ public class HearingPartController {
     @PutMapping(path = "/{hearingPartId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity assignHearingPartToSession(
         @PathVariable UUID hearingPartId,
-        @RequestBody HearingPartSessionRelationship assignment) throws Exception {
+        @RequestBody HearingPartSessionRelationship assignment) {
 
         Action action = new AssignHearingPartToSessionAction(hearingPartId, assignment,
             hearingPartRepository, sessionRepository, entityManager, objectMapper);

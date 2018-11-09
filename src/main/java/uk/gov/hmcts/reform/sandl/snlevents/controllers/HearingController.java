@@ -71,7 +71,7 @@ public class HearingController {
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity assignHearingToSession(
         @PathVariable UUID hearingId,
-        @RequestBody HearingSessionRelationship assignment) throws Exception {
+        @RequestBody HearingSessionRelationship assignment) {
 
         Action action = new AssignSessionsToHearingAction(
             hearingId, assignment, hearingRepository, sessionRepository, entityManager, objectMapper

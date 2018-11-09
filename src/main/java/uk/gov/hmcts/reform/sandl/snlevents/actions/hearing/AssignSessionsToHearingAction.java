@@ -56,7 +56,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(hearingId);
-        if (hearing == null || hearing.getHearingParts() == null || hearing.getHearingParts().size() == 0) {
+        if (hearing == null || hearing.getHearingParts() == null || hearing.getHearingParts().isEmpty()) {
             throw new SnlEventsException("Hearing cannot be null!");
         }
 
@@ -68,7 +68,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
             .collect(Collectors.toList());
 
         targetSessions = sessionRepository.findSessionByIdIn(targetSessionsIds);
-        if (targetSessions == null || targetSessions.size() == 0) {
+        if (targetSessions == null || targetSessions.isEmpty()) {
             throw new SnlEventsException("Target sessions cannot be null!");
         }
     }
