@@ -137,14 +137,14 @@ public class ReloadRulesService {
     }
 
     private void sendDateTimePart(String timeType, int value) throws JsonProcessingException {
-        logger.info("Loading rules with date/time part, " + timeType + ":" + value);
+        logger.info("Loading rules with date/time part, {0}:{1}", timeType, value);
         val dateTimePartValue = new DateTimePartValue(timeType, value);
         rulesService.postMessage(String.format("upsert-%s", dateTimePartValue.getTimeType()),
             factsMapper.mapTimeToRuleJsonMessage(dateTimePartValue));
     }
 
     private void reloadRulesEngine(FactPropagationEngineConfiguration engine) throws IOException {
-        logger.info("Loading rules with facts from db, " + engine.getName() + ", " + engine.getMsgUrl());
+        logger.info("Loading rules with facts from db, {0}, {1}", engine.getName(), engine.getMsgUrl());
 
         OffsetDateTime startedAt = OffsetDateTime.now();
         updateReloadStatus(engine, startedAt, null);
@@ -178,7 +178,7 @@ public class ReloadRulesService {
         reloadDateAndTimeIfNeeded();
 
         updateReloadStatus(engine, startedAt, OffsetDateTime.now());
-        logger.info("Finished rules loading " + engine.getName());
+        logger.info("Finished rules loading {0}", engine.getName());
     }
 
     private void resetCachedDataParts() {
