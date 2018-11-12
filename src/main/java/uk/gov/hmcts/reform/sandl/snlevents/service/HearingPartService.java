@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -245,8 +246,10 @@ public class HearingPartService {
         hearingPart.setVersion(assignment.getHearingPartVersion());
 
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
+        OffsetDateTime targetSessionStart = (targetSession == null) ? null : targetSession.getStart();
         hearingPart.setSessionId(targetSessionId);
         hearingPart.setSession(targetSession);
+        hearingPart.setStart(targetSessionStart);
 
         String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         UserTransaction ut = assignWithTransaction(hearingPart,
