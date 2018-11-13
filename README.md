@@ -192,6 +192,8 @@ Before creating a PR, ensure that all of the code styling checks and tests have 
 ```bash
 ./gradlew checkStyleMain
 
+./gradlew checkStyleIntegration
+
 ./gradlew checkStyleTest
 ```
 
