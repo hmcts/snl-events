@@ -39,6 +39,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
 
+    @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public CreateListingRequestAction(CreateHearingRequest createHearingRequest,
                                       HearingMapper hearingMapper,
                                       HearingTypeRepository hearingTypeRepository,

@@ -45,6 +45,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     protected StatusServiceManager statusServiceManager;
     protected Hearing savedHearing;
 
+    @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public AssignSessionsToHearingAction(UUID hearingId,
                                          HearingSessionRelationship relationship,
                                          HearingRepository hearingRepository,
@@ -66,8 +67,11 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(hearingId);
-        if (hearing == null || hearing.getHearingParts() == null || hearing.getHearingParts().isEmpty()) {
+        if (hearing == null) {
             throw new SnlEventsException("Hearing cannot be null!");
+        }
+        if (hearing.getHearingParts() == null || hearing.getHearingParts().isEmpty()) {
+            throw new SnlEventsException("Hearing parts cannot be null!");
         }
         if (!statusServiceManager.canBeListed(hearing)) {
             throw new SnlEventsException("Hearing can not be listed");
@@ -116,10 +120,6 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         final StatusConfig listedConfig = statusConfigService.getStatusConfig(Status.Listed);
         try {
             previousHearing = objectMapper.writeValueAsString(hearing);
-            entityManager.detach(hearing);
-
-            hearing.setVersion(relationship.getHearingVersion());
-            hearing.setStatus(listedConfig);
 
             previousHearingParts = new ArrayList<>();
             AtomicInteger index = new AtomicInteger();
@@ -139,6 +139,10 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);
         }
+        entityManager.detach(hearing);
+
+        hearing.setVersion(relationship.getHearingVersion());
+        hearing.setStatus(listedConfig);
         savedHearing = hearingRepository.save(hearing);
     }
 

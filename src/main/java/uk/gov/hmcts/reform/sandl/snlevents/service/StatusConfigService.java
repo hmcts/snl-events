@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.ApplicationScope;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.StatusConfigRepository;
@@ -33,6 +34,8 @@ public class StatusConfigService {
 
     public StatusConfig getStatusConfig(Status statusToRetrieve) {
         fetchAllConfigs();
-        return getStatusConfigs().stream().filter(entry -> entry.getStatus() == statusToRetrieve).findFirst().get();
+        return getStatusConfigs().stream().filter(entry -> entry.getStatus() == statusToRetrieve)
+            .findFirst()
+            .orElseThrow(() -> new SnlRuntimeException("Missing status config " + statusToRetrieve));
     }
 }

@@ -40,6 +40,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
 
+    @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public AssignHearingPartToSessionAction(UUID hearingPartId,
                                             HearingPartSessionRelationship hearingPartSessionRelationship,
                                             HearingPartRepository hearingPartRepository,
@@ -93,17 +94,17 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
             previousHearingPart = objectMapper.writeValueAsString(hearingPart);
             previousHearing = objectMapper.writeValueAsString(hearingPart.getHearing());
             previousSession = hearingPart.getSession();
-
-            entityManager.detach(hearingPart);
-            hearingPart.setVersion(relationship.getHearingPartVersion());
-
-            UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
-            hearingPart.setSessionId(targetSessionId);
-            hearingPart.setSession(targetSession);
-            hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Listed));
         } catch (JsonProcessingException e) {
             throw new SnlEventsException(e);
         }
+        entityManager.detach(hearingPart);
+        hearingPart.setVersion(relationship.getHearingPartVersion());
+
+        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
+        hearingPart.setSessionId(targetSessionId);
+        hearingPart.setSession(targetSession);
+        hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Listed));
+
     }
 
     @Override //Done although hearing and session for user transactionDAta are not needed
