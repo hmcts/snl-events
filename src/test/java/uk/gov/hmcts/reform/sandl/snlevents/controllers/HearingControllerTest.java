@@ -79,8 +79,8 @@ public class HearingControllerTest {
         hearing.setId(uuid);
         when(hearingService.get(uuid)).thenReturn(hearing);
 
-        val response = mvc.getAndMapResponse(URL + "/" + uuid + "/for-amendment", new TypeReference<HearingSearchResponseForAmendment>() {
-        });
+        val response = mvc.getAndMapResponse(URL + "/" + uuid + "/for-amendment",
+            new TypeReference<HearingSearchResponseForAmendment>() {});
         assertThat(response.getId()).isEqualTo(hearing.getId());
     }
 

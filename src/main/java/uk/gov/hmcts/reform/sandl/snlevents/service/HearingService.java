@@ -40,6 +40,7 @@ public class HearingService {
     public HearingSearchResponseForAmendment get(UUID id) {
         return hearingQueries.get(id);
     }
+
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
         return hearingQueries.search(searchCriteriaList, pageable);
     }
