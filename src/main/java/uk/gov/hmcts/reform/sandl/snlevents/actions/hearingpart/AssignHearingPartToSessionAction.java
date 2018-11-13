@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -13,6 +14,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelat
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,11 +37,15 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     protected HearingPartRepository hearingPartRepository;
     protected EntityManager entityManager;
     protected SessionRepository sessionRepository;
+    protected StatusConfigService statusConfigService;
+    protected StatusServiceManager statusServiceManager;
 
     public AssignHearingPartToSessionAction(UUID hearingPartId,
                                             HearingPartSessionRelationship hearingPartSessionRelationship,
                                             HearingPartRepository hearingPartRepository,
                                             SessionRepository sessionRepository,
+                                            StatusConfigService statusConfigService,
+                                            StatusServiceManager statusServiceManager,
                                             EntityManager entityManager,
                                             ObjectMapper objectMapper) {
         this.relationship = hearingPartSessionRelationship;
@@ -47,6 +54,8 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         this.sessionRepository = sessionRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
+        this.statusConfigService = statusConfigService;
+        this.statusServiceManager = statusServiceManager;
     }
 
     @Override
@@ -54,6 +63,10 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         hearingPart = hearingPartRepository.findOne(hearingPartId);
         if (hearingPart == null) {
             throw new SnlEventsException("Hearing part cannot be null!");
+        }
+        // this below might be wrong, but the thinking behind is that it has to be first unlisted and the listed again
+        if (!statusServiceManager.canBeUnlisted(hearingPart)) {
+            throw new SnlEventsException("Hearing part can not be unlisted");
         }
 
         targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
@@ -87,6 +100,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
             UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
             hearingPart.setSessionId(targetSessionId);
             hearingPart.setSession(targetSession);
+            hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Listed));
         } catch (JsonProcessingException e) {
             throw new SnlEventsException(e);
         }

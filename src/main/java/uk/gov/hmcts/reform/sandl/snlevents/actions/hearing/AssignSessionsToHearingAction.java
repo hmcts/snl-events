@@ -7,15 +7,19 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +41,16 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     protected HearingRepository hearingRepository;
     protected SessionRepository sessionRepository;
+    protected StatusConfigService statusConfigService;
+    protected StatusServiceManager statusServiceManager;
     protected Hearing savedHearing;
 
     public AssignSessionsToHearingAction(UUID hearingId,
                                          HearingSessionRelationship relationship,
                                          HearingRepository hearingRepository,
                                          SessionRepository sessionRepository,
+                                         StatusConfigService statusConfigService,
+                                         StatusServiceManager statusServiceManager,
                                          EntityManager entityManager,
                                          ObjectMapper objectMapper) {
         this.relationship = relationship;
@@ -51,6 +59,8 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         this.sessionRepository = sessionRepository;
         this.objectMapper = objectMapper;
         this.entityManager = entityManager;
+        this.statusConfigService = statusConfigService;
+        this.statusServiceManager = statusServiceManager;
     }
 
     @Override
@@ -59,6 +69,16 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         if (hearing == null || hearing.getHearingParts() == null || hearing.getHearingParts().isEmpty()) {
             throw new SnlEventsException("Hearing cannot be null!");
         }
+        if (!statusServiceManager.canBeListed(hearing)) {
+            throw new SnlEventsException("Hearing can not be listed");
+        }
+        hearing.getHearingParts().forEach(hp -> {
+            if (!statusServiceManager.canBeListed(hp)) {
+                // need to add more logic of what to do if one hearingPart is unlistable but
+                // the rest are ok and number of them matches sessions number
+                throw new SnlEventsException("Hearing part can not be listed");
+            }
+        });
 
         if (relationship.getSessionsData() == null) {
             throw new SnlEventsException("SessionsData cannot be null!");
@@ -93,11 +113,13 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     @Override
     public void act() {
+        final StatusConfig listedConfig = statusConfigService.getStatusConfig(Status.Listed);
         try {
             previousHearing = objectMapper.writeValueAsString(hearing);
             entityManager.detach(hearing);
 
             hearing.setVersion(relationship.getHearingVersion());
+            hearing.setStatus(listedConfig);
 
             previousHearingParts = new ArrayList<>();
             AtomicInteger index = new AtomicInteger();
@@ -107,6 +129,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
                 Session session = targetSessions.get(index.getAndIncrement());
                 hp.setSessionId(session.getId());
                 hp.setSession(session);
+                hp.setStatus(listedConfig);
                 if (targetSessions.size() > 1) {
                     hp.setStart(session.getStart());
                 } else {

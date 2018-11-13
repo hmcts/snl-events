@@ -28,6 +28,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,6 +59,10 @@ public class HearingController {
 
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private StatusServiceManager statusServiceManager;
+    @Autowired
+    private StatusConfigService statusConfigService;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
@@ -74,7 +80,8 @@ public class HearingController {
         @RequestBody HearingSessionRelationship assignment) {
 
         Action action = new AssignSessionsToHearingAction(
-            hearingId, assignment, hearingRepository, sessionRepository, entityManager, objectMapper
+            hearingId, assignment, hearingRepository, sessionRepository, statusConfigService, statusServiceManager,
+            entityManager, objectMapper
         );
 
         UserTransaction ut = actionService.execute(action);

@@ -135,7 +135,9 @@ public class HearingPartController {
         @RequestBody HearingPartSessionRelationship assignment) {
 
         Action action = new AssignHearingPartToSessionAction(hearingPartId, assignment,
-            hearingPartRepository, sessionRepository, entityManager, objectMapper);
+            hearingPartRepository, sessionRepository, statusConfigService, statusServiceManager,
+            entityManager, objectMapper
+        );
 
         UserTransaction ut = actionService.execute(action);
 

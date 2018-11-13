@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingController.class)
-@Import(TestConfiguration.class)
+@Import({TestConfiguration.class, StatusesTestConfiguration.class})
 @AutoConfigureMockMvc(secure = false)
 public class HearingControllerTest {
     public static final String URL = "/hearing";

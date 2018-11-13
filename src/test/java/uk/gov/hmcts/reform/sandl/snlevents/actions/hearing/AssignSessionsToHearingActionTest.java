@@ -9,13 +9,16 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
@@ -54,6 +57,7 @@ public class AssignSessionsToHearingActionTest {
     private HearingPart mockedHearingPart2;
     private Session mockedSession;
     private Session mockedSession2;
+    private StatusesMock statusesMock = new StatusesMock();
 
     @Mock
     private SessionRepository sessionRepository;
@@ -125,28 +129,56 @@ public class AssignSessionsToHearingActionTest {
         action.getAndValidateEntities();
     }
 
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_forNotListableHearing_shouldThrowException() {
+        Hearing mockedHearing = createHearing();
+        mockedHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        Mockito.when(hearingRepository.findOne(any(UUID.class)))
+            .thenReturn(mockedHearing);
 
-    //need a check for single session
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_forNotListableHearingPart_shouldThrowException() {
+        Hearing mockedHearing = createHearing();
+        mockedHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        HearingPart hearingPart = createHearingPart(mockedHearing);
+        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        mockedHearing.setHearingParts(Collections.singletonList(hearingPart));
+
+        Mockito.when(hearingRepository.findOne(any(UUID.class)))
+            .thenReturn(mockedHearing);
+
+        action.getAndValidateEntities();
+    }
+
     @Test
     public void act_forMultiSessionAssignment_shouldSetClassFieldsToProperState() throws JsonProcessingException {
         action.getAndValidateEntities();
         action.act();
 
+        final StatusConfig listedConfig = statusesMock.statusConfigService.getStatusConfig(Status.Listed);
+
         assertThat(action.hearing.getVersion()).isEqualTo(0);
         assertThat(action.hearing.getVersion()).isEqualTo(request.getHearingVersion());
+        assertThat(action.hearing.getStatus()).isEqualTo(listedConfig);
         assertThat(action.targetSessions).isEqualTo(Arrays.asList(mockedSession, mockedSession2));
         assertThat(action.hearing.getHearingParts().size()).isEqualTo(2);
         assertThat(action.hearing.getHearingParts().get(0).getSession()).isEqualTo(mockedSession);
         assertThat(action.hearing.getHearingParts().get(0).getStart()).isEqualTo(mockedSession.getStart());
+        assertThat(action.hearing.getHearingParts().get(0).getStatus()).isEqualTo(listedConfig);
+
         assertThat(action.hearing.getHearingParts().get(1).getSession()).isEqualTo(mockedSession2);
         assertThat(action.hearing.getHearingParts().get(1).getStart()).isEqualTo(mockedSession2.getStart());
+        assertThat(action.hearing.getHearingParts().get(1).getStatus()).isEqualTo(listedConfig);
 
         Mockito.verify(objectMapper, times(3)).writeValueAsString(any());
     }
 
     @Test
     public void act_forSingleSessionAssignment_shouldSetClassFieldsToProperState() throws JsonProcessingException {
-
         setupSingleSession();
 
         action.getAndValidateEntities();
@@ -170,6 +202,10 @@ public class AssignSessionsToHearingActionTest {
         mockedSession = createSession();
         Mockito.when(sessionRepository.findSessionByIdIn(anyListOf(UUID.class)))
             .thenReturn(Arrays.asList(mockedSession));
+
+        request.setSessionsData(Collections.singletonList(
+            new SessionAssignmentData(SESSION_ID, 0)
+        ));
     }
 
     @Test(expected = SnlRuntimeException.class)
@@ -287,6 +323,7 @@ public class AssignSessionsToHearingActionTest {
         hearing.setScheduleStart(dateTime);
         hearing.setScheduleEnd(dateTime.plusHours(1));
         hearing.setCreatedAt(dateTime);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
         return hearing;
     }
 
@@ -298,6 +335,7 @@ public class AssignSessionsToHearingActionTest {
         hp.setSession(null);
         hp.setHearing(hearing);
         hp.setHearingId(hearing.getId());
+        hp.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
         return hp;
     }
 
@@ -318,7 +356,9 @@ public class AssignSessionsToHearingActionTest {
 
     private AssignSessionsToHearingAction createAction(HearingSessionRelationship request) {
         return new AssignSessionsToHearingAction(request.getHearingId(), request,
-            hearingRepository, sessionRepository, entityManager, objectMapper);
+            hearingRepository, sessionRepository, statusesMock.statusConfigService, statusesMock.statusServiceManager,
+            entityManager, objectMapper
+        );
     }
 
     private UserTransactionData getLockedSessionTransactionData(UUID id) {
