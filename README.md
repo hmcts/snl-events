@@ -183,7 +183,19 @@ docker image rm <image-id>
 
 There is no need to remove postgres and java or similar core images.
 
-## Testing
+## Testing and Preparing for Pull Requests
+
+Before creating a PR, ensure that all of the code styling checks and tests have been done locally (they will be caught on Jenkins if there are any discrepancies)
+
+### 1. Code Style
+
+```bash
+./gradlew checkStyleMain
+
+./gradlew checkStyleTest
+```
+
+### 2. Testing
 
 ```bash
 ./gradlew test
