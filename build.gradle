@@ -222,9 +222,9 @@ sonarqube {
     property "sonar.projectKey", "snl-events"
     property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationFakeRulesTests.exec,${project.buildDir}/jacoco/integrationTests.exec"
     property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
-    property "sonar.exclusions", "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
+    property "sonar.exclusions", "**/config/**,**/PostDbDataController*"
     property "sonar.test.exclusions", ""
-    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*,**/AssignHearingPartToSessionAction*"
+    property 'sonar.coverage.exclusions', "**/config/**,**/PostDbDataController*"
   }
 }
 

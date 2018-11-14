@@ -4,4 +4,8 @@ public class SnlRuntimeException extends RuntimeException {
     public SnlRuntimeException(Throwable cause) {
         super(cause);
     }
+
+    public SnlRuntimeException(String message) {
+        super(message);
+    }
 }

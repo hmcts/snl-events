@@ -34,6 +34,10 @@ public class HearingService {
 
     @Autowired
     private ActionService actionService;
+    @Autowired
+    private StatusConfigService statusConfigService;
+    @Autowired
+    private StatusServiceManager statusServiceManager;
 
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
         return hearingQueries.search(searchCriteriaList, pageable);
@@ -44,6 +48,8 @@ public class HearingService {
             unlistHearingRequest,
             hearingRepository,
             hearingPartRepository,
+            statusConfigService,
+            statusServiceManager,
             objectMapper
         );
 
