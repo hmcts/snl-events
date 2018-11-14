@@ -22,12 +22,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactCaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactHearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactPerson;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactReloadStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactRoom;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -225,5 +227,13 @@ public class FactsMapper {
         }
 
         return objectMapper.writeValueAsString(factHearingPart);
+    }
+
+    public String mapReloadStatusToRuleJsonMessage(
+        OffsetDateTime startedAt,
+        OffsetDateTime finishedAt) throws JsonProcessingException {
+
+        FactReloadStatus factReloadStatus = new FactReloadStatus(startedAt, finishedAt);
+        return objectMapper.writeValueAsString(factReloadStatus);
     }
 }
