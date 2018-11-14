@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
-    <!--<include resource="org/springframework/boot/logging/logback/file-appender.xml" />-->
+    <property name="LOG_PATH" value="./logs" />
     <!-- Overriding spring-boot default message pattern -->
     <appender name="STDOUT"
               class="ch.qos.logback.core.ConsoleAppender">
@@ -16,7 +16,7 @@
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 
       <!-- daily rollover -->
-      <fileNamePattern>snl-events.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <fileNamePattern>${LOG_PATH}/snl-events.%d{yyyy-MM-dd}.log</fileNamePattern>
 
     </rollingPolicy>
     <encoder>
@@ -33,11 +33,8 @@
     <root level="INFO">
       <appender-ref ref="aiAppender" />
       <appender-ref ref="rolling" />
+      <appender-ref ref="STDOUT" />
     </root>
 
     <logger name="uk.gov.hmcts.reform.sandl" level="INFO" />
-
-    <root level="INFO">
-        <appender-ref ref="STDOUT" />
-    </root>
 </configuration>
