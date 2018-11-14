@@ -66,8 +66,8 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
             throw new SnlEventsException("Hearing part cannot be null!");
         }
         // this below might be wrong, but the thinking behind is that it has to be first unlisted and the listed again
-        if (!statusServiceManager.canBeUnlisted(hearingPart)) {
-            throw new SnlEventsException("Hearing part can not be unlisted");
+        if (!statusServiceManager.canBeListed(hearingPart)) {
+            throw new SnlEventsException("Hearing part can not be listed");
         }
 
         targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
@@ -97,7 +97,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         } catch (JsonProcessingException e) {
             throw new SnlEventsException(e);
         }
-        entityManager.detach(hearingPart);
         hearingPart.setVersion(relationship.getHearingPartVersion());
 
         UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();

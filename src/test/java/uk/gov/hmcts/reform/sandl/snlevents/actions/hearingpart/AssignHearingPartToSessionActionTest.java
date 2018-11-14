@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
@@ -103,7 +104,9 @@ public class AssignHearingPartToSessionActionTest {
 
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_forWrongHearingPartStatus_shouldThrowException() {
-        mockedHearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        final StatusConfig customStatusConfig = statusesMock.statusConfigService.getStatusConfig(Status.Unlisted);
+        customStatusConfig.setCanBeListed(false);
+        mockedHearingPart.setStatus(customStatusConfig);
         Mockito.when(hearingPartRepository.findOne(any(UUID.class)))
             .thenReturn(mockedHearingPart);
 

@@ -27,7 +27,7 @@ public class StatusesMock {
 
     public static List<StatusConfig> createSampleStatuses() {
         List<StatusConfig> statusConfigs = new ArrayList<>();
-        statusConfigs.add(new StatusConfig(Status.Listed, false, true, true));
+        statusConfigs.add(new StatusConfig(Status.Listed, true, true, true));
         statusConfigs.add(new StatusConfig(Status.Unlisted, true, false,false));
         return statusConfigs;
     }

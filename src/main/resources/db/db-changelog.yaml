@@ -61,3 +61,5 @@ databaseChangeLog:
       file: db/schema/SL-1967-statuses-configuration.yaml
   - include:
       file: db/schema/SL-1969-add-sessions-and-multisession-flag.yaml
+  - include:
+      file: db/schema/SL-1968-statuses-configuration-update.yaml

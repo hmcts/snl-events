@@ -142,7 +142,9 @@ public class AssignSessionsToHearingActionTest {
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_forNotListableHearingPart_shouldThrowException() {
         Hearing mockedHearing = createHearing();
-        mockedHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        final StatusConfig customStatusConfig = statusesMock.statusConfigService.getStatusConfig(Status.Listed);
+        customStatusConfig.setCanBeListed(false);
+        mockedHearing.setStatus(customStatusConfig);
 
         HearingPart hearingPart = createHearingPart(mockedHearing);
         hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
@@ -290,13 +292,6 @@ public class AssignSessionsToHearingActionTest {
 
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
-    }
-
-
-    @Test
-    public void getUserTransactionData_returnsCorrectData_withPreviousSession() {
-        // currently not supported operation - To implement later
-        assertThat(true).isEqualTo(true);
     }
 
     //
