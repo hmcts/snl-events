@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
@@ -72,6 +73,18 @@ public class HearingControllerTest {
     }
 
     @Test
+    public void getHearingByIdForAmendment_shouldReturnProperHearing() throws Exception {
+        val uuid = ID.randomUUID();
+        val hearing = createHearingForAmend();
+        hearing.setId(uuid);
+        when(hearingService.get(uuid)).thenReturn(hearing);
+
+        val response = mvc.getAndMapResponse(URL + "/" + uuid + "/for-amendment",
+            new TypeReference<HearingSearchResponseForAmendment>() {});
+        assertThat(response.getId()).isEqualTo(hearing.getId());
+    }
+
+    @Test
     public void assignHearingToSession_shouldReturnUserTransaction() throws Exception {
         val ut = createUserTransaction();
 
@@ -82,27 +95,6 @@ public class HearingControllerTest {
             UserTransaction.class);
 
         assertThat(response).isEqualTo(ut);
-    }
-
-    private UserTransaction createUserTransaction() {
-        var ut = new UserTransaction();
-        ut.setId(ID.randomUUID());
-
-        return ut;
-    }
-
-    private HearingSessionRelationship createAssignment() {
-        val assignment = new HearingSessionRelationship();
-
-        return assignment;
-    }
-
-    private Hearing createHearing() {
-        Hearing h = new Hearing();
-        h.setHearingType(new HearingType("code", "desc"));
-        h.setCaseType(new CaseType("code", "desc"));
-        h.setPriority(Priority.High);
-        return h;
     }
 
     @Test
@@ -134,5 +126,33 @@ public class HearingControllerTest {
             UserTransaction.class);
 
         assertThat(response).isEqualTo(ut);
+    }
+
+    private UserTransaction createUserTransaction() {
+        var ut = new UserTransaction();
+        ut.setId(ID.randomUUID());
+
+        return ut;
+    }
+
+    private HearingSessionRelationship createAssignment() {
+        val assignment = new HearingSessionRelationship();
+
+        return assignment;
+    }
+
+    private Hearing createHearing() {
+        Hearing h = new Hearing();
+        h.setHearingType(new HearingType("code", "desc"));
+        h.setCaseType(new CaseType("code", "desc"));
+        h.setPriority(Priority.High);
+        return h;
+    }
+
+    private HearingSearchResponseForAmendment createHearingForAmend() {
+        val hearing = new HearingSearchResponseForAmendment();
+        hearing.setListedCount(1L);
+
+        return hearing;
     }
 }
