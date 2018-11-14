@@ -111,6 +111,8 @@ public class HearingQueries {
             subQueryListingCount, subQueryListingStart);
 
         selections.add(subQueryJudgeAssigned.getSelection());
+        selections.add(hearingRoot.get(Hearing_.numberOfSessions));
+        selections.add(hearingRoot.get(Hearing_.isMultiSession));
 
         return selections;
     }

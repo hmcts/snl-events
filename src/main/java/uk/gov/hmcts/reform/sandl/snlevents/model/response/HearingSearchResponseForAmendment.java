@@ -35,6 +35,8 @@ public class HearingSearchResponseForAmendment implements Serializable {
     private Long listedCount;
     private OffsetDateTime listingDate;
     private String personName;
+    private int numberOfSessions;
+    private boolean isMultiSession;
 
     public Boolean getIsListed() {
         return listedCount > 0;
