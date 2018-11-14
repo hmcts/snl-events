@@ -50,6 +50,7 @@ public class AssignSessionsToHearingActionTest {
     private static final UUID SESSION_ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440002");
     private static final UUID SESSION_ID_2 = UUID.fromString("123e4567-e89b-12d3-a456-426655440022");
     private static final UUID HEARING_ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440003");
+    private static final String UPDATE_ACTION_TEXT = "update";
 
     private AssignSessionsToHearingAction action;
     private HearingSessionRelationship request;
@@ -276,22 +277,22 @@ public class AssignSessionsToHearingActionTest {
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
             action.previousHearing,
-            "update",
-            "update",
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
             1)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             HEARING_PART_ID,
             action.previousHearingParts.get(0),
-            "update",
-            "update",
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
             2)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             HEARING_PART_ID_2,
             action.previousHearingParts.get(1),
-            "update",
-            "update",
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
             2)
         );
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));
