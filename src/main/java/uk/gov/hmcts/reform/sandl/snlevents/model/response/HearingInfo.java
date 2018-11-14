@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -32,6 +33,29 @@ public class HearingInfo implements Serializable {
     private Long version;
     private int numberOfSessions;
     private boolean multiSession;
+
+    public HearingInfo(Hearing hearing, Session session) {
+        this.setId(hearing.getId());
+        this.setCaseNumber(hearing.getCaseNumber());
+        this.setCaseTitle(hearing.getCaseTitle());
+        this.setCaseTypeCode(hearing.getCaseType().getCode());
+        this.setHearingTypeCode(hearing.getHearingType().getCode());
+        this.setScheduleStart(hearing.getScheduleStart());
+        this.setScheduleEnd(hearing.getScheduleEnd());
+        this.setPriority(hearing.getPriority());
+        this.setReservedJudgeId(hearing.getReservedJudgeId());
+        this.setCommunicationFacilitator(hearing.getCommunicationFacilitator());
+        this.setDeleted(hearing.isDeleted());
+        this.setVersion(hearing.getVersion());
+        this.setNumberOfSessions(hearing.getNumberOfSessions());
+        this.setMultiSession(hearing.isMultiSession());
+
+        if (this.isMultiSession()) {
+            this.setDuration(session.getDuration());
+        } else {
+            this.setDuration(hearing.getDuration());
+        }
+    }
 
     public HearingInfo(Hearing hearing) {
         this.setId(hearing.getId());

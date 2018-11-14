@@ -28,7 +28,7 @@ public class HearingPartResponse implements Serializable {
         this.sessionId = hearingPart.getSessionId();
         this.version = hearingPart.getVersion();
         this.start = hearingPart.getStart();
-        this.hearingInfo = new HearingInfo(hearingPart.getHearing()); // @TODO lazy loading requires refactor
+        this.hearingInfo = new HearingInfo(hearingPart.getHearing(), hearingPart.getSession()); // @TODO lazy loading requires refactor
         // in the future because of performance issues
     }
 }
