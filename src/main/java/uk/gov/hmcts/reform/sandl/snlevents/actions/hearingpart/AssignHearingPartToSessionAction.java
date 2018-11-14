@@ -97,14 +97,12 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         } catch (JsonProcessingException e) {
             throw new SnlEventsException(e);
         }
-        entityManager.detach(hearingPart);
         hearingPart.setVersion(relationship.getHearingPartVersion());
-
-        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
+        UUID targetSessionId = targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
         hearingPart.setSession(targetSession);
         hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Listed));
-
+        hearingPart.setStart(targetSession.getStart());
     }
 
     @Override //Done although hearing and session for user transactionDAta are not needed
