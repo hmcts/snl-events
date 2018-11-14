@@ -152,10 +152,18 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearing",
             savedHearing.getId(),
-            previousHearing,
+            null,
             "lock",
             "unlock",
             0)
+        );
+
+        userTransactionDataList.add(new UserTransactionData("hearing",
+            savedHearing.getId(),
+            previousHearing,
+            "update",
+            "update",
+            1)
         );
 
         AtomicInteger index = new AtomicInteger();
@@ -165,7 +173,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
                 previousHearingParts.get(index.getAndIncrement()),
                 "update",
                 "update",
-                1
+                2
             ));
         }
 
