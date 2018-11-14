@@ -98,12 +98,11 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
             throw new SnlEventsException(e);
         }
         hearingPart.setVersion(relationship.getHearingPartVersion());
-
-        UUID targetSessionId = (targetSession == null) ? null : targetSession.getId();
+        UUID targetSessionId = targetSession.getId();
         hearingPart.setSessionId(targetSessionId);
         hearingPart.setSession(targetSession);
         hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Listed));
-
+        hearingPart.setStart(targetSession.getStart());
     }
 
     @Override //Done although hearing and session for user transactionDAta are not needed
