@@ -10,12 +10,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class HearingService {
@@ -34,6 +36,10 @@ public class HearingService {
 
     @Autowired
     private ActionService actionService;
+
+    public HearingSearchResponseForAmendment get(UUID id) {
+        return hearingQueries.get(id);
+    }
 
     public Page<HearingSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
         return hearingQueries.search(searchCriteriaList, pageable);
