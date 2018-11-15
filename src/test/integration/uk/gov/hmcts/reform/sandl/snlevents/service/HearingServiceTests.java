@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -112,6 +114,15 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         hearing.addHearingPart(hearingPart);
         hearing2.addHearingPart(hearingPart2);
+
+        StatusConfig statusListed = new StatusConfig();
+        statusListed.setStatus(Status.valueOf("Listed"));
+
+        StatusConfig statusUnlisted = new StatusConfig();
+        statusUnlisted.setStatus(Status.valueOf("Unlisted"));
+
+        hearing.setStatus(statusListed);
+        hearing2.setStatus(statusUnlisted);
 
         sessionRepository.saveAndFlush(session);
         hearingRepository.saveAndFlush(hearing);
@@ -216,7 +227,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public void findAll_withHearingSpecifications_isListedTrue_shouldReturnOneMatchingResult() {
         // Given
         List<SearchCriteria> criteriaList = new ArrayList<>();
-        SearchCriteria criteria = new SearchCriteria("listingStatus", ComparisonOperations.EQUALS, "listed");
+        SearchCriteria criteria = new SearchCriteria("status.status", ComparisonOperations.EQUALS, "Listed");
         criteriaList.add(criteria);
 
         // When
@@ -224,7 +235,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(1);
-        assertThat(responseList.getContent().get(0).getIsListed()).isTrue();
+        assertThat(responseList.getContent().get(0).getStatus().toString()).isEqualTo("Listed");
         assertThat(responseList.getContent().get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_123);
     }
 
@@ -232,7 +243,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public void findAll_withHearingSpecifications_isListedFalse_shouldReturnOneMatchingResult() {
         // Given
         List<SearchCriteria> criteriaList = new ArrayList<>();
-        SearchCriteria criteria = new SearchCriteria("listingStatus", ComparisonOperations.EQUALS, "unlisted");
+        SearchCriteria criteria = new SearchCriteria("status.status", ComparisonOperations.EQUALS, "Unlisted");
         criteriaList.add(criteria);
 
         // When
@@ -240,7 +251,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         // Then
         assertThat(responseList.getContent().size()).isEqualTo(1);
-        assertThat(responseList.getContent().get(0).getIsListed()).isFalse();
+        assertThat(responseList.getContent().get(0).getStatus().toString()).isEqualTo("Unlisted");
         assertThat(responseList.getContent().get(0).getCaseNumber()).isEqualTo(CASE_NUMBER_222);
     }
 
