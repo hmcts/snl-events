@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import lombok.var;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -24,12 +26,15 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
+import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
 import java.util.Collections;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -38,7 +43,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingController.class)
-@Import(TestConfiguration.class)
+@Import({TestConfiguration.class, StatusesTestConfiguration.class})
 @AutoConfigureMockMvc(secure = false)
 public class HearingControllerTest {
     public static final String URL = "/hearing";
@@ -55,6 +60,21 @@ public class HearingControllerTest {
 
     @MockBean
     private HearingRepository hearingRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private SessionRepository sessionRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private ActionService actionService;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private EntityManager entityManager;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
@@ -88,8 +108,7 @@ public class HearingControllerTest {
     public void assignHearingToSession_shouldReturnUserTransaction() throws Exception {
         val ut = createUserTransaction();
 
-        when(hearingPartService.assignHearingToSessionWithTransaction(ID, createAssignment()))
-            .thenReturn(ut);
+        when(actionService.execute(any())).thenReturn(ut);
 
         val response = mvc.callAndMapResponse(put(URL + "/" + ID), createAssignment(),
             UserTransaction.class);

@@ -36,6 +36,10 @@ public class HearingService {
 
     @Autowired
     private ActionService actionService;
+    @Autowired
+    private StatusConfigService statusConfigService;
+    @Autowired
+    private StatusServiceManager statusServiceManager;
 
     public HearingSearchResponseForAmendment get(UUID id) {
         return hearingQueries.get(id);
@@ -50,6 +54,8 @@ public class HearingService {
             unlistHearingRequest,
             hearingRepository,
             hearingPartRepository,
+            statusConfigService,
+            statusServiceManager,
             objectMapper
         );
 

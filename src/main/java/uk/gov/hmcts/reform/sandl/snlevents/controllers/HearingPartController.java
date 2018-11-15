@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart.AssignHearingPartToSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
@@ -28,8 +29,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +58,9 @@ public class HearingPartController {
     HearingRepository hearingRepository;
 
     @Autowired
+    SessionRepository sessionRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -70,6 +77,11 @@ public class HearingPartController {
 
     @Autowired
     private HearingMapper hearingMapper;
+
+    @Autowired
+    private StatusServiceManager statusServiceManager;
+    @Autowired
+    private StatusConfigService statusConfigService;
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingPartResponse getHearingPartById(@PathVariable("id") UUID id) {
@@ -97,6 +109,8 @@ public class HearingPartController {
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository,
+            statusConfigService,
+            statusServiceManager,
             entityManager
         );
 
@@ -118,9 +132,14 @@ public class HearingPartController {
     @PutMapping(path = "/{hearingPartId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity assignHearingPartToSession(
         @PathVariable UUID hearingPartId,
-        @RequestBody HearingPartSessionRelationship assignment) throws Exception {
+        @RequestBody HearingPartSessionRelationship assignment) {
 
-        UserTransaction ut = hearingPartService.assignHearingPartToSessionWithTransaction(hearingPartId, assignment);
+        Action action = new AssignHearingPartToSessionAction(hearingPartId, assignment,
+            hearingPartRepository, sessionRepository, statusConfigService, statusServiceManager,
+            entityManager, objectMapper
+        );
+
+        UserTransaction ut = actionService.execute(action);
 
         return ok(ut);
     }
