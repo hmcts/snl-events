@@ -30,6 +30,7 @@ import javax.persistence.EntityManager;
 
 public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
 
+    private static final String UPDATE_ACTION_TEXT = "update";
     protected final EntityManager entityManager;
     protected HearingSessionRelationship relationship;
     protected UUID hearingId;
@@ -152,10 +153,18 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(new UserTransactionData("hearing",
             savedHearing.getId(),
-            previousHearing,
+            null,
             "lock",
             "unlock",
             0)
+        );
+
+        userTransactionDataList.add(new UserTransactionData("hearing",
+            savedHearing.getId(),
+            previousHearing,
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
+            1)
         );
 
         AtomicInteger index = new AtomicInteger();
@@ -163,9 +172,9 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
             userTransactionDataList.add(new UserTransactionData("hearingPart",
                 hp.getId(),
                 previousHearingParts.get(index.getAndIncrement()),
-                "update",
-                "update",
-                1
+                UPDATE_ACTION_TEXT,
+                UPDATE_ACTION_TEXT,
+                2
             ));
         }
 

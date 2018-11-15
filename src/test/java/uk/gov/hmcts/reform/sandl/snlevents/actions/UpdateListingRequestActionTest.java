@@ -137,6 +137,8 @@ public class UpdateListingRequestActionTest {
         Mockito.verify(hearingRepository).save(captor.capture());
 
         assertThat(captor.getValue().getId()).isEqualTo(ulr.getId());
+        assertThat(captor.getValue().getReservedJudgeId()).isEqualTo(ulr.getReservedJudgeId());
+        assertThat(captor.getValue().getCaseNumber()).isEqualTo(ulr.getCaseNumber());
     }
 
     @Test
