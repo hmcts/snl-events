@@ -16,9 +16,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
@@ -121,6 +123,11 @@ public class HearingControllerTest {
         h.setHearingType(new HearingType("code", "desc"));
         h.setCaseType(new CaseType("code", "desc"));
         h.setPriority(Priority.High);
+
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Listed);
+        h.setStatus(statusConfig);
+
         return h;
     }
 
@@ -138,6 +145,7 @@ public class HearingControllerTest {
         expectedResponse.setHearingType("desc");
         expectedResponse.setSessions(Collections.emptyList());
         expectedResponse.setHearingPartsVersions(Collections.emptyList());
+        expectedResponse.setStatus(Status.Listed);
 
         val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);

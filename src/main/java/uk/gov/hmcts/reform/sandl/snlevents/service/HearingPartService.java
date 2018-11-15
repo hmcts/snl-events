@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
@@ -64,16 +66,26 @@ public class HearingPartService {
     }
 
     public List<HearingPartResponse> getAllHearingPartsThat(Boolean areListed) {
-        List<HearingPart> hearingParts;
+        List<HearingPart> hearingParts = hearingPartRepository.findAll();
         if (areListed) {
-            hearingParts = hearingPartRepository.findBySessionIsNotNull();
+            return hearingParts.stream()
+                .filter(hp -> {
+                    StatusConfig statusConfig = hp.getHearing().getStatus();
+                    return statusConfig.getStatus().equals(Status.Listed);
+                })
+                .map(HearingPartResponse::new)
+                .collect(Collectors.toList());
         } else {
-            hearingParts = hearingPartRepository.findBySessionIsNull();
+            return hearingParts.stream()
+                .filter(hp -> {
+                    StatusConfig statusConfig = hp.getHearing().getStatus();
+                    return statusConfig.isCanBeListed() && !statusConfig.getStatus().equals(Status.Listed);
+                })
+                .map(HearingPartResponse::new)
+                .collect(Collectors.toList());
         }
 
-        return hearingParts.stream()
-            .map(HearingPartResponse::new)
-            .collect(Collectors.toList());
+
     }
 
     public HearingPart save(HearingPart hearingPart) {
