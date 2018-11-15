@@ -66,7 +66,7 @@ public class HearingQueries {
         List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson,
             subQueryListingCount, subQueryListingStart, subQueryJudgeAssigned);
 
-        SearchCriteria sc = new SearchCriteria("id", ComparisonOperations.EQUALS, id);
+        SearchCriteria sc = new SearchCriteria(Hearing_.id.getName(), ComparisonOperations.EQUALS, id);
         Predicate restrictions = createWherePredicates(Arrays.asList(sc), criteriaBuilder, criteriaQuery, hearingRoot);
         criteriaQuery.where(restrictions);
 
