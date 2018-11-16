@@ -45,6 +45,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
+    private String previousHearing;
 
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
@@ -100,6 +101,11 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         if (sessions.isEmpty()) {
             throw new EntityNotFoundException("Hearing parts assigned to Hearing haven't been listed yet");
         }
+        try {
+            previousHearing = objectMapper.writeValueAsString(hearing);
+        } catch (JsonProcessingException e) {
+            throw new SnlRuntimeException(e);
+        }
 
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
 
@@ -129,7 +135,14 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             )
         );
 
-        userTransactionDataList.add(prepareLockedEntityTransactionData("hearing", hearing.getId()));
+        userTransactionDataList.add(new UserTransactionData("hearing",
+            hearing.getId(),
+            previousHearing,
+            "update",
+            "update",
+            1)
+        );
+
         sessions.stream().forEach(s ->
             userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
         );
