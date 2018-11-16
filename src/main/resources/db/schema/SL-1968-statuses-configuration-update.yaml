@@ -1,0 +1,13 @@
+databaseChangeLog:
+- changeSet:
+    id: update-statuses
+    author: lgurniewicz
+    comment: Initial values needed an update
+    changes:
+    - update:
+        columns:
+        - column:
+            name: can_be_listed
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"

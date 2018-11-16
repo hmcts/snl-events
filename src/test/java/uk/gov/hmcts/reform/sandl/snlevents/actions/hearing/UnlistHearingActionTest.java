@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,9 +10,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,7 +54,7 @@ public class UnlistHearingActionTest {
         getVersionInfo(HEARING_PART_ID_A, HEARING_VERSION_ID_A),
         getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
     );
-
+    private StatusesMock statusesMock = new StatusesMock();
     private UnlistHearingAction action;
 
     @Mock
@@ -71,6 +74,7 @@ public class UnlistHearingActionTest {
         hearing.setCaseType(new CaseType("cs-code", "cs-desc"));
         hearing.setHearingType(new HearingType("ht-code", "ht-desc"));
         hearing.setId(HEARING_ID_TO_BE_UNLISTED);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         hearing.setHearingParts(Arrays.asList(
             createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A, hearing, SESSION_ID_A),
             createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B, hearing, SESSION_ID_B)
@@ -85,7 +89,10 @@ public class UnlistHearingActionTest {
         uhr.setHearingPartsVersions(hearingVersions);
 
         action = new UnlistHearingAction(
-            uhr, hearingRepository, hearingPartRepository, objectMapper
+            uhr, hearingRepository, hearingPartRepository,
+            statusesMock.statusConfigService,
+            statusesMock.statusServiceManager,
+            objectMapper
         );
     }
 
@@ -94,6 +101,7 @@ public class UnlistHearingActionTest {
         hearingPart.setId(id);
         hearingPart.setHearing(hearing);
         hearingPart.setVersion(version);
+        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         Session session = new Session();
         session.setId(sessionId);
@@ -118,22 +126,6 @@ public class UnlistHearingActionTest {
 
         assertThat(ids.length).isEqualTo(expectedUuids.length);
         assertTrue(Arrays.asList(ids).containsAll(Arrays.asList(expectedUuids)));
-    }
-
-    @Test
-    public void act_shouldSetHearingPartSessionIdToNull() {
-        action.getAndValidateEntities();
-        action.act();
-
-        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
-
-        Mockito.verify(hearingPartRepository).save(captor.capture());
-        assertThat(captor.getValue().size()).isEqualTo(hearingVersions.size());
-        captor.getValue().forEach(hp -> {
-            assertNull(hp.getSessionId());
-            assertNull(hp.getSession());
-            assertNull(hp.getStart());
-        });
     }
 
     @Test
@@ -163,11 +155,62 @@ public class UnlistHearingActionTest {
         assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.UPSERT_HEARING_PART);
     }
 
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        assertThat(captor.getValue().size()).isEqualTo(hearingVersions.size());
+        captor.getValue().forEach(hp -> {
+            assertNull(hp.getSessionId());
+            assertNull(hp.getSession());
+            assertNull(hp.getStart());
+        });
+    }
+
+    @Test
+    public void act_shouldSetStatusesToUnlisted() {
+        action.getAndValidateEntities();
+        action.act();
+
+        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        assertThat(action.hearingParts.size()).isEqualTo(2);
+        action.hearingParts.forEach(hearingPart -> {
+            assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        });
+    }
+
     @Test(expected = SnlRuntimeException.class)
     public void act_whenObjectIsInvalid_shouldThrowSnlRuntimeException() throws JsonProcessingException {
         action.getAndValidateEntities();
         Mockito.when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
         action.act();
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_whenHearingStatusCantbeUlisted_shouldThrowException() {
+        Hearing hearing = new Hearing();
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        Mockito.when(hearingRepository.findOne(any(UUID.class)))
+            .thenReturn(hearing);
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_whenHearingPartStatusCantbeUlisted_shouldThrowException() {
+        Hearing hearing = new Hearing();
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L, hearing, SESSION_ID_A);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        hearing.setHearingParts(Collections.singletonList(hearingPart));
+
+        Mockito.when(hearingRepository.findOne(any(UUID.class)))
+            .thenReturn(hearing);
+        action.getAndValidateEntities();
     }
 
     private void assertThatContainsHearigPart(List<UserTransactionData> userTransactionData, UUID hearingPartId) {

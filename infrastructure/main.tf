@@ -7,8 +7,8 @@ locals {
   shortEnv = "${(var.env == "preview" || var.env == "spreview") ? var.deployment_namespace : var.env}"
 
   product = "${var.env == "preview" || var.env == "spreview" ? var.raw_product : var.product}"
-  aat_rules_url = "http://${local.product}-rules-aat-vm.service.core-compute-aat.internal"
-  local_rules_url = "http://${local.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+  aat_rules_url = "https://${local.product}-rules-aat-vm.service.core-compute-aat.internal"
+  local_rules_url = "https://${local.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   rules_url = "${var.env == "preview" || var.env == "spreview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
@@ -39,6 +39,8 @@ module "snl-events" {
   https_only           = "true"
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
+  capacity             = "1"
+  instance_size        = "I1"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   asp_rg               = "${local.asp_rg}"
   asp_name             = "${local.asp_name}"
@@ -57,6 +59,8 @@ module "snl-events" {
     SNL_RULES_URL = "${local.rules_url}"
 
     SNL_S2S_JWT_SECRET = "${data.azurerm_key_vault_secret.s2s_jwt_secret.value}"
+
+    SNL_SCHEDULEDJOB_ENABLED = "${(var.env == "preview" || var.env == "spreview") ? "false" : "true"}"
   }
 }
 

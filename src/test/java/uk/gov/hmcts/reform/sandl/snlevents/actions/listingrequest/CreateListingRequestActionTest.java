@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import lombok.val;
 import org.junit.Before;
@@ -7,11 +7,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,11 +44,10 @@ public class CreateListingRequestActionTest {
     private static final String HEARING_PART_ID2 = "123e4567-e89b-12d3-a456-426655440001";
     private static final String HEARING_ID = "38692091-8165-43a5-8c63-977723a77228";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
+    private StatusesMock statusesMock = new StatusesMock();
 
     private CreateListingRequestAction action;
-
     private CreateHearingRequest createHearingRequest;
-
     private HearingPart hearingPart;
 
     @Mock
@@ -75,6 +77,8 @@ public class CreateListingRequestActionTest {
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository,
+            statusesMock.statusConfigService,
+            statusesMock.statusServiceManager,
             entityManager
         );
         this.hearingPart = createHearingPart(HEARING_PART_ID);
@@ -94,6 +98,18 @@ public class CreateListingRequestActionTest {
     }
 
     @Test
+    public void act_shouldSetClassFieldsToProperState() {
+        action.getAndValidateEntities();
+        action.act();
+
+        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        assertThat(action.hearingParts.size()).isEqualTo(1);
+        action.hearingParts.forEach(hearingPart -> {
+            assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        });
+    }
+
+    @Test
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
         UUID[] ids = action.getAssociatedEntitiesIds();
 
@@ -109,6 +125,7 @@ public class CreateListingRequestActionTest {
 
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
+        action.getAndValidateEntities();
         action.act();
         List<FactMessage> factMessages = action.generateFactMessages();
 
@@ -135,6 +152,7 @@ public class CreateListingRequestActionTest {
             "delete",
             1));
 
+        action.getAndValidateEntities();
         action.act();
 
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
@@ -171,7 +189,7 @@ public class CreateListingRequestActionTest {
         when(hearingMapper.mapToHearingParts(createHearingRequest)).thenReturn(Arrays.asList(
             createHearingPart(HEARING_PART_ID), createHearingPart(HEARING_PART_ID2))
         );
-
+        action.getAndValidateEntities();
         action.act();
 
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
