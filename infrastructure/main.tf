@@ -37,6 +37,8 @@ module "snl-events" {
   is_frontend          = false
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
+  capacity             = "1"
+  instance_size        = "I1"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   asp_rg               = "${local.asp_rg}"
   asp_name             = "${local.asp_name}"
