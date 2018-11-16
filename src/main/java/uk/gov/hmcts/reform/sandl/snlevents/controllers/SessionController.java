@@ -3,6 +3,9 @@ package uk.gov.hmcts.reform.sandl.snlevents.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +24,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
@@ -31,6 +37,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.validation.Valid;
@@ -86,6 +93,28 @@ public class SessionController {
         @RequestParam("startDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate endDate) {
         return sessionService.getSessionsWithHearingsForDates(startDate, endDate);
+    }
+
+    @PostMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<SessionSearchResponse> fetchSessionsWithHearingsForDates(
+        @RequestParam(value = "page", required = false) Optional<Integer> page,
+        @RequestParam(value = "size", required = false) Optional<Integer> size,
+        @RequestParam(value = "sort", required = false) Optional<String> sort,
+        @RequestBody(required = false) List<SearchCriteria> searchCriteriaList) {
+
+        SearchSessionSelectColumn orderByColumn = null;
+        Sort.Direction direction = null;
+        if (sort.isPresent()) {
+            val sortPair = sort.get().split(":");
+            orderByColumn = SearchSessionSelectColumn.fromString(sortPair[0]);
+            direction = Sort.Direction.fromString(sortPair[1]);
+        }
+
+        PageRequest pageRequest =
+            (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : new PageRequest(0, 10);
+
+
+        return sessionService.searchForSession(searchCriteriaList, pageRequest, orderByColumn, direction);
     }
 
     @PutMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE)
