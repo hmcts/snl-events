@@ -4,14 +4,18 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
+import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +35,18 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected CaseTypeRepository caseTypeRepository;
     protected HearingMapper hearingMapper;
     protected HearingRepository hearingRepository;
-    private EntityManager entityManager;
+    protected StatusConfigService statusConfigService;
+    protected StatusServiceManager statusServiceManager;
+    protected EntityManager entityManager;
 
+    @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public CreateListingRequestAction(CreateHearingRequest createHearingRequest,
                                       HearingMapper hearingMapper,
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository,
                                       HearingRepository hearingRepository,
+                                      StatusConfigService statusConfigService,
+                                      StatusServiceManager statusServiceManager,
                                       EntityManager entityManager) {
         this.createHearingRequest = createHearingRequest;
         this.hearingMapper = hearingMapper;
@@ -45,11 +54,26 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         this.caseTypeRepository = caseTypeRepository;
         this.hearingRepository = hearingRepository;
         this.entityManager = entityManager;
+        this.statusConfigService = statusConfigService;
+        this.statusServiceManager = statusServiceManager;
     }
 
     @Override
     @Transactional
     public void act() {
+        final StatusConfig unlistedStatus = statusConfigService.getStatusConfig(Status.Unlisted);
+        hearing.setStatus(unlistedStatus);
+
+        hearingParts.forEach(hearingPart -> {
+            hearingPart.setStatus(unlistedStatus);
+            hearing.addHearingPart(hearingPart);
+        });
+
+        hearingRepository.save(hearing);
+    }
+
+    @Override
+    public void getAndValidateEntities() {
         hearingParts = hearingMapper.mapToHearingParts(createHearingRequest);
 
         hearing = hearingMapper.mapToHearing(
@@ -58,15 +82,6 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
             hearingTypeRepository,
             entityManager
         );
-
-        hearingParts.forEach(hearingPart -> hearing.addHearingPart(hearingPart));
-
-        hearingRepository.save(hearing);
-    }
-
-    @Override
-    public void getAndValidateEntities() {
-        // No op
     }
 
     @Override
