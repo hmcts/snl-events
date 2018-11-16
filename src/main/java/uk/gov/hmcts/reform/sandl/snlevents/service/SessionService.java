@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -23,7 +26,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionQuery;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -252,8 +257,8 @@ public class SessionService {
         return ut;
     }
 
-    public List<SessionSearchResponse> searchForSession() {
-        return searchSessionQuery.search();
+    public Page<SessionSearchResponse> searchForSession(List<SearchCriteria> searchCriteriaList, Pageable pageable, SearchSessionSelectColumn orderByColumn, Sort.Direction direction) {
+        return searchSessionQuery.search(searchCriteriaList, pageable, orderByColumn, direction);
     }
 
     private void setResources(Session session, UpsertSession upsertSession) {
