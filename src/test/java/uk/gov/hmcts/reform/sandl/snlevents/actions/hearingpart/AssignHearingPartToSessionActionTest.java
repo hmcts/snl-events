@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -66,6 +68,9 @@ public class AssignHearingPartToSessionActionTest {
     @Mock
     private ObjectMapper objectMapper;
     private final HearingPart mockedHearingPart = new HearingPart();
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -130,8 +135,10 @@ public class AssignHearingPartToSessionActionTest {
         Mockito.verify(objectMapper, times(2)).writeValueAsString(any());
     }
 
-    @Test(expected = SnlEventsException.class)
+    @Test
     public void act_shouldThrowServiceException_whenHearingIsMultiSession() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Cannot assign hearing part which is a part of a multi-session!");
         mockedHearingPart.getHearing().setMultiSession(true);
         action.getAndValidateEntities();
     }

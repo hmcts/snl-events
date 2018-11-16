@@ -72,7 +72,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         }
 
         if (hearingPart.getHearing().isMultiSession()) {
-            throw new SnlEventsException("Hearing part cannot be part of a multi-session!");
+            throw new SnlEventsException("Cannot assign hearing part which is a part of a multi-session!");
         }
 
         targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
