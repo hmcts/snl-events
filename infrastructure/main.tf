@@ -38,6 +38,8 @@ module "snl-events" {
   https_only           = "true"
   subscription         = "${var.subscription}"
   additional_host_name = "${var.external_host_name}"
+  capacity             = "1"
+  instance_size        = "I1"
   appinsights_instrumentation_key = "${var.appinsights_instrumentation_key}"
   asp_rg               = "${local.asp_rg}"
   asp_name             = "${local.asp_name}"
@@ -56,6 +58,8 @@ module "snl-events" {
     SNL_RULES_URL = "${local.rules_url}"
 
     SNL_S2S_JWT_SECRET = "${data.azurerm_key_vault_secret.s2s_jwt_secret.value}"
+
+    SNL_SCHEDULEDJOB_ENABLED = "${(var.env == "preview" || var.env == "spreview") ? "false" : "true"}"
   }
 }
 
