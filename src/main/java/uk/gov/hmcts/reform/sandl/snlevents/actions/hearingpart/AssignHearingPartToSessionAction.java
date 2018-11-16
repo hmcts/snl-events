@@ -62,12 +62,17 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     @Override
     public void getAndValidateEntities() {
         hearingPart = hearingPartRepository.findOne(hearingPartId);
+
         if (hearingPart == null) {
             throw new SnlEventsException("Hearing part cannot be null!");
         }
         // this below might be wrong, but the thinking behind is that it has to be first unlisted and the listed again
         if (!statusServiceManager.canBeListed(hearingPart)) {
             throw new SnlEventsException("Hearing part can not be listed");
+        }
+
+        if (hearingPart.getHearing().isMultiSession()) {
+            throw new SnlEventsException("Cannot assign hearing part which is a part of a multi-session!");
         }
 
         targetSession = sessionRepository.findOne(relationship.getSessionData().getSessionId());
