@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -128,6 +129,12 @@ public class AssignHearingPartToSessionActionTest {
         assertThat(action.hearingPart.getStart()).isEqualTo(mockedSession.getStart());
 
         Mockito.verify(objectMapper, times(2)).writeValueAsString(any());
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void act_shouldThrowServiceException_whenHearingIsMultiSession() {
+        mockedHearingPart.getHearing().setMultiSession(true);
+        action.getAndValidateEntities();
     }
 
     @Test(expected = SnlEventsException.class)
