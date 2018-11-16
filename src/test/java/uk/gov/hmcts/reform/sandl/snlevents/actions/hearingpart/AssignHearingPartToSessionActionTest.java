@@ -125,6 +125,7 @@ public class AssignHearingPartToSessionActionTest {
         assertThat(action.hearingPart.getVersion()).isEqualTo(request.getHearingPartVersion());
         assertThat(action.hearingPart.getSession()).isEqualTo(mockedSession);
         assertThat(action.hearingPart.getSessionId()).isEqualTo(mockedSession.getId());
+        assertThat(action.hearingPart.getStart()).isEqualTo(mockedSession.getStart());
 
         Mockito.verify(objectMapper, times(2)).writeValueAsString(any());
     }
