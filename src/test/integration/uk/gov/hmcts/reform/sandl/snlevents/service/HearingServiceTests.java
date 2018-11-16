@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -46,6 +48,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
     public static final String CASE_NUMBER_FIELD = "caseNumber";
     public static final String CASE_NUMBER_222 = "222";
     public static final String JUDGE_ID = "1143b1ea-1813-4acc-8b08-f37d1db59492";
+    private static final UUID HEARING_ID = UUID.randomUUID();
 
     private final CaseType smallClaims = new CaseType(SMALL_CLAIMS, "SC");
     private final CaseType fastTrack = new CaseType(FAST_TRACK, "FT");
@@ -127,6 +130,30 @@ public class HearingServiceTests extends BaseIntegrationTest {
         sessionRepository.saveAndFlush(session);
         hearingRepository.saveAndFlush(hearing);
         hearingRepository.saveAndFlush(hearing2);
+    }
+
+    @Test
+    public void getHearingForAmend_shouldReturnProperResponse() {
+        final Hearing hearing3 = new Hearing();
+        hearing3.setId(HEARING_ID);
+        hearing3.setCaseNumber("AMENDMENT");
+        hearing3.setCaseTitle("FOR AMEND");
+        hearing3.setPriority(Priority.Low);
+        hearing3.setCaseType(fastTrack);
+        hearing3.setHearingType(trial);
+        hearing3.setNumberOfSessions(1);
+        hearing3.setMultiSession(false);
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Listed);
+        hearing3.setStatus(statusConfig);
+
+        hearingRepository.saveAndFlush(hearing3);
+
+        HearingSearchResponseForAmendment response = hearingService.get(HEARING_ID);
+
+        assertThat(response.getId()).isEqualTo(HEARING_ID);
+        assertThat(response.getCaseTitle()).isEqualToIgnoringCase("FOR AMEND");
+        assertThat(response.getStatus()).isEqualTo(Status.Listed);
     }
 
     @Test

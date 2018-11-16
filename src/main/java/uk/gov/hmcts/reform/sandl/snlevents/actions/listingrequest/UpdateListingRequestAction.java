@@ -76,6 +76,8 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             hearing.setReservedJudge(
                 this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
             );
+        } else {
+            hearing.setReservedJudge(null);
         }
 
         hearingRepository.save(hearing);
