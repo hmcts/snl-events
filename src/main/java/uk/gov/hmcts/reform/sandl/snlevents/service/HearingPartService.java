@@ -65,6 +65,7 @@ public class HearingPartService {
             .collect(Collectors.toList());
     }
 
+    @Deprecated // This should be rewritten to native query instead of filtering in DB as part of SL-1971
     public List<HearingPartResponse> getAllHearingPartsThat(Boolean areListed) {
         List<HearingPart> hearingParts = hearingPartRepository.findAll();
         if (areListed) {
