@@ -8,7 +8,7 @@ locals {
 
   product = "${var.env == "preview" || var.env == "spreview" ? var.raw_product : var.product}"
   aat_rules_url = "https://${local.product}-rules-aat-vm.service.core-compute-aat.internal"
-  local_rules_url = "https://${local.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+  local_rules_url = "http://${local.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
   rules_url = "${var.env == "preview" || var.env == "spreview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
