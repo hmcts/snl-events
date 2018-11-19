@@ -139,9 +139,9 @@ public class UnlistHearingActionTest {
         action.act();
         List<UserTransactionData> userTransactionData = action.generateUserTransactionData();
 
-        assertThatContainsHearigPart(userTransactionData, HEARING_PART_ID_A);
-        assertThatContainsHearigPart(userTransactionData, HEARING_PART_ID_B);
-        assertThatContainsEntity(userTransactionData, "hearing", HEARING_ID_TO_BE_UNLISTED);
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_A, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_B, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_UNLISTED, "hearing");
         assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
         assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
     }
@@ -213,10 +213,11 @@ public class UnlistHearingActionTest {
         action.getAndValidateEntities();
     }
 
-    private void assertThatContainsHearigPart(List<UserTransactionData> userTransactionData, UUID hearingPartId) {
-        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == hearingPartId)
+    private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,
+                                                          String entityName) {
+        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == entityId)
             .findFirst().get();
-        assertThat(hearingUserTransactionData.getEntity()).isEqualTo("hearingPart");
+        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entityName);
         assertThat(hearingUserTransactionData.getAction()).isEqualTo("update");
         assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("update");
     }

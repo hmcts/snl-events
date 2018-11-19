@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,11 +12,13 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
@@ -86,23 +89,22 @@ public class HearingPartServiceTest {
 
     @Test
     public void getAllHearingPartsThat_whenAreListedIsFalse_returnsHearingPartsWithNoSessionAssignedFromRepository() {
-        List<HearingPart> hps = createHearingParts();
-        hps.stream().forEach(hp -> hp.setSessionId(null));
-        when(hearingPartRepository.findBySessionIsNull()).thenReturn(hps);
+        when(hearingPartRepository.findAll()).thenReturn(
+            Arrays.asList(createHearingPartAndHearingWithStatus(createStatusConfigUnlisted()),
+            createHearingPartAndHearingWithStatus(createStatusConfigListed())));
         List<HearingPartResponse> hearingPartResponses = hearingPartService.getAllHearingPartsThat(false);
 
-        assertThat(hearingPartResponses.get(0)).isEqualTo(hearingPartResponses.get(0));
-        assertThat(hearingPartResponses.get(0).getSessionId()).isNull();
+        assertThat(hearingPartResponses.size()).isEqualTo(1);
     }
 
     @Test
     public void getAllHearingPartsThat_whenAreListedIsTrue_returnsHearingPartsWithSessionAssignedFromRepository() {
-        when(hearingPartRepository.findBySessionIsNotNull()).thenReturn(
-            Arrays.asList(createHearingPart()));
+        when(hearingPartRepository.findAll()).thenReturn(
+            Arrays.asList(createHearingPartAndHearingWithStatus(createStatusConfigListed()),
+                createHearingPartAndHearingWithStatus(createStatusConfigUnlisted())));
         List<HearingPartResponse> hearingPartResponses = hearingPartService.getAllHearingPartsThat(true);
 
-        assertThat(hearingPartResponses.get(0)).isEqualTo(hearingPartResponses.get(0));
-        assertThat(hearingPartResponses.get(0).getSessionId()).isNotNull();
+        assertThat(hearingPartResponses.size()).isEqualTo(1);
     }
 
     @Test
@@ -273,6 +275,35 @@ public class HearingPartServiceTest {
         session.setId(UUID.randomUUID());
 
         return session;
+    }
+
+    private StatusConfig createStatusConfigListed() {
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Listed);
+        statusConfig.setCanBeListed(true);
+        statusConfig.setCanBeUnlisted(true);
+        return statusConfig;
+    }
+
+    private StatusConfig createStatusConfigUnlisted() {
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Unlisted);
+        statusConfig.setCanBeListed(true);
+        statusConfig.setCanBeUnlisted(false);
+        return statusConfig;
+    }
+
+    private HearingPart createHearingPartAndHearingWithStatus(StatusConfig status) {
+        HearingPart hp = new HearingPart();
+        Hearing h = new Hearing();
+        h.setStatus(status);
+        h.addHearingPart(createHearingPart());
+        hp.setHearing(h);
+
+        hp.getHearing().setCaseType(new CaseType("code", "desc"));
+        hp.getHearing().setHearingType(new HearingType("code", "desc"));
+
+        return hp;
     }
 
     private List<Session> createSessions() {

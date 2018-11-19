@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType_;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person_;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session_;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig_;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -59,12 +61,11 @@ public class HearingQueries {
 
         Subquery<String> subQueryPerson = createPersonNameSelect(criteriaBuilder, criteriaQuery, hearingRoot);
         Subquery<String> subQueryJudgeAssigned = createJudgeAssignedSelect(criteriaBuilder, criteriaQuery, hearingRoot);
-        Subquery<Long> subQueryListingCount = createListingCountSelect(criteriaBuilder, criteriaQuery, hearingRoot);
         Subquery<OffsetDateTime> subQueryListingStart = createListingStartSelect(criteriaBuilder,
             criteriaQuery, hearingRoot);
 
-        List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson,
-            subQueryListingCount, subQueryListingStart, subQueryJudgeAssigned);
+        List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson, subQueryListingStart,
+            subQueryJudgeAssigned);
 
         SearchCriteria sc = new SearchCriteria(Hearing_.id.getName(), ComparisonOperations.EQUALS, id);
         Predicate restrictions = createWherePredicates(Arrays.asList(sc), criteriaBuilder, criteriaQuery, hearingRoot);
@@ -80,12 +81,10 @@ public class HearingQueries {
         Root<Hearing> hearingRoot = criteriaQuery.from(Hearing.class);
 
         Subquery<String> subQueryPerson = createPersonNameSelect(criteriaBuilder, criteriaQuery, hearingRoot);
-        Subquery<Long> subQueryListingCount = createListingCountSelect(criteriaBuilder, criteriaQuery, hearingRoot);
         Subquery<OffsetDateTime> subQueryListingStart = createListingStartSelect(criteriaBuilder,
             criteriaQuery, hearingRoot);
 
-        List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson,
-            subQueryListingCount, subQueryListingStart);
+        List<Selection<?>> selections = createSelections(hearingRoot, subQueryPerson, subQueryListingStart);
 
         Predicate restrictions = createWherePredicates(searchCriteriaList, criteriaBuilder, criteriaQuery, hearingRoot);
         criteriaQuery.where(restrictions);
@@ -104,11 +103,9 @@ public class HearingQueries {
 
     private List<Selection<?>> createSelections(Root<Hearing> hearingRoot,
                                                 Subquery<String> subQueryPerson,
-                                                Subquery<Long> subQueryListingCount,
                                                 Subquery<OffsetDateTime> subQueryListingStart,
                                                 Subquery<String> subQueryJudgeAssigned) {
-        List<Selection<?>> selections = this.createSelections(hearingRoot, subQueryPerson,
-            subQueryListingCount, subQueryListingStart);
+        List<Selection<?>> selections = this.createSelections(hearingRoot, subQueryPerson, subQueryListingStart);
 
         selections.add(subQueryJudgeAssigned.getSelection());
         selections.add(hearingRoot.get(Hearing_.numberOfSessions));
@@ -119,7 +116,6 @@ public class HearingQueries {
 
     private List<Selection<?>> createSelections(Root<Hearing> hearingRoot,
                                                 Subquery<String> subQueryPerson,
-                                                Subquery<Long> subQueryListingCount,
                                                 Subquery<OffsetDateTime> subQueryListingStart) {
         List<Selection<?>> selections = new LinkedList<>();
 
@@ -138,7 +134,7 @@ public class HearingQueries {
         selections.add(hearingRoot.get(Hearing_.communicationFacilitator));
         selections.add(hearingRoot.get(Hearing_.priority));
         selections.add(hearingRoot.get(Hearing_.version));
-        selections.add(subQueryListingCount.getSelection());
+        selections.add(hearingRoot.get(Hearing_.status).get(StatusConfig_.status));
         selections.add(subQueryListingStart.getSelection());
 
         return selections;
@@ -175,12 +171,7 @@ public class HearingQueries {
             ComparisonOperations operation = criteria.getOperation();
             Predicate restriction = null;
 
-            if (criteria.getKey().equals("listingStatus")
-                && operation.equals(ComparisonOperations.EQUALS)) {
-
-                boolean isListed = criteria.getValue().toString().equals("listed");
-                restriction = createListingStatusPredicate(cb, cq, hearingRoot, isListed);
-            } else if (operation.equals(ComparisonOperations.EQUALS)) {
+            if (operation.equals(ComparisonOperations.EQUALS)) {
                 restriction = createEqualsPredicate(cb, hearingRoot, criteria);
             } else if (operation.equals(ComparisonOperations.IN)) {
                 restriction = createInPredicate(hearingRoot, criteria);
@@ -228,24 +219,11 @@ public class HearingQueries {
     }
 
     private Predicate createEqualsPredicate(CriteriaBuilder cb, Root<Hearing> hearingRoot, SearchCriteria criteria) {
-        return cb.equal(hearingRoot.get(criteria.getKey()), criteria.getValue());
-    }
-
-    private Predicate createListingStatusPredicate(CriteriaBuilder cb,
-                                                   CriteriaQuery<?> cq,
-                                                   Root<Hearing> hearingRoot,
-                                                   boolean isListed) {
-        Subquery<HearingPart> subQuery = cq.subquery(HearingPart.class);
-        Root<HearingPart> hpRoot = subQuery.from(HearingPart.class);
-        subQuery.select(hpRoot);
-        if (isListed) {
-            subQuery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), hearingRoot),
-                cb.isNotNull(hpRoot.get(HearingPart_.sessionId)));
-        } else {
-            subQuery.where(cb.equal(hpRoot.get(HearingPart_.hearingId), hearingRoot),
-                cb.isNull(hpRoot.get(HearingPart_.sessionId)));
+        if (criteria.getKey().equals("status.status")) {
+            return cb.equal(getRootKeyFromFieldName(hearingRoot, criteria.getKey()),
+                Status.valueOf(criteria.getValue().toString()));
         }
-        return  cb.exists(subQuery);
+        return cb.equal(hearingRoot.get(criteria.getKey()), criteria.getValue());
     }
 
     private Subquery<OffsetDateTime> createListingStartSelect(CriteriaBuilder cb,
@@ -283,23 +261,6 @@ public class HearingQueries {
         judgeAssignedSelect.select(cb.least(personJoin.<String>get(Person_.name)));
 
         return judgeAssignedSelect;
-    }
-
-    private Subquery<Long> createListingCountSelect(CriteriaBuilder cb,
-                                                    CriteriaQuery<?> cq,
-                                                    Root<Hearing> hearingRoot) {
-        Subquery<Long> subQueryListingCount = cq.subquery(Long.class);
-
-        Root<HearingPart> subQueryListingCountRoot = subQueryListingCount.from(HearingPart.class);
-        subQueryListingCount.select(cb.count(subQueryListingCountRoot));
-        subQueryListingCount.where(
-            //join subquery with main query
-            cb.equal(subQueryListingCountRoot.get(HearingPart_.hearingId), hearingRoot),
-            // additional filters
-            cb.isNotNull(subQueryListingCountRoot.get(HearingPart_.sessionId))
-        );
-
-        return subQueryListingCount;
     }
 
     private Subquery<String> createPersonNameSelect(CriteriaBuilder cb,
