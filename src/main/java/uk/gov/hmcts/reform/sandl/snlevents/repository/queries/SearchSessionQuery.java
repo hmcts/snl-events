@@ -12,14 +12,17 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class SearchSessionQuery {
 
-    String COUNT_BY_SESSION_ID = "SELECT COUNT(session_id) FROM (<SELECT_QUERY>) AS FILTERED_SESSION_COUNT;";
-
-    String SEARCH_SESSION_QUERY = "SELECT\n"
+    private static final String COUNT_BY_SESSION_ID = "SELECT COUNT(session_id) FROM (<SELECT_QUERY>) "
+        + "AS FILTERED_SESSION_COUNT;";
+    private static final String SELECT_QUERY_PLACEHOLDER = "<SELECT_QUERY>";
+    private static final String SEARCH_SESSION_QUERY = "SELECT\n"
         + "  *,\n"
         + "  CASE WHEN allocated_duration > 100\n"
         + "    THEN 0\n"
@@ -61,45 +64,90 @@ public class SearchSessionQuery {
         + "  <WHERE_CLAUSES>\n"
         + "  <ORDER_BY>\n"
         + "  <LIMIT>";
-
-    String LIMIT_QUERY = "LIMIT :itemsPerPage OFFSET :pageNumber";
+    private static final String LIMIT_QUERY = "LIMIT :itemsPerPage OFFSET :pageNumber";
+    private static final String ITEMS_PER_PAGE_PARAM_NAME = "itemsPerPage";
+    private static final String PAGE_NUMBER_PARAM_NAME = "pageNumber";
+    private static final String LIMIT_PLACEHOLDER = "<LIMIT>";
+    private static final String WHERE_PLACEHOLDER = "<WHERE_CLAUSES>";
+    private static final String ORDER_BY_PLACEHOLDER = "<ORDER_BY>";
+    private static final List<String> SEARCH_SESSION_QUERY_PLACEHOLDERS = Arrays.asList(
+        LIMIT_PLACEHOLDER,
+        WHERE_PLACEHOLDER,
+        ORDER_BY_PLACEHOLDER
+    );
 
     @Autowired
     private EntityManager entityManager;
 
-    public Page<SessionSearchResponse> search(List<SearchCriteria> searchCriteriaList, Pageable pageable, SearchSessionSelectColumn orderByColumn, Sort.Direction direction) {
-        String whereClause = createWherePredicate(searchCriteriaList);
-        String selectSessions = this.SEARCH_SESSION_QUERY.replace("<WHERE_CLAUSES>", whereClause);
+    public Page<SessionSearchResponse> search(List<SearchCriteria> searchCriteriaList,
+                                              Pageable pageable,
+                                              SearchSessionSelectColumn orderByColumn,
+                                              Sort.Direction direction) {
+        List<SessionFilterKey> sessionFilterKeys = mapToSessionFilterKeys(searchCriteriaList);
+        List<WhereClauseInfo> whereClauseInfos = sessionFilterKeys.stream()
+            .map(SessionFilterKey::getWherePredicate)
+            .collect(Collectors.toList());
 
-        Long totalCount = getTotalCount(searchCriteriaList, selectSessions);
+        String whereClause = createWherePredicate(whereClauseInfos);
+        String selectSessions = SEARCH_SESSION_QUERY.replace(WHERE_PLACEHOLDER, whereClause);
 
+        Long totalCount = getTotalCount(whereClauseInfos, selectSessions);
+
+        List<SessionSearchResponse> queryResults = searchSessions(
+            selectSessions,
+            whereClauseInfos,
+            pageable,
+            orderByColumn,
+            direction
+        );
+
+        return new PageImpl<>(queryResults, pageable, totalCount);
+    }
+
+    private List<SessionSearchResponse> searchSessions(String selectSessions,
+                                                       List<WhereClauseInfo> whereClauseInfos,
+                                                       Pageable pageable,
+                                                       SearchSessionSelectColumn orderByColumn,
+                                                       Sort.Direction direction) {
         String orderByClause = createOrderBy(orderByColumn, direction);
-        selectSessions = selectSessions.replace("<LIMIT>", LIMIT_QUERY).replace("<ORDER_BY>", orderByClause);
+        selectSessions = selectSessions
+            .replace(LIMIT_PLACEHOLDER, LIMIT_QUERY)
+            .replace(ORDER_BY_PLACEHOLDER, orderByClause);
+
         Query sqlQuery = entityManager.createNativeQuery(selectSessions, "MapToSessionSearchResponse");
 
-        setQueryParameters(sqlQuery, searchCriteriaList);
+        setWhereQueryParameters(sqlQuery, whereClauseInfos);
+        sqlQuery.setParameter(ITEMS_PER_PAGE_PARAM_NAME, pageable.getPageSize());
+        sqlQuery.setParameter(PAGE_NUMBER_PARAM_NAME, pageable.getOffset());
 
-        sqlQuery.setParameter("itemsPerPage", pageable.getPageSize());
-        sqlQuery.setParameter("pageNumber", pageable.getOffset());
-
-        List<SessionSearchResponse> queryResults = sqlQuery.getResultList();
-
-        return new PageImpl<>(queryResults, pageable, totalCount.longValue());
+        return (List<SessionSearchResponse>) sqlQuery.getResultList();
     }
 
-    private Long getTotalCount(List<SearchCriteria> searchCriteriaList, String selectSessions) {
-        String selectForCount = selectSessions.replace("<ORDER_BY>", "").replace("<LIMIT>", "");
-        String selectCount = this.COUNT_BY_SESSION_ID.replace("<SELECT_QUERY>", selectForCount);
-        Query countALLQuery = entityManager.createNativeQuery(selectCount);
-        setQueryParameters(countALLQuery, searchCriteriaList);
-
-        return ((BigInteger)countALLQuery.getSingleResult()).longValue();
-    }
-
-    private void verifyPassedSearchCriterions(SearchSessionKey ssk, SearchCriteria sc) {
-        if(ssk == null) {
-            throw new SnlRuntimeException("Can't convert given key: '" + sc.getKey() + "' to SearchSessionKey");
+    private Long getTotalCount(List<WhereClauseInfo> whereClauseInfos, String selectSessions) {
+        // Clear all that are not fullfilled placeholders
+        String selectForCount = selectSessions;
+        for (String placeHolder : SEARCH_SESSION_QUERY_PLACEHOLDERS) {
+            selectForCount = selectForCount.replace(placeHolder, "");
         }
+
+        // Create and execute SELECT COUNT statement
+        String selectCount = COUNT_BY_SESSION_ID.replace(SELECT_QUERY_PLACEHOLDER, selectForCount);
+        Query countALLQuery = entityManager.createNativeQuery(selectCount);
+        setWhereQueryParameters(countALLQuery, whereClauseInfos);
+
+        return ((BigInteger) countALLQuery.getSingleResult()).longValue();
+    }
+
+    private List<SessionFilterKey> mapToSessionFilterKeys(List<SearchCriteria> searchCriteriaList) {
+        return searchCriteriaList.stream().map(sc -> {
+            SessionFilterKey ssk = SessionFilterKey.fromSearchCriteria(sc);
+
+            if (ssk == null) {
+                throw new SnlRuntimeException("Can't convert given key: '" + sc.getKey() + "' to SessionFilterKey");
+            }
+
+            return ssk;
+        }).collect(Collectors.toList());
     }
 
     private String createOrderBy(SearchSessionSelectColumn orderByColumn, Sort.Direction direction) {
@@ -110,22 +158,39 @@ public class SearchSessionQuery {
         return "";
     }
 
-    private String createWherePredicate(List<SearchCriteria> searchCriteriaList) {
-        StringBuilder wherePredicate = new StringBuilder();
+    private String createWherePredicate(List<WhereClauseInfo> whereClauseInfos) {
+        List<WhereClauseInfo> othersWhereCauseInfo = whereClauseInfos.stream().filter(wci ->
+            !SessionFilterKey.UtilisationKeys.contains(wci.getSessionFilterKey().getKey())
+        ).collect(Collectors.toList());
 
-        searchCriteriaList.forEach(sc -> {
-            SearchSessionKey ssk = SearchSessionKey.fromString(sc.getKey(), sc.getValue());
-            verifyPassedSearchCriterions(ssk, sc);
+        // Utilisation options are join using OR conjunction and merged with other using AND conjunction
+        List<WhereClauseInfo> utilisationWhereCauseInfo = whereClauseInfos.stream().filter(wci ->
+            SessionFilterKey.UtilisationKeys.contains(wci.getSessionFilterKey().getKey())
+        ).collect(Collectors.toList());
 
-            wherePredicate.append(ssk.getWherePredicate(sc));
-        });
+        String andJoinedWherePredicate = getSQLWhereString(othersWhereCauseInfo);
 
-        // REMOVE first AND or OR
-        String finalWherePredicate = cutOffFirstConjunction(wherePredicate.toString());
-        if (finalWherePredicate.length() > 0) {
-            finalWherePredicate = "WHERE " + finalWherePredicate;
+        if (utilisationWhereCauseInfo.size() > 0) {
+
+            if (othersWhereCauseInfo.size() > 0) {
+                andJoinedWherePredicate += " AND ";
+            }
+
+            String utilisationWhereClause = getSQLWhereString(utilisationWhereCauseInfo);
+            andJoinedWherePredicate += String.format(" ( %s ) ", utilisationWhereClause);
         }
-        return finalWherePredicate;
+
+        if (andJoinedWherePredicate.length() > 0) {
+            andJoinedWherePredicate = "WHERE " + andJoinedWherePredicate;
+        }
+
+        return andJoinedWherePredicate;
+    }
+
+    private String getSQLWhereString(List<WhereClauseInfo> othersWhereCauseInfo) {
+        StringBuilder andWherePredicate = new StringBuilder();
+        othersWhereCauseInfo.forEach(wci -> andWherePredicate.append(wci.getWhereClause()));
+        return cutOffFirstConjunction(andWherePredicate.toString());
     }
 
     private String cutOffFirstConjunction(String wherePredicate) {
@@ -139,14 +204,7 @@ public class SearchSessionQuery {
         return trimmedWherePredicate;
     }
 
-    private void setQueryParameters(Query query, List<SearchCriteria> searchCriteriaList) {
-        searchCriteriaList.forEach(sc -> {
-            SearchSessionKey ssk = SearchSessionKey.fromString(sc.getKey(), sc.getValue());
-            verifyPassedSearchCriterions(ssk, sc);
-
-            if (ssk.isParamNeeded()) {
-                query.setParameter(ssk.getKey(), ssk.getValue());
-            }
-        });
+    private void setWhereQueryParameters(Query query, List<WhereClauseInfo> whereClauseInfos) {
+        whereClauseInfos.forEach(wci -> wci.getKeyValuePairs().forEach(query::setParameter));
     }
 }
