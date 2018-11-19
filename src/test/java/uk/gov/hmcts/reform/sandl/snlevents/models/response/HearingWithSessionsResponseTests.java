@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 
 import java.time.Duration;
@@ -90,6 +92,10 @@ public class HearingWithSessionsResponseTests {
         hearing.setHearingType(createHearingType());
         hearing.setPriority(PRIORITY);
 
+        val status = new StatusConfig();
+        status.setStatus(Status.Listed);
+        hearing.setStatus(status);
+
         return hearing;
     }
 
@@ -103,6 +109,9 @@ public class HearingWithSessionsResponseTests {
         hearing.setScheduleEnd(SCHEDULE_END);
         hearing.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         hearing.setReservedJudge(createPerson());
+        val status = new StatusConfig();
+        status.setStatus(Status.Listed);
+        hearing.setStatus(status);
 
         return hearing;
     }
@@ -122,6 +131,7 @@ public class HearingWithSessionsResponseTests {
         response.setReservedToJudge(JUDGE_NAME);
         response.setSessions(Collections.emptyList());
         response.setHearingPartsVersions(new ArrayList<>());
+        response.setStatus(Status.Listed);
 
         return response;
     }

@@ -37,6 +37,9 @@ public class S2SJwtAuthenticationFilterTest {
         s2SAuthenticationConfig = Mockito.mock(S2SAuthenticationConfig.class);
         when(s2SAuthenticationConfig.getEvents())
             .thenReturn(new S2SAuthenticationConfig.JwtCredentials(SECRET_EVENTS, DEFAULT_EXPIRY));
+        when(s2SAuthenticationConfig.isEnabled())
+            .thenReturn(true);
+
 
         filter = new S2SJwtAuthenticationFilter(s2SAuthenticationConfig);
         clientTokenService = new TokenService(SECRET_EVENTS, DEFAULT_EXPIRY);

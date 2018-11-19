@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
+import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -55,15 +57,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(HearingPartController.class)
-@Import(TestConfiguration.class)
+@Import({TestConfiguration.class, StatusesTestConfiguration.class})
 @AutoConfigureMockMvc(secure = false)
 public class HearingPartControllerTest {
     public static final String CASE_TYPE_CODE = "type";
-    public static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE,"case-type-desc");
+    public static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-desc");
     public static final String CASE_NUMBER = "90";
     public static final String TITLE = "title";
     public static final String HEARING_TYPE_CODE = "hearing-type-code";
-    public static final HearingType HEARING_TYPE =  new HearingType(HEARING_TYPE_CODE, "hearing-type-desc");
+    public static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-desc");
     public static final String URL = "/hearing-part";
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
@@ -104,6 +106,10 @@ public class HearingPartControllerTest {
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
+    private SessionRepository sessionRepository;
+
+    @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private CaseTypeRepository caseTypeRepository;
 
     @MockBean
@@ -121,7 +127,8 @@ public class HearingPartControllerTest {
         val hearingPartResponses = crateHearingPartResponse();
         when(hearingPartService.getAllHearingParts()).thenReturn(hearingPartResponses);
 
-        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPartResponse>>(){});
+        val response = mvc.getAndMapResponse(URL, new TypeReference<List<HearingPartResponse>>() {
+        });
         assertEquals(response.size(), 1);
         assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingPartResponses.get(0));
     }
@@ -131,7 +138,8 @@ public class HearingPartControllerTest {
         val hearingPartResponses = crateHearingPartResponse();
         when(hearingPartService.getAllHearingPartsThat(any())).thenReturn(hearingPartResponses);
 
-        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPartResponse>>(){});
+        val response = mvc.getAndMapResponse(URL_IS_LISTED_FALSE, new TypeReference<List<HearingPartResponse>>() {
+        });
         assertEquals(response.size(), 1);
         assertThat(response.get(0)).isEqualToComparingFieldByFieldRecursively(hearingPartResponses.get(0));
     }
@@ -198,8 +206,7 @@ public class HearingPartControllerTest {
     public void assignHearingPartToSession_shouldAssignProperly() throws Exception {
         val ut = createUserTransaction();
 
-        when(hearingPartService.assignHearingPartToSessionWithTransaction(createUuid(), createAssignment()))
-            .thenReturn(ut);
+        when(actionService.execute(any())).thenReturn(ut);
 
         val response = mvc.callAndMapResponse(put(URL + "/" + createUuid()), createAssignment(),
             UserTransaction.class);
@@ -270,6 +277,7 @@ public class HearingPartControllerTest {
         chp.setReservedJudgeId(RESERVED_JUDGE_ID);
         chp.setUserTransactionId(UUID.randomUUID());
         chp.setNumberOfSessions(1);
+        chp.setMultiSession(false);
 
         return chp;
     }
@@ -289,6 +297,8 @@ public class HearingPartControllerTest {
         ulr.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         ulr.setReservedJudgeId(RESERVED_JUDGE_ID);
         ulr.setUserTransactionId(UUID.randomUUID());
+        ulr.setNumberOfSessions(1);
+        ulr.setMultiSession(false);
         ulr.setVersion(0L);
 
         return ulr;

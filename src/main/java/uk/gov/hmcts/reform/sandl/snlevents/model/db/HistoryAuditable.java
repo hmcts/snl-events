@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import java.time.OffsetDateTime;
 
-public interface HistoryAuditable {
+public interface  HistoryAuditable {
     OffsetDateTime getCreatedAt();
 
     void setCreatedAt(OffsetDateTime createdAt);

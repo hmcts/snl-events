@@ -65,9 +65,9 @@ public class RevertChangesManager {
     }
 
     private void handleHearing(UserTransactionData utd) {
-        Hearing hearing = hearingRepository.findOne(utd.getEntityId());
 
         if ("update".equals(utd.getCounterAction())) {
+            Hearing hearing = hearingRepository.findOne(utd.getEntityId());
             Hearing previousHearing;
 
             try {
@@ -93,6 +93,27 @@ public class RevertChangesManager {
             hearingRepository.save(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
             hearingRepository.delete(utd.getEntityId());
+        } else if ("create".equals(utd.getCounterAction())) {
+            Hearing deletedHearing = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
+            deletedHearing.setDeleted(false);
+
+            List<HearingPart> hearingParts = hearingPartRepository
+                .getHearingPartsByHearingIdIgnoringWhereDeletedClause(deletedHearing.getId());
+            hearingParts.forEach(hp -> hp.setDeleted(false));
+
+            hearingPartRepository.save(hearingParts);
+            hearingRepository.save(deletedHearing);
+
+            hearingParts.forEach(hp -> {
+                String msg;
+                try {
+                    msg = factsMapper.mapHearingPartToRuleJsonMessage(hp);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            });
         }
     }
 
