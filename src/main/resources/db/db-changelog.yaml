@@ -64,5 +64,5 @@ databaseChangeLog:
   - include:
       file: db/schema/SL-1968-statuses-configuration-update.yaml
   - include:
-      file: db/schema/SL-1900-add-statuses-adjourn-vacate.yaml
+      file: db/schema/SL-1900-add-statuses-adjourned-vacated-withdrawn.yaml
 
