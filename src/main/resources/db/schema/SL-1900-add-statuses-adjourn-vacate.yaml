@@ -1,5 +1,50 @@
 databaseChangeLog:
 - changeSet:
+    id: add-more-columns-to-status-config
+    author: rkruk
+    changes:
+    - addColumn:
+        tableName: status_config
+        columns:
+        - column:
+            name: can_be_withdrawn
+            type: boolean
+            defaultValue: false
+    - addColumn:
+        tableName: status_config
+        columns:
+        - column:
+            name: can_be_vacated
+            type: boolean
+            defaultValue: false
+    - addColumn:
+        tableName: status_config
+        columns:
+        - column:
+            name: can_be_adjourned
+            type: boolean
+            defaultValue: false
+
+- changeSet:
+    id: update-statuses-values
+    author: rkruk
+    changes:
+    - update:
+        columns:
+        - column:
+            name: can_be_vacated
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"
+    - update:
+        columns:
+        - column:
+            name: can_be_adjourned
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"
+
+- changeSet:
     id: insert-adjourned-vacated-statuses
     author: rkruk
     changes:
@@ -17,6 +62,15 @@ databaseChangeLog:
         - column:
             name: count_in_utilization
             value: false
+        - column:
+            name: can_be_withdrawn
+            value: false
+        - column:
+            name: can_be_vacated
+            value: false
+        - column:
+            name: can_be_adjourned
+            value: false
         tableName: status_config
     - insert:
         columns:
@@ -32,6 +86,15 @@ databaseChangeLog:
         - column:
             name: count_in_utilization
             value: false
+        - column:
+            name: can_be_withdrawn
+            value: false
+        - column:
+            name: can_be_vacated
+            value: false
+        - column:
+            name: can_be_adjourned
+            value: false
         tableName: status_config
     - insert:
         columns:
@@ -46,5 +109,14 @@ databaseChangeLog:
             value: false
         - column:
             name: count_in_utilization
+            value: false
+        - column:
+            name: can_be_withdrawn
+            value: false
+        - column:
+            name: can_be_vacated
+            value: false
+        - column:
+            name: can_be_adjourned
             value: false
         tableName: status_config
