@@ -1,0 +1,50 @@
+databaseChangeLog:
+- changeSet:
+    id: insert-adjourned-vacated-statuses
+    author: rkruk
+    changes:
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Adjourned"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: false
+        - column:
+            name: count_in_utilization
+            value: false
+        tableName: status_config
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Vacated"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: false
+        - column:
+            name: count_in_utilization
+            value: false
+        tableName: status_config
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Withdrawn"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: false
+        - column:
+            name: count_in_utilization
+            value: false
+        tableName: status_config
