@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +67,9 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
     @Autowired
     HearingService hearingService;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Before
     public void setup() {
