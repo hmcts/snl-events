@@ -61,7 +61,9 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
                 @ColumnResult(name = "no_of_hearing_parts", type = int.class),
                 @ColumnResult(name = "allocated_duration", type = Long.class),
                 @ColumnResult(name = "utilisation", type = Long.class),
-                @ColumnResult(name = "available", type = Duration.class)
+                @ColumnResult(name = "available", type = Duration.class),
+                @ColumnResult(name = "has_multisessionhearing_assigned", type = Boolean.class),
+                @ColumnResult(name = "session_version", type = Long.class)
             })
     })
 @SuppressWarnings("squid:S3437")

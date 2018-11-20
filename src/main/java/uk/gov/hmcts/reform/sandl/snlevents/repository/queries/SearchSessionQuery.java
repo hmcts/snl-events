@@ -22,9 +22,10 @@ public class SearchSessionQuery {
     private static final String COUNT_BY_SESSION_ID = "SELECT COUNT(session_id) FROM (<SELECT_QUERY>) "
         + "AS FILTERED_SESSION_COUNT;";
     private static final String SELECT_QUERY_PLACEHOLDER = "<SELECT_QUERY>";
+    // multiply duration fileds by 1000000000 in order to convert them from nanoseconds to seconds
     private static final String SEARCH_SESSION_QUERY = "SELECT\n"
         + "  *,\n"
-        + "  CASE WHEN allocated_duration > 100\n"
+        + "  CASE WHEN utilisation > 100\n"
         + "    THEN 0\n"
         + "  ELSE session_duration - allocated_duration END AS available\n"
         + "FROM (\n"
@@ -42,7 +43,7 @@ public class SearchSessionQuery {
         + "                main_session.id                                   AS session_id,\n"
         + "                main_session.start                                AS session_startTime,\n"
         + "                main_session.start                                AS session_startDate,\n"
-        + "                main_session.duration                             AS session_duration,\n"
+        + "                main_session.duration * 1000000000                AS session_duration,\n"
         + "                (SELECT count(id)\n"
         + "                 FROM hearing_part\n"
         + "                 WHERE session_id = main_session.id)              AS no_of_hearing_parts,\n"
@@ -54,7 +55,15 @@ public class SearchSessionQuery {
         + "                 FROM hearing_part\n"
         + "                   RIGHT JOIN session s ON hearing_part.session_id = s.id\n"
         + "                   LEFT JOIN hearing h ON hearing_part.hearing_id = h.id\n"
-        + "                 WHERE s.id = main_session.id) AS allocated_duration\n"
+        + "                 WHERE s.id = main_session.id) * 1000000000       AS allocated_duration,\n"
+        + "                (SELECT CASE WHEN EXISTS (\n"
+        + "                     SELECT s.id\n"
+        + "                     FROM session s\n"
+        + "                     INNER JOIN hearing_part hp ON s.id = hp.session_id\n"
+        + "                     INNER JOIN hearing h on hp.hearing_id = h.id\n"
+        + "                     WHERE h.is_multisession = TRUE AND s.id = main_session.id)\n"
+        + "                 THEN TRUE ELSE FALSE END)                        AS has_multisessionhearing_assigned,\n"
+        + "                main_session.version                              AS session_version\n"
         + "              FROM session main_session\n"
         + "                LEFT JOIN person p ON main_session.person_id = p.id\n"
         + "                LEFT JOIN room r ON main_session.room_id = r.id\n"
@@ -114,6 +123,7 @@ public class SearchSessionQuery {
             .replace(LIMIT_PLACEHOLDER, LIMIT_QUERY)
             .replace(ORDER_BY_PLACEHOLDER, orderByClause);
 
+
         Query sqlQuery = entityManager.createNativeQuery(selectSessions, "MapToSessionSearchResponse");
 
         setWhereQueryParameters(sqlQuery, whereClauseInfos);
@@ -170,7 +180,7 @@ public class SearchSessionQuery {
 
         String andJoinedWherePredicate = getSqlWhereString(othersWhereCauseInfo);
 
-        if (utilisationWhereCauseInfo.isEmpty()) {
+        if (!utilisationWhereCauseInfo.isEmpty()) {
 
             if (othersWhereCauseInfo.size() > 0) {
                 andJoinedWherePredicate += " AND ";
@@ -180,7 +190,7 @@ public class SearchSessionQuery {
             andJoinedWherePredicate += String.format(" ( %s ) ", utilisationWhereClause);
         }
 
-        if (andJoinedWherePredicate.isEmpty()) {
+        if (!andJoinedWherePredicate.isEmpty()) {
             andJoinedWherePredicate = "WHERE " + andJoinedWherePredicate;
         }
 

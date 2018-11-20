@@ -16,7 +16,9 @@ public enum SearchSessionSelectColumn {
     NO_OF_HEARING_PARTS("no_of_hearing_parts"),
     ALLOCATED_DURATION("allocated_duration"),
     UTILISATION("utilisation"),
-    AVAILABLE("available");
+    AVAILABLE("available"),
+    HAS_MULTISESSIONHEARING_ASSIGNED("has_multisessionhearing_assigned"),
+    SESSION_VERSION("session_version");
 
     @Getter
     private String columnName;

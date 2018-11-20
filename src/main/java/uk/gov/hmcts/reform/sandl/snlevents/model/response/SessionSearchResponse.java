@@ -27,4 +27,6 @@ public class SessionSearchResponse implements Serializable {
     private Long allocatedDuration;
     private Long utilisation;
     private Duration available;
+    private Boolean hasMultiSessionHearingAssigned;
+    private Long sessionVersion;
 }
