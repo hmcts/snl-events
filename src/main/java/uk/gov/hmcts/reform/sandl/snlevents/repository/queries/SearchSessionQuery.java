@@ -182,7 +182,7 @@ public class SearchSessionQuery {
 
         if (!utilisationWhereCauseInfo.isEmpty()) {
 
-            if (othersWhereCauseInfo.size() > 0) {
+            if (!othersWhereCauseInfo.isEmpty()) {
                 andJoinedWherePredicate += " AND ";
             }
 
