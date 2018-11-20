@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 
@@ -32,6 +33,7 @@ public class HearingWithSessionsResponse {
     private String priority;
     private String communicationFacilitator;
     private String reservedToJudge;
+    private Status status;
     private List<ViewSessionResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
 
@@ -49,6 +51,7 @@ public class HearingWithSessionsResponse {
         this.priority = hearing.getPriority().toString();
         this.communicationFacilitator = hearing.getCommunicationFacilitator();
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
+        this.status = hearing.getStatus().getStatus();
         this.sessions = hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() != null)

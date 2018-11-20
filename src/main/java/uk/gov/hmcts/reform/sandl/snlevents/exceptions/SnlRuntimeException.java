@@ -5,7 +5,7 @@ public class SnlRuntimeException extends RuntimeException {
         super(cause);
     }
 
-    public SnlRuntimeException(String cause) {
-        super(cause);
+    public SnlRuntimeException(String message) {
+        super(message);
     }
 }

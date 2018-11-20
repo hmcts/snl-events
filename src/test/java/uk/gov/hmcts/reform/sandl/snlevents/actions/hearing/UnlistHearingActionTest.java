@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,9 +10,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,7 +54,7 @@ public class UnlistHearingActionTest {
         getVersionInfo(HEARING_PART_ID_A, HEARING_VERSION_ID_A),
         getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
     );
-
+    private StatusesMock statusesMock = new StatusesMock();
     private UnlistHearingAction action;
 
     @Mock
@@ -71,6 +74,7 @@ public class UnlistHearingActionTest {
         hearing.setCaseType(new CaseType("cs-code", "cs-desc"));
         hearing.setHearingType(new HearingType("ht-code", "ht-desc"));
         hearing.setId(HEARING_ID_TO_BE_UNLISTED);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         hearing.setHearingParts(Arrays.asList(
             createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A, hearing, SESSION_ID_A),
             createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B, hearing, SESSION_ID_B)
@@ -85,7 +89,10 @@ public class UnlistHearingActionTest {
         uhr.setHearingPartsVersions(hearingVersions);
 
         action = new UnlistHearingAction(
-            uhr, hearingRepository, hearingPartRepository, objectMapper
+            uhr, hearingRepository, hearingPartRepository,
+            statusesMock.statusConfigService,
+            statusesMock.statusServiceManager,
+            objectMapper
         );
     }
 
@@ -94,6 +101,7 @@ public class UnlistHearingActionTest {
         hearingPart.setId(id);
         hearingPart.setHearing(hearing);
         hearingPart.setVersion(version);
+        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         Session session = new Session();
         session.setId(sessionId);
@@ -121,6 +129,33 @@ public class UnlistHearingActionTest {
     }
 
     @Test
+    public void getUserTransactionId_shouldReturnUuid() {
+        assertNotNull(action.getUserTransactionId());
+    }
+
+    @Test
+    public void generateUserTransactionData_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        List<UserTransactionData> userTransactionData = action.generateUserTransactionData();
+
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_A, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_B, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_UNLISTED, "hearing");
+        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
+        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
+    }
+
+    @Test
+    public void generateFactMessages_shouldReturnMsgForUpdatedHearingParts() {
+        action.getAndValidateEntities();
+        val generatedFactMsgs = action.generateFactMessages();
+
+        assertThat(generatedFactMsgs.size()).isEqualTo(2);
+        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.UPSERT_HEARING_PART);
+    }
+
+    @Test
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
@@ -137,30 +172,15 @@ public class UnlistHearingActionTest {
     }
 
     @Test
-    public void getUserTransactionId_shouldReturnUuid() {
-        assertNotNull(action.getUserTransactionId());
-    }
-
-    @Test
-    public void generateUserTransactionData_shouldSetHearingPartSessionIdToNull() {
+    public void act_shouldSetStatusesToUnlisted() {
         action.getAndValidateEntities();
         action.act();
-        List<UserTransactionData> userTransactionData = action.generateUserTransactionData();
 
-        assertThatContainsHearigPart(userTransactionData, HEARING_PART_ID_A);
-        assertThatContainsHearigPart(userTransactionData, HEARING_PART_ID_B);
-        assertThatContainsEntity(userTransactionData, "hearing", HEARING_ID_TO_BE_UNLISTED);
-        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
-        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
-    }
-
-    @Test
-    public void generateFactMessages_shouldReturnMsgForUpdatedHearingParts() {
-        action.getAndValidateEntities();
-        val generatedFactMsgs = action.generateFactMessages();
-
-        assertThat(generatedFactMsgs.size()).isEqualTo(2);
-        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.UPSERT_HEARING_PART);
+        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        assertThat(action.hearingParts.size()).isEqualTo(2);
+        action.hearingParts.forEach(hearingPart -> {
+            assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        });
     }
 
     @Test(expected = SnlRuntimeException.class)
@@ -170,10 +190,34 @@ public class UnlistHearingActionTest {
         action.act();
     }
 
-    private void assertThatContainsHearigPart(List<UserTransactionData> userTransactionData, UUID hearingPartId) {
-        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == hearingPartId)
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_whenHearingStatusCantbeUlisted_shouldThrowException() {
+        Hearing hearing = new Hearing();
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        Mockito.when(hearingRepository.findOne(any(UUID.class)))
+            .thenReturn(hearing);
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlEventsException.class)
+    public void getAndValidateEntities_whenHearingPartStatusCantbeUlisted_shouldThrowException() {
+        Hearing hearing = new Hearing();
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L, hearing, SESSION_ID_A);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        hearing.setHearingParts(Collections.singletonList(hearingPart));
+
+        Mockito.when(hearingRepository.findOne(any(UUID.class)))
+            .thenReturn(hearing);
+        action.getAndValidateEntities();
+    }
+
+    private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,
+                                                          String entityName) {
+        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == entityId)
             .findFirst().get();
-        assertThat(hearingUserTransactionData.getEntity()).isEqualTo("hearingPart");
+        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entityName);
         assertThat(hearingUserTransactionData.getAction()).isEqualTo("update");
         assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("update");
     }

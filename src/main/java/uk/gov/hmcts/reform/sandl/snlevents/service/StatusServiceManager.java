@@ -6,15 +6,15 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
 @Service
 public class StatusServiceManager {
 
-    boolean canBeListed(Statusable entity) {
+    public boolean canBeListed(Statusable entity) {
         return entity.getStatus().isCanBeListed();
     }
 
-    boolean canBeUnlisted(Statusable entity) {
+    public boolean canBeUnlisted(Statusable entity) {
         return entity.getStatus().isCanBeUnlisted();
     }
 
-    boolean shouldBeCountInUtilization(Statusable entity) {
+    public boolean shouldBeCountInUtilization(Statusable entity) {
         return entity.getStatus().isCountInUtilization();
     }
 }

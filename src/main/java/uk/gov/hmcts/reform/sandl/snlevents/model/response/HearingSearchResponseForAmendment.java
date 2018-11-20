@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HearingSearchResponse implements Serializable {
+public class HearingSearchResponseForAmendment implements Serializable {
     private UUID id;
     private String caseNumber;
     private String caseTitle;
@@ -33,4 +33,7 @@ public class HearingSearchResponse implements Serializable {
     private Long version;
     private Status status;
     private OffsetDateTime listingDate;
+    private String personName;
+    private int numberOfSessions;
+    private boolean isMultiSession;
 }
