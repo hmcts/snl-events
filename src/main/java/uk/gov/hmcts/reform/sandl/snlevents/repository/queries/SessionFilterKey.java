@@ -26,13 +26,14 @@ public enum SessionFilterKey {
     CUSTOM("custom", null),
     ;
 
-    public static List<String> UtilisationKeys = Arrays.asList(
+    public static final List<String> UTILISATION_KEYS = Arrays.asList(
         SessionFilterKey.UNLISTED.getKey(),
         SessionFilterKey.PART_LISTED.getKey(),
         SessionFilterKey.FULLY_LISTED.getKey(),
         SessionFilterKey.OVER_LISTED.getKey(),
         SessionFilterKey.CUSTOM.getKey()
     );
+    public static final String CASE_NOT_HANDLED_MSG = "Case not handled";
 
     @Getter
     private String key;
@@ -80,7 +81,7 @@ public enum SessionFilterKey {
             case FULLY_LISTED:
             case OVER_LISTED:
                 return null;
-            default: throw new SnlRuntimeException("Case not handled");
+            default: throw new SnlRuntimeException(CASE_NOT_HANDLED_MSG);
         }
     }
 
@@ -97,7 +98,7 @@ public enum SessionFilterKey {
             case OVER_LISTED:
             case CUSTOM:
                 return SearchSessionSelectColumn.UTILISATION.getColumnName();
-            default: throw new SnlRuntimeException("Case not handled");
+            default: throw new SnlRuntimeException(CASE_NOT_HANDLED_MSG);
         }
     }
 
@@ -141,14 +142,12 @@ public enum SessionFilterKey {
 
                 whereClause = String.format(" OR (%s > :%s AND %s < :%s)",
                     getColumnName(), customFromKey, getColumnName(), customToKey);
-                keyValuePairs = new HashMap<String, Object>() {
-                    {
-                        put(customFromKey, valueFrom);
-                        put(customToKey, valueTo);
-                    }
-                };
+                keyValuePairs = new HashMap<>();
+                keyValuePairs.put(customFromKey, valueFrom);
+                keyValuePairs.put(customToKey, valueTo);
+
                 break;
-            default: throw new SnlRuntimeException("Case not handled");
+            default: throw new SnlRuntimeException(CASE_NOT_HANDLED_MSG);
         }
 
         return new WhereClauseInfo(this, whereClause, keyValuePairs);

@@ -11,5 +11,5 @@ import java.util.Map;
 public class WhereClauseInfo {
     private SessionFilterKey sessionFilterKey;
     private String whereClause;
-    private Map<String, Object> keyValuePairs = new HashMap<String, Object>();
+    private Map<String, Object> keyValuePairs = new HashMap<>();
 }

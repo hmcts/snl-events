@@ -160,17 +160,17 @@ public class SearchSessionQuery {
 
     private String createWherePredicate(List<WhereClauseInfo> whereClauseInfos) {
         List<WhereClauseInfo> othersWhereCauseInfo = whereClauseInfos.stream().filter(wci ->
-            !SessionFilterKey.UtilisationKeys.contains(wci.getSessionFilterKey().getKey())
+            !SessionFilterKey.UTILISATION_KEYS.contains(wci.getSessionFilterKey().getKey())
         ).collect(Collectors.toList());
 
         // Utilisation options are join using OR conjunction and merged with other using AND conjunction
         List<WhereClauseInfo> utilisationWhereCauseInfo = whereClauseInfos.stream().filter(wci ->
-            SessionFilterKey.UtilisationKeys.contains(wci.getSessionFilterKey().getKey())
+            SessionFilterKey.UTILISATION_KEYS.contains(wci.getSessionFilterKey().getKey())
         ).collect(Collectors.toList());
 
         String andJoinedWherePredicate = getSqlWhereString(othersWhereCauseInfo);
 
-        if (utilisationWhereCauseInfo.size() > 0) {
+        if (utilisationWhereCauseInfo.isEmpty()) {
 
             if (othersWhereCauseInfo.size() > 0) {
                 andJoinedWherePredicate += " AND ";
@@ -180,7 +180,7 @@ public class SearchSessionQuery {
             andJoinedWherePredicate += String.format(" ( %s ) ", utilisationWhereClause);
         }
 
-        if (andJoinedWherePredicate.length() > 0) {
+        if (andJoinedWherePredicate.isEmpty()) {
             andJoinedWherePredicate = "WHERE " + andJoinedWherePredicate;
         }
 
