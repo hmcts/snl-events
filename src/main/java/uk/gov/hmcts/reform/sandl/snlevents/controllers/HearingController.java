@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AssignSessionsToHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
@@ -77,7 +78,9 @@ public class HearingController {
 
     @GetMapping(path = "/{id}/with-sessions", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingWithSessionsResponse getHearingByIdWithSessions(@PathVariable("id") UUID id) {
-        return new HearingWithSessionsResponse(hearingRepository.findOne(id));
+        Hearing hearing = hearingRepository.findOne(id);
+
+        return new HearingWithSessionsResponse(hearing, statusServiceManager.getPossibleActions(hearing));
     }
 
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)

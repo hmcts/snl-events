@@ -36,8 +36,9 @@ public class HearingWithSessionsResponse {
     private Status status;
     private List<ViewSessionResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
+    private PossibleActions possibleActions;
 
-    public HearingWithSessionsResponse(Hearing hearing) {
+    public HearingWithSessionsResponse(Hearing hearing, PossibleActions possibleActions) {
         this.id = hearing.getId();
         this.caseNumber = hearing.getCaseNumber();
         this.caseTitle = hearing.getCaseTitle();
@@ -65,5 +66,6 @@ public class HearingWithSessionsResponse {
 
             return versionInfo;
         }).collect(Collectors.toList());
+        this.possibleActions = possibleActions;
     }
 }
