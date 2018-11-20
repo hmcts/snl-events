@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 
 @Transactional
 @SuppressWarnings("PMD.VariableDeclarationUsageDistance")
-public class ServiceSearchServiceTests extends BaseSessionSearchTests {
+public class ServiceSearchServiceTests extends BaseSessionSearchTest {
     private static final UUID JUDGE_KAMIL_ID = UUID.randomUUID();
     private static final String JUDGE_KAMIL_NAME = "Judge Kamil";
     private static final Person JUDGE_KAMIL = new Person();
@@ -474,6 +474,3 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
         assertTrue(sessions.get(2).getStartDate().isEqual(YESTERDAY_DATETIME));
     }
 }
-
-
-

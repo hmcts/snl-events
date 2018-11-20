@@ -16,7 +16,7 @@ import javax.transaction.Transactional;
 import static org.junit.Assert.assertEquals;
 
 @Transactional
-public class SessionSearchUtilisationTests extends BaseSessionSearchTests {
+public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
 
     @Test
     public void search_whenSessionHasNoHearingPartsAssigned_returnSessionWithUtilisationEqual0() {
@@ -166,6 +166,3 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTests {
         assertEquals(200, sessions.getContent().get(0).getUtilisation().longValue());
     }
 }
-
-
-

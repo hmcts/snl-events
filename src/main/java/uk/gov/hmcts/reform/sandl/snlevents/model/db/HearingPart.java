@@ -84,11 +84,11 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
 
     public void setHearing(Hearing hearing) {
         this.hearing = hearing;
-        this.hearingId = hearing.getId();
+        this.hearingId = (hearing != null) ? hearing.getId() : null;
     }
 
     public void setSession(Session session) {
         this.session = session;
-        this.sessionId = session.getId();
+        this.sessionId = (session != null) ? session.getId() : null;
     }
 }

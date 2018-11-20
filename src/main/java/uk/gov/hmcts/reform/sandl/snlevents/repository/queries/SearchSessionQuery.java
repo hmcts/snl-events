@@ -194,11 +194,14 @@ public class SearchSessionQuery {
     }
 
     private String cutOffFirstConjunction(String wherePredicate) {
+        final String and = "AND";
+        final String or = "OR";
         String trimmedWherePredicate = wherePredicate.trim();
-        if (trimmedWherePredicate.startsWith("AND")) {
-            return trimmedWherePredicate.replaceFirst("AND", "");
-        } else if (trimmedWherePredicate.startsWith("OR")) {
-            return trimmedWherePredicate.replaceFirst("OR", "");
+
+        if (trimmedWherePredicate.startsWith(and)) {
+            return trimmedWherePredicate.replaceFirst(and, "");
+        } else if (trimmedWherePredicate.startsWith(or)) {
+            return trimmedWherePredicate.replaceFirst(or, "");
         }
 
         return trimmedWherePredicate;

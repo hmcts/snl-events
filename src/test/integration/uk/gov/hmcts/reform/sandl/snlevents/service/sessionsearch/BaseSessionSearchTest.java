@@ -21,7 +21,7 @@ import java.util.UUID;
 import javax.transaction.Transactional;
 
 @Transactional
-public class BaseSessionSearchTests extends BaseIntegrationTest {
+public abstract class BaseSessionSearchTest extends BaseIntegrationTest {
 
     protected static final String SESSION_TYPE_CODE = "small-trial";
     private final SessionType smallTrialSessionType = new SessionType(SESSION_TYPE_CODE, "ST");
