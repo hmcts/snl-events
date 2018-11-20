@@ -140,11 +140,12 @@ public enum SessionFilterKey {
                 String customToKey = "customTo";
                 Object valueTo = customValues.get(1);
 
-                whereClause = String.format(" OR (%s > :%s AND %s < :%s)",
-                    getColumnName(), customFromKey, getColumnName(), customToKey);
                 keyValuePairs = new HashMap<>();
                 keyValuePairs.put(customFromKey, valueFrom);
                 keyValuePairs.put(customToKey, valueTo);
+
+                whereClause = String.format(" OR (%s > :%s AND %s < :%s)",
+                    getColumnName(), customFromKey, getColumnName(), customToKey);
 
                 break;
             default: throw new SnlRuntimeException(CASE_NOT_HANDLED_MSG);
