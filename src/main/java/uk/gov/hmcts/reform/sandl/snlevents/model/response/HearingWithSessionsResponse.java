@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 
 import java.time.Duration;
@@ -38,7 +40,13 @@ public class HearingWithSessionsResponse {
     private List<VersionInfo> hearingPartsVersions;
     private PossibleActions possibleActions;
 
-    public HearingWithSessionsResponse(Hearing hearing, PossibleActions possibleActions) {
+    @JsonIgnore
+    private StatusConfig statusConfig;
+
+    @JsonIgnore
+    private OffsetDateTime listingDate;
+
+    public HearingWithSessionsResponse(Hearing hearing) {
         this.id = hearing.getId();
         this.caseNumber = hearing.getCaseNumber();
         this.caseTitle = hearing.getCaseTitle();
@@ -53,6 +61,7 @@ public class HearingWithSessionsResponse {
         this.communicationFacilitator = hearing.getCommunicationFacilitator();
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.status = hearing.getStatus().getStatus();
+        this.statusConfig = hearing.getStatus();
         this.sessions = hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() != null)
@@ -66,6 +75,9 @@ public class HearingWithSessionsResponse {
 
             return versionInfo;
         }).collect(Collectors.toList());
-        this.possibleActions = possibleActions;
+        if (this.sessions.size() != 0) {
+            this.listingDate = this.sessions.get(0).getStart(); // TODO: reimplement whole
+            // thing to use native query instead of JPA Entity
+        }
     }
 }

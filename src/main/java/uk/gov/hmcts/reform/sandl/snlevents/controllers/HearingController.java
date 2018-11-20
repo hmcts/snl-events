@@ -79,8 +79,10 @@ public class HearingController {
     @GetMapping(path = "/{id}/with-sessions", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingWithSessionsResponse getHearingByIdWithSessions(@PathVariable("id") UUID id) {
         Hearing hearing = hearingRepository.findOne(id);
+        HearingWithSessionsResponse response = new HearingWithSessionsResponse(hearing);
+        response.setPossibleActions(statusServiceManager.getPossibleActions(response));
 
-        return new HearingWithSessionsResponse(hearing, statusServiceManager.getPossibleActions(hearing));
+        return response;
     }
 
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)

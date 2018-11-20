@@ -48,7 +48,7 @@ public class HearingWithSessionsResponseTests {
 
         val expectedResponse = createExpectedResponse();
 
-        val response = new HearingWithSessionsResponse(hearing, new PossibleActions());
+        val response = new HearingWithSessionsResponse(hearing);
 
         assertThat(response).isEqualTo(expectedResponse);
     }
@@ -65,7 +65,7 @@ public class HearingWithSessionsResponseTests {
             )
         );
 
-        val response = new HearingWithSessionsResponse(hearing, new PossibleActions());
+        val response = new HearingWithSessionsResponse(hearing);
 
         // assert correct order of sessions
         assertThat(response.getSessions().get(0).getStart().getDayOfMonth()).isEqualTo(1);
@@ -133,7 +133,9 @@ public class HearingWithSessionsResponseTests {
         response.setSessions(Collections.emptyList());
         response.setHearingPartsVersions(new ArrayList<>());
         response.setStatus(Status.Listed);
-        response.setPossibleActions(new PossibleActions());
+        val status = new StatusConfig();
+        status.setStatus(Status.Listed);
+        response.setStatusConfig(status);
 
         return response;
     }
