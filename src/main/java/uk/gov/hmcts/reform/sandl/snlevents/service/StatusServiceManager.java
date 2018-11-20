@@ -16,8 +16,10 @@ public class StatusServiceManager {
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
 
     {
-        possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned, checkIfAdjournCanBePerformed));
-        possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeWithdrawn, checkIfWithdrawCanBePerformed));
+        possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
+            checkIfAdjournCanBePerformed));
+        possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeWithdrawn,
+            checkIfWithdrawCanBePerformed));
     }
 
     public boolean canBeListed(Statusable entity) {
@@ -51,13 +53,13 @@ public class StatusServiceManager {
 
     private static BiFunction<Hearing, PossibleActions, PossibleActions> checkIfAdjournCanBePerformed =
         (Hearing hearing, PossibleActions possibleActions) -> {
-        // @TODO: implement logic
-        return possibleActions;
-    };
+            // @TODO: implement logic
+            return possibleActions;
+        };
 
     private static BiFunction<Hearing, PossibleActions, PossibleActions> checkIfWithdrawCanBePerformed =
         (Hearing hearing, PossibleActions possibleActions) -> {
-        // @TODO: implement logic
-        return possibleActions;
-    };
+            // @TODO: implement logic
+            return possibleActions;
+        };
 }

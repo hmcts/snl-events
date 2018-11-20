@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -47,7 +48,7 @@ public class HearingWithSessionsResponseTests {
 
         val expectedResponse = createExpectedResponse();
 
-        val response = new HearingWithSessionsResponse(hearing);
+        val response = new HearingWithSessionsResponse(hearing, new PossibleActions());
 
         assertThat(response).isEqualTo(expectedResponse);
     }
@@ -64,7 +65,7 @@ public class HearingWithSessionsResponseTests {
             )
         );
 
-        val response = new HearingWithSessionsResponse(hearing);
+        val response = new HearingWithSessionsResponse(hearing, new PossibleActions());
 
         // assert correct order of sessions
         assertThat(response.getSessions().get(0).getStart().getDayOfMonth()).isEqualTo(1);
@@ -132,6 +133,7 @@ public class HearingWithSessionsResponseTests {
         response.setSessions(Collections.emptyList());
         response.setHearingPartsVersions(new ArrayList<>());
         response.setStatus(Status.Listed);
+        response.setPossibleActions(new PossibleActions());
 
         return response;
     }

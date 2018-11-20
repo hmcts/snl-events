@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
@@ -133,6 +134,7 @@ public class HearingControllerTest {
         expectedResponse.setSessions(Collections.emptyList());
         expectedResponse.setHearingPartsVersions(Collections.emptyList());
         expectedResponse.setStatus(Status.Listed);
+        expectedResponse.setPossibleActions(new PossibleActions());
 
         val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);
