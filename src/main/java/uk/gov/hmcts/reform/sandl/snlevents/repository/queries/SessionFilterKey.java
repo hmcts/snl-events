@@ -68,7 +68,6 @@ public enum SessionFilterKey {
             case END_DATE:
                 return OffsetDateTime.parse((String) value);
             case CUSTOM:
-                return ((List<Integer>) value);
             case SESSION_TYPE_CODES:
                 return value;
             case ROOM_IDS:
