@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.service.SessionSearch;
+package uk.gov.hmcts.reform.sandl.snlevents.service.sessionsearch;
 
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -8,11 +8,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
-import uk.gov.hmcts.reform.sandl.snlevents.service.SessionSearch.BaseSessionSearchTests;
 
-import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.UUID;
+import javax.transaction.Transactional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -81,11 +80,13 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTests {
     }
 
     @Test
-    public void search_whenSessionHasOneMultiHearingPartAssigned_UtilisationShouldIncludeAssignedHearingParts() {
+    public void search_whenSessionHasOneMultiHearingPartAssigned_UtilisationShouldBeCountedProperly() {
         UUID sessionIdA = UUID.randomUUID();
         Session sessionA = createSession(ONE_HOUR, sessionIdA, null, null, null);
         UUID sessionIdB = UUID.randomUUID();
         Session sessionB = createSession(TWO_HOUR, sessionIdB, null, null, null);
+        sessionRepository.saveAndFlush(sessionA);
+        sessionRepository.saveAndFlush(sessionB);
 
         Hearing hearing = createHearing(HALF_HOUR, null, true);
         HearingPart hearingPartA = new HearingPart();
@@ -99,8 +100,6 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTests {
         hearingPartB.setSession(sessionB);
 
         hearingRepository.saveAndFlush(hearing);
-        sessionRepository.saveAndFlush(sessionA);
-        sessionRepository.saveAndFlush(sessionB);
         hearingPartRepository.saveAndFlush(hearingPartA);
         hearingPartRepository.saveAndFlush(hearingPartB);
 
@@ -112,7 +111,7 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTests {
     }
 
     @Test
-        public void search_whenSessionHasOneMultiAndOneSingleHearingPartAssigned_UtilisationShouldIncludeAssignedHearingParts() {
+        public void search_whenSessionHasMultiAndSingleHearingPartAssigned_UtilisationShouldBeCountedProperly() {
         UUID sessionIdA = UUID.randomUUID();
         Session sessionA = createSession(ONE_HOUR, sessionIdA, null, null, null);
 

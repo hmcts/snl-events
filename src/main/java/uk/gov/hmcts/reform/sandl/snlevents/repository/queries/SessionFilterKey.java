@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
 import lombok.Getter;
 import lombok.val;
 import org.assertj.core.util.Maps;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -79,9 +80,8 @@ public enum SessionFilterKey {
             case FULLY_LISTED:
             case OVER_LISTED:
                 return null;
+            default: throw new SnlRuntimeException("Case not handled");
         }
-
-        return null;
     }
 
     public String getColumnName() {
@@ -95,10 +95,10 @@ public enum SessionFilterKey {
             case PART_LISTED:
             case FULLY_LISTED:
             case OVER_LISTED:
-            case CUSTOM: return SearchSessionSelectColumn.UTILISATION.getColumnName();
+            case CUSTOM:
+                return SearchSessionSelectColumn.UTILISATION.getColumnName();
+            default: throw new SnlRuntimeException("Case not handled");
         }
-
-        return null;
     }
 
     public WhereClauseInfo getWherePredicate() {
@@ -148,6 +148,7 @@ public enum SessionFilterKey {
                     }
                 };
                 break;
+            default: throw new SnlRuntimeException("Case not handled");
         }
 
         return new WhereClauseInfo(this, whereClause, keyValuePairs);

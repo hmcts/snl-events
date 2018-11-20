@@ -257,7 +257,10 @@ public class SessionService {
         return ut;
     }
 
-    public Page<SessionSearchResponse> searchForSession(List<SearchCriteria> searchCriteriaList, Pageable pageable, SearchSessionSelectColumn orderByColumn, Sort.Direction direction) {
+    public Page<SessionSearchResponse> searchForSession(List<SearchCriteria> searchCriteriaList,
+                                                        Pageable pageable,
+                                                        SearchSessionSelectColumn orderByColumn,
+                                                        Sort.Direction direction) {
         return searchSessionQuery.search(searchCriteriaList, pageable, orderByColumn, direction);
     }
 

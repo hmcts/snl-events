@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 @Component
 public class SearchSessionQuery {
@@ -132,10 +132,10 @@ public class SearchSessionQuery {
 
         // Create and execute SELECT COUNT statement
         String selectCount = COUNT_BY_SESSION_ID.replace(SELECT_QUERY_PLACEHOLDER, selectForCount);
-        Query countALLQuery = entityManager.createNativeQuery(selectCount);
-        setWhereQueryParameters(countALLQuery, whereClauseInfos);
+        Query countAllQuery = entityManager.createNativeQuery(selectCount);
+        setWhereQueryParameters(countAllQuery, whereClauseInfos);
 
-        return ((BigInteger) countALLQuery.getSingleResult()).longValue();
+        return ((BigInteger) countAllQuery.getSingleResult()).longValue();
     }
 
     private List<SessionFilterKey> mapToSessionFilterKeys(List<SearchCriteria> searchCriteriaList) {
@@ -168,7 +168,7 @@ public class SearchSessionQuery {
             SessionFilterKey.UtilisationKeys.contains(wci.getSessionFilterKey().getKey())
         ).collect(Collectors.toList());
 
-        String andJoinedWherePredicate = getSQLWhereString(othersWhereCauseInfo);
+        String andJoinedWherePredicate = getSqlWhereString(othersWhereCauseInfo);
 
         if (utilisationWhereCauseInfo.size() > 0) {
 
@@ -176,7 +176,7 @@ public class SearchSessionQuery {
                 andJoinedWherePredicate += " AND ";
             }
 
-            String utilisationWhereClause = getSQLWhereString(utilisationWhereCauseInfo);
+            String utilisationWhereClause = getSqlWhereString(utilisationWhereCauseInfo);
             andJoinedWherePredicate += String.format(" ( %s ) ", utilisationWhereClause);
         }
 
@@ -187,7 +187,7 @@ public class SearchSessionQuery {
         return andJoinedWherePredicate;
     }
 
-    private String getSQLWhereString(List<WhereClauseInfo> othersWhereCauseInfo) {
+    private String getSqlWhereString(List<WhereClauseInfo> othersWhereCauseInfo) {
         StringBuilder andWherePredicate = new StringBuilder();
         othersWhereCauseInfo.forEach(wci -> andWherePredicate.append(wci.getWhereClause()));
         return cutOffFirstConjunction(andWherePredicate.toString());

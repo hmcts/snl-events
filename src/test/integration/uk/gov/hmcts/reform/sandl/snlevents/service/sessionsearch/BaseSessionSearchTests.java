@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.service.SessionSearch;
+package uk.gov.hmcts.reform.sandl.snlevents.service.sessionsearch;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -15,19 +15,19 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import javax.transaction.Transactional;
 
 @Transactional
 public class BaseSessionSearchTests extends BaseIntegrationTest {
 
     protected static final String SESSION_TYPE_CODE = "small-trial";
-    private final SessionType SMALL_TRIAL_SESSION_TYPE = new SessionType(SESSION_TYPE_CODE, "ST");
+    private final SessionType smallTrialSessionType = new SessionType(SESSION_TYPE_CODE, "ST");
 
-    private final CaseType CASE_TYPE = new CaseType("small-claims", "SC");
-    private final HearingType HEARING_TYPE = new HearingType("trial", "Trial");
+    private final CaseType caseType = new CaseType("small-claims", "SC");
+    private final HearingType hearingType = new HearingType("trial", "Trial");
 
     protected static final Duration HALF_HOUR = Duration.ofMinutes(30);
     protected static final Duration ONE_HOUR = Duration.ofMinutes(60);
@@ -64,7 +64,7 @@ public class BaseSessionSearchTests extends BaseIntegrationTest {
 
         Session session = new Session();
         session.setId(id);
-        session.setSessionType(SMALL_TRIAL_SESSION_TYPE);
+        session.setSessionType(smallTrialSessionType);
         session.setDuration(duration);
         session.setStart(startTime);
         session.setPerson(person);
@@ -81,8 +81,8 @@ public class BaseSessionSearchTests extends BaseIntegrationTest {
 
         Hearing hearing = new Hearing();
         hearing.setId(id);
-        hearing.setCaseType(CASE_TYPE);
-        hearing.setHearingType(HEARING_TYPE);
+        hearing.setCaseType(caseType);
+        hearing.setHearingType(hearingType);
         hearing.setDuration(duration);
         hearing.setMultiSession(isMultisession);
 

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.service.SessionSearch;
+package uk.gov.hmcts.reform.sandl.snlevents.service.sessionsearch;
 
 import lombok.val;
 import org.junit.Before;
@@ -21,9 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperatio
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionFilterKey;
-import uk.gov.hmcts.reform.sandl.snlevents.service.SessionSearch.BaseSessionSearchTests;
 
-import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,11 +29,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 @Transactional
+@SuppressWarnings("PMD.VariableDeclarationUsageDistance")
 public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     private static final UUID JUDGE_KAMIL_ID = UUID.randomUUID();
     private static final String JUDGE_KAMIL_NAME = "Judge Kamil";
@@ -161,7 +161,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     }
 
     @Test
-    public void search_byRoomId_IN_OR_NULL_returnSessionWithRoomIdEqualsGivenInSearchCriteriaOrNull() {
+    public void search_byRoomId_In_Or_Null_returnSessionWithRoomIdEqualsGivenInSearchCriteriaOrNull() {
         UUID sessionWithRoomId = UUID.randomUUID();
         Session sessionWithRoom = createSession(null, sessionWithRoomId, null, ROOM_TRYTON, null);
         UUID sessionIdWithoutRoom = UUID.randomUUID();
@@ -212,7 +212,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     }
 
     @Test
-    public void search_byPersonId_IN_OR_NULL_returnSessionWithPersonIdEqualsGivenInSearchCriteriaOrNull() {
+    public void search_byPersonId_In_Or_Null_returnSessionWithPersonIdEqualsGivenInSearchCriteriaOrNull() {
         UUID sessionIdWithJudgeKamil = UUID.randomUUID();
         Session sessionWithJudgeKamil = createSession(null, sessionIdWithJudgeKamil, JUDGE_KAMIL, null, null);
         UUID sessionIdWithoutJudge = UUID.randomUUID();
@@ -236,7 +236,13 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     public void search_byUnlisted_returnSessionWithUtilisationEqualsZero() {
         Session sessionWithSingleHearingPart = createSession(HALF_HOUR, null, null, null, null);
         UUID sessionIdWithoutHearingPart = UUID.randomUUID();
-        Session sessionWithoutHearingPart = createSession(HALF_HOUR, sessionIdWithoutHearingPart, null, null, null);
+        final Session sessionWithoutHearingPart = createSession(
+            HALF_HOUR,
+            sessionIdWithoutHearingPart,
+            null,
+            null,
+            null
+        );
 
         // When assign hearing part to session it should set utilisation
         Hearing hearing = createHearing(HALF_HOUR, null, false);
@@ -264,8 +270,14 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     @Test
     public void search_byPartListed_returnSessionWithUtilisationBetween1And99() {
         UUID sessionIdWithHearingPart = UUID.randomUUID();
-        Session sessionWithSingleHearingPart = createSession(ONE_HOUR, sessionIdWithHearingPart, null, null, null);
-        Session sessionWithoutHearingPart = createSession(HALF_HOUR, UUID.randomUUID(), null, null, null);
+        final Session sessionWithSingleHearingPart = createSession(
+            ONE_HOUR,
+            sessionIdWithHearingPart,
+            null,
+            null,
+            null
+        );
+        final Session sessionWithoutHearingPart = createSession(HALF_HOUR, UUID.randomUUID(), null, null, null);
 
         // When assign hearing part to session it should set utilisation
         Hearing hearing = createHearing(HALF_HOUR, null, false);
@@ -298,6 +310,8 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
         UUID sessionIdWithHearingPart = UUID.randomUUID();
         Session sessionWithSingleHearingPart = createSession(ONE_HOUR, sessionIdWithHearingPart, null, null, null);
         Session sessionWithoutHearingPart = createSession(ONE_HOUR, UUID.randomUUID(), null, null, null);
+        sessionRepository.saveAndFlush(sessionWithoutHearingPart);
+        sessionRepository.saveAndFlush(sessionWithSingleHearingPart);
 
         Hearing hearing = createHearing(ONE_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
@@ -306,8 +320,6 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
         hearingPart.setHearing(hearing);
         hearingPart.setSession(sessionWithSingleHearingPart);
 
-        sessionRepository.saveAndFlush(sessionWithoutHearingPart);
-        sessionRepository.saveAndFlush(sessionWithSingleHearingPart);
         hearingRepository.saveAndFlush(hearing);
         hearingPartRepository.saveAndFlush(hearingPart);
 
@@ -328,7 +340,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     public void search_byOverListed_returnSessionWithUtilisationGraterThan100() {
         UUID sessionIdWithHearingPart = UUID.randomUUID();
         Session sessionWithSingleHearingPart = createSession(HALF_HOUR, sessionIdWithHearingPart, null, null, null);
-        Session sessionWithoutHearingPart = createSession(HALF_HOUR, UUID.randomUUID(), null, null, null);
+        final Session sessionWithoutHearingPart = createSession(HALF_HOUR, UUID.randomUUID(), null, null, null);
 
         Hearing hearing = createHearing(ONE_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
@@ -358,8 +370,14 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     @Test
     public void search_byCustom_returnSessionWithUtilisationThatMatchGivenValues() {
         UUID sessionIdWithHearingPart = UUID.randomUUID();
-        Session sessionWithSingleHearingPart = createSession(ONE_HOUR, sessionIdWithHearingPart, null, null, null);
-        Session sessionWithoutHearingPart = createSession(HALF_HOUR, UUID.randomUUID(), null, null, null);
+        final Session sessionWithSingleHearingPart = createSession(
+            ONE_HOUR,
+            sessionIdWithHearingPart,
+            null,
+            null,
+            null
+        );
+        final Session sessionWithoutHearingPart = createSession(HALF_HOUR, UUID.randomUUID(), null, null, null);
 
         Hearing hearing = createHearing(HALF_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
@@ -389,37 +407,37 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
         assertTrue(utilisation > customFrom && utilisation < customTo);
     }
 
-        @Test
-        public void search_Pagination() {
-            List<UUID> uuids = new ArrayList<>();
+    @Test
+    public void search_Pagination() {
+        List<UUID> uuids = new ArrayList<>();
 
-            for (int i = 0; i < 11; i++) {
-                UUID uuid = UUID.randomUUID();
-                Session session = createSession(ONE_HOUR, uuid, null, null, null);
-                sessionRepository.saveAndFlush(session);
-                uuids.add(uuid);
-            }
-
-            Page<SessionSearchResponse> firstPageSessions = sessionService.searchForSession(
-                Collections.emptyList(), FIRST_PAGE, null, null);
-            Page<SessionSearchResponse> secondPageSessions = sessionService.searchForSession(
-                Collections.emptyList(), SECOND_PAGE, null, null);
-
-            val fistPageSessionIds = firstPageSessions.getContent().stream()
-                .map(SessionSearchResponse::getSessionId)
-                .collect(Collectors.toList());
-            val secondPageSessionIds = secondPageSessions.getContent().stream()
-                .map(SessionSearchResponse::getSessionId)
-                .collect(Collectors.toList());
-
-            uuids.removeAll(fistPageSessionIds);
-            uuids.removeAll(secondPageSessionIds);
-
-            assertTrue(uuids.isEmpty());
+        for (int i = 0; i < 11; i++) {
+            UUID uuid = UUID.randomUUID();
+            Session session = createSession(ONE_HOUR, uuid, null, null, null);
+            sessionRepository.saveAndFlush(session);
+            uuids.add(uuid);
         }
 
+        Page<SessionSearchResponse> firstPageSessions = sessionService.searchForSession(
+            Collections.emptyList(), FIRST_PAGE, null, null);
+        Page<SessionSearchResponse> secondPageSessions = sessionService.searchForSession(
+            Collections.emptyList(), SECOND_PAGE, null, null);
+
+        val fistPageSessionIds = firstPageSessions.getContent().stream()
+            .map(SessionSearchResponse::getSessionId)
+            .collect(Collectors.toList());
+        val secondPageSessionIds = secondPageSessions.getContent().stream()
+            .map(SessionSearchResponse::getSessionId)
+            .collect(Collectors.toList());
+
+        uuids.removeAll(fistPageSessionIds);
+        uuids.removeAll(secondPageSessionIds);
+
+        assertTrue(uuids.isEmpty());
+    }
+
     @Test
-    public void search_SortingByStartDate_ASC_ShouldReturnTheOldestFirst() {
+    public void search_SortingByStartDate_Asc_ShouldReturnTheOldestFirst() {
         Session yesterdaySession = createSession(ONE_HOUR, null, null, null, YESTERDAY_DATETIME);
         Session nowSession = createSession(ONE_HOUR, null, null, null, NOW_DATETIME);
         Session tomorrowSession = createSession(ONE_HOUR, null, null, null, TOMORROW_DATETIME);
@@ -438,7 +456,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTests {
     }
 
     @Test
-    public void search_SortingByStartDate_DESC_ShouldReturnTheLatestFirst() {
+    public void search_SortingByStartDate_Desc_ShouldReturnTheLatestFirst() {
         Session yesterdaySession = createSession(ONE_HOUR, null, null, null, YESTERDAY_DATETIME);
         Session nowSession = createSession(ONE_HOUR, null, null, null, NOW_DATETIME);
         Session tomorrowSession = createSession(ONE_HOUR, null, null, null, TOMORROW_DATETIME);
