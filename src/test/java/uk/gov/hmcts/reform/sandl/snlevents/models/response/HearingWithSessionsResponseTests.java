@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
-import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
