@@ -43,6 +43,20 @@ databaseChangeLog:
             value: true
         tableName: status_config
         where: "status = 'Listed'"
+    - update:
+        columns:
+        - column:
+            name: can_be_withdrawn
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"
+    - update:
+        columns:
+        - column:
+            name: can_be_withdrawn
+            value: true
+        tableName: status_config
+        where: "status = 'Unlisted'"
 
 - changeSet:
     id: insert-adjourned-vacated-statuses
