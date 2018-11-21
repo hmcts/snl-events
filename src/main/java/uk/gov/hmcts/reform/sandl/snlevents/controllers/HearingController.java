@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AssignSessionsToHeari
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingForListingResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
@@ -68,6 +69,11 @@ public class HearingController {
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
         return new HearingInfo(hearingRepository.findOne(id));
+    }
+
+    @GetMapping(path = "/can-be-listed", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<HearingForListingResponse> getCanBeListed() {
+        return hearingService.getHearingsForListing();
     }
 
     @GetMapping(path = "/{id}/for-amendment", produces = MediaType.APPLICATION_JSON_VALUE)
