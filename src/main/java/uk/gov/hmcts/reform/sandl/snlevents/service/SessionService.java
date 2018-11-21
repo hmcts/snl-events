@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
@@ -44,8 +45,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
+import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_AMEND_RESPONSE_SQL;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_INFO_SQL;
 
 @Service
@@ -304,5 +307,12 @@ public class SessionService {
         }
 
         return userTransactionDataList;
+    }
+
+    public SessionAmendResponse getAmendSession(UUID id) {
+        Query query = entityManager.createNativeQuery(GET_SESSION_AMEND_RESPONSE_SQL, "MapToSessionAmendResponse");
+        query.setParameter("session_id", id);
+
+        return (SessionAmendResponse) query.getSingleResult();
     }
 }

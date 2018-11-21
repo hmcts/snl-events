@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -75,6 +76,11 @@ public class SessionController {
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public SessionInfo getSessionById(@PathVariable("id") UUID id) {
         return sessionService.getSessionInfoById(id);
+    }
+
+    @GetMapping(path = "/amend/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public SessionAmendResponse getAmendSessionById(@PathVariable("id") UUID id) {
+        return sessionService.getAmendSession(id);
     }
 
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)

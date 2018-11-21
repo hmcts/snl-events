@@ -13,6 +13,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 
 import java.io.Serializable;
@@ -31,6 +32,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.validation.constraints.NotNull;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
@@ -43,17 +45,16 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Setter
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-@SqlResultSetMapping(name = "MapToSessionSearchResponse",
+
+@SqlResultSetMappings({
+    @SqlResultSetMapping(name = "MapToSessionSearchResponse",
     classes = {
         @ConstructorResult(
             targetClass = SessionSearchResponse.class,
             columns = {
                 @ColumnResult(name = "session_id", type = UUID.class),
-                @ColumnResult(name = "person_id", type = UUID.class),
                 @ColumnResult(name = "person_name", type = String.class),
-                @ColumnResult(name = "room_id", type = UUID.class),
                 @ColumnResult(name = "room_name", type = String.class),
-                @ColumnResult(name = "session_type_code", type = String.class),
                 @ColumnResult(name = "session_type_description", type = String.class),
                 @ColumnResult(name = "session_startTime", type = OffsetDateTime.class),
                 @ColumnResult(name = "session_startDate", type = OffsetDateTime.class),
@@ -62,10 +63,27 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
                 @ColumnResult(name = "allocated_duration", type = Long.class),
                 @ColumnResult(name = "utilisation", type = Long.class),
                 @ColumnResult(name = "available", type = Duration.class),
-                @ColumnResult(name = "has_multisessionhearing_assigned", type = Boolean.class),
-                @ColumnResult(name = "session_version", type = Long.class)
             })
-    })
+    }),
+    @SqlResultSetMapping(name = "MapToSessionAmendResponse",
+        classes = {
+            @ConstructorResult(
+                targetClass = SessionAmendResponse.class,
+                columns = {
+                    @ColumnResult(name = "id", type = UUID.class),
+                    @ColumnResult(name = "start", type = OffsetDateTime.class),
+                    @ColumnResult(name = "duration", type = Duration.class),
+                    @ColumnResult(name = "session_type_code", type = String.class),
+                    @ColumnResult(name = "person_name", type = String.class),
+                    @ColumnResult(name = "room_name", type = String.class),
+                    @ColumnResult(name = "room_description", type = String.class),
+                    @ColumnResult(name = "room_type_code", type = String.class),
+                    @ColumnResult(name = "hearing_parts_count", type = Integer.class),
+                    @ColumnResult(name = "has_multi_session_hearing_assigned", type = Boolean.class),
+                    @ColumnResult(name = "version", type = Long.class)
+                })
+        })
+})
 @SuppressWarnings("squid:S3437")
 public class Session extends VersionedEntity implements Serializable, HistoryAuditable {
 

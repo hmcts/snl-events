@@ -14,11 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SessionSearchResponse implements Serializable {
     private UUID sessionId;
-    private UUID personId;
     private String personName;
-    private UUID roomId;
     private String roomName;
-    private String sessionTypeCode;
     private String sessionTypeDescription;
     private OffsetDateTime startTime;
     private OffsetDateTime startDate;
@@ -27,6 +24,4 @@ public class SessionSearchResponse implements Serializable {
     private Long allocatedDuration;
     private Long utilisation;
     private Duration available;
-    private Boolean hasMultiSessionHearingAssigned;
-    private Long sessionVersion;
 }
