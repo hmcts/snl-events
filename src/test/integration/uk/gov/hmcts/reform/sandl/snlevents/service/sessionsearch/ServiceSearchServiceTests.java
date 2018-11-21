@@ -155,7 +155,6 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
 
         assertEquals(1, sessions.getNumberOfElements());
         sessions.forEach(s -> {
-            assertEquals(ROOM_TRYTON_ID, s.getRoomId().toString());
             assertEquals(ROOM_NAME, s.getRoomName());
         });
     }
@@ -206,7 +205,6 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
 
         assertEquals(1, sessions.getNumberOfElements());
         sessions.forEach(s -> {
-            assertEquals(JUDGE_KAMIL_ID, s.getPersonId());
             assertEquals(JUDGE_KAMIL_NAME, s.getPersonName());
         });
     }
