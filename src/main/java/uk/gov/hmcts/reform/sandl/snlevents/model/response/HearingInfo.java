@@ -50,7 +50,7 @@ public class HearingInfo implements Serializable {
         this.setNumberOfSessions(hearing.getNumberOfSessions());
         this.setMultiSession(hearing.isMultiSession());
 
-        this.setDuration(this.isMultiSession() ? session.getDuration() : hearing.getDuration());
+        this.setDuration((this.isMultiSession() &&  session != null) ? session.getDuration() : hearing.getDuration());
     }
 
     public HearingInfo(Hearing hearing) {
