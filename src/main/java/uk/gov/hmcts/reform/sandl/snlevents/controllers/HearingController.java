@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AdjournHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AssignSessionsToHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
@@ -115,5 +117,10 @@ public class HearingController {
     @PutMapping(path = "/unlist", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity unlist(@RequestBody UnlistHearingRequest unlistHearingRequest) {
         return ok(hearingService.unlist(unlistHearingRequest));
+    }
+
+    @PutMapping(path = "/adjourn", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity adjourn(@RequestBody AdjournHearingRequest adjournHearingRequest) {
+        return ok(hearingService.adjourn(adjournHearingRequest));
     }
 }

@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -82,8 +83,7 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfAdjournCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        // @TODO: implement
-        return true;
+        return hearingWithSessionsResponse.getListingDate().isBefore(OffsetDateTime.now());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>

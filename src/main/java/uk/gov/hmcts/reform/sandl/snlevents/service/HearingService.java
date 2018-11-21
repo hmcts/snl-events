@@ -6,8 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AdjournHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,10 +39,15 @@ public class HearingService {
 
     @Autowired
     private ActionService actionService;
+
     @Autowired
     private StatusConfigService statusConfigService;
+
     @Autowired
     private StatusServiceManager statusServiceManager;
+
+    @Autowired
+    private EntityManager entityManager;
 
     public HearingSearchResponseForAmendment get(UUID id) {
         return hearingQueries.get(id);
@@ -57,6 +65,20 @@ public class HearingService {
             statusConfigService,
             statusServiceManager,
             objectMapper
+        );
+
+        return actionService.execute(action);
+    }
+
+    public UserTransaction adjourn(AdjournHearingRequest adjournHearingRequest) {
+        Action action = new AdjournHearingAction(
+            adjournHearingRequest,
+            hearingRepository,
+            hearingPartRepository,
+            statusConfigService,
+            statusServiceManager,
+            objectMapper,
+            entityManager
         );
 
         return actionService.execute(action);
