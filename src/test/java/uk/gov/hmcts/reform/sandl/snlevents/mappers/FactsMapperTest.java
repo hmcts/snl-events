@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +78,7 @@ public class FactsMapperTest {
 
     @Test
     public void mapUpdateSessionToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapUpdateSessionToRuleJsonMessage(createSession());
+        val mapped = factsMapper.mapUpdateSessionToRuleJsonMessage(createSession(), Collections.emptyList());
         val expected = "{"
             + "\"id\":\"" + ID + "\","
             + "\"judgeId\":\"" + PERSON_ID + "\","
@@ -128,7 +129,7 @@ public class FactsMapperTest {
 
     @Test
     public void mapDbSessionToRuleJsonMessage_mapsOk() {
-        val mapped = factsMapper.mapDbSessionToRuleJsonMessage(createSession());
+        val mapped = factsMapper.mapDbSessionToRuleJsonMessage(createSession(), Collections.emptyList());
         val expected = "{"
             + "\"id\":\"" + ID + "\","
             + "\"judgeId\":\"" + PERSON_ID + "\","

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.val;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -73,15 +74,15 @@ public class FactsMapper {
         return objectMapper.writeValueAsString(factSession);
     }
 
-    public SessionWithHearingPartsFacts mapUpdateSessionToRuleJsonMessage(Session session) {
-        return mapDbSessionToRuleJsonMessage(session);
+    public SessionWithHearingPartsFacts mapUpdateSessionToRuleJsonMessage(Session session, List<HearingPart> hearingParts) {
+        return mapDbSessionToRuleJsonMessage(session, hearingParts);
     }
 
     public String mapHearingToRuleJsonMessage(HearingPart hearingPart) {
         return mapHearingPartToRuleJsonMessage(hearingPart);
     }
 
-    public SessionWithHearingPartsFacts mapDbSessionToRuleJsonMessage(Session session) {
+    public SessionWithHearingPartsFacts mapDbSessionToRuleJsonMessage(Session session, List<HearingPart> hearingParts) {
         FactSession factSession = new FactSession();
 
         factSession.setId(session.getId().toString());
@@ -104,7 +105,8 @@ public class FactsMapper {
         List<String> hearingPartsMsg;
         try {
             sessionMsg = objectMapper.writeValueAsString(factSession);
-            hearingPartsMsg = session.getHearingParts().stream()
+            // its not possible to do session.getHearingParts() as session is often detached
+            hearingPartsMsg = hearingParts.stream()
                 .map(hp -> mapHearingPartToRuleJsonMessage(hp))
                 .collect(Collectors.toList());
         } catch (JsonProcessingException e) {

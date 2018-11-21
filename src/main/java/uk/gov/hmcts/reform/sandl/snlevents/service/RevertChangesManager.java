@@ -160,7 +160,10 @@ public class RevertChangesManager {
             }
 
             sessionRepository.delete(utd.getEntityId());
-            SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(session);
+            SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(
+                session,
+                session.getHearingParts()
+            );
             rulesService.postMessage(
                 utd.getUserTransactionId(),
                 RulesService.DELETE_SESSION,
@@ -180,7 +183,7 @@ public class RevertChangesManager {
             }
 
             SessionWithHearingPartsFacts sessionWithHpFacts =
-                factsMapper.mapDbSessionToRuleJsonMessage(previousSession);
+                factsMapper.mapDbSessionToRuleJsonMessage(previousSession, previousSession.getHearingParts());
 
             rulesService.postMessage(
                 utd.getUserTransactionId(),

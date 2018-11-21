@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.hibernate.Hibernate;
 import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -31,6 +33,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     private EntityManager entityManager;
 
     private Session session;
+    private List<HearingPart> hearingParts;
     private String currentSessionAsString;
 
     public AmendSessionAction(AmendSessionRequest amendSessionRequest,
@@ -71,11 +74,13 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         session  = sessionRepository.findOne(amendSessionRequest.getId());
+        Hibernate.initialize(session.getHearingParts());
+        hearingParts = session.getHearingParts();
     }
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(session);
+        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(session, hearingParts);
         List<FactMessage> facts = sessionWithHpFacts.getHearingPartsFacts().stream().map(hpFact ->
             new FactMessage(RulesService.UPSERT_HEARING_PART, hpFact)
         ).collect(Collectors.toList());
