@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -47,6 +48,10 @@ public class StatusServiceManager {
             .forEach(validator -> validator.getBusinessOperationVerifier().apply(hearing, possibleActions));
 
         return possibleActions;
+    }
+
+    public boolean canBeWithdrawn(Statusable entity) {
+        return entity.getStatus().isCanBeWithdrawn();
     }
 
     public boolean canBeWithdrawn(Hearing hearing) {
@@ -93,8 +98,8 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfWithdrawCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        // @TODO: implement
-        return true;
+        return hearingWithSessionsResponse.getListingDate() != null
+            && hearingWithSessionsResponse.getListingDate().isAfter(OffsetDateTime.now());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>

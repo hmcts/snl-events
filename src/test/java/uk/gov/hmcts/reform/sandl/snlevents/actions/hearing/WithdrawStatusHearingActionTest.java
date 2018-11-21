@@ -6,7 +6,6 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -20,8 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.BaseStatusHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -35,14 +33,13 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class UnlistHearingActionTest {
+public class WithdrawStatusHearingActionTest {
     private static final UUID HEARING_ID_TO_BE_UNLISTED = UUID.randomUUID();
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
@@ -55,7 +52,7 @@ public class UnlistHearingActionTest {
         getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
     );
     private StatusesMock statusesMock = new StatusesMock();
-    private UnlistHearingAction action;
+    private WithdrawStatusHearingAction action;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -76,19 +73,21 @@ public class UnlistHearingActionTest {
         hearing.setId(HEARING_ID_TO_BE_UNLISTED);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         hearing.setHearingParts(Arrays.asList(
-            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A, hearing, SESSION_ID_A),
-            createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B, hearing, SESSION_ID_B)
+            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
+                hearing, SESSION_ID_A, Status.Listed),
+            createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
+                hearing, SESSION_ID_B, Status.Unlisted)
         ));
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_UNLISTED))).thenReturn(hearing);
 
-        UnlistHearingRequest uhr = new UnlistHearingRequest();
+        BaseStatusHearingRequest uhr = new BaseStatusHearingRequest();
         uhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
         uhr.setUserTransactionId(UUID.randomUUID());
 
         uhr.setHearingPartsVersions(hearingVersions);
 
-        action = new UnlistHearingAction(
+        action = new WithdrawStatusHearingAction(
             uhr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
@@ -96,12 +95,13 @@ public class UnlistHearingActionTest {
         );
     }
 
-    private HearingPart createHearingPartWithSession(UUID id, Long version, Hearing hearing, UUID sessionId) {
+    private HearingPart createHearingPartWithSession(UUID id, Long version, Hearing hearing, UUID sessionId,
+                                                     Status status) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(id);
         hearingPart.setHearing(hearing);
         hearingPart.setVersion(version);
-        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(status));
 
         Session session = new Session();
         session.setId(sessionId);
@@ -134,52 +134,27 @@ public class UnlistHearingActionTest {
     }
 
     @Test
-    public void generateUserTransactionData_shouldSetHearingPartSessionIdToNull() {
-        action.getAndValidateEntities();
-        action.act();
-        List<UserTransactionData> userTransactionData = action.generateUserTransactionData();
-
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_A, "hearingPart");
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_B, "hearingPart");
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_UNLISTED, "hearing");
-        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
-        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
-    }
-
-    @Test
     public void generateFactMessages_shouldReturnMsgForUpdatedHearingParts() {
         action.getAndValidateEntities();
         val generatedFactMsgs = action.generateFactMessages();
 
         assertThat(generatedFactMsgs.size()).isEqualTo(2);
-        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.UPSERT_HEARING_PART);
+        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.DELETE_HEARING_PART);
     }
 
     @Test
-    public void act_shouldSetHearingPartSessionIdToNull() {
+    public void act_shouldSetStatusesToWithdrawn() {
         action.getAndValidateEntities();
         action.act();
 
-        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
-
-        Mockito.verify(hearingPartRepository).save(captor.capture());
-        assertThat(captor.getValue().size()).isEqualTo(hearingVersions.size());
-        captor.getValue().forEach(hp -> {
-            assertNull(hp.getSessionId());
-            assertNull(hp.getSession());
-            assertNull(hp.getStart());
-        });
-    }
-
-    @Test
-    public void act_shouldSetStatusesToUnlisted() {
-        action.getAndValidateEntities();
-        action.act();
-
-        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
         assertThat(action.hearingParts.size()).isEqualTo(2);
         action.hearingParts.forEach(hearingPart -> {
-            assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+            if (hearingPart.getId() == HEARING_PART_ID_A) {
+                assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Vacated);
+            } else if (hearingPart.getId() == HEARING_PART_ID_B) {
+                assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
+            }
         });
     }
 
@@ -191,43 +166,27 @@ public class UnlistHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingStatusCantbeUlisted_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingStatusCantbeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingPartStatusCantbeUlisted_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingPartStatusCantbeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L, hearing, SESSION_ID_A);
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L,
+            hearing, SESSION_ID_A, Status.Adjourned);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Withdrawn));
 
         hearing.setHearingParts(Collections.singletonList(hearingPart));
 
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
-    }
-
-    private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,
-                                                          String entityName) {
-        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == entityId)
-            .findFirst().get();
-        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entityName);
-        assertThat(hearingUserTransactionData.getAction()).isEqualTo("update");
-        assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("update");
-    }
-
-    private void assertThatContainsEntity(List<UserTransactionData> userTransactionData, String entity, UUID id) {
-        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == id)
-            .findFirst().get();
-        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entity);
-        assertThat(hearingUserTransactionData.getAction()).isEqualTo("lock");
-        assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("unlock");
     }
 
     private void assertThatAllMsgsAreTypeOf(List<FactMessage> factMessages, String type) {

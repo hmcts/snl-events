@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistStatusHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.BaseStatusHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -49,9 +49,22 @@ public class HearingService {
         return hearingQueries.search(searchCriteriaList, pageable);
     }
 
-    public UserTransaction unlist(UnlistHearingRequest unlistHearingRequest) {
-        Action action = new UnlistHearingAction(
-            unlistHearingRequest,
+    public UserTransaction unlist(BaseStatusHearingRequest baseStatusHearingRequest) {
+        Action action = new UnlistStatusHearingAction(
+            baseStatusHearingRequest,
+            hearingRepository,
+            hearingPartRepository,
+            statusConfigService,
+            statusServiceManager,
+            objectMapper
+        );
+
+        return actionService.execute(action);
+    }
+
+    public UserTransaction withdraw(BaseStatusHearingRequest withdrawHearingRequest) {
+        Action action = new UnlistStatusHearingAction(
+            withdrawHearingRequest,
             hearingRepository,
             hearingPartRepository,
             statusConfigService,
