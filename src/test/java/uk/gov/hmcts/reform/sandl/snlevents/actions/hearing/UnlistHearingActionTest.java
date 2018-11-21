@@ -42,7 +42,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class UnlistStatusHearingActionTest {
+public class UnlistHearingActionTest {
     private static final UUID HEARING_ID_TO_BE_UNLISTED = UUID.randomUUID();
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;

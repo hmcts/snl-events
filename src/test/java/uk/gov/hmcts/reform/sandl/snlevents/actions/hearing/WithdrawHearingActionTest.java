@@ -39,7 +39,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class WithdrawStatusHearingActionTest {
+public class WithdrawHearingActionTest {
     private static final UUID HEARING_ID_TO_BE_WITHDRAWN = UUID.randomUUID();
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
