@@ -19,14 +19,14 @@ import java.util.List;
 public class WithdrawStatusHearingAction extends BaseStatusHearingAction implements RulesProcessable {
 
     public WithdrawStatusHearingAction(
-        BaseStatusHearingRequest baseStatusHearingRequest,
+        BaseStatusHearingRequest withdrawStatusHearingRequest,
         HearingRepository hearingRepository,
         HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
         ObjectMapper objectMapper
     ) {
-        super(baseStatusHearingRequest, hearingRepository, hearingPartRepository,
+        super(withdrawStatusHearingRequest, hearingRepository, hearingPartRepository,
             statusConfigService, statusServiceManager, objectMapper);
     }
 

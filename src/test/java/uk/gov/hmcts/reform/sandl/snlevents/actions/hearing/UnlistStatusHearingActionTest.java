@@ -82,14 +82,14 @@ public class UnlistStatusHearingActionTest {
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_UNLISTED))).thenReturn(hearing);
 
-        BaseStatusHearingRequest uhr = new BaseStatusHearingRequest();
-        uhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
-        uhr.setUserTransactionId(UUID.randomUUID());
+        BaseStatusHearingRequest bhr = new BaseStatusHearingRequest();
+        bhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
+        bhr.setUserTransactionId(UUID.randomUUID());
 
-        uhr.setHearingPartsVersions(hearingVersions);
+        bhr.setHearingPartsVersions(hearingVersions);
 
         action = new UnlistStatusHearingAction(
-            uhr, hearingRepository, hearingPartRepository,
+            bhr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper
@@ -191,7 +191,7 @@ public class UnlistStatusHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingStatusCantbeUlisted_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingStatusCantBeUnlisted_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
@@ -200,7 +200,7 @@ public class UnlistStatusHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingPartStatusCantbeUlisted_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingPartStatusCantBeUnlisted_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L, hearing, SESSION_ID_A);

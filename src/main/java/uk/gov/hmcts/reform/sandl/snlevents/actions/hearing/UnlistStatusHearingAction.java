@@ -22,14 +22,14 @@ import java.util.List;
 public class UnlistStatusHearingAction extends BaseStatusHearingAction implements RulesProcessable {
 
     public UnlistStatusHearingAction(
-        BaseStatusHearingRequest baseStatusHearingRequest,
+        BaseStatusHearingRequest unlistStatusHearingRequest,
         HearingRepository hearingRepository,
         HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
         ObjectMapper objectMapper
     ) {
-        super(baseStatusHearingRequest, hearingRepository, hearingPartRepository,
+        super(unlistStatusHearingRequest, hearingRepository, hearingPartRepository,
             statusConfigService, statusServiceManager, objectMapper);
     }
 

@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class WithdrawStatusHearingActionTest {
-    private static final UUID HEARING_ID_TO_BE_UNLISTED = UUID.randomUUID();
+    private static final UUID HEARING_ID_TO_BE_WITHDRAWN = UUID.randomUUID();
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
     private static final UUID HEARING_PART_ID_B = UUID.randomUUID();
@@ -70,7 +71,7 @@ public class WithdrawStatusHearingActionTest {
         hearing.setDuration(Duration.ofMinutes(60));
         hearing.setCaseType(new CaseType("cs-code", "cs-desc"));
         hearing.setHearingType(new HearingType("ht-code", "ht-desc"));
-        hearing.setId(HEARING_ID_TO_BE_UNLISTED);
+        hearing.setId(HEARING_ID_TO_BE_WITHDRAWN);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         hearing.setHearingParts(Arrays.asList(
             createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
@@ -79,16 +80,16 @@ public class WithdrawStatusHearingActionTest {
                 hearing, SESSION_ID_B, Status.Unlisted)
         ));
 
-        when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_UNLISTED))).thenReturn(hearing);
+        when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);
 
-        BaseStatusHearingRequest uhr = new BaseStatusHearingRequest();
-        uhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
-        uhr.setUserTransactionId(UUID.randomUUID());
+        BaseStatusHearingRequest bhr = new BaseStatusHearingRequest();
+        bhr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
+        bhr.setUserTransactionId(UUID.randomUUID());
 
-        uhr.setHearingPartsVersions(hearingVersions);
+        bhr.setHearingPartsVersions(hearingVersions);
 
         action = new WithdrawStatusHearingAction(
-            uhr, hearingRepository, hearingPartRepository,
+            bhr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper
@@ -105,6 +106,7 @@ public class WithdrawStatusHearingActionTest {
 
         Session session = new Session();
         session.setId(sessionId);
+        session.setStart(OffsetDateTime.now().plusDays(1));
 
         hearingPart.setSessionId(sessionId);
         hearingPart.setSession(session);
@@ -117,7 +119,7 @@ public class WithdrawStatusHearingActionTest {
         action.getAndValidateEntities();
         UUID[] ids = action.getAssociatedEntitiesIds();
         UUID[] expectedUuids = new UUID[]{
-            HEARING_ID_TO_BE_UNLISTED,
+            HEARING_ID_TO_BE_WITHDRAWN,
             HEARING_PART_ID_A,
             HEARING_PART_ID_B,
             SESSION_ID_A,
@@ -166,7 +168,7 @@ public class WithdrawStatusHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingStatusCantbeWithdrawn_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingStatusCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
@@ -175,14 +177,15 @@ public class WithdrawStatusHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingPartStatusCantbeWithdrawn_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingPartsStatusCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L,
-            hearing, SESSION_ID_A, Status.Adjourned);
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Withdrawn));
-
-        hearing.setHearingParts(Collections.singletonList(hearingPart));
+        hearing.setHearingParts(Arrays.asList(
+            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
+                hearing, SESSION_ID_A, Status.Adjourned),
+            createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
+                hearing, SESSION_ID_B, Status.Adjourned)
+        ));
 
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);

@@ -49,9 +49,9 @@ public class HearingService {
         return hearingQueries.search(searchCriteriaList, pageable);
     }
 
-    public UserTransaction unlist(BaseStatusHearingRequest baseStatusHearingRequest) {
+    public UserTransaction unlist(BaseStatusHearingRequest unlistStatusHearingRequest) {
         Action action = new UnlistStatusHearingAction(
-            baseStatusHearingRequest,
+            unlistStatusHearingRequest,
             hearingRepository,
             hearingPartRepository,
             statusConfigService,
