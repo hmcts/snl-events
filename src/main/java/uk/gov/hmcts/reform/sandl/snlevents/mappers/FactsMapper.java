@@ -27,12 +27,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactRoom;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactSessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.FactTime;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFacts;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.xml.ws.WebServiceException;
 
@@ -71,54 +73,25 @@ public class FactsMapper {
         return objectMapper.writeValueAsString(factSession);
     }
 
-    public String mapUpdateSessionToRuleJsonMessage(Session session) throws JsonProcessingException {
-        FactSession factSession = new FactSession();
-
-        factSession.setId(session.getId().toString());
-        factSession.setDuration(session.getDuration());
-        factSession.setStart(session.getStart());
-        if (session.getSessionType() != null) {
-            factSession.setSessionType(session.getSessionType().getCode());
-        }
-
-        Optional.ofNullable(session.getRoom()).ifPresent(r -> factSession.setRoomId(r.getId().toString()));
-        Optional.ofNullable(session.getPerson()).ifPresent(p -> factSession.setJudgeId(p.getId().toString()));
-
-        return objectMapper.writeValueAsString(factSession);
+    public SessionWithHearingPartsFacts mapUpdateSessionToRuleJsonMessage(Session session) {
+        return mapDbSessionToRuleJsonMessage(session);
     }
 
     public String mapHearingToRuleJsonMessage(HearingPart hearingPart) {
-        FactHearingPart factHearingPart = new FactHearingPart();
-        Hearing hearing = hearingPart.getHearing();
-
-        factHearingPart.setId(hearingPart.getId().toString());
-        factHearingPart.setDuration(hearing.getDuration());
-        factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
-        factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
-        factHearingPart.setScheduleStart(hearing.getScheduleStart());
-        factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
-        factHearingPart.setCreatedAt(hearing.getCreatedAt());
-
-        if (hearingPart.getSessionId() != null) {
-            factHearingPart.setSessionId(hearingPart.getSessionId().toString());
-        }
-
-        try {
-            return objectMapper.writeValueAsString(factHearingPart);
-        } catch (JsonProcessingException e) {
-            throw new SnlRuntimeException(e);
-        }
+        return mapHearingPartToRuleJsonMessage(hearingPart);
     }
 
-    public String mapDbSessionToRuleJsonMessage(Session session) {
+    public SessionWithHearingPartsFacts mapDbSessionToRuleJsonMessage(Session session) {
         FactSession factSession = new FactSession();
 
         factSession.setId(session.getId().toString());
         factSession.setDuration(session.getDuration());
         factSession.setStart(session.getStart());
+
         if (session.getSessionType() != null) {
             factSession.setSessionType(session.getSessionType().getCode());
         }
+
         if (session.getPerson() != null) {
             factSession.setJudgeId(session.getPerson().getId().toString());
         }
@@ -127,36 +100,18 @@ public class FactsMapper {
             factSession.setRoomId(session.getRoom().getId().toString());
         }
 
+        String sessionMsg;
+        List<String> hearingPartsMsg;
         try {
-            return objectMapper.writeValueAsString(factSession);
+            sessionMsg = objectMapper.writeValueAsString(factSession);
+            hearingPartsMsg = session.getHearingParts().stream()
+                .map(hp -> mapHearingPartToRuleJsonMessage(hp))
+                .collect(Collectors.toList());
         } catch (JsonProcessingException e) {
-            throw new WebServiceException("Cannot map session to ft", e);
-        }
-    }
-
-    // to be removed?
-    @Deprecated
-    public String mapDbHearingToRuleJsonMessage(Hearing hearing) throws JsonProcessingException {
-        FactHearingPart factHearingPart = new FactHearingPart();
-
-        factHearingPart.setDuration(hearing.getDuration());
-        factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
-        factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
-        factHearingPart.setScheduleStart(hearing.getScheduleStart());
-        factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
-        factHearingPart.setCreatedAt(hearing.getCreatedAt());
-
-        HearingPart hearingPart = hearing.getHearingParts().get(0); // @TODO temporary solution
-        factHearingPart.setId(hearingPart.getId().toString());
-
-        if (hearingPart.getSessionId() != null) {
-            factHearingPart.setSessionId(hearingPart.getSessionId().toString());
+            throw new WebServiceException("Cannot map session or its hearing part to fact", e);
         }
 
-        Optional.ofNullable(hearingPart.getSession()).ifPresent(
-            s -> factHearingPart.setSessionId(s.getId().toString()));
-
-        return objectMapper.writeValueAsString(factHearingPart);
+        return new SessionWithHearingPartsFacts(sessionMsg, hearingPartsMsg);
     }
 
     public String mapDbRoomToRuleJsonMessage(Room room) throws JsonProcessingException {
@@ -210,23 +165,33 @@ public class FactsMapper {
         return new FactHearingType(ht.getCode(), ht.getDescription());
     }
 
-    public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) throws JsonProcessingException {
-        Hearing hearing = hearingPart.getHearing();
+    public String mapHearingPartToRuleJsonMessage(HearingPart hearingPart) {
         FactHearingPart factHearingPart = new FactHearingPart();
+        Hearing hearing = hearingPart.getHearing();
 
         factHearingPart.setId(hearingPart.getId().toString());
-        factHearingPart.setDuration(hearing.getDuration());
+
+        if (hearing.isMultiSession() && hearingPart.getSession() != null) {
+            factHearingPart.setDuration(hearingPart.getSession().getDuration());
+        } else {
+            factHearingPart.setDuration(hearing.getDuration());
+        }
+
         factHearingPart.setCaseTypeCode(hearing.getCaseType().getCode());
         factHearingPart.setHearingTypeCode(hearing.getHearingType().getCode());
         factHearingPart.setScheduleStart(hearing.getScheduleStart());
         factHearingPart.setScheduleEnd(hearing.getScheduleEnd());
         factHearingPart.setCreatedAt(hearing.getCreatedAt());
 
-        if (hearingPart.getSession() != null) {
-            factHearingPart.setSessionId(hearingPart.getSession().getId().toString());
+        if (hearingPart.getSessionId() != null) {
+            factHearingPart.setSessionId(hearingPart.getSessionId().toString());
         }
 
-        return objectMapper.writeValueAsString(factHearingPart);
+        try {
+            return objectMapper.writeValueAsString(factHearingPart);
+        } catch (JsonProcessingException e) {
+            throw new SnlRuntimeException(e);
+        }
     }
 
     public String mapReloadStatusToRuleJsonMessage(
