@@ -1,0 +1,136 @@
+databaseChangeLog:
+- changeSet:
+    id: add-more-columns-to-status-config
+    author: rkruk
+    changes:
+    - addColumn:
+        tableName: status_config
+        columns:
+        - column:
+            name: can_be_withdrawn
+            type: boolean
+            defaultValue: false
+    - addColumn:
+        tableName: status_config
+        columns:
+        - column:
+            name: can_be_vacated
+            type: boolean
+            defaultValue: false
+    - addColumn:
+        tableName: status_config
+        columns:
+        - column:
+            name: can_be_adjourned
+            type: boolean
+            defaultValue: false
+
+- changeSet:
+    id: update-statuses-values
+    author: rkruk
+    changes:
+    - update:
+        columns:
+        - column:
+            name: can_be_vacated
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"
+    - update:
+        columns:
+        - column:
+            name: can_be_adjourned
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"
+    - update:
+        columns:
+        - column:
+            name: can_be_withdrawn
+            value: true
+        tableName: status_config
+        where: "status = 'Listed'"
+    - update:
+        columns:
+        - column:
+            name: can_be_withdrawn
+            value: true
+        tableName: status_config
+        where: "status = 'Unlisted'"
+
+- changeSet:
+    id: insert-adjourned-vacated-statuses
+    author: rkruk
+    changes:
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Adjourned"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: false
+        - column:
+            name: count_in_utilization
+            value: false
+        - column:
+            name: can_be_withdrawn
+            value: false
+        - column:
+            name: can_be_vacated
+            value: false
+        - column:
+            name: can_be_adjourned
+            value: false
+        tableName: status_config
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Vacated"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: false
+        - column:
+            name: count_in_utilization
+            value: false
+        - column:
+            name: can_be_withdrawn
+            value: false
+        - column:
+            name: can_be_vacated
+            value: false
+        - column:
+            name: can_be_adjourned
+            value: false
+        tableName: status_config
+    - insert:
+        columns:
+        - column:
+            name: status
+            value: "Withdrawn"
+        - column:
+            name: can_be_listed
+            value: false
+        - column:
+            name: can_be_unlisted
+            value: false
+        - column:
+            name: count_in_utilization
+            value: false
+        - column:
+            name: can_be_withdrawn
+            value: false
+        - column:
+            name: can_be_vacated
+            value: false
+        - column:
+            name: can_be_adjourned
+            value: false
+        tableName: status_config
