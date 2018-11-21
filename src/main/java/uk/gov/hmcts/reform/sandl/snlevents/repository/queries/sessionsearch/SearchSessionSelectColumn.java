@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import lombok.Getter;
 

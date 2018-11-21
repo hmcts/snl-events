@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -18,11 +19,10 @@ import javax.persistence.Query;
 
 @Component
 public class SearchSessionQuery {
-
     private static final String COUNT_BY_SESSION_ID = "SELECT COUNT(session_id) FROM (<SELECT_QUERY>) "
         + "AS FILTERED_SESSION_COUNT;";
     private static final String SELECT_QUERY_PLACEHOLDER = "<SELECT_QUERY>";
-    // multiply duration fileds by 1000000000 in order to convert them from nanoseconds to seconds
+    // multiply duration fields by 1000 000 000 in order to convert them from nanoseconds to seconds
     private static final String SEARCH_SESSION_QUERY = "SELECT\n"
         + "  *,\n"
         + "  CASE WHEN utilisation > 100\n"
@@ -34,11 +34,8 @@ public class SearchSessionQuery {
         + "         ROUND(allocated_duration / session_duration * 100, 2) AS utilisation\n"
         + "       FROM (\n"
         + "              SELECT\n"
-        + "                p.id                                              AS person_id,\n"
         + "                p.name                                            AS person_name,\n"
-        + "                r.id                                              AS room_id,\n"
         + "                r.name                                            AS room_name,\n"
-        + "                st.code                                           AS session_type_code,\n"
         + "                st.description                                    AS session_type_description,\n"
         + "                main_session.id                                   AS session_id,\n"
         + "                main_session.start                                AS session_startTime,\n"
@@ -55,15 +52,7 @@ public class SearchSessionQuery {
         + "                 FROM hearing_part\n"
         + "                   RIGHT JOIN session s ON hearing_part.session_id = s.id\n"
         + "                   LEFT JOIN hearing h ON hearing_part.hearing_id = h.id\n"
-        + "                 WHERE s.id = main_session.id) * 1000000000       AS allocated_duration,\n"
-        + "                (SELECT CASE WHEN EXISTS (\n"
-        + "                     SELECT s.id\n"
-        + "                     FROM session s\n"
-        + "                     INNER JOIN hearing_part hp ON s.id = hp.session_id\n"
-        + "                     INNER JOIN hearing h on hp.hearing_id = h.id\n"
-        + "                     WHERE h.is_multisession = TRUE AND s.id = main_session.id)\n"
-        + "                 THEN TRUE ELSE FALSE END)                        AS has_multisessionhearing_assigned,\n"
-        + "                main_session.version                              AS session_version\n"
+        + "                 WHERE s.id = main_session.id) * 1000000000       AS allocated_duration\n"
         + "              FROM session main_session\n"
         + "                LEFT JOIN person p ON main_session.person_id = p.id\n"
         + "                LEFT JOIN room r ON main_session.room_id = r.id\n"

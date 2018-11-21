@@ -1,9 +1,11 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import lombok.Getter;
 import lombok.val;
 import org.assertj.core.util.Maps;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;

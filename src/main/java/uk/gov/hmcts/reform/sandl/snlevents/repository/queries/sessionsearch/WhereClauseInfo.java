@@ -1,7 +1,8 @@
-package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
+package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SessionFilterKey;
 
 import java.util.HashMap;
 import java.util.Map;
