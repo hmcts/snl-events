@@ -22,7 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.BaseStatusHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
@@ -146,7 +146,7 @@ public class HearingControllerTest {
 
         when(hearingService.unlist(any())).thenReturn(ut);
 
-        val response = mvc.callAndMapResponse(put(URL + "/unlist"), new BaseStatusHearingRequest(),
+        val response = mvc.callAndMapResponse(put(URL + "/unlist"), new UnlistHearingRequest(),
             UserTransaction.class);
 
         assertThat(response).isEqualTo(ut);

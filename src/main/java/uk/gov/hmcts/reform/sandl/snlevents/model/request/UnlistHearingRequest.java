@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseStatusHearingRequest implements UserTransactional {
+public class UnlistHearingRequest implements UserTransactional {
     private UUID hearingId;
     private List<VersionInfo> hearingPartsVersions;
     private UUID userTransactionId;

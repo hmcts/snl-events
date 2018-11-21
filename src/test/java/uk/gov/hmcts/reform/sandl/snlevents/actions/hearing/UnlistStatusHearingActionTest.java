@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.BaseStatusHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -55,7 +55,7 @@ public class UnlistStatusHearingActionTest {
         getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
     );
     private StatusesMock statusesMock = new StatusesMock();
-    private UnlistStatusHearingAction action;
+    private UnlistHearingAction action;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -82,13 +82,13 @@ public class UnlistStatusHearingActionTest {
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_UNLISTED))).thenReturn(hearing);
 
-        BaseStatusHearingRequest bhr = new BaseStatusHearingRequest();
+        UnlistHearingRequest bhr = new UnlistHearingRequest();
         bhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
         bhr.setUserTransactionId(UUID.randomUUID());
 
         bhr.setHearingPartsVersions(hearingVersions);
 
-        action = new UnlistStatusHearingAction(
+        action = new UnlistHearingAction(
             bhr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,

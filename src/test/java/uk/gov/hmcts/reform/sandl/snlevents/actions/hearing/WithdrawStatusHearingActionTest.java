@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.BaseStatusHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +52,7 @@ public class WithdrawStatusHearingActionTest {
         getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
     );
     private StatusesMock statusesMock = new StatusesMock();
-    private WithdrawStatusHearingAction action;
+    private WithdrawHearingAction action;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -82,14 +81,14 @@ public class WithdrawStatusHearingActionTest {
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);
 
-        BaseStatusHearingRequest bhr = new BaseStatusHearingRequest();
-        bhr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
-        bhr.setUserTransactionId(UUID.randomUUID());
+        WithdrawHearingRequest whr = new WithdrawHearingRequest();
+        whr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
+        whr.setUserTransactionId(UUID.randomUUID());
 
-        bhr.setHearingPartsVersions(hearingVersions);
+        whr.setHearingPartsVersions(hearingVersions);
 
-        action = new WithdrawStatusHearingAction(
-            bhr, hearingRepository, hearingPartRepository,
+        action = new WithdrawHearingAction(
+            whr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper
