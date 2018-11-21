@@ -31,7 +31,7 @@ public class StatusServiceManager {
     }
 
     public boolean canBeUnlisted(Statusable entity) {
-        return entity.getStatus().isCanBeListed();
+        return entity.getStatus().isCanBeUnlisted();
     }
 
     public boolean shouldBeCountInUtilization(Statusable entity) {
