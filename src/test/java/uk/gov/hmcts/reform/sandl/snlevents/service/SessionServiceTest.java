@@ -213,7 +213,7 @@ public class SessionServiceTest {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
         when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).then(returnsFirstArg());
-        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session))).thenReturn(message);
+        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session)).getSessionFact()).thenReturn(message);
 
         UserTransaction transaction = sessionService.updateSession(createUpsertSession());
 

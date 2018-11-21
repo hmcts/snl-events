@@ -17,11 +17,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
-import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFacts;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
@@ -251,9 +252,13 @@ public class SessionService {
         UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(),
             userTransactionDataList);
 
-        String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
+        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
 
-        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, msg);
+        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, sessionWithHpFacts.getSessionFact());
+
+        for (String hpFacts : sessionWithHpFacts.getHearingPartsFacts()) {
+            rulesService.postMessage(ut.getId(), RulesService.UPSERT_HEARING_PART, hpFacts);
+        }
 
         ut = userTransactionService.rulesProcessed(ut);
 

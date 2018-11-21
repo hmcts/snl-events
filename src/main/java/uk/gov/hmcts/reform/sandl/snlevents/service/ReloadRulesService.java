@@ -165,7 +165,7 @@ public class ReloadRulesService {
         }
 
         for (Session session : sessionRepository.findAll()) {
-            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
+            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session).getSessionFact();
             postMessageToEngine(engine, RulesService.UPSERT_SESSION, msg);
         }
 

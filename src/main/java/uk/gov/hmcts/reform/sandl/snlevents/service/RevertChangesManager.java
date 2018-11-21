@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFacts;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -105,13 +106,7 @@ public class RevertChangesManager {
             hearingRepository.save(deletedHearing);
 
             hearingParts.forEach(hp -> {
-                String msg;
-                try {
-                    msg = factsMapper.mapHearingPartToRuleJsonMessage(hp);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
+                String msg = factsMapper.mapHearingPartToRuleJsonMessage(hp);
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
             });
         }
@@ -165,28 +160,42 @@ public class RevertChangesManager {
             }
 
             sessionRepository.delete(utd.getEntityId());
-            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_SESSION, msg);
+            SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(session);
+            rulesService.postMessage(
+                utd.getUserTransactionId(),
+                RulesService.DELETE_SESSION,
+                sessionWithHpFacts.getSessionFact()
+            );
+            sessionWithHpFacts.getHearingPartsFacts().forEach(hpFact ->
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, hpFact)
+            );
 
         } else if ("update".equals(utd.getCounterAction())) {
-            Session session = sessionRepository.findOne(utd.getEntityId());
-
             Session previousSession;
-            String msg;
 
             try {
                 previousSession = objectMapper.readValue(utd.getBeforeData(), Session.class);
-                msg = factsMapper.mapDbSessionToRuleJsonMessage(previousSession);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_SESSION, msg);
+            SessionWithHearingPartsFacts sessionWithHpFacts =
+                factsMapper.mapDbSessionToRuleJsonMessage(previousSession);
 
+            rulesService.postMessage(
+                utd.getUserTransactionId(),
+                RulesService.UPSERT_SESSION,
+                sessionWithHpFacts.getSessionFact()
+            );
+
+            sessionWithHpFacts.getHearingPartsFacts().forEach(hpFact ->
+                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, hpFact)
+            );
+
+            Session session = sessionRepository.findOne(utd.getEntityId());
             previousSession.setVersion(session.getVersion());
 
             sessionRepository.save(previousSession);
-
         }
     }
 }
