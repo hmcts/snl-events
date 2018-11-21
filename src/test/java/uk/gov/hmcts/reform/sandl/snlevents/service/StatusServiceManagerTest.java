@@ -5,7 +5,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.*;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
