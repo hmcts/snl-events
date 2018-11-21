@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 
 public class WithdrawHearingAction extends Action implements RulesProcessable {
 
@@ -39,6 +40,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
+    protected EntityManager entityManager;
 
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
@@ -50,7 +52,8 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        EntityManager entityManager
     ) {
         this.withdrawHearingRequest = withdrawHearingRequest;
         this.hearingRepository = hearingRepository;
@@ -58,6 +61,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -73,12 +77,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         if (!statusServiceManager.canBeWithdrawn(hearing)) {
             throw new SnlEventsException("Hearing can not be withdrawn");
         }
-        hearingParts.forEach(hp -> {
-            if (!statusServiceManager.canBeWithdrawn(hp)) {
-                // we should define somewhere text of these messages and how much we want to show to the user
-                throw new SnlEventsException("Hearing part can not be withdrawn");
-            }
-        });
     }
 
     @Override
@@ -102,6 +100,9 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         }
 
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
+        entityManager.detach(hearing);
+        hearing.setVersion(withdrawHearingRequest.getHearingVersion());
+        hearingRepository.save(hearing);
 
         originalHearingParts = mapHearingPartsToStrings(hearingParts);
         hearingParts.stream().forEach(hp -> {

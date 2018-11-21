@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 @Service
 public class HearingService {
@@ -38,10 +39,15 @@ public class HearingService {
 
     @Autowired
     private ActionService actionService;
+
     @Autowired
     private StatusConfigService statusConfigService;
+
     @Autowired
     private StatusServiceManager statusServiceManager;
+
+    @Autowired
+    private EntityManager entityManager;
 
     public HearingSearchResponseForAmendment get(UUID id) {
         return hearingQueries.get(id);
@@ -71,7 +77,8 @@ public class HearingService {
             hearingPartRepository,
             statusConfigService,
             statusServiceManager,
-            objectMapper
+            objectMapper,
+            entityManager
         );
 
         return actionService.execute(action);

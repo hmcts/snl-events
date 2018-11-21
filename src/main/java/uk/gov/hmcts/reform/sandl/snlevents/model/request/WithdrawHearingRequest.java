@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,6 +12,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class WithdrawHearingRequest implements UserTransactional {
     private UUID hearingId;
-    private List<VersionInfo> hearingPartsVersions;
+    private long hearingVersion;
     private UUID userTransactionId;
+
+    @Override
+    public UUID getUserTransactionId() {
+        return userTransactionId;
+    }
 }

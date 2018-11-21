@@ -7,22 +7,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
-
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringRunner.class)
 public class StatusServiceManagerTest {
-
-    private static final UUID SESSION_ID_A = UUID.randomUUID();
-    private static final UUID SESSION_ID_B = UUID.randomUUID();
     StatusServiceManager statusServiceManager = new StatusServiceManager();
 
     @Test
@@ -58,36 +50,10 @@ public class StatusServiceManagerTest {
     }
 
     @Test
-    public void canWithdrawIsTrue_whenHearingAndPartsHasListedStatus() {
-        Hearing hearing = createHearingWithStatus(createListedStatus());
-        hearing.setHearingParts(Arrays.asList(
-            createHearingPartWithSession(SESSION_ID_A, createListedStatus()),
-            createHearingPartWithSession(SESSION_ID_B, createListedStatus())
-        ));
-
-        assertThat(statusServiceManager.canBeWithdrawn(hearing)).isEqualTo(true);
-    }
-
-    @Test
     public void canWithdrawIsFalse_whenHearingHasAdjournedStatus() {
         Hearing hearing = createHearingWithStatus(createAdjournedStatus());
-        hearing.setHearingParts(Arrays.asList(
-            createHearingPartWithSession(SESSION_ID_A, createListedStatus()),
-            createHearingPartWithSession(SESSION_ID_B, createListedStatus())
-        ));
 
         assertThat(statusServiceManager.canBeWithdrawn(hearing)).isEqualTo(false);
-    }
-
-    @Test
-    public void canWithdrawIsFalse_whenHearingPartHasAdjournedStatus() {
-        Hearing hearing = createHearingWithStatus(createListedStatus());
-        hearing.setHearingParts(Arrays.asList(
-            createHearingPartWithSession(SESSION_ID_A, createListedStatus()),
-            createHearingPartWithSession(SESSION_ID_B, createAdjournedStatus())
-        ));
-
-        assertThat(!statusServiceManager.canBeWithdrawn(hearing)).isEqualTo(false);
     }
 
     private Hearing createHearingWithStatus(StatusConfig status) {
@@ -100,20 +66,6 @@ public class StatusServiceManagerTest {
     private HearingPart createHearingPartWithStatus(StatusConfig status) {
         val hearingPart = new HearingPart();
         hearingPart.setStatus(status);
-
-        return hearingPart;
-    }
-
-    private HearingPart createHearingPartWithSession(UUID sessionId, StatusConfig status) {
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setStatus(status);
-
-        Session session = new Session();
-        session.setId(sessionId);
-        session.setStart(OffsetDateTime.now().plusDays(1));
-
-        hearingPart.setSessionId(sessionId);
-        hearingPart.setSession(session);
 
         return hearingPart;
     }

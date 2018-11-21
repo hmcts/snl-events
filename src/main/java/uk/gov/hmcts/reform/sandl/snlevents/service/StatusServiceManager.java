@@ -51,10 +51,6 @@ public class StatusServiceManager {
         return possibleActions;
     }
 
-    public boolean canBeWithdrawn(Statusable entity) {
-        return entity.getStatus().isCanBeWithdrawn();
-    }
-
     public boolean canBeWithdrawn(Hearing hearing) {
         HearingWithSessionsResponse hearingWithSessionsResponse = new HearingWithSessionsResponse(hearing);
 

@@ -30,6 +30,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -47,10 +48,6 @@ public class WithdrawHearingActionTest {
     private static final Long HEARING_VERSION_ID_B = 2L;
     private static final UUID SESSION_ID_A = UUID.randomUUID();
     private static final UUID SESSION_ID_B = UUID.randomUUID();
-    private static final List<VersionInfo> hearingVersions = Arrays.asList(
-        getVersionInfo(HEARING_PART_ID_A, HEARING_VERSION_ID_A),
-        getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
-    );
     private StatusesMock statusesMock = new StatusesMock();
     private WithdrawHearingAction action;
 
@@ -62,6 +59,9 @@ public class WithdrawHearingActionTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private EntityManager entityManager;
 
 
     @Before
@@ -85,13 +85,12 @@ public class WithdrawHearingActionTest {
         whr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
         whr.setUserTransactionId(UUID.randomUUID());
 
-        whr.setHearingPartsVersions(hearingVersions);
-
         action = new WithdrawHearingAction(
             whr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
-            objectMapper
+            objectMapper,
+            entityManager
         );
     }
 
@@ -170,22 +169,6 @@ public class WithdrawHearingActionTest {
     public void getAndValidateEntities_whenHearingStatusCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
-        Mockito.when(hearingRepository.findOne(any(UUID.class)))
-            .thenReturn(hearing);
-        action.getAndValidateEntities();
-    }
-
-    @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingPartsStatusCantBeWithdrawn_shouldThrowException() {
-        Hearing hearing = new Hearing();
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setHearingParts(Arrays.asList(
-            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, SESSION_ID_A, Status.Adjourned),
-            createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, SESSION_ID_B, Status.Adjourned)
-        ));
-
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
