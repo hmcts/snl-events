@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionSelectColumn;
 
 import java.util.Collections;
 import java.util.UUID;

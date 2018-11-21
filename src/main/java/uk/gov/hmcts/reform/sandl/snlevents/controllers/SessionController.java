@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionSelectColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;

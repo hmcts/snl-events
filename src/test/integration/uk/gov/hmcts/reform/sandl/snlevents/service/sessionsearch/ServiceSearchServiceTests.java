@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchSessionSelectColumn;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionFilterKey;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionSelectColumn;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SessionFilterKey;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
