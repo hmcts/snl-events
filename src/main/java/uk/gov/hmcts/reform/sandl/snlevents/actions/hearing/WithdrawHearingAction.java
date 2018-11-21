@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -108,8 +105,8 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
         originalHearingParts = mapHearingPartsToStrings(hearingParts);
         hearingParts.stream().forEach(hp -> {
-            VersionInfo vi = getVersionInfo(hp);
-            hp.setVersion(vi.getVersion());
+            hp.setSession(null);
+            hp.setSessionId(null);
             if (hp.getStatus().getStatus() == Status.Listed) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             } else if (hp.getStatus().getStatus() == Status.Unlisted) {
@@ -163,16 +160,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public UUID getUserTransactionId() {
         return withdrawHearingRequest.getUserTransactionId();
-    }
-
-    private VersionInfo getVersionInfo(HearingPart hp) {
-        Optional<VersionInfo> hpvi = withdrawHearingRequest.getHearingPartsVersions()
-            .stream()
-            .filter(hpv -> hpv.getId().equals(hp.getId()))
-            .findFirst();
-        return hpvi.orElseThrow(() ->
-            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
-        );
     }
 
     private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
