@@ -98,6 +98,12 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
     @Override
     public void act() {
+        try {
+            previousHearing = objectMapper.writeValueAsString(hearing);
+        } catch (JsonProcessingException e) {
+            throw new SnlRuntimeException(e);
+        }
+
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
 
         originalHearingParts = mapHearingPartsToStrings(hearingParts);
