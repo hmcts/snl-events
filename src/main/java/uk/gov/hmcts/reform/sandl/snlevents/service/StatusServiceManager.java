@@ -18,6 +18,8 @@ public class StatusServiceManager {
 
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
 
+    // @TODO: introduce Validator classes instead of puting all the logic into one file e.g. AdjournValidator,
+    // UnlistValidator etc.
     {
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
             checkIfAdjournCanBePerformed));
@@ -43,8 +45,7 @@ public class StatusServiceManager {
         PossibleActions possibleActions = new PossibleActions();
 
         possibleOperationConfig.stream()
-            .filter(validator -> validator.getDbConfigVerifier().apply(hearing)
-                && validator.getBusinessOperationVerifier() != null)
+            .filter(validator -> validator.getDbConfigVerifier().apply(hearing))
             .forEach(validator -> validator.getBusinessOperationVerifier().apply(hearing, possibleActions));
 
         return possibleActions;
