@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
@@ -23,9 +24,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,8 +42,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
 
-    // id & hearing part string
-    private Map<UUID, String> originalHearingParts;
     private String previousHearing;
 
     public UnlistHearingAction(
@@ -109,7 +106,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
 
-        originalHearingParts = mapHearingPartsToStrings(hearingParts);
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
@@ -124,30 +120,11 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataList.add(new UserTransactionData("hearingPart",
-                id,
-                hpString,
-                "update",
-                "update",
-                0)
-            )
-        );
+        String action = "update";
+        String counterAction = "update";
 
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            previousHearing,
-            "update",
-            "update",
-            1)
-        );
-
-        sessions.stream().forEach(s ->
-            userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
-        );
-
-        return userTransactionDataList;
+        return UserTransactionDataPreparerService.generateUserTransactionData(hearing, previousHearing, hearingParts,
+            objectMapper, sessions, action, counterAction);
     }
 
     @Override
@@ -175,23 +152,5 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         return hpvi.orElseThrow(() ->
             new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
         );
-    }
-
-    private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
-        return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
-    }
-
-    private Map<UUID, String> mapHearingPartsToStrings(List<HearingPart> hearingParts) {
-        Map<UUID, String> originalIdStringPair = new HashMap<>();
-        hearingParts.stream().forEach(hp -> {
-            try {
-                String hearingPartString = objectMapper.writeValueAsString(hp);
-                originalIdStringPair.put(hp.getId(), hearingPartString);
-            } catch (JsonProcessingException e) {
-                throw new SnlRuntimeException(e);
-            }
-        });
-
-        return originalIdStringPair;
     }
 }

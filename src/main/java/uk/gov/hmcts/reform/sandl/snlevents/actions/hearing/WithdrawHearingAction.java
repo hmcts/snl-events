@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
@@ -21,9 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,8 +41,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
 
-    // id & hearing part string
-    private Map<UUID, String> originalHearingParts;
     private String previousHearing;
 
     public WithdrawHearingAction(
@@ -104,7 +101,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         hearing.setVersion(withdrawHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);
 
-        originalHearingParts = mapHearingPartsToStrings(hearingParts);
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
@@ -123,30 +119,8 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         String action = "update";
         String counterAction = "update";
 
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataList.add(new UserTransactionData("hearingPart",
-                id,
-                hpString,
-                action,
-                counterAction,
-                0)
-            )
-        );
-
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            previousHearing,
-            action,
-            counterAction,
-            1)
-        );
-
-        sessions.stream().forEach(s ->
-            userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
-        );
-
-        return userTransactionDataList;
+        return UserTransactionDataPreparerService.generateUserTransactionData(hearing, previousHearing, hearingParts,
+            objectMapper, sessions, action, counterAction);
     }
 
     @Override
@@ -164,23 +138,5 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public UUID getUserTransactionId() {
         return withdrawHearingRequest.getUserTransactionId();
-    }
-
-    private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
-        return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
-    }
-
-    private Map<UUID, String> mapHearingPartsToStrings(List<HearingPart> hearingParts) {
-        Map<UUID, String> originalIdStringPair = new HashMap<>();
-        hearingParts.stream().forEach(hp -> {
-            try {
-                String hearingPartString = objectMapper.writeValueAsString(hp);
-                originalIdStringPair.put(hp.getId(), hearingPartString);
-            } catch (JsonProcessingException e) {
-                throw new SnlRuntimeException(e);
-            }
-        });
-
-        return originalIdStringPair;
     }
 }
