@@ -142,12 +142,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        String msg;
-        try {
-            msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new SnlEventsException(e);
-        }
+        String msg = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
         return Collections.singletonList(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
     }
 
