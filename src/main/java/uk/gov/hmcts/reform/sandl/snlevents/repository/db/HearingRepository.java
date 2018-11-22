@@ -17,7 +17,8 @@ public interface HearingRepository extends JpaRepository<Hearing, UUID>, JpaSpec
 
     String HEARING_FOR_LISTING_QUERY = "SELECT h.id, case_number, case_title, ct.code as case_type_code, "
         + "ct.description as case_type_description, ht.code as hearing_type_code, "
-        + "ht.description as hearing_type_description, duration, schedule_start, schedule_end, version, "
+        + "ht.description as hearing_type_description, (duration * 1000000000) as duration, "
+        + "schedule_start, schedule_end, version, "
         + "priority, communication_facilitator, reserved_judge_id, p.name as reserved_judge_name, number_of_sessions, "
         + "h.status, is_multisession "
         + "FROM hearing h "
