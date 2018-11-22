@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
   <suppress>
-    <notes>
-      <![CDATA[Resolving the security warnings is not the main goal of SnL POC and they've been added to tech debt]]>
-    </notes>
-    <gav regex="true">^.*$</gav>
-    <cvssBelow>10</cvssBelow>
+    <notes>SSL related in applicationinsights-core-2.2.1 which is the newest version atm</notes>
+    <gav regex="true">^io\.netty:netty-tcnative-boringssl-static:.*$</gav>
+    <cve>CVE-2014-3488</cve>
+  </suppress>
+  <suppress>
+    <notes>cookie related in applicationinsights-core-2.2.1 which is the newest version atm</notes>
+    <gav regex="true">^io\.netty:netty-tcnative-boringssl-static:.*$</gav>
+    <cve>CVE-2015-2156</cve>
+  </suppress>
+  <suppress>
+    <notes>guava used only by swagger and in the most recent fox swagger version</notes>
+    <gav regex="true">^com\.google\.guava:guava:.*$</gav>
+    <cve>CVE-2018-10237</cve>
+  </suppress>
+  <suppress>
+    <notes>used by hystrix in the most recent version for this spring boot ver</notes>
+    <gav regex="true">^org\.bouncycastle:bcprov-jdk15on:.*$</gav>
+    <cpe>cpe:/a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api</cpe>
+  </suppress>
+  <suppress>
+    <notes>Used for testing only not in production</notes>
+    <gav regex="true">^com\.h2database:h2:.*$</gav>
+    <cpe>cpe:/a:h2database:h2</cpe>
+  </suppress>
+  <suppress>
+    <notes>part of spring boot jpa, required migration to spring boot 2.0, covered by SL-2115</notes>
+    <gav regex="true">^dom4j:dom4j:.*$</gav>
+    <cve>CVE-2018-1000632</cve>
   </suppress>
 </suppressions>
