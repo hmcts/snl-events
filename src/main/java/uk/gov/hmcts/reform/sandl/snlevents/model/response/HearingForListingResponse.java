@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
-import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 
 import java.io.Serializable;
 import java.time.Duration;

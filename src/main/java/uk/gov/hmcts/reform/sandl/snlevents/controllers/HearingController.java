@@ -71,9 +71,12 @@ public class HearingController {
         return new HearingInfo(hearingRepository.findOne(id));
     }
 
-    @GetMapping(path = "/can-be-listed", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<HearingForListingResponse> getCanBeListed() {
-        return hearingService.getHearingsForListing();
+    @GetMapping(path = "/for-listing", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<HearingForListingResponse> getCanBeListed(
+        @RequestParam(value = "page", required = false) Optional<Integer> page,
+        @RequestParam(value = "size", required = false) Optional<Integer> size) {
+
+        return hearingService.getHearingsForListing(page, size);
     }
 
     @GetMapping(path = "/{id}/for-amendment", produces = MediaType.APPLICATION_JSON_VALUE)
