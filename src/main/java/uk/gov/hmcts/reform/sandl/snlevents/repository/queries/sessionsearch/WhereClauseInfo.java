@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -108,10 +108,10 @@ public enum SessionFilterKey {
         keyValuePairs.put(getKey(), getSqlValue());
         switch (this) {
             case START_DATE:
-                whereClause = String.format(" AND %s > :%s ", getColumnName(), getKey());
+                whereClause = String.format(" AND %s >= :%s ", getColumnName(), getKey());
                 break;
             case END_DATE:
-                whereClause = String.format(" AND %s < :%s ", getColumnName(), getKey());
+                whereClause = String.format(" AND %s <= :%s ", getColumnName(), getKey());
                 break;
             case SESSION_TYPE_CODES:
                 whereClause = String.format(" AND %s IN (:%s) ", getColumnName(), getKey());
@@ -145,7 +145,7 @@ public enum SessionFilterKey {
                 keyValuePairs.put(customFromKey, valueFrom);
                 keyValuePairs.put(customToKey, valueTo);
 
-                whereClause = String.format(" OR (%s > :%s AND %s < :%s)",
+                whereClause = String.format(" OR (%s >= :%s AND %s <= :%s)",
                     getColumnName(), customFromKey, getColumnName(), customToKey);
 
                 break;

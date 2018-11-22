@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -165,7 +166,7 @@ public class ReloadRulesService {
         }
 
         for (Session session : sessionRepository.findAll()) {
-            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
+            String msg = factsMapper.mapDbSessionToRuleJsonMessage(session, Collections.emptyList()).getSessionFact();
             postMessageToEngine(engine, RulesService.UPSERT_SESSION, msg);
         }
 
