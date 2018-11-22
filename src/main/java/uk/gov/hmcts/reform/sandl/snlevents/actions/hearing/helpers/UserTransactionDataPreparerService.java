@@ -22,8 +22,10 @@ public class UserTransactionDataPreparerService {
     }
 
     public void prepareUserTransactionDataForUpdate(String entity, UUID entityId, String previousEntityString,
-                                                           String action, String counterAction,
                                                            int counterActionOrder) {
+
+        String action = "update";
+        String counterAction = "update";
         userTransactionDataList.add(new UserTransactionData(entity,
             entityId,
             previousEntityString,
@@ -33,9 +35,9 @@ public class UserTransactionDataPreparerService {
         );
     }
 
-    public void prepareLockedEntityTransactionData(String entity, UUID entityId, String action,
-                                                   String counterAction,
-                                                   int counterActionOrder) {
+    public void prepareLockedEntityTransactionData(String entity, UUID entityId, int counterActionOrder) {
+        String action = "lock";
+        String counterAction = "unlock";
         userTransactionDataList.add(new UserTransactionData(entity, entityId, null,
             action, counterAction, counterActionOrder));
     }
