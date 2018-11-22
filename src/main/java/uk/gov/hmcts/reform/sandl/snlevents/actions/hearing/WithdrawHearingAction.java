@@ -120,13 +120,16 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
+        String action = "update";
+        String counterAction = "update";
+
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         originalHearingParts.forEach((id, hpString) ->
             userTransactionDataList.add(new UserTransactionData("hearingPart",
                 id,
                 hpString,
-                "update",
-                "update",
+                action,
+                counterAction,
                 0)
             )
         );
@@ -134,8 +137,8 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         userTransactionDataList.add(new UserTransactionData("hearing",
             hearing.getId(),
             previousHearing,
-            "update",
-            "update",
+            action,
+            counterAction,
             1)
         );
 

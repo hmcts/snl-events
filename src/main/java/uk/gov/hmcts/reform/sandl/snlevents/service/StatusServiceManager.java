@@ -19,7 +19,7 @@ public class StatusServiceManager {
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
 
     // @TODO: introduce Validator classes instead of puting all the logic into one file e.g. AdjournValidator,
-    // UnlistValidator etc.
+    public StatusServiceManager()
     {
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
             checkIfAdjournCanBePerformed));
@@ -84,7 +84,7 @@ public class StatusServiceManager {
 
     private static boolean checkIfAdjournCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
         // @TODO: implement
-        return true;
+        return hearingWithSessionsResponse != null;
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
