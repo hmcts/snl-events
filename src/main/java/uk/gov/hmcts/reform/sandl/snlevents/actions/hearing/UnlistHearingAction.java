@@ -43,8 +43,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected StatusServiceManager statusServiceManager;
 
     private String previousHearing;
-    private String action = "update";
-    private String counterAction = "update";
 
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
@@ -123,7 +121,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         return UserTransactionDataPreparerService.generateUserTransactionData(hearing, previousHearing, hearingParts,
-            objectMapper, sessions, action, counterAction);
+            objectMapper, sessions, "update", "update");
     }
 
     @Override
