@@ -53,8 +53,11 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
             targetClass = SessionSearchResponse.class,
             columns = {
                 @ColumnResult(name = "session_id", type = UUID.class),
+                @ColumnResult(name = "person_id", type = UUID.class),
                 @ColumnResult(name = "person_name", type = String.class),
+                @ColumnResult(name = "room_id", type = UUID.class),
                 @ColumnResult(name = "room_name", type = String.class),
+                @ColumnResult(name = "session_type_code", type = String.class),
                 @ColumnResult(name = "session_type_description", type = String.class),
                 @ColumnResult(name = "session_startTime", type = OffsetDateTime.class),
                 @ColumnResult(name = "session_startDate", type = OffsetDateTime.class),
