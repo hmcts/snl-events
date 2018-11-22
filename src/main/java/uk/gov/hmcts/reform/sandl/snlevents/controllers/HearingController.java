@@ -62,8 +62,10 @@ public class HearingController {
 
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private StatusServiceManager statusServiceManager;
+
     @Autowired
     private StatusConfigService statusConfigService;
 

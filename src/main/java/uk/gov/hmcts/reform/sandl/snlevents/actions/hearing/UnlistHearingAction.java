@@ -25,10 +25,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 public class UnlistHearingAction extends Action implements RulesProcessable {
 
@@ -42,7 +44,10 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
 
+    // id & hearing part string
+    private Map<UUID, String> originalHearingParts;
     private String previousHearing;
+    private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
@@ -106,6 +111,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
 
+        originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
@@ -120,8 +126,21 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        return UserTransactionDataPreparerService.generateUserTransactionData(hearing, previousHearing, hearingParts,
-            objectMapper, sessions, "update", "update");
+        originalHearingParts.forEach((id, hpString) ->
+            utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString, "update",
+                "update", 0)
+        ); // NOSONAR
+
+        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), previousHearing, "update",
+            "update", 1); // NOSONAR
+
+        sessions.stream().forEach(s ->
+            utdps.prepareLockedEntityTransactionData("session", s.getId(), "lock",
+                "unlock", 0)
+        ); // NOSONAR
+
+
+        return utdps.getUserTransactionDataList(); // NOSONAR
     }
 
     @Override

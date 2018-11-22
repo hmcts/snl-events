@@ -2,10 +2,9 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 
 import java.util.ArrayList;
@@ -14,45 +13,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public final class UserTransactionDataPreparerService {
+@Service
+public class UserTransactionDataPreparerService {
+    private List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
-    public static List<UserTransactionData> generateUserTransactionData(Hearing hearing, String previousHearing,
-                                                                        List<HearingPart> hearingParts,
-                                                                        ObjectMapper objectMapper,
-                                                                        List<Session> sessions, String action,
-                                                                        String counterAction) {
-
-        Map<UUID, String> originalHearingParts = mapHearingPartsToStrings(hearingParts, objectMapper);
-
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataList.add(new UserTransactionData("hearingPart",
-                id,
-                hpString,
-                action,
-                counterAction,
-                0)
-            )
-        );
-
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            previousHearing,
-            action,
-            counterAction,
-            1)
-        );
-
-        sessions.stream().forEach(s ->
-            userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
-        );
-
+    public List<UserTransactionData> getUserTransactionDataList() {
         return userTransactionDataList;
     }
 
-    private static Map<UUID, String> mapHearingPartsToStrings(List<HearingPart> hearingParts,
-                                                              ObjectMapper objectMapper) {
+    public void prepareUserTransactionDataForUpdate(String entity, UUID entityId, String previousEntityString,
+                                                           String action, String counterAction,
+                                                           int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(entity,
+            entityId,
+            previousEntityString,
+            action,
+            counterAction,
+            counterActionOrder)
+        );
+    }
 
+    public void prepareLockedEntityTransactionData(String entity, UUID entityId, String action,
+                                                   String counterAction,
+                                                   int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(entity, entityId, null,
+            action, counterAction, counterActionOrder));
+    }
+
+    public Map<UUID, String> mapHearingPartsToStrings(ObjectMapper objectMapper, List<HearingPart> hearingParts) {
         Map<UUID, String> originalIdStringPair = new HashMap<>();
         hearingParts.stream().forEach(hp -> {
             try {
@@ -64,12 +52,5 @@ public final class UserTransactionDataPreparerService {
         });
 
         return originalIdStringPair;
-    }
-
-    private static UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
-        return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
-    }
-
-    private UserTransactionDataPreparerService() {
     }
 }
