@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -14,11 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.*;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -34,6 +31,7 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -134,12 +132,39 @@ public class WithdrawHearingActionTest {
     }
 
     @Test
+    public void generateUserTransactionData_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        List<UserTransactionData> userTransactionData = action.generateUserTransactionData();
+
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_A, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_B, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_WITHDRAWN, "hearing");
+        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
+        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
+    }
+
+    @Test
     public void generateFactMessages_shouldReturnMsgForUpdatedHearingParts() {
         action.getAndValidateEntities();
         val generatedFactMsgs = action.generateFactMessages();
 
         assertThat(generatedFactMsgs.size()).isEqualTo(2);
         assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.DELETE_HEARING_PART);
+    }
+
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            assertNull(hp.getSessionId());
+            assertNull(hp.getSession());
+        });
     }
 
     @Test
@@ -172,6 +197,23 @@ public class WithdrawHearingActionTest {
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
+    }
+
+    private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,
+                                                          String entityName) {
+        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == entityId)
+            .findFirst().get();
+        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entityName);
+        assertThat(hearingUserTransactionData.getAction()).isEqualTo("update");
+        assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("update");
+    }
+
+    private void assertThatContainsEntity(List<UserTransactionData> userTransactionData, String entity, UUID id) {
+        val hearingUserTransactionData = userTransactionData.stream().filter(utd -> utd.getEntityId() == id)
+            .findFirst().get();
+        assertThat(hearingUserTransactionData.getEntity()).isEqualTo(entity);
+        assertThat(hearingUserTransactionData.getAction()).isEqualTo("lock");
+        assertThat(hearingUserTransactionData.getCounterAction()).isEqualTo("unlock");
     }
 
     private void assertThatAllMsgsAreTypeOf(List<FactMessage> factMessages, String type) {
