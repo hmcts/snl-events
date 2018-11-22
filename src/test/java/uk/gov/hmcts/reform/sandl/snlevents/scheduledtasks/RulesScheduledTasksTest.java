@@ -28,7 +28,7 @@ public class RulesScheduledTasksTest {
         doNothing().when(reloadRulesService).reloadDateAndTimeIfNeeded();
 
         rulesScheduledTasks.reloadRulesFactsFromDb();
-        rulesScheduledTasks.setDateAndTime();
+        rulesScheduledTasks.setRulesDateAndTime();
 
         verify(reloadRulesService, times(1)).reloadIfNeeded();
         verify(reloadRulesService, times(1)).reloadDateAndTimeIfNeeded();
