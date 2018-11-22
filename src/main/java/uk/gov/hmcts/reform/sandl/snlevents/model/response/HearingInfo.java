@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 
 import java.io.Serializable;
@@ -32,6 +33,7 @@ public class HearingInfo implements Serializable {
     private Long version;
     private int numberOfSessions;
     private boolean multiSession;
+    private Status status;
 
     public HearingInfo(Hearing hearing) {
         this.setId(hearing.getId());
@@ -49,5 +51,6 @@ public class HearingInfo implements Serializable {
         this.setVersion(hearing.getVersion());
         this.setNumberOfSessions(hearing.getNumberOfSessions());
         this.setMultiSession(hearing.isMultiSession());
+        this.setStatus(hearing.getStatus().getStatus());
     }
 }
