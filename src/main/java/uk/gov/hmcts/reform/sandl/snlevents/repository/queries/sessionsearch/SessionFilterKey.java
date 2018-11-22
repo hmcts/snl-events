@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import lombok.Getter;
 import lombok.val;
-import org.assertj.core.util.Maps;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
@@ -105,7 +104,8 @@ public enum SessionFilterKey {
 
     public WhereClauseInfo getWherePredicate() {
         String whereClause = null;
-        Map<String, Object> keyValuePairs = Maps.newHashMap(getKey(), getSqlValue());
+        Map<String, Object> keyValuePairs = new HashMap<>();
+        keyValuePairs.put(getKey(), getSqlValue());
         switch (this) {
             case START_DATE:
                 whereClause = String.format(" AND %s > :%s ", getColumnName(), getKey());
@@ -157,7 +157,8 @@ public enum SessionFilterKey {
 
     private WhereClauseInfo createInClause() {
         String whereClause;
-        Map<String, Object> keyValuePairs = Maps.newHashMap(getKey(), getSqlValue());
+        Map<String, Object> keyValuePairs = new HashMap<>();
+        keyValuePairs.put(getKey(), getSqlValue());
 
         if (searchCriteria.getOperation() == ComparisonOperations.IN_OR_NULL) {
             val filteredValues = ((List<String>)this.getOriginalValue())
