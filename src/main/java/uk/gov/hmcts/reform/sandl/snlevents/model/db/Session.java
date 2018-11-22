@@ -46,7 +46,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Audited
 @EntityListeners(AuditingEntityListener.class)
 
-@SqlResultSetMappings({
+@SqlResultSetMappings({ //NOSONAR
     @SqlResultSetMapping(name = "MapToSessionSearchResponse",
     classes = {
         @ConstructorResult(
