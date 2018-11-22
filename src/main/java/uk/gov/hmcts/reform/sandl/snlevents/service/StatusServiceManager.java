@@ -19,8 +19,7 @@ public class StatusServiceManager {
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
 
     // @TODO: introduce Validator classes instead of puting all the logic into one file e.g. AdjournValidator,
-    public StatusServiceManager()
-    {
+    public StatusServiceManager() {
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
             checkIfAdjournCanBePerformed));
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeWithdrawn,
