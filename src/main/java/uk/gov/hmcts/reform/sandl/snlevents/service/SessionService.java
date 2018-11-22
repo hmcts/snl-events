@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -253,7 +252,10 @@ public class SessionService {
         UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(),
             userTransactionDataList);
 
-        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapUpdateSessionToRuleJsonMessage(session, hearingParts);
+        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapUpdateSessionToRuleJsonMessage(
+            session,
+            hearingParts
+        );
 
         rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, sessionWithHpFacts.getSessionFact());
 

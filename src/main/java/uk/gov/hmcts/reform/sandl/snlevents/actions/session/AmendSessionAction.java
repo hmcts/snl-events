@@ -80,7 +80,8 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(session, hearingParts);
+        SessionWithHearingPartsFacts sessionWithHpFacts =
+            factsMapper.mapDbSessionToRuleJsonMessage(session, hearingParts);
         List<FactMessage> facts = sessionWithHpFacts.getHearingPartsFacts().stream().map(hpFact ->
             new FactMessage(RulesService.UPSERT_HEARING_PART, hpFact)
         ).collect(Collectors.toList());
