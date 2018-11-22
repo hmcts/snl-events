@@ -42,6 +42,8 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     protected EntityManager entityManager;
 
     private String previousHearing;
+    private String action = "update";
+    private String counterAction = "update";
 
     public WithdrawHearingAction(
         WithdrawHearingRequest withdrawHearingRequest,
@@ -116,9 +118,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        String action = "update";
-        String counterAction = "update";
-
         return UserTransactionDataPreparerService.generateUserTransactionData(hearing, previousHearing, hearingParts,
             objectMapper, sessions, action, counterAction);
     }
