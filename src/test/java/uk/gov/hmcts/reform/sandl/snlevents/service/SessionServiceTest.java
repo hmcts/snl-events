@@ -5,6 +5,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
@@ -87,7 +88,7 @@ public class SessionServiceTest {
     private UserTransactionService userTransactionService;
     @Mock
     private ObjectMapper objectMapper;
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private FactsMapper factsMapper;
     @Mock
     private RulesService rulesService;

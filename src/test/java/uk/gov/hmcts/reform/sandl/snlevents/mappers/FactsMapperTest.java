@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 public class FactsMapperTest {
@@ -77,8 +78,10 @@ public class FactsMapperTest {
     }
 
     @Test
-    public void mapUpdateSessionToRuleJsonMessage_mapsOk() throws JsonProcessingException {
-        val mapped = factsMapper.mapUpdateSessionToRuleJsonMessage(createSession(), Collections.emptyList());
+    public void mapUpdateSessionToRuleJsonMessage_mapsOk() {
+        val sessionWithHearingPartsFacts = factsMapper
+            .mapUpdateSessionToRuleJsonMessage(createSession(), Collections.emptyList());
+
         val expected = "{"
             + "\"id\":\"" + ID + "\","
             + "\"judgeId\":\"" + PERSON_ID + "\","
@@ -88,48 +91,43 @@ public class FactsMapperTest {
             + "\"sessionType\":\"" + SESSION_TYPE + "\""
             + "}";
 
-        assertThat(mapped).isEqualTo(expected);
+        assertThat(sessionWithHearingPartsFacts.getSessionFact()).isEqualTo(expected);
+        assertTrue(sessionWithHearingPartsFacts.getHearingPartsFacts().isEmpty());
     }
 
-    private Hearing createHearing() {
-        val h = new Hearing();
-        h.setId(createUuid());
-        h.setDuration(createDuration());
-        h.setCaseType(CASE_TYPE);
-        h.setHearingType(HEARING_TYPE);
-        h.setScheduleStart(START);
-        h.setScheduleEnd(END);
-        h.setCreatedAt(START);
-        val hp = new HearingPart();
-        hp.setId(createUuid(HP_ID));
-        hp.setHearing(h);
-        hp.setSessionId(createUuid(SESSION_ID));
-        h.setHearingParts(Arrays.asList(hp));
+    @Test
+    public void mapUpdateSessionToRuleJsonMessage_SessionWithHearingPart_MapsSessionAndHearingsParts() {
+        val session = createHearingPart().getSession();
+        val sessionWithHearingPartsFacts = factsMapper
+            .mapUpdateSessionToRuleJsonMessage(session, session.getHearingParts());
 
-        return h;
-    }
+        val expectedSessionFact = "{"
+            + "\"id\":\"" + SESSION_ID + "\","
+            + "\"judgeId\":\"" + PERSON_ID + "\","
+            + "\"start\":\"" + START_MAPPED + "\","
+            + "\"duration\":" + DURATION_MAPPED + ","
+            + "\"roomId\":\"" + ROOM_ID + "\","
+            + "\"sessionType\":\"" + SESSION_TYPE + "\""
+            + "}";
 
-    private HearingPart createHearingPart() {
-        val h = new Hearing();
-        h.setId(createUuid());
-        h.setDuration(createDuration());
-        h.setCaseType(CASE_TYPE);
-        h.setHearingType(HEARING_TYPE);
-        h.setScheduleStart(START);
-        h.setScheduleEnd(END);
-        h.setCreatedAt(START);
-        val hp = new HearingPart();
-        hp.setId(createUuid(HP_ID));
-        hp.setSessionId(createUuid(SESSION_ID));
-        h.setHearingParts(Arrays.asList(hp));
-        hp.setHearing(h);
+        val expectedHearingPartFact = "{\"id\":\"d26119ab-f3fa-47c9-9733-047b744a0c8a\","
+            + "\"sessionId\":\"" + SESSION_ID + "\","
+            + "\"caseTypeCode\":\"case-type\","
+            + "\"hearingTypeCode\":\"hearing-type-2\","
+            + "\"duration\":86400,"
+            + "\"scheduleStart\":\"-999999999-01-01T00:00:00+18:00\","
+            + "\"scheduleEnd\":\"+999999999-12-31T23:59:59.999999999-18:00\","
+            + "\"createdAt\":\"-999999999-01-01T00:00:00+18:00\"}";
 
-        return hp;
+        assertThat(sessionWithHearingPartsFacts.getSessionFact()).isEqualTo(expectedSessionFact);
+        assertThat(sessionWithHearingPartsFacts.getHearingPartsFacts().size()).isEqualTo(1);
+        assertThat(sessionWithHearingPartsFacts.getHearingPartsFacts().get(0)).isEqualTo(expectedHearingPartFact);
     }
 
     @Test
     public void mapDbSessionToRuleJsonMessage_mapsOk() {
-        val mapped = factsMapper.mapDbSessionToRuleJsonMessage(createSession(), Collections.emptyList());
+        val mapped = factsMapper.mapDbSessionToRuleJsonMessage(createSession(), Collections.emptyList())
+            .getSessionFact();
         val expected = "{"
             + "\"id\":\"" + ID + "\","
             + "\"judgeId\":\"" + PERSON_ID + "\","
@@ -209,10 +207,10 @@ public class FactsMapperTest {
     }
 
     @Test
-    public void mapHearingPartToRuleJsonMessage_mapsOk() throws JsonProcessingException {
+    public void mapHearingPartToRuleJsonMessage_mapsOk() {
         val mapped = factsMapper.mapHearingPartToRuleJsonMessage(createHearingPart());
         val expected = "{\"id\":\"d26119ab-f3fa-47c9-9733-047b744a0c8a\","
-            + "\"sessionId\":null,"
+            + "\"sessionId\":\"" + SESSION_ID + "\","
             + "\"caseTypeCode\":\"case-type\","
             + "\"hearingTypeCode\":\"hearing-type-2\","
             + "\"duration\":86400,"
@@ -222,6 +220,48 @@ public class FactsMapperTest {
 
         assertThat(mapped).isEqualTo(expected);
     }
+
+    @Test
+    public void mapHearingPartToRuleJsonMessage_WhenHearingIsMultiSession_ShouldSetSessionDurationAsHPartDuration() {
+        val hearingPart = createHearingPart();
+        val session = hearingPart.getSession();
+        val hearing = hearingPart.getHearing();
+        hearing.setMultiSession(true);
+
+        val expectedHearingPartFact = "{\"id\":\"d26119ab-f3fa-47c9-9733-047b744a0c8a\","
+            + "\"sessionId\":\"" + SESSION_ID + "\","
+            + "\"caseTypeCode\":\"case-type\","
+            + "\"hearingTypeCode\":\"hearing-type-2\","
+            + "\"duration\":" + session.getDuration().getSeconds() + ","
+            + "\"scheduleStart\":\"-999999999-01-01T00:00:00+18:00\","
+            + "\"scheduleEnd\":\"+999999999-12-31T23:59:59.999999999-18:00\","
+            + "\"createdAt\":\"-999999999-01-01T00:00:00+18:00\"}";
+
+        val hearingPartFact = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+
+        assertThat(hearingPartFact).isEqualTo(expectedHearingPartFact);
+    }
+
+    @Test
+    public void mapHearingPartToRuleJsonMessage_WhenHearingIsMultiSession_ShouldSetHearingDurationAsHPartDuration() {
+        val hearingPart = createHearingPart();
+        val hearing = hearingPart.getHearing();
+        hearing.setMultiSession(true);
+
+        val expectedHearingPartFact = "{\"id\":\"d26119ab-f3fa-47c9-9733-047b744a0c8a\","
+            + "\"sessionId\":\"" + SESSION_ID + "\","
+            + "\"caseTypeCode\":\"case-type\","
+            + "\"hearingTypeCode\":\"hearing-type-2\","
+            + "\"duration\":" + hearing.getDuration().getSeconds() + ","
+            + "\"scheduleStart\":\"-999999999-01-01T00:00:00+18:00\","
+            + "\"scheduleEnd\":\"+999999999-12-31T23:59:59.999999999-18:00\","
+            + "\"createdAt\":\"-999999999-01-01T00:00:00+18:00\"}";
+
+        val hearingPartFact = factsMapper.mapHearingPartToRuleJsonMessage(hearingPart);
+
+        assertThat(hearingPartFact).isEqualTo(expectedHearingPartFact);
+    }
+
 
     @Test
     public void mapTimeToRuleJsonMessage_mapsOk() throws JsonProcessingException {
@@ -275,6 +315,48 @@ public class FactsMapperTest {
         st.addCaseType(new CaseType(CASE_TYPE_CODE, CASE_TYPE_DESC));
         st.addCaseType(new CaseType(CASE_TYPE_2, CASE_TYPE_DESC_2));
         return st;
+    }
+
+    private Hearing createHearing() {
+        val h = new Hearing();
+        h.setId(createUuid());
+        h.setDuration(createDuration());
+        h.setCaseType(CASE_TYPE);
+        h.setHearingType(HEARING_TYPE);
+        h.setScheduleStart(START);
+        h.setScheduleEnd(END);
+        h.setCreatedAt(START);
+        val hp = new HearingPart();
+        hp.setId(createUuid(HP_ID));
+        hp.setHearing(h);
+        hp.setSessionId(createUuid(SESSION_ID));
+        h.setHearingParts(Arrays.asList(hp));
+
+        return h;
+    }
+
+    private HearingPart createHearingPart() {
+        val h = new Hearing();
+        h.setId(createUuid());
+        h.setDuration(createDuration());
+        h.setCaseType(CASE_TYPE);
+        h.setHearingType(HEARING_TYPE);
+        h.setScheduleStart(START);
+        h.setScheduleEnd(END);
+        h.setCreatedAt(START);
+
+        val session = createSession();
+        session.setId(createUuid(SESSION_ID));
+
+        val hp = new HearingPart();
+        hp.setId(createUuid(HP_ID));
+        hp.setSession(session);
+        h.setHearingParts(Arrays.asList(hp));
+        hp.setHearing(h);
+
+        session.addHearingPart(hp);
+
+        return hp;
     }
 
     private UUID createUuid() {

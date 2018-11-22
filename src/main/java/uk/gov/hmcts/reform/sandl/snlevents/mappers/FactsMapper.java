@@ -110,7 +110,7 @@ public class FactsMapper {
                 .map(hp -> mapHearingPartToRuleJsonMessage(hp))
                 .collect(Collectors.toList());
         } catch (JsonProcessingException e) {
-            throw new WebServiceException("Cannot map session or its hearing part to fact", e);
+            throw new SnlRuntimeException("Cannot map session or its hearing part to fact " + e.getMessage());
         }
 
         return new SessionWithHearingPartsFacts(sessionMsg, hearingPartsMsg);
