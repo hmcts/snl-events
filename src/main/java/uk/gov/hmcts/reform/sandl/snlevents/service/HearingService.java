@@ -19,12 +19,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import static uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository.HEARING_FOR_LISTING_COUNT_QUERY;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository.HEARING_FOR_LISTING_QUERY;
 
 @Service
@@ -65,7 +67,15 @@ public class HearingService {
         sqlQuery.setFirstResult(page.orElseGet(() -> Integer.valueOf(1)) * size.orElseGet(() -> Integer.valueOf(100)));
         sqlQuery.setMaxResults(size.orElseGet(() -> Integer.valueOf(100)));
 
-        return new PageImpl<HearingForListingResponse>(sqlQuery.getResultList());
+        BigInteger totalCount = getHearingsForListingCount();
+
+        return new PageImpl<HearingForListingResponse>(sqlQuery.getResultList(), null, totalCount.longValue());
+    }
+
+    public BigInteger getHearingsForListingCount() {
+        Query sqlQuery = entityManager.createNativeQuery(HEARING_FOR_LISTING_COUNT_QUERY);
+
+        return (BigInteger) sqlQuery.getSingleResult();
     }
 
     public UserTransaction unlist(UnlistHearingRequest unlistHearingRequest) {
