@@ -245,7 +245,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
         // When assign hearing part to session it should set utilisation
         Hearing hearing = createHearing(HALF_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
-        HearingPart hearingPart = new HearingPart();
+        HearingPart hearingPart = createHearingPart(UUID.randomUUID());
         hearingPart.setId(hearingPartId);
         hearingPart.setHearing(hearing);
         hearingPart.setSession(sessionWithSingleHearingPart);
@@ -280,8 +280,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
         // When assign hearing part to session it should set utilisation
         Hearing hearing = createHearing(HALF_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(hearingPartId);
+        HearingPart hearingPart = createHearingPart(hearingPartId);
         hearingPart.setHearing(hearing);
         hearingPart.setSession(sessionWithSingleHearingPart);
 
@@ -313,8 +312,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
 
         Hearing hearing = createHearing(ONE_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(hearingPartId);
+        HearingPart hearingPart = createHearingPart(hearingPartId);
         hearingPart.setHearing(hearing);
         hearingPart.setSession(sessionWithSingleHearingPart);
 
@@ -342,8 +340,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
 
         Hearing hearing = createHearing(ONE_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(hearingPartId);
+        HearingPart hearingPart = createHearingPart(hearingPartId);
         hearingPart.setHearing(hearing);
         hearingPart.setSession(sessionWithSingleHearingPart);
 
@@ -379,8 +376,7 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
 
         Hearing hearing = createHearing(HALF_HOUR, null, false);
         UUID hearingPartId = UUID.randomUUID();
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(hearingPartId);
+        HearingPart hearingPart = createHearingPart(hearingPartId);
         hearingPart.setHearing(hearing);
         hearingPart.setSession(sessionWithSingleHearingPart);
 

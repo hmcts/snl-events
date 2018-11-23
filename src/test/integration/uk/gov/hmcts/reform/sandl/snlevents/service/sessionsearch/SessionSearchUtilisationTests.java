@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.sandl.snlevents.service.sessionsearch;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionSelectColumn;
 
@@ -38,8 +40,7 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Session session = createSession(ONE_HOUR, UUID.randomUUID(), null, null, null);
 
         Hearing hearing = createHearing(HALF_HOUR, null, false);
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(UUID.randomUUID());
+        HearingPart hearingPart = createHearingPart(UUID.randomUUID());
         hearingPart.setHearing(hearing);
         hearingPart.setSession(session);
 
@@ -59,14 +60,12 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Session session = createSession(ONE_HOUR, UUID.randomUUID(), null, null, null);
 
         Hearing hearingA = createHearing(HALF_HOUR, null, false);
-        HearingPart hearingPartA = new HearingPart();
-        hearingPartA.setId(UUID.randomUUID());
+        HearingPart hearingPartA = createHearingPart(UUID.randomUUID());
         hearingPartA.setHearing(hearingA);
         hearingPartA.setSession(session);
 
         Hearing hearingB = createHearing(HALF_HOUR, null, false);
-        HearingPart hearingPartB = new HearingPart();
-        hearingPartB.setId(UUID.randomUUID());
+        HearingPart hearingPartB = createHearingPart(UUID.randomUUID());
         hearingPartB.setHearing(hearingB);
         hearingPartB.setSession(session);
 
@@ -93,13 +92,11 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         sessionRepository.saveAndFlush(sessionB);
 
         Hearing hearing = createHearing(HALF_HOUR, null, true);
-        HearingPart hearingPartA = new HearingPart();
-        hearingPartA.setId(UUID.randomUUID());
+        HearingPart hearingPartA = createHearingPart(UUID.randomUUID());
         hearingPartA.setHearing(hearing);
         hearingPartA.setSession(sessionA);
 
-        HearingPart hearingPartB = new HearingPart();
-        hearingPartB.setId(UUID.randomUUID());
+        HearingPart hearingPartB = createHearingPart(UUID.randomUUID());
         hearingPartB.setHearing(hearing);
         hearingPartB.setSession(sessionB);
 
@@ -121,14 +118,12 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Session sessionA = createSession(ONE_HOUR, sessionIdA, null, null, null);
 
         Hearing multipleHearing = createHearing(HALF_HOUR, null, true);
-        HearingPart hearingPartA = new HearingPart();
-        hearingPartA.setId(UUID.randomUUID());
+        HearingPart hearingPartA = createHearingPart(UUID.randomUUID());
         hearingPartA.setHearing(multipleHearing);
         hearingPartA.setSession(sessionA);
 
         Hearing singleHearing = createHearing(HALF_HOUR, null, false);
-        HearingPart hearingPartB = new HearingPart();
-        hearingPartB.setId(UUID.randomUUID());
+        HearingPart hearingPartB = createHearingPart(UUID.randomUUID());
         hearingPartB.setHearing(singleHearing);
         hearingPartB.setSession(sessionA);
 
@@ -151,14 +146,12 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Session sessionA = createSession(ONE_HOUR, sessionIdA, null, null, null);
 
         Hearing multipleHearing = createHearing(HALF_HOUR, null, true);
-        HearingPart hearingPartA = new HearingPart();
-        hearingPartA.setId(UUID.randomUUID());
+        HearingPart hearingPartA = createHearingPart(UUID.randomUUID());
         hearingPartA.setHearing(multipleHearing);
         hearingPartA.setSession(sessionA);
 
         Hearing singleHearing = createHearing(HALF_HOUR, null, true);
-        HearingPart hearingPartB = new HearingPart();
-        hearingPartB.setId(UUID.randomUUID());
+        HearingPart hearingPartB = createHearingPart(UUID.randomUUID());
         hearingPartB.setHearing(singleHearing);
         hearingPartB.setSession(sessionA);
 
@@ -172,6 +165,53 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
             Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
 
         assertSessionSearchResponse(sessions.getContent().get(0), 200, ONE_HOUR, 2, TWO_HOURS);
+    }
+
+    @Test
+    public void search_whenHearingPartIsDeleted_ShouldNotCountInUtilisation() {
+        UUID sessionIdA = UUID.randomUUID();
+        Session sessionA = createSession(ONE_HOUR, sessionIdA, null, null, null);
+
+        Hearing hearing = createHearing(HALF_HOUR, null, false);
+        HearingPart hearingPartA = createHearingPart(UUID.randomUUID());
+        hearingPartA.setHearing(hearing);
+        hearingPartA.setSession(sessionA);
+        hearingPartA.setDeleted(true);
+
+        hearingRepository.saveAndFlush(hearing);
+        sessionRepository.saveAndFlush(sessionA);
+        hearingPartRepository.saveAndFlush(hearingPartA);
+
+        Page<SessionSearchResponse> sessions = sessionService.searchForSession(
+            Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
+
+        assertSessionSearchResponse(sessions.getContent().get(0), 0, ONE_HOUR, 1, ZERO_MINUTES);
+    }
+
+    @Test
+    public void search_whenHearingPartIsUnlisted_ShouldNotCountInUtilisation() {
+        Session sessionA = createSession(ONE_HOUR, null, null, null, null);
+
+        Hearing hearing = createHearing(HALF_HOUR, null, false);
+        HearingPart hearingPartA = createHearingPart(UUID.randomUUID());
+        hearingPartA.setHearing(hearing);
+        hearingPartA.setSession(sessionA);
+
+        StatusConfig unlisted = statusConfigRepository.findAll()
+            .stream()
+            .filter(sc -> sc.getStatus().equals(Status.Unlisted))
+            .findFirst()
+            .get();
+        hearingPartA.setStatus(unlisted);
+
+        hearingRepository.saveAndFlush(hearing);
+        sessionRepository.saveAndFlush(sessionA);
+        hearingPartRepository.saveAndFlush(hearingPartA);
+
+        Page<SessionSearchResponse> sessions = sessionService.searchForSession(
+            Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
+
+        assertSessionSearchResponse(sessions.getContent().get(0), 0, ONE_HOUR, 1, ZERO_MINUTES);
     }
 
     private void assertSessionSearchResponse(SessionSearchResponse sessionSearchResponse,

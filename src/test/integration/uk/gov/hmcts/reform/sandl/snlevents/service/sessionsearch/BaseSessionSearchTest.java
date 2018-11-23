@@ -1,18 +1,23 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service.sessionsearch;
 
+import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.StatusConfigRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.SessionService;
 
 import java.time.Duration;
@@ -29,6 +34,7 @@ public abstract class BaseSessionSearchTest extends BaseIntegrationTest {
     private final CaseType caseType = new CaseType("small-claims", "SC");
     private final HearingType hearingType = new HearingType("trial", "Trial");
 
+    protected static final Duration ZERO_MINUTES = Duration.ofMinutes(0);
     protected static final Duration HALF_HOUR = Duration.ofMinutes(30);
     protected static final Duration ONE_HOUR = Duration.ofMinutes(60);
     protected static final Duration ONE_AND_HALF_HOUR = Duration.ofMinutes(90);
@@ -36,15 +42,30 @@ public abstract class BaseSessionSearchTest extends BaseIntegrationTest {
 
     protected static final PageRequest FIRST_PAGE = new PageRequest(0, 10);
 
+    protected static StatusConfig listedStatus;
+
     @Autowired
     protected HearingRepository hearingRepository;
     @Autowired
     protected SessionRepository sessionRepository;
     @Autowired
     protected HearingPartRepository hearingPartRepository;
+    @Autowired
+    protected StatusConfigRepository statusConfigRepository;
 
     @Autowired
     protected SessionService sessionService;
+
+
+    @Before
+    public void beforeUtilisationTest() {
+        listedStatus = statusConfigRepository
+            .findAll()
+            .stream()
+            .filter(sc -> sc.getStatus().equals(Status.Listed))
+            .findFirst()
+            .get();
+    }
 
     protected Session createSession(Duration duration, UUID uuid, Person person, Room room, OffsetDateTime start) {
         Duration defaultDuration = Duration.ofMinutes(30);
@@ -88,5 +109,13 @@ public abstract class BaseSessionSearchTest extends BaseIntegrationTest {
         hearing.setMultiSession(isMultisession);
 
         return hearing;
+    }
+
+    protected HearingPart createHearingPart(UUID uuid) {
+        HearingPart hp = new HearingPart();
+        hp.setId(uuid != null ? uuid : UUID.randomUUID());
+        hp.setStatus(listedStatus);
+
+        return hp;
     }
 }
