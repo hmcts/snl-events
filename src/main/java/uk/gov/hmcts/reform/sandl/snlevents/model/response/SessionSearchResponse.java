@@ -24,7 +24,7 @@ public class SessionSearchResponse implements Serializable {
     private OffsetDateTime startDate;
     private Duration duration;
     private int noOfHearingPartsAssignedToSession;
-    private Long allocatedDuration;
+    private Duration allocatedDuration;
     private Long utilisation;
     private Duration available;
 }
