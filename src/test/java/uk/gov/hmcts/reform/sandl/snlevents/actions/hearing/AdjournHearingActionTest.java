@@ -26,15 +26,15 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import javax.persistence.EntityManager;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -54,6 +54,7 @@ public class AdjournHearingActionTest {
     private static final UUID TRANSACTION_ID = UUID.randomUUID();
     private StatusesMock statusesMock = new StatusesMock();
     private AdjournHearingAction action;
+
     @Mock
     private HearingRepository hearingRepository;
     @Mock
@@ -62,6 +63,7 @@ public class AdjournHearingActionTest {
     private ObjectMapper objectMapper;
     @Mock
     private EntityManager entityManager;
+
     @Before
     public void setup() {
         Hearing hearing = new Hearing();
@@ -89,6 +91,7 @@ public class AdjournHearingActionTest {
             entityManager
         );
     }
+
     @Test
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
         action.getAndValidateEntities();
@@ -103,10 +106,12 @@ public class AdjournHearingActionTest {
         assertThat(ids.length).isEqualTo(expectedUuids.length);
         assertTrue(Arrays.asList(ids).containsAll(Arrays.asList(expectedUuids)));
     }
+
     @Test
     public void getUserTransactionId_shouldReturnUuid() {
         assertThat(action.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
+
     @Test
     public void generateUserTransactionData_shouldSetProperEntities() {
         action.getAndValidateEntities();
@@ -118,6 +123,7 @@ public class AdjournHearingActionTest {
         assertThatContainsLockedEntity(userTransactionData, "session", SESSION_ID_A);
         assertThatContainsLockedEntity(userTransactionData, "session", SESSION_ID_B);
     }
+
     @Test
     public void generateFactMessages_shouldReturnDeleteMessages() {
         action.getAndValidateEntities();
@@ -125,6 +131,7 @@ public class AdjournHearingActionTest {
         assertThat(generatedFactMsgs.size()).isEqualTo(2);
         assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.DELETE_HEARING_PART);
     }
+
     @Test
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
@@ -136,6 +143,7 @@ public class AdjournHearingActionTest {
             assertNull(hp.getSession());
         });
     }
+
     @Test
     public void act_shouldSetProperStatuses() {
         action.getAndValidateEntities();
@@ -150,6 +158,7 @@ public class AdjournHearingActionTest {
             }
         });
     }
+
     @Test(expected = SnlRuntimeException.class)
     public void act_whenObjectIsInvalid_shouldThrowSnlRuntimeException() throws JsonProcessingException {
         action.getAndValidateEntities();
