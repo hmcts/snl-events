@@ -148,7 +148,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
         hearingParts.forEach(hp -> {
             String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            msgs.add(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
+            msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
         });
 
         return msgs;
