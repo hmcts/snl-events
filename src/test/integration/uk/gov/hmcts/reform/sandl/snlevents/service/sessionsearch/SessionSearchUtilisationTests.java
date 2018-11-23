@@ -9,11 +9,13 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionSelectColumn;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.UUID;
 import javax.transaction.Transactional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Transactional
 public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
@@ -48,7 +50,8 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Page<SessionSearchResponse> sessions = sessionService.searchForSession(
             Collections.emptyList(), FIRST_PAGE, null, null);
         SessionSearchResponse sessionSearchResponse = sessions.getContent().get(0);
-        assertEquals(50, sessionSearchResponse.getUtilisation().longValue());
+
+        assertSessionSearchResponse(sessionSearchResponse, 50, ONE_HOUR, 1, HALF_HOUR);
     }
 
     @Test
@@ -76,7 +79,8 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Page<SessionSearchResponse> sessions = sessionService.searchForSession(
             Collections.emptyList(), FIRST_PAGE, null, null);
         SessionSearchResponse sessionSearchResponse = sessions.getContent().get(0);
-        assertEquals(100, sessionSearchResponse.getUtilisation().longValue());
+
+        assertSessionSearchResponse(sessionSearchResponse, 100, ONE_HOUR, 2, ONE_HOUR);
     }
 
     @Test
@@ -84,7 +88,7 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         UUID sessionIdA = UUID.randomUUID();
         Session sessionA = createSession(ONE_HOUR, sessionIdA, null, null, null);
         UUID sessionIdB = UUID.randomUUID();
-        Session sessionB = createSession(TWO_HOUR, sessionIdB, null, null, null);
+        Session sessionB = createSession(TWO_HOURS, sessionIdB, null, null, null);
         sessionRepository.saveAndFlush(sessionA);
         sessionRepository.saveAndFlush(sessionB);
 
@@ -106,8 +110,9 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Page<SessionSearchResponse> sessions = sessionService.searchForSession(
             Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
 
-        assertEquals(100, sessions.getContent().get(0).getUtilisation().longValue());
-        assertEquals(100, sessions.getContent().get(1).getUtilisation().longValue());
+        assertSessionSearchResponse(sessions.getContent().get(0), 100, ONE_HOUR, 1, ONE_HOUR);
+        assertSessionSearchResponse(sessions.getContent().get(1), 100, TWO_HOURS, 1, TWO_HOURS);
+
     }
 
     @Test
@@ -136,6 +141,8 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Page<SessionSearchResponse> sessions = sessionService.searchForSession(
             Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
         assertEquals(150, sessions.getContent().get(0).getUtilisation().longValue());
+
+        assertSessionSearchResponse(sessions.getContent().get(0), 150, ONE_HOUR, 2, ONE_AND_HALF_HOUR);
     }
 
     @Test
@@ -163,6 +170,18 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
 
         Page<SessionSearchResponse> sessions = sessionService.searchForSession(
             Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
-        assertEquals(200, sessions.getContent().get(0).getUtilisation().longValue());
+
+        assertSessionSearchResponse(sessions.getContent().get(0), 200, ONE_HOUR, 2, TWO_HOURS);
+    }
+
+    private void assertSessionSearchResponse(SessionSearchResponse sessionSearchResponse,
+                                             long expectedUtilisation,
+                                             Duration expectedDuration,
+                                             int expectedHearingPartsCount,
+                                             Duration expectedAllocatedDuration) {
+        assertEquals(expectedUtilisation, sessionSearchResponse.getUtilisation().longValue());
+        assertTrue(sessionSearchResponse.getDuration().equals(expectedDuration));
+        assertEquals(expectedHearingPartsCount, sessionSearchResponse.getNoOfHearingPartsAssignedToSession());
+        assertEquals(expectedAllocatedDuration.getSeconds(), sessionSearchResponse.getAllocatedDuration().getSeconds());
     }
 }

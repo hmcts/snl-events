@@ -31,7 +31,8 @@ public abstract class BaseSessionSearchTest extends BaseIntegrationTest {
 
     protected static final Duration HALF_HOUR = Duration.ofMinutes(30);
     protected static final Duration ONE_HOUR = Duration.ofMinutes(60);
-    protected static final Duration TWO_HOUR = Duration.ofMinutes(120);
+    protected static final Duration ONE_AND_HALF_HOUR = Duration.ofMinutes(90);
+    protected static final Duration TWO_HOURS = Duration.ofMinutes(120);
 
     protected static final PageRequest FIRST_PAGE = new PageRequest(0, 10);
 
