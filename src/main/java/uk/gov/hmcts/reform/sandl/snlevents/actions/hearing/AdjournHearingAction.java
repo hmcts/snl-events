@@ -73,7 +73,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        // Validation moved to act() due to conflict with optimistic lock
 
         if (!statusServiceManager.canBeAdjourned(hearing)) {
             throw new SnlEventsException("Hearing can not be adjourned");
@@ -82,11 +81,8 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        val ids = hearing.getHearingParts().stream().map(HearingPart::getId).collect(Collectors.toList());
-        ids.addAll(hearing.getHearingParts().stream()
-            .map(HearingPart::getSessionId)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList()));
+        val ids = hearingParts.stream().map(HearingPart::getId).collect(Collectors.toList());
+        ids.addAll(sessions.stream().map(Session::getId).collect(Collectors.toList()));
         ids.add(adjournHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);
