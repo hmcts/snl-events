@@ -74,9 +74,11 @@ public class HearingController {
     @GetMapping(path = "/for-listing", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<HearingForListingResponse> getCanBeListed(
         @RequestParam(value = "page", required = false) Optional<Integer> page,
-        @RequestParam(value = "size", required = false) Optional<Integer> size) {
+        @RequestParam(value = "size", required = false) Optional<Integer> size,
+        @RequestParam(value = "sortByProperty", required = false) Optional<String> sortByProperty,
+        @RequestParam(value = "sortByDirection", required = false) Optional<String> sortByDirection) {
 
-        return hearingService.getHearingsForListing(page, size);
+        return hearingService.getHearingsForListing(page, size, sortByProperty, sortByDirection);
     }
 
     @GetMapping(path = "/{id}/for-amendment", produces = MediaType.APPLICATION_JSON_VALUE)
