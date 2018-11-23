@@ -39,6 +39,7 @@ public class HearingWithSessionsResponse {
     private List<ViewSessionResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
     private PossibleActions possibleActions;
+    private long version;
 
     @JsonIgnore
     private StatusConfig statusConfig;
@@ -62,6 +63,7 @@ public class HearingWithSessionsResponse {
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.status = hearing.getStatus() != null ? hearing.getStatus().getStatus() : null;
         this.statusConfig = hearing.getStatus();
+        this.version = hearing.getVersion() != null ? hearing.getVersion() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() != null)

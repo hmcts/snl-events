@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -45,6 +44,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class WithdrawHearingActionTest {
     private static final UUID HEARING_ID_TO_BE_WITHDRAWN = UUID.randomUUID();
+    private static final Long HEARING_VERSION_TO_BE_WITHDRAWN = 0L;
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
     private static final UUID HEARING_PART_ID_B = UUID.randomUUID();
@@ -75,6 +75,7 @@ public class WithdrawHearingActionTest {
         hearing.setHearingType(new HearingType("ht-code", "ht-desc"));
         hearing.setId(HEARING_ID_TO_BE_WITHDRAWN);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setHearingParts(Arrays.asList(
             createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
                 hearing, SESSION_ID_A, Status.Listed),
@@ -198,6 +199,7 @@ public class WithdrawHearingActionTest {
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_whenHearingStatusCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
+        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
@@ -223,13 +225,5 @@ public class WithdrawHearingActionTest {
 
     private void assertThatAllMsgsAreTypeOf(List<FactMessage> factMessages, String type) {
         factMessages.stream().forEach(fm -> assertThat(fm.getType()).isEqualTo(type));
-    }
-
-    private static VersionInfo getVersionInfo(UUID id, Long version) {
-        VersionInfo vi = new VersionInfo();
-        vi.setId(id);
-        vi.setVersion(version);
-
-        return vi;
     }
 }
