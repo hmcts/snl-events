@@ -51,17 +51,17 @@ public class HearingWithSessionsResponse {
         this.id = hearing.getId();
         this.caseNumber = hearing.getCaseNumber();
         this.caseTitle = hearing.getCaseTitle();
-        this.caseType = hearing.getCaseType().getDescription();
-        this.hearingType = hearing.getHearingType().getDescription();
+        this.caseType = hearing.getCaseType() != null ? hearing.getCaseType().getDescription() : null;
+        this.hearingType = hearing.getHearingType() != null ? hearing.getHearingType().getDescription() : null;
         this.duration = hearing.getDuration();
         this.numberOfSessions = hearing.getNumberOfSessions();
         this.isMultiSession = hearing.isMultiSession();
         this.scheduleStart = hearing.getScheduleStart();
         this.scheduleEnd = hearing.getScheduleEnd();
-        this.priority = hearing.getPriority().toString();
+        this.priority = hearing.getPriority() != null ? hearing.getPriority().toString() : null;
         this.communicationFacilitator = hearing.getCommunicationFacilitator();
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
-        this.status = hearing.getStatus().getStatus();
+        this.status = hearing.getStatus() != null ? hearing.getStatus().getStatus() : null;
         this.statusConfig = hearing.getStatus();
         this.sessions = hearing.getHearingParts()
             .stream()
@@ -80,6 +80,6 @@ public class HearingWithSessionsResponse {
             this.listingDate = this.sessions.get(0).getStart(); // TODO: reimplement whole
             // thing to use native query instead of JPA Entity
         }
-        this.hearingVersion = hearing.getVersion();
+        this.hearingVersion = hearing.getVersion() != null ? hearing.getVersion() : null;
     }
 }
