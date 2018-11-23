@@ -40,6 +40,7 @@ public class HearingWithSessionsResponseTests {
     private static final Priority PRIORITY = Priority.High;
     private static final String COMMUNICATION_FACILITATOR = "communication-facilitator";
     private static final String JUDGE_NAME = "judge-name";
+    private static final Long VERSION = 0L;
 
     @Test
     public void hearingWithSessionsResponseConstructor_mapsHearingFromDb() {
@@ -91,6 +92,7 @@ public class HearingWithSessionsResponseTests {
         hearing.setCaseType(createCaseType());
         hearing.setHearingType(createHearingType());
         hearing.setPriority(PRIORITY);
+        hearing.setVersion(VERSION);
 
         val status = new StatusConfig();
         status.setStatus(Status.Listed);
@@ -109,6 +111,7 @@ public class HearingWithSessionsResponseTests {
         hearing.setScheduleEnd(SCHEDULE_END);
         hearing.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         hearing.setReservedJudge(createPerson());
+        hearing.setVersion(VERSION);
         val status = new StatusConfig();
         status.setStatus(Status.Listed);
         hearing.setStatus(status);

@@ -51,6 +51,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class HearingControllerTest {
     public static final String URL = "/hearing";
     private static final UUID ID = java.util.UUID.fromString("f9a3867b-0d15-419d-bd98-40d247139131");
+    private static final Long VERSION = 0L;
 
     @Autowired
     private EventsMockMvc mvc;
@@ -123,6 +124,7 @@ public class HearingControllerTest {
     public void getHearingByIdWithSessionsReturnsHearingWithSessions() throws Exception {
         val hearing = createHearing();
         hearing.setId(ID);
+        hearing.setVersion(VERSION);
 
         when(hearingRepository.findOne(ID)).thenReturn(hearing);
 

@@ -13,12 +13,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.config.TestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -70,6 +72,7 @@ public class HearingPartControllerTest {
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
     public static final UUID RESERVED_JUDGE_ID = UUID.randomUUID();
+    public StatusesMock statusesMock = new StatusesMock();
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
@@ -194,7 +197,8 @@ public class HearingPartControllerTest {
 
     @Test
     public void getHearingPartResponse_shouldReturnValidResponse() throws Exception {
-        when(hearingPartRepository.findOne(createUuid())).thenReturn(createHearingPart());
+        HearingPart hearingPart = createHearingPart();
+        when(hearingPartRepository.findOne(createUuid())).thenReturn(hearingPart);
 
         val response = mvc.getAndMapResponse(URL + "/" + createUuid(),
             HearingPartResponse.class);
@@ -246,6 +250,7 @@ public class HearingPartControllerTest {
         val hearing = new Hearing();
         hearing.setCaseType(new CaseType());
         hearing.setHearingType(new HearingType());
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         return hearing;
     }

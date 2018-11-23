@@ -15,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 public class StatusServiceManagerTest {
-
-    StatusServiceManager statusServiceManager = new StatusServiceManager();
+    private static final Long VERSION = 0L;
+    private StatusServiceManager statusServiceManager = new StatusServiceManager();
 
     @Test
     public void shouldGiveProperValues_whenEntityHasListedStatus() {
@@ -38,6 +38,7 @@ public class StatusServiceManagerTest {
 
     private Hearing createHearingWithStatus(StatusConfig status) {
         val hearing = new Hearing();
+        hearing.setVersion(VERSION);
         hearing.setStatus(status);
 
         return hearing;
@@ -55,6 +56,9 @@ public class StatusServiceManagerTest {
         status.setStatus(Status.Listed);
         status.setCanBeListed(false);
         status.setCanBeUnlisted(true);
+        status.setCanBeAdjourned(true);
+        status.setCanBeVacated(true);
+        status.setCanBeWithdrawn(true);
         status.setCountInUtilization(true);
 
         return status;
@@ -65,6 +69,9 @@ public class StatusServiceManagerTest {
         status.setStatus(Status.Unlisted);
         status.setCanBeListed(true);
         status.setCanBeUnlisted(false);
+        status.setCanBeAdjourned(false);
+        status.setCanBeVacated(false);
+        status.setCanBeWithdrawn(true);
         status.setCountInUtilization(false);
 
         return status;
