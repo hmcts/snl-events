@@ -271,7 +271,7 @@ public class HearingQueries {
         Root<Person> subQueryPersonRoot = subQueryPerson.from(Person.class);
         subQueryPerson.where(
             //join subquery with main query
-            cb.equal(subQueryPersonRoot.get("id"), hearingRoot)
+            cb.equal(subQueryPersonRoot.get("id"), hearingRoot.get(Hearing_.reservedJudge))
         );
         subQueryPerson.select(cb.greatest(subQueryPersonRoot.<String>get(Person_.name)));
 
