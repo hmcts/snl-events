@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
@@ -26,11 +25,23 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import static uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository.HEARING_FOR_LISTING_COUNT_QUERY;
-import static uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository.HEARING_FOR_LISTING_QUERY;
-
 @Service
 public class HearingService {
+
+    private String hearingForListingSelectCount = "SELECT Count(*) ";
+    private String hearingForListingSelectHearings = "SELECT h.id, case_number, case_title, ct.code as case_type_code, "
+        + "ct.description as case_type_description, ht.code as hearing_type_code, "
+        + "ht.description as hearing_type_description, (duration * 1000000000) as duration, "
+        + "schedule_start, schedule_end, version, "
+        + "priority, communication_facilitator, reserved_judge_id, p.name as reserved_judge_name, number_of_sessions, "
+        + "h.status, is_multisession ";
+
+    private String hearingForListingQueryBody = "FROM hearing h "
+        + "LEFT JOIN person p on p.id = h.reserved_judge_id "
+        + "INNER JOIN case_type ct on h.case_type_code = ct.code "
+        + "INNER JOIN hearing_type ht on h.hearing_type_code = ht.code "
+        + "INNER JOIN status_config sc on h.status = sc.status WHERE can_be_listed = true AND h.status != 'Listed'"
+        + "AND is_deleted = false";
 
     @Autowired
     private HearingQueries hearingQueries;
@@ -63,7 +74,8 @@ public class HearingService {
     }
 
     public Page<HearingForListingResponse> getHearingsForListing(Optional<Integer> page, Optional<Integer> size) {
-        Query sqlQuery = entityManager.createNativeQuery(HEARING_FOR_LISTING_QUERY, "MapToHearingForListingResponse");
+        String query = hearingForListingSelectHearings + hearingForListingQueryBody;
+        Query sqlQuery = entityManager.createNativeQuery(query, "MapToHearingForListingResponse");
         sqlQuery.setFirstResult(page.orElseGet(() -> Integer.valueOf(1)) * size.orElseGet(() -> Integer.valueOf(100)));
         sqlQuery.setMaxResults(size.orElseGet(() -> Integer.valueOf(100)));
 
@@ -73,7 +85,8 @@ public class HearingService {
     }
 
     public BigInteger getHearingsForListingCount() {
-        Query sqlQuery = entityManager.createNativeQuery(HEARING_FOR_LISTING_COUNT_QUERY);
+        String query = hearingForListingSelectCount + hearingForListingQueryBody;
+        Query sqlQuery = entityManager.createNativeQuery(query);
 
         return (BigInteger) sqlQuery.getSingleResult();
     }
