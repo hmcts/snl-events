@@ -18,9 +18,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
+
+import javax.persistence.EntityManager;
 
 @Service
 public class HearingService {
