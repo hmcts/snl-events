@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
@@ -28,27 +29,11 @@ import javax.persistence.Query;
 @Service
 public class HearingService {
 
-    private final String hearingForListingSelectCount = "SELECT Count(*) ";
-    private final String hearingForListingSelectHearings = "SELECT h.id, case_number, case_title, ct.code as case_type_code, "
-        + "ct.description as case_type_description, ht.code as hearing_type_code, "
-        + "ht.description as hearing_type_description, (duration * 1000000000) as duration, "
-        + "schedule_start, schedule_end, version, "
-        + "priority, communication_facilitator, reserved_judge_id, p.name as reserved_judge_name, number_of_sessions, "
-        + "h.status, is_multisession ";
-
-    private final String hearingForListingQueryBody = "FROM hearing h "
-        + "LEFT JOIN person p on p.id = h.reserved_judge_id "
-        + "INNER JOIN case_type ct on h.case_type_code = ct.code "
-        + "INNER JOIN hearing_type ht on h.hearing_type_code = ht.code "
-        + "INNER JOIN status_config sc on h.status = sc.status "
-        + "WHERE can_be_listed = true "
-        + "AND h.status != 'Listed' "
-        + "AND is_deleted = false ";
-
-    private String orderByQueryPart = "ORDER BY <order_property> <order_direction>";
-
     @Autowired
     private HearingQueries hearingQueries;
+
+    @Autowired
+    private HearingForListingQueries hearingForListingQueries;
 
     @Autowired
     private HearingRepository hearingRepository;
@@ -81,17 +66,15 @@ public class HearingService {
                                                                  Optional<Integer> size,
                                                                  Optional<String> sortByProperty,
                                                                  Optional<String> sortByDirection) {
-        String orderByQueryPartWithParams = orderByQueryPart
-            .replace("<order_property>", sortByProperty.orElse("case_number"))
-            .replace("<order_direction>", sortByDirection.orElse("asc"));
 
-        String query = hearingForListingSelectHearings + hearingForListingQueryBody + orderByQueryPartWithParams;
-        Query sqlQuery = entityManager.createNativeQuery(query, "MapToHearingForListingResponse");
+        String hearingForListingQuery = hearingForListingQueries.getMainQuery(
+            sortByProperty.orElse("case_number"), sortByDirection.orElse("asc"));
 
+        Query sqlQuery = entityManager.createNativeQuery(hearingForListingQuery, "MapToHearingForListingResponse");
         sqlQuery.setFirstResult(page.orElse(Integer.valueOf(1)) * size.orElse(Integer.valueOf(100)));
         sqlQuery.setMaxResults(size.orElse(Integer.valueOf(100)));
 
-        String countQuery = hearingForListingSelectCount + hearingForListingQueryBody;
+        String countQuery = hearingForListingQueries.getCountQuery();
         Query sqlCountQuery = entityManager.createNativeQuery(countQuery);
 
         BigInteger totalCount = (BigInteger) sqlCountQuery.getSingleResult();
