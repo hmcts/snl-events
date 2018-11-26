@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -15,13 +18,19 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFacts;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionQuery;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch.SearchSessionSelectColumn;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -37,8 +46,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
+import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_AMEND_RESPONSE_SQL;
 import static uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SessionQueries.GET_SESSION_INFO_SQL;
 
 @Service
@@ -79,6 +90,8 @@ public class SessionService {
     private FactsMapper factsMapper;
     @Autowired
     private RulesService rulesService;
+    @Autowired
+    private SearchSessionQuery searchSessionQuery;
 
     public List getSessions() {
         return sessionRepository.findAll();
@@ -239,13 +252,27 @@ public class SessionService {
         UserTransaction ut = userTransactionService.startTransaction(upsertSession.getUserTransactionId(),
             userTransactionDataList);
 
-        String msg = factsMapper.mapUpdateSessionToRuleJsonMessage(session);
+        SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapUpdateSessionToRuleJsonMessage(
+            session,
+            hearingParts
+        );
 
-        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, msg);
+        rulesService.postMessage(ut.getId(), RulesService.UPSERT_SESSION, sessionWithHpFacts.getSessionFact());
+
+        for (String hpFacts : sessionWithHpFacts.getHearingPartsFacts()) {
+            rulesService.postMessage(ut.getId(), RulesService.UPSERT_HEARING_PART, hpFacts);
+        }
 
         ut = userTransactionService.rulesProcessed(ut);
 
         return ut;
+    }
+
+    public Page<SessionSearchResponse> searchForSession(List<SearchCriteria> searchCriteriaList,
+                                                        Pageable pageable,
+                                                        SearchSessionSelectColumn orderByColumn,
+                                                        Sort.Direction direction) {
+        return searchSessionQuery.search(searchCriteriaList, pageable, orderByColumn, direction);
     }
 
     private void setResources(Session session, UpsertSession upsertSession) {
@@ -288,5 +315,12 @@ public class SessionService {
         }
 
         return userTransactionDataList;
+    }
+
+    public SessionAmendResponse getAmendSession(UUID id) {
+        Query query = entityManager.createNativeQuery(GET_SESSION_AMEND_RESPONSE_SQL, "MapToSessionAmendResponse");
+        query.setParameter("session_id", id);
+
+        return (SessionAmendResponse) query.getSingleResult();
     }
 }
