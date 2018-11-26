@@ -18,8 +18,7 @@ import java.util.function.Predicate;
 public class StatusServiceManager {
 
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
-
-    // @TODO: introduce Validator classes instead of puting all the logic into one file e.g. AdjournValidator,
+    
     public StatusServiceManager() {
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
             checkIfAdjournCanBePerformed));
@@ -82,7 +81,6 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfAdjournCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        // @TODO: implement
         return hearingWithSessionsResponse != null;
     }
 
