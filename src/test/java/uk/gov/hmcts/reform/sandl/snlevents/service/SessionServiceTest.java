@@ -5,6 +5,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
@@ -90,7 +91,7 @@ public class SessionServiceTest {
     private UserTransactionService userTransactionService;
     @Mock
     private ObjectMapper objectMapper;
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private FactsMapper factsMapper;
     @Mock
     private RulesService rulesService;
@@ -216,7 +217,7 @@ public class SessionServiceTest {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
         when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).then(returnsFirstArg());
-        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session))).thenReturn(message);
+        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session), any()).getSessionFact()).thenReturn(message);
 
         UserTransaction transaction = sessionService.updateSession(createUpsertSession());
 
