@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -61,6 +62,13 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     @Override
     @Transactional
     public void act() {
+        hearing = hearingMapper.mapToHearing(
+            createHearingRequest,
+            caseTypeRepository,
+            hearingTypeRepository,
+            entityManager
+        );
+
         final StatusConfig unlistedStatus = statusConfigService.getStatusConfig(Status.Unlisted);
         hearing.setStatus(unlistedStatus);
 
@@ -76,12 +84,9 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public void getAndValidateEntities() {
         hearingParts = hearingMapper.mapToHearingParts(createHearingRequest);
 
-        hearing = hearingMapper.mapToHearing(
-            createHearingRequest,
-            caseTypeRepository,
-            hearingTypeRepository,
-            entityManager
-        );
+        if(createHearingRequest.isMultiSession() && createHearingRequest.getNumberOfSessions() < 2) {
+            throw new SnlEventsException("Multi-session hearings cannot have less than 2 sessions!");
+        }
     }
 
     @Override
