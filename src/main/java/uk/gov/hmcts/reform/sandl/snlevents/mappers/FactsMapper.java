@@ -105,7 +105,7 @@ public class FactsMapper {
             sessionMsg = objectMapper.writeValueAsString(factSession);
             // its not possible to do session.getHearingParts() as session is often detached
             hearingPartsMsg = hearingParts.stream()
-                .map(hp -> mapHearingPartToRuleJsonMessage(hp))
+                .map(this::mapHearingPartToRuleJsonMessage)
                 .collect(Collectors.toList());
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException("Cannot map session or its hearing part to fact " + e.getMessage());
