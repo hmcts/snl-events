@@ -45,7 +45,8 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
-    private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
+    private UserTransactionDataPreparerService userTransactionDataPreparerService =
+        new UserTransactionDataPreparerService();
 
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
@@ -109,7 +110,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
 
-        originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
+        originalHearingParts = userTransactionDataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
@@ -123,20 +124,19 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     }
 
     @Override
-    @SuppressWarnings("DuplicatedBlocks")
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
             previousHearing, 1);
 
         sessions.stream().forEach(s ->
-            utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            userTransactionDataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        return utdps.getUserTransactionDataList();
+        return userTransactionDataPreparerService.getUserTransactionDataList();
     }
 
     @Override

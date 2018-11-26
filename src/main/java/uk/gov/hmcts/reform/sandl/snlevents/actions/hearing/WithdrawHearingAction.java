@@ -119,7 +119,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     }
 
     @Override
-    @SuppressWarnings("DuplicatedBlocks")
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
             utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
