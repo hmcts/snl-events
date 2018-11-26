@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class WithdrawHearingAction extends Action implements RulesProcessable {
-
     protected WithdrawHearingRequest withdrawHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
@@ -120,19 +119,20 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     }
 
     @Override
+    @SuppressWarnings("DuplicatedBlocks")
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
             utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
-        ); // NOSONAR
+        );
 
         utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
-            previousHearing, 1); // NOSONAR
+            previousHearing, 1);
 
         sessions.stream().forEach(s ->
             utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
-        ); // NOSONAR
+        );
 
-        return utdps.getUserTransactionDataList(); // NOSONAR
+        return utdps.getUserTransactionDataList();
     }
 
     @Override

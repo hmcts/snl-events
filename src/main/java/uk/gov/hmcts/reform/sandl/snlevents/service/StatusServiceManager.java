@@ -95,8 +95,8 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfWithdrawCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        return hearingWithSessionsResponse.getListingDate() != null
-            && hearingWithSessionsResponse.getListingDate().toLocalDate().isAfter(
+        return hearingWithSessionsResponse.getListingDate() == null
+            || hearingWithSessionsResponse.getListingDate().toLocalDate().isAfter(
                 OffsetDateTime.now(ZoneOffset.UTC).toLocalDate());
     }
 
