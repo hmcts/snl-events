@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +35,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Getter
 @Setter
 @Audited
+@Builder(toBuilder = true)
 @EntityListeners(AuditingEntityListener.class)
 @DynamicInsert
 @Where(clause = "is_deleted=false")

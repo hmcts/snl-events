@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -73,6 +74,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder(toBuilder = true)
 @Audited
 @EntityListeners(AuditingEntityListener.class)
 @DynamicInsert
