@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsRes
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -95,7 +96,8 @@ public class StatusServiceManager {
 
     private static boolean checkIfWithdrawCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
         return hearingWithSessionsResponse.getListingDate() != null
-            && hearingWithSessionsResponse.getListingDate().isAfter(OffsetDateTime.now());
+            && hearingWithSessionsResponse.getListingDate().toLocalDate().isAfter(
+                OffsetDateTime.now(ZoneOffset.UTC).toLocalDate());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
