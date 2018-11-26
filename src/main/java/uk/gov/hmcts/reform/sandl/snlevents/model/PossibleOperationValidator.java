@@ -6,12 +6,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsRes
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Data
 @AllArgsConstructor
 public class PossibleOperationValidator {
-    private Function<HearingWithSessionsResponse, Boolean> dbConfigVerifier;
+    private Predicate<HearingWithSessionsResponse> dbConfigVerifier;
 
     private BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions> businessOperationVerifier;
 }

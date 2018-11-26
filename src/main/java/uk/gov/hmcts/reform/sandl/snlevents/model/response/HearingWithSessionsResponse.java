@@ -77,7 +77,7 @@ public class HearingWithSessionsResponse {
 
             return versionInfo;
         }).collect(Collectors.toList());
-        if (this.sessions.size() != 0) {
+        if (!this.sessions.isEmpty()) {
             this.listingDate = this.sessions.get(0).getStart(); // TODO: reimplement whole
             // thing to use native query instead of JPA Entity
         }
