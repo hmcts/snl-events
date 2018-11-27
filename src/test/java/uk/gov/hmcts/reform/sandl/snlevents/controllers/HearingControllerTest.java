@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingForListingRespo
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
@@ -57,6 +58,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class HearingControllerTest {
     public static final String URL = "/hearing";
     private static final UUID ID = java.util.UUID.fromString("f9a3867b-0d15-419d-bd98-40d247139131");
+    private static final Long VERSION = 0L;
 
     @Autowired
     private EventsMockMvc mvc;
@@ -148,6 +150,7 @@ public class HearingControllerTest {
     public void getHearingByIdWithSessionsReturnsHearingWithSessions() throws Exception {
         val hearing = createHearing();
         hearing.setId(ID);
+        hearing.setVersion(VERSION);
 
         when(hearingRepository.findOne(ID)).thenReturn(hearing);
 
@@ -159,6 +162,7 @@ public class HearingControllerTest {
         expectedResponse.setSessions(Collections.emptyList());
         expectedResponse.setHearingPartsVersions(Collections.emptyList());
         expectedResponse.setStatus(Status.Listed);
+        expectedResponse.setPossibleActions(new PossibleActions());
 
         val response = mvc.getAndMapResponse(URL + "/" + ID + "/with-sessions", HearingWithSessionsResponse.class);
         assertThat(response).isEqualTo(expectedResponse);
@@ -171,6 +175,18 @@ public class HearingControllerTest {
         when(hearingService.unlist(any())).thenReturn(ut);
 
         val response = mvc.callAndMapResponse(put(URL + "/unlist"), new UnlistHearingRequest(),
+            UserTransaction.class);
+
+        assertThat(response).isEqualTo(ut);
+    }
+
+    @Test
+    public void withdrawHearing_shouldReturnUserTransaction() throws Exception {
+        val ut = createUserTransaction();
+
+        when(hearingService.withdraw(any())).thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(put(URL + "/withdraw"), new UnlistHearingRequest(),
             UserTransaction.class);
 
         assertThat(response).isEqualTo(ut);

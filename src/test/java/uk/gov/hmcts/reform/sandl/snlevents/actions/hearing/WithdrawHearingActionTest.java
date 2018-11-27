@@ -21,17 +21,17 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -42,20 +42,17 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class UnlistHearingActionTest {
-    private static final UUID HEARING_ID_TO_BE_UNLISTED = UUID.randomUUID();
+public class WithdrawHearingActionTest {
+    private static final UUID HEARING_ID_TO_BE_WITHDRAWN = UUID.randomUUID();
+    private static final Long HEARING_VERSION_TO_BE_WITHDRAWN = 0L;
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
     private static final UUID HEARING_PART_ID_B = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_B = 2L;
     private static final UUID SESSION_ID_A = UUID.randomUUID();
     private static final UUID SESSION_ID_B = UUID.randomUUID();
-    private static final List<VersionInfo> hearingVersions = Arrays.asList(
-        getVersionInfo(HEARING_PART_ID_A, HEARING_VERSION_ID_A),
-        getVersionInfo(HEARING_PART_ID_B, HEARING_VERSION_ID_B)
-    );
     private StatusesMock statusesMock = new StatusesMock();
-    private UnlistHearingAction action;
+    private WithdrawHearingAction action;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -66,6 +63,9 @@ public class UnlistHearingActionTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private EntityManager entityManager;
+
 
     @Before
     public void setup() {
@@ -73,38 +73,42 @@ public class UnlistHearingActionTest {
         hearing.setDuration(Duration.ofMinutes(60));
         hearing.setCaseType(new CaseType("cs-code", "cs-desc"));
         hearing.setHearingType(new HearingType("ht-code", "ht-desc"));
-        hearing.setId(HEARING_ID_TO_BE_UNLISTED);
+        hearing.setId(HEARING_ID_TO_BE_WITHDRAWN);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setHearingParts(Arrays.asList(
-            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A, hearing, SESSION_ID_A),
-            createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B, hearing, SESSION_ID_B)
+            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
+                hearing, SESSION_ID_A, Status.Listed, OffsetDateTime.now().plusDays(0)),
+            createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
+                hearing, SESSION_ID_B, Status.Unlisted, OffsetDateTime.now().plusDays(1))
         ));
 
-        when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_UNLISTED))).thenReturn(hearing);
+        when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);
 
-        UnlistHearingRequest bhr = new UnlistHearingRequest();
-        bhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
-        bhr.setUserTransactionId(UUID.randomUUID());
+        WithdrawHearingRequest whr = new WithdrawHearingRequest();
+        whr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
+        whr.setUserTransactionId(UUID.randomUUID());
 
-        bhr.setHearingPartsVersions(hearingVersions);
-
-        action = new UnlistHearingAction(
-            bhr, hearingRepository, hearingPartRepository,
+        action = new WithdrawHearingAction(
+            whr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
-            objectMapper
+            objectMapper,
+            entityManager
         );
     }
 
-    private HearingPart createHearingPartWithSession(UUID id, Long version, Hearing hearing, UUID sessionId) {
+    private HearingPart createHearingPartWithSession(UUID id, Long version, Hearing hearing, UUID sessionId,
+                                                     Status status, OffsetDateTime dateTime) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(id);
         hearingPart.setHearing(hearing);
         hearingPart.setVersion(version);
-        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(status));
 
         Session session = new Session();
         session.setId(sessionId);
+        session.setStart(dateTime);
 
         hearingPart.setSessionId(sessionId);
         hearingPart.setSession(session);
@@ -117,7 +121,7 @@ public class UnlistHearingActionTest {
         action.getAndValidateEntities();
         UUID[] ids = action.getAssociatedEntitiesIds();
         UUID[] expectedUuids = new UUID[]{
-            HEARING_ID_TO_BE_UNLISTED,
+            HEARING_ID_TO_BE_WITHDRAWN,
             HEARING_PART_ID_A,
             HEARING_PART_ID_B,
             SESSION_ID_A,
@@ -141,7 +145,7 @@ public class UnlistHearingActionTest {
 
         assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_A, "hearingPart");
         assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_B, "hearingPart");
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_UNLISTED, "hearing");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_WITHDRAWN, "hearing");
         assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
         assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
     }
@@ -152,7 +156,7 @@ public class UnlistHearingActionTest {
         val generatedFactMsgs = action.generateFactMessages();
 
         assertThat(generatedFactMsgs.size()).isEqualTo(2);
-        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.UPSERT_HEARING_PART);
+        assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.DELETE_HEARING_PART);
     }
 
     @Test
@@ -163,23 +167,25 @@ public class UnlistHearingActionTest {
         ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
 
         Mockito.verify(hearingPartRepository).save(captor.capture());
-        assertThat(captor.getValue().size()).isEqualTo(hearingVersions.size());
         captor.getValue().forEach(hp -> {
             assertNull(hp.getSessionId());
             assertNull(hp.getSession());
-            assertNull(hp.getStart());
         });
     }
 
     @Test
-    public void act_shouldSetStatusesToUnlisted() {
+    public void act_shouldSetStatusesToWithdrawn() {
         action.getAndValidateEntities();
         action.act();
 
-        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
         assertThat(action.hearingParts.size()).isEqualTo(2);
         action.hearingParts.forEach(hearingPart -> {
-            assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+            if (hearingPart.getId() == HEARING_PART_ID_A) {
+                assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Vacated);
+            } else if (hearingPart.getId() == HEARING_PART_ID_B) {
+                assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
+            }
         });
     }
 
@@ -191,23 +197,24 @@ public class UnlistHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingStatusCantBeUnlisted_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingStatusCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingPartStatusCantBeUnlisted_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingDateCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
+        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        HearingPart hearingPart = createHearingPartWithSession(HEARING_PART_ID_A, 0L, hearing, SESSION_ID_A);
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
-
-        hearing.setHearingParts(Collections.singletonList(hearingPart));
-
+        hearing.setHearingParts(Arrays.asList(
+            createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
+                hearing, SESSION_ID_A, Status.Listed, OffsetDateTime.now().minusDays(1))
+        ));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
@@ -232,13 +239,5 @@ public class UnlistHearingActionTest {
 
     private void assertThatAllMsgsAreTypeOf(List<FactMessage> factMessages, String type) {
         factMessages.stream().forEach(fm -> assertThat(fm.getType()).isEqualTo(type));
-    }
-
-    private static VersionInfo getVersionInfo(UUID id, Long version) {
-        VersionInfo vi = new VersionInfo();
-        vi.setId(id);
-        vi.setVersion(version);
-
-        return vi;
     }
 }

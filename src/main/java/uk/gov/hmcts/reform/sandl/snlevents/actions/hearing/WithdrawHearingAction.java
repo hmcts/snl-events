@@ -6,7 +6,6 @@ import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -15,8 +14,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -27,12 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 
-public class UnlistHearingAction extends Action implements RulesProcessable {
-    protected UnlistHearingRequest unlistHearingRequest;
+public class WithdrawHearingAction extends Action implements RulesProcessable {
+    protected WithdrawHearingRequest withdrawHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
     protected List<Session> sessions;
@@ -41,32 +39,34 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
+    protected EntityManager entityManager;
 
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
-    private UserTransactionDataPreparerService userTransactionDataPreparerService =
-        new UserTransactionDataPreparerService();
+    private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
-    public UnlistHearingAction(
-        UnlistHearingRequest unlistHearingRequest,
+    public WithdrawHearingAction(
+        WithdrawHearingRequest withdrawHearingRequest,
         HearingRepository hearingRepository,
         HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        EntityManager entityManager
     ) {
-        this.unlistHearingRequest = unlistHearingRequest;
+        this.withdrawHearingRequest = withdrawHearingRequest;
         this.hearingRepository = hearingRepository;
         this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
+        this.entityManager = entityManager;
     }
 
     @Override
     public void getAndValidateEntities() {
-        hearing = hearingRepository.findOne(unlistHearingRequest.getHearingId());
+        hearing = hearingRepository.findOne(withdrawHearingRequest.getHearingId());
         hearingParts = hearing.getHearingParts();
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
@@ -74,15 +74,9 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             .collect(Collectors.toList());
         // Validation moved to act() due to conflict with optimistic lock
 
-        if (!statusServiceManager.canBeUnlisted(hearing)) {
-            throw new SnlEventsException("Hearing can not be unlisted");
+        if (!statusServiceManager.canBeWithdrawn(hearing)) {
+            throw new SnlEventsException("Hearing can not be withdrawn");
         }
-        hearingParts.forEach(hp -> {
-            if (!statusServiceManager.canBeUnlisted(hp)) {
-                // we should define somewhere text of these messages and how much we want to show to the user
-                throw new SnlEventsException("Hearing part can not be unlisted");
-            }
-        });
     }
 
     @Override
@@ -92,32 +86,33 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             .map(HearingPart::getSessionId)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
-        ids.add(unlistHearingRequest.getHearingId());
+        ids.add(withdrawHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);
     }
 
     @Override
     public void act() {
-        if (sessions.isEmpty()) {
-            throw new EntityNotFoundException("Hearing parts assigned to Hearing haven't been listed yet");
-        }
         try {
             previousHearing = objectMapper.writeValueAsString(hearing);
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);
         }
 
-        hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
+        hearing.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
+        entityManager.detach(hearing);
+        hearing.setVersion(withdrawHearingRequest.getHearingVersion());
+        hearingRepository.save(hearing);
 
-        originalHearingParts = userTransactionDataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
+        originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
-            hp.setStart(null);
-            VersionInfo vi = getVersionInfo(hp);
-            hp.setVersion(vi.getVersion());
-            hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
+            if (hp.getStatus().getStatus() == Status.Listed) {
+                hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
+            } else if (hp.getStatus().getStatus() == Status.Unlisted) {
+                hp.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
+            }
         });
 
         hearingPartRepository.save(hearingParts);
@@ -126,17 +121,17 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
             previousHearing, 1);
 
         sessions.stream().forEach(s ->
-            userTransactionDataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        return userTransactionDataPreparerService.getUserTransactionDataList();
+        return utdps.getUserTransactionDataList();
     }
 
     @Override
@@ -145,7 +140,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
         hearingParts.forEach(hp -> {
             String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            msgs.add(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
+            msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
         });
 
         return msgs;
@@ -153,16 +148,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
     @Override
     public UUID getUserTransactionId() {
-        return unlistHearingRequest.getUserTransactionId();
-    }
-
-    private VersionInfo getVersionInfo(HearingPart hp) {
-        Optional<VersionInfo> hpvi = unlistHearingRequest.getHearingPartsVersions()
-            .stream()
-            .filter(hpv -> hpv.getId().equals(hp.getId()))
-            .findFirst();
-        return hpvi.orElseThrow(() ->
-            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
-        );
+        return withdrawHearingRequest.getUserTransactionId();
     }
 }

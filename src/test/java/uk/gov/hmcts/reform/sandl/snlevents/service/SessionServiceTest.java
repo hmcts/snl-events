@@ -10,8 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -68,6 +70,7 @@ public class SessionServiceTest {
     private static final String HEARING_ID = "7684d2a2-6bf2-4a20-a75a-c6593fcc7c63";
     public static final LocalDate START_DATE = LocalDate.MIN;
     public static final LocalDate END_DATE = LocalDate.MAX;
+    public StatusesMock statusesMock = new StatusesMock();
 
     @InjectMocks
     private SessionService sessionService;
@@ -325,6 +328,7 @@ public class SessionServiceTest {
         hearing.setId(createUuid(HEARING_ID));
         hearing.setCaseType(new CaseType());
         hearing.setHearingType(new HearingType());
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         return hearing;
     }
 

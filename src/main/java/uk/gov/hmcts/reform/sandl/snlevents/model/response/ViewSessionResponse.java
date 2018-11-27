@@ -26,6 +26,6 @@ public class ViewSessionResponse {
         this.duration = session.getDuration();
         this.roomName = session.getRoom() != null ? session.getRoom().getName() : null;
         this.judgeName = session.getPerson() != null ? session.getPerson().getName() : null;
-        this.sessionType = session.getSessionType().getDescription();
+        this.sessionType = session.getSessionType() != null ? session.getSessionType().getDescription() : null;
     }
 }

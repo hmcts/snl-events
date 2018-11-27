@@ -29,6 +29,9 @@ public class StatusesMock {
         List<StatusConfig> statusConfigs = new ArrayList<>();
         statusConfigs.add(new StatusConfig(Status.Listed, true, true, true, true, true, true));
         statusConfigs.add(new StatusConfig(Status.Unlisted, true, false, false, false, false, true));
+        statusConfigs.add(new StatusConfig(Status.Adjourned, false, false, false, false, false, false));
+        statusConfigs.add(new StatusConfig(Status.Vacated, false, false, false, false, false, false));
+        statusConfigs.add(new StatusConfig(Status.Withdrawn, false, false, false, false, false, false));
         return statusConfigs;
     }
 }

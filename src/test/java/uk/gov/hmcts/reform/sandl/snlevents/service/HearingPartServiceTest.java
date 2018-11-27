@@ -253,6 +253,7 @@ public class HearingPartServiceTest {
         HearingPart hp = new HearingPart();
         Hearing h = new Hearing();
         h.addHearingPart(hp);
+        h.setStatus(createStatusConfigListed());
         hp.setHearing(h);
         hp.getHearing().setCaseType(new CaseType("code", "desc"));
         hp.getHearing().setHearingType(new HearingType("code", "desc"));
@@ -263,7 +264,6 @@ public class HearingPartServiceTest {
 
     private Hearing createHearing() {
         Hearing h = new Hearing();
-
         h.addHearingPart(createHearingPart());
 
         return h;
