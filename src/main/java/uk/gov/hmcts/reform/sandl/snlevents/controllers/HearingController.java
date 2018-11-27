@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AssignSessionsToHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
@@ -60,8 +62,10 @@ public class HearingController {
 
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private StatusServiceManager statusServiceManager;
+
     @Autowired
     private StatusConfigService statusConfigService;
 
@@ -77,7 +81,11 @@ public class HearingController {
 
     @GetMapping(path = "/{id}/with-sessions", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingWithSessionsResponse getHearingByIdWithSessions(@PathVariable("id") UUID id) {
-        return new HearingWithSessionsResponse(hearingRepository.findOne(id));
+        Hearing hearing = hearingRepository.findOne(id);
+        HearingWithSessionsResponse response = new HearingWithSessionsResponse(hearing);
+        response.setPossibleActions(statusServiceManager.getPossibleActions(response));
+
+        return response;
     }
 
     @PutMapping(path = "/{hearingId}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -101,8 +109,9 @@ public class HearingController {
         @RequestParam(value = "page", required = false) Optional<Integer> page,
         @RequestParam(value = "size", required = false) Optional<Integer> size,
         @RequestBody(required = false) List<SearchCriteria> searchCriteriaList) {
-        PageRequest pageRequest =
-            (page.isPresent() && size.isPresent()) ? new PageRequest(page.get(), size.get()) : new PageRequest(0, 10);
+        PageRequest pageRequest = (page.isPresent() && size.isPresent())
+            ? new PageRequest(page.get(), size.get())
+            : new PageRequest(0, 10);
 
         return hearingService.search(searchCriteriaList, pageRequest);
     }
@@ -110,5 +119,10 @@ public class HearingController {
     @PutMapping(path = "/unlist", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity unlist(@RequestBody UnlistHearingRequest unlistHearingRequest) {
         return ok(hearingService.unlist(unlistHearingRequest));
+    }
+
+    @PutMapping(path = "/withdraw", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity withdraw(@RequestBody WithdrawHearingRequest withdrawHearingRequest) {
+        return ok(hearingService.withdraw(withdrawHearingRequest));
     }
 }

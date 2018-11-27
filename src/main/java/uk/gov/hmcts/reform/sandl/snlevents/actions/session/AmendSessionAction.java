@@ -3,14 +3,17 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.hibernate.Hibernate;
 import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFacts;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -19,9 +22,9 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class AmendSessionAction extends Action implements RulesProcessable {
@@ -30,6 +33,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     private EntityManager entityManager;
 
     private Session session;
+    private List<HearingPart> hearingParts;
     private String currentSessionAsString;
 
     public AmendSessionAction(AmendSessionRequest amendSessionRequest,
@@ -70,13 +74,20 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         session  = sessionRepository.findOne(amendSessionRequest.getId());
+        Hibernate.initialize(session.getHearingParts());
+        hearingParts = session.getHearingParts();
     }
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        val msg = factsMapper.mapDbSessionToRuleJsonMessage(session);
+        SessionWithHearingPartsFacts sessionWithHpFacts =
+            factsMapper.mapDbSessionToRuleJsonMessage(session, hearingParts);
+        List<FactMessage> facts = sessionWithHpFacts.getHearingPartsFacts().stream().map(hpFact ->
+            new FactMessage(RulesService.UPSERT_HEARING_PART, hpFact)
+        ).collect(Collectors.toList());
+        facts.add(new FactMessage(RulesService.UPSERT_SESSION, sessionWithHpFacts.getSessionFact()));
 
-        return Arrays.asList(new FactMessage(RulesService.UPSERT_SESSION, msg));
+        return facts;
     }
 
     @Override
