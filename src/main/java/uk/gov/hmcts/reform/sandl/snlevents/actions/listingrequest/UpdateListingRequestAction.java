@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.*;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -29,8 +28,8 @@ import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
 
-    protected Hearing hearing;
-    protected List<HearingPart> hearingParts;
+    private List<HearingPart> hearingParts;
+    private Hearing hearing;
     private UpdateListingRequest updateListingRequest;
     private String currentHearingAsString;
     private EntityManager entityManager;
@@ -113,7 +112,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
             if (!OffsetDateTime.now().toLocalDate().isBefore(
                 hearingParts.get(0).getSession().getStart().toLocalDate())) {
-                throw new SnlEventsException("Cannot ammend listing request if its on or before today's date!");
+                throw new SnlEventsException("Cannot amend listing request if starts on or before today's date!");
             }
 
             if (updateListingRequest.getNumberOfSessions() > hearing.getNumberOfSessions()) {
