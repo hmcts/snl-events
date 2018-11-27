@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.*;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.ViewSessionResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -28,11 +29,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import javax.persistence.EntityManager;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -144,6 +144,41 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
+    public void getUserTransactionData_returnsCorrectData() {
+        session.setStart(OffsetDateTime.now().plusDays(1));
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        hearing.setMultiSession(true);
+        hearing.setNumberOfSessions(2);
+        hearing.setHearingParts(createHearingParts(session, 2));
+
+        List<UserTransactionData> expectedTransactionData = new ArrayList<>();
+
+        expectedTransactionData.add(new UserTransactionData("hearing",
+            ulr.getId(),
+            Mockito.any(),
+            "update",
+            "update",
+            0)
+        );
+
+        hearing.getHearingParts().forEach(hp -> expectedTransactionData.add(new UserTransactionData("hearingPart",
+            hp.getId(),
+            null,
+            "lock",
+            "unlock",
+            0))
+        );
+
+        action.getAndValidateEntities();
+
+        action.act();
+
+        List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
+
+        assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
+    }
+
+    @Test
     public void act_worksProperly_WhenNotChangingNumberOfSessions() {
         session.setStart(OffsetDateTime.now().plusDays(1));
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
@@ -247,38 +282,49 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
-    public void getUserTransactionData_returnsCorrectData() {
+    public void act_worksProperly_whenDecreasingNumberOfSessions_ForMultiSessionRequest() {
+        session.setStart(OffsetDateTime.now().plusDays(1));
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearing.setMultiSession(true);
+        hearing.setNumberOfSessions(4);
+        hearing.setHearingParts(createHearingParts(session, 4));
+        ulr.setNumberOfSessions(2);
+
+        action.getAndValidateEntities();
+        action.act();
+
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+
+        Mockito.verify(hearingRepository).save(captor.capture());
+
+        assertThat(captor.getValue().getNumberOfSessions()).isEqualTo(2);
+
+        List<HearingPart> hearingParts = captor.getValue().getHearingParts()
+            .stream()
+            .filter(hp -> hp.getSession() != null)
+            .collect(Collectors.toList());
+
+        assertThat(hearingParts.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void act_worksProperly_whenIncreasingNumberOfSessions_ForMultiSessionRequest() {
         session.setStart(OffsetDateTime.now().plusDays(1));
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
         hearing.setMultiSession(true);
         hearing.setNumberOfSessions(2);
         hearing.setHearingParts(createHearingParts(session, 2));
-
-        List<UserTransactionData> expectedTransactionData = new ArrayList<>();
-
-        expectedTransactionData.add(new UserTransactionData("hearing",
-            ulr.getId(),
-            Mockito.any(),
-            "update",
-            "update",
-            0)
-        );
-
-        hearing.getHearingParts().forEach(hp -> expectedTransactionData.add(new UserTransactionData("hearingPart",
-            hp.getId(),
-            null,
-            "lock",
-            "unlock",
-            0))
-        );
+        ulr.setNumberOfSessions(4);
 
         action.getAndValidateEntities();
-
         action.act();
 
-        List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
 
-        assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
+        Mockito.verify(hearingRepository).save(captor.capture());
+
+        assertThat(captor.getValue().getNumberOfSessions()).isEqualTo(4);
+        assertThat(captor.getValue().getHearingParts().size()).isEqualTo(4);
     }
 
     private UUID createUuid(String uuid) {

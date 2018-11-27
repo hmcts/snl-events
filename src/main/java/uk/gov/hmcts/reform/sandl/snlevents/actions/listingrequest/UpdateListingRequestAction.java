@@ -79,14 +79,15 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
-        hearing.setNumberOfSessions(updateListingRequest.getNumberOfSessions());
 
         int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
         if (diff > 0) {
             addHearingParts(diff);
         } else if (diff < 0) {
-            removeHearingParts(diff);
+            removeHearingParts(diff * -1);
         }
+
+        hearing.setNumberOfSessions(updateListingRequest.getNumberOfSessions());
 
         if (updateListingRequest.getReservedJudgeId() != null) {
             hearing.setReservedJudge(
@@ -175,15 +176,19 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             hearingPart.setId(UUID.randomUUID());
             hearingPart.setHearingId(updateListingRequest.getId());
             hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
+            hearingPart.setHearing(hearing);
             hearing.addHearingPart(hearingPart);
         }
     }
 
     private void removeHearingParts(int numberOfPartsToRemove) {
         Status status = hearing.getStatus().getStatus().equals(Status.Listed) ? Status.Vacated : Status.Withdrawn;
-        for (int i = hearingParts.size(); i > hearingParts.size() - numberOfPartsToRemove; i--) {
-            hearingParts.get(i).setStatus(statusConfigService.getStatusConfig(status));
-            hearingPartRepository.save(hearingParts.get(i));
+        for (int i = hearingParts.size() - 1; i >= hearingParts.size() - numberOfPartsToRemove; i--) {
+            HearingPart hp = hearingParts.get(i);
+            hp.setSession(null);
+            hp.setSessionId(null);
+            hp.setStatus(statusConfigService.getStatusConfig(status));
+            hearingPartRepository.save(hp);
         }
     }
 }
