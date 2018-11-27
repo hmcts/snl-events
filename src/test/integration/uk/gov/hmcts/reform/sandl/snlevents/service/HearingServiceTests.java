@@ -342,7 +342,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
         // Given
         Hearing.HearingBuilder unlistedHearingBuilder = hearingUnlisted.toBuilder();
 
-        for (int i = 0 ; i < 10 ; i++) {
+        for (int i = 0; i < 10; i++) {
             Hearing tempUnlistedHearing = unlistedHearingBuilder
                 .id(UUID.randomUUID())
                 .hearingParts(Arrays.asList(hearingPart.toBuilder().id(UUID.randomUUID()).build()))

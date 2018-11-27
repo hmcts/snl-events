@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 public class HearingForListingQueries {
 
     private final String hearingForListingSelectCount = "SELECT Count(*) ";
-    private final String hearingForListingSelectHearings = "SELECT h.id, case_number, case_title, ct.code as case_type_code, "
+    private final String hearingForListingSelectHearings = "SELECT h.id, case_number, case_title, "
+        + "ct.code as case_type_code, "
         + "ct.description as case_type_description, ht.code as hearing_type_code, "
         + "ht.description as hearing_type_description, (duration * 1000000000) as duration, "
         + "schedule_start, schedule_end, version, "
