@@ -29,16 +29,16 @@ import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
 
+    protected Hearing hearing;
+    protected List<HearingPart> hearingParts;
     private UpdateListingRequest updateListingRequest;
     private String currentHearingAsString;
     private EntityManager entityManager;
     private HearingTypeRepository hearingTypeRepository;
     private CaseTypeRepository caseTypeRepository;
-    private Hearing hearing;
     private HearingRepository hearingRepository;
     private HearingPartRepository hearingPartRepository;
     private StatusConfigService statusConfigService;
-    private List<HearingPart> hearingParts;
 
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       EntityManager entityManager,
