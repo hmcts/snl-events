@@ -102,7 +102,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
         entityManager.detach(hearing);
         hearing.setVersion(withdrawHearingRequest.getHearingVersion());
-        hearingRepository.save(hearing);
 
         originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
@@ -112,9 +111,11 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             } else if (hp.getStatus().getStatus() == Status.Unlisted) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
+                hearing.setNumberOfSessions(hearing.getNumberOfSessions() - 1);
             }
         });
 
+        hearingRepository.save(hearing);
         hearingPartRepository.save(hearingParts);
     }
 
