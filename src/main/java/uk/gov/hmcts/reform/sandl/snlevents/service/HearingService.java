@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.AdjournHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.VacateHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.WithdrawHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
@@ -89,6 +91,20 @@ public class HearingService {
     public UserTransaction adjourn(AdjournHearingRequest adjournHearingRequest) {
         Action action = new AdjournHearingAction(
             adjournHearingRequest,
+            hearingRepository,
+            hearingPartRepository,
+            statusConfigService,
+            statusServiceManager,
+            objectMapper,
+            entityManager
+        );
+
+        return actionService.execute(action);
+    }
+
+    public UserTransaction vacate(VacateHearingRequest vacateHearingRequest) {
+        Action action = new VacateHearingAction(
+            vacateHearingRequest,
             hearingRepository,
             hearingPartRepository,
             statusConfigService,

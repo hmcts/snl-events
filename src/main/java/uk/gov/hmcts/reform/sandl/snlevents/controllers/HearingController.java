@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
@@ -130,5 +131,10 @@ public class HearingController {
     @PutMapping(path = "/adjourn", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity adjourn(@RequestBody AdjournHearingRequest adjournHearingRequest) {
         return ok(hearingService.adjourn(adjournHearingRequest));
+    }
+
+    @PutMapping(path = "/vacate", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity vacate(@RequestBody VacateHearingRequest vacateHearingRequest) {
+        return ok(hearingService.vacate(vacateHearingRequest));
     }
 }
