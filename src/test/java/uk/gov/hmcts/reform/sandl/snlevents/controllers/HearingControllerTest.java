@@ -154,6 +154,18 @@ public class HearingControllerTest {
         assertThat(response).isEqualTo(ut);
     }
 
+    @Test
+    public void withdrawHearing_shouldReturnUserTransaction() throws Exception {
+        val ut = createUserTransaction();
+
+        when(hearingService.withdraw(any())).thenReturn(ut);
+
+        val response = mvc.callAndMapResponse(put(URL + "/withdraw"), new UnlistHearingRequest(),
+            UserTransaction.class);
+
+        assertThat(response).isEqualTo(ut);
+    }
+
     private UserTransaction createUserTransaction() {
         var ut = new UserTransaction();
         ut.setId(ID.randomUUID());

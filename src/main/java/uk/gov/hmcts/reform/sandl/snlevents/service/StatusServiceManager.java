@@ -11,16 +11,14 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Service
 public class StatusServiceManager {
 
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
 
-    // @TODO: introduce Validator classes instead of puting all the logic into one file e.g. AdjournValidator,
-    // UnlistValidator etc.
-    {
+    public StatusServiceManager() {
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
             checkIfAdjournCanBePerformed));
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeWithdrawn,
@@ -45,7 +43,7 @@ public class StatusServiceManager {
         PossibleActions possibleActions = new PossibleActions();
 
         possibleOperationConfig.stream()
-            .filter(validator -> validator.getDbConfigVerifier().apply(hearing))
+            .filter(validator -> validator.getDbConfigVerifier().test(hearing))
             .forEach(validator -> validator.getBusinessOperationVerifier().apply(hearing, possibleActions));
 
         return possibleActions;
@@ -54,25 +52,24 @@ public class StatusServiceManager {
     public boolean canBeWithdrawn(Hearing hearing) {
         HearingWithSessionsResponse hearingWithSessionsResponse = new HearingWithSessionsResponse(hearing);
 
-        return checkIfStatusCanBeWithdrawn.apply(hearingWithSessionsResponse)
+        return checkIfStatusCanBeWithdrawn.test(hearingWithSessionsResponse)
             && checkIfWithdrawCanBePerformed(hearingWithSessionsResponse);
     }
 
     public boolean canBeAdjourned(Hearing hearing) {
         HearingWithSessionsResponse hearingWithSessionsResponse = new HearingWithSessionsResponse(hearing);
 
-        return checkIfStatusCanBeAdjourned.apply(hearingWithSessionsResponse)
+        return checkIfStatusCanBeAdjourned.test(hearingWithSessionsResponse)
             && checkIfAdjournCanBePerformed(hearingWithSessionsResponse);
     }
 
-    private static Function<HearingWithSessionsResponse, Boolean> checkIfStatusCanBeUnlisted =
-        (HearingWithSessionsResponse entity) ->
-            entity.getStatusConfig().isCanBeUnlisted();
+    private static Predicate<HearingWithSessionsResponse> checkIfStatusCanBeUnlisted =
+        (HearingWithSessionsResponse entity) -> entity.getStatusConfig().isCanBeUnlisted();
 
-    private static Function<HearingWithSessionsResponse, Boolean> checkIfStatusCanBeAdjourned =
+    private static Predicate<HearingWithSessionsResponse> checkIfStatusCanBeAdjourned =
         (HearingWithSessionsResponse entity) -> entity.getStatusConfig().isCanBeAdjourned();
 
-    private static Function<HearingWithSessionsResponse, Boolean> checkIfStatusCanBeWithdrawn =
+    private static Predicate<HearingWithSessionsResponse> checkIfStatusCanBeWithdrawn =
         (HearingWithSessionsResponse entity) -> entity.getStatusConfig().isCanBeWithdrawn();
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
@@ -94,8 +91,9 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfWithdrawCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        // @TODO: implement
-        return true;
+        return hearingWithSessionsResponse.getListingDate() == null
+            || !hearingWithSessionsResponse.getListingDate().toLocalDate().isBefore(
+                OffsetDateTime.now().toLocalDate());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>

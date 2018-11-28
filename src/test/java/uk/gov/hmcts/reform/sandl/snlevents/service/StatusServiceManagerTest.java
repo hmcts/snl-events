@@ -36,6 +36,27 @@ public class StatusServiceManagerTest {
         assertThat(statusServiceManager.shouldBeCountInUtilization(entity)).isEqualTo(false);
     }
 
+    @Test
+    public void canAdjournIsTrue_whenHearingHasListedStatus() {
+        Hearing hearing = createHearingWithStatus(createListedStatus());
+
+        assertThat(statusServiceManager.canBeAdjourned(hearing)).isEqualTo(true);
+    }
+
+    @Test
+    public void canAdjournIsFalse_whenHearingHasUnlistedStatus() {
+        Hearing hearing = createHearingWithStatus(createUnlistedStatus());
+
+        assertThat(statusServiceManager.canBeAdjourned(hearing)).isEqualTo(false);
+    }
+
+    @Test
+    public void canWithdrawIsFalse_whenHearingHasAdjournedStatus() {
+        Hearing hearing = createHearingWithStatus(createAdjournedStatus());
+
+        assertThat(statusServiceManager.canBeWithdrawn(hearing)).isEqualTo(false);
+    }
+
     private Hearing createHearingWithStatus(StatusConfig status) {
         val hearing = new Hearing();
         hearing.setVersion(VERSION);
@@ -72,6 +93,19 @@ public class StatusServiceManagerTest {
         status.setCanBeAdjourned(false);
         status.setCanBeVacated(false);
         status.setCanBeWithdrawn(true);
+        status.setCountInUtilization(false);
+
+        return status;
+    }
+
+    private StatusConfig createAdjournedStatus() {
+        val status = new StatusConfig();
+        status.setStatus(Status.Adjourned);
+        status.setCanBeListed(false);
+        status.setCanBeUnlisted(false);
+        status.setCanBeAdjourned(false);
+        status.setCanBeVacated(false);
+        status.setCanBeWithdrawn(false);
         status.setCountInUtilization(false);
 
         return status;

@@ -39,7 +39,7 @@ public class HearingWithSessionsResponse {
     private List<ViewSessionResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
     private PossibleActions possibleActions;
-    private long hearingVersion;
+    private long version;
 
     @JsonIgnore
     private StatusConfig statusConfig;
@@ -63,6 +63,7 @@ public class HearingWithSessionsResponse {
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
         this.status = hearing.getStatus() != null ? hearing.getStatus().getStatus() : null;
         this.statusConfig = hearing.getStatus();
+        this.version = hearing.getVersion() != null ? hearing.getVersion() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() != null)
@@ -76,10 +77,9 @@ public class HearingWithSessionsResponse {
 
             return versionInfo;
         }).collect(Collectors.toList());
-        if (this.sessions.size() != 0) {
-            this.listingDate = this.sessions.get(0).getStart(); // TODO: reimplement whole
+        if (!this.sessions.isEmpty()) {
+            this.listingDate = this.sessions.get(0).getStart();
             // thing to use native query instead of JPA Entity
         }
-        this.hearingVersion = hearing.getVersion() != null ? hearing.getVersion() : null;
     }
 }
