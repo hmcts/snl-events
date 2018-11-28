@@ -71,37 +71,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
 
         entityManager.detach(hearing);
-
-        hearing.setCaseNumber(updateListingRequest.getCaseNumber());
-        hearing.setCaseTitle(updateListingRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(updateListingRequest.getCaseTypeCode());
-        hearing.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingTypeCode());
-        hearing.setHearingType(hearingType);
-        hearing.setDuration(updateListingRequest.getDuration());
-        hearing.setScheduleStart(updateListingRequest.getScheduleStart());
-        hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());
-        hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
-        hearing.setPriority(updateListingRequest.getPriority());
-        hearing.setVersion(updateListingRequest.getVersion());
-
-        int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
-        if (diff > 0) {
-            addHearingParts(diff);
-        } else if (diff < 0) {
-            removeHearingParts(diff * -1);
-        }
-
-        hearing.setNumberOfSessions(updateListingRequest.getNumberOfSessions());
-
-        if (updateListingRequest.getReservedJudgeId() != null) {
-            hearing.setReservedJudge(
-                this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
-            );
-        } else {
-            hearing.setReservedJudge(null);
-        }
-
+        setUpdatedHearingValues();
         hearingRepository.save(hearing);
     }
 
@@ -117,6 +87,14 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             throw new EntityNotFoundException("Hearing not found");
         }
 
+        if (!hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() > 1) {
+            throw new SnlEventsException("Single-session hearings cannot have more than 2 sessions!");
+        }
+
+        if (hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() < 2) {
+            throw new SnlEventsException("Multi-session hearings cannot have less than 2 sessions!");
+        }
+
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
             if (!OffsetDateTime.now().toLocalDate().isBefore(
                 hearingParts.get(0).getSession().getStart().toLocalDate())) {
@@ -128,14 +106,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             }
         } else if (!hearing.getStatus().getStatus().equals(Status.Unlisted)) {
             throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
-        }
-
-        if (!hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() > 1) {
-            throw new SnlEventsException("Single-session hearings cannot have more than 2 sessions!");
-        }
-
-        if (hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() < 2) {
-            throw new SnlEventsException("Multi-session hearings cannot have less than 2 sessions!");
         }
     }
 
@@ -178,6 +148,44 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public UUID[] getAssociatedEntitiesIds() {
         return new UUID[]{updateListingRequest.getId()};
+    }
+
+    private void setUpdatedHearingValues() {
+        hearing.setCaseNumber(updateListingRequest.getCaseNumber());
+        hearing.setCaseTitle(updateListingRequest.getCaseTitle());
+        CaseType caseType = caseTypeRepository.findOne(updateListingRequest.getCaseTypeCode());
+        hearing.setCaseType(caseType);
+        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingTypeCode());
+        hearing.setHearingType(hearingType);
+        hearing.setDuration(updateListingRequest.getDuration());
+        hearing.setScheduleStart(updateListingRequest.getScheduleStart());
+        hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());
+        hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
+        hearing.setPriority(updateListingRequest.getPriority());
+        hearing.setVersion(updateListingRequest.getVersion());
+        setNumberOfSessionsAndHearingParts();
+        setJudge();
+    }
+
+    private void setNumberOfSessionsAndHearingParts() {
+        int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
+        if (diff > 0) {
+            addHearingParts(diff);
+        } else if (diff < 0) {
+            removeHearingParts(Math.abs(diff));
+        }
+
+        hearing.setNumberOfSessions(updateListingRequest.getNumberOfSessions());
+    }
+
+    private void setJudge() {
+        if (updateListingRequest.getReservedJudgeId() != null) {
+            hearing.setReservedJudge(
+                this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
+            );
+        } else {
+            hearing.setReservedJudge(null);
+        }
     }
 
     private void addHearingParts(int numberOfPartsToAdd) {
