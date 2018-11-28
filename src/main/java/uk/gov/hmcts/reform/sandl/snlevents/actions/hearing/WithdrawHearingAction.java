@@ -6,6 +6,7 @@ import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -67,6 +68,11 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(withdrawHearingRequest.getHearingId());
+
+        if (hearing == null) {
+            throw new EntityNotFoundException("Hearing not found");
+        }
+
         hearingParts = hearing.getHearingParts()
             .stream()
             .filter(hp -> statusServiceManager.canBeWithdrawn(hp))

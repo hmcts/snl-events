@@ -30,7 +30,7 @@ import javax.persistence.EntityManager;
 
 public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
 
-    private static final String UPDATE_ACTION_TEXT = "update";
+    protected static final String UPDATE_ACTION_TEXT = "update";
     protected final EntityManager entityManager;
     protected HearingSessionRelationship relationship;
     protected UUID hearingId;
@@ -69,23 +69,28 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(hearingId);
+
+        if (hearing == null) {
+            throw new SnlEventsException("Hearing cannot be null!");
+        }
+
         hearingParts = hearing.getHearingParts()
             .stream()
             .filter(hp -> statusServiceManager.canBeListed(hp))
             .collect(Collectors.toList());
 
-        if (hearing == null) {
-            throw new SnlEventsException("Hearing cannot be null!");
-        }
         if (hearingParts == null || hearingParts.isEmpty()) {
             throw new SnlEventsException("Hearing parts cannot be null!");
         }
+
         if (!statusServiceManager.canBeListed(hearing)) {
             throw new SnlEventsException("Hearing can not be listed");
         }
+
         if (relationship.getSessionsData() == null) {
             throw new SnlEventsException("SessionsData cannot be null!");
         }
+
         targetSessionsIds = relationship.getSessionsData().stream()
             .map(SessionAssignmentData::getSessionId)
             .collect(Collectors.toList());
@@ -94,6 +99,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         if (targetSessions == null || targetSessions.isEmpty()) {
             throw new SnlEventsException("Target sessions cannot be null!");
         }
+
         if (targetSessions.size() != targetSessionsIds.size()) {
             throw new SnlEventsException("Number of sessions in DB is different then in request!");
         }

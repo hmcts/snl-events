@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
-
     private List<HearingPart> hearingParts;
     private Hearing hearing;
     private List<Session> sessions;
@@ -49,6 +48,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private StatusConfigService statusConfigService;
     private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
+    @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       EntityManager entityManager,
                                       ObjectMapper objectMapper,
@@ -83,12 +83,13 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(updateListingRequest.getId());
-        getHearingParts();
-        getSessions();
 
         if (hearing == null) {
             throw new EntityNotFoundException("Hearing not found");
         }
+
+        getHearingParts();
+        getSessions();
 
         if (!hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() > 1) {
             throw new SnlEventsException("Single-session hearings cannot have more than 2 sessions!");
@@ -122,7 +123,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-
         hearing.getHearingParts().forEach(hp ->
             utdps.prepareUserTransactionDataForUpdate("hearingPart", hp.getId(), null,  0)
         );

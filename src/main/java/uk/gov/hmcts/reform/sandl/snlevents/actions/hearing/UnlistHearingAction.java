@@ -67,6 +67,11 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(unlistHearingRequest.getHearingId());
+
+        if (hearing == null) {
+            throw new EntityNotFoundException("Hearing not found");
+        }
+
         hearingParts = hearing.getHearingParts()
             .stream()
             .filter(hp -> statusServiceManager.canBeUnlisted(hp))
