@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
 import java.time.OffsetDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -88,7 +87,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             throw new EntityNotFoundException("Hearing not found");
         }
 
-        getHearingParts();
+        getHearingPartsWithStatus(hearing.getStatus().getStatus());
         getSessions();
 
         if (!hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() > 1) {
@@ -159,19 +158,11 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         return ids.stream().toArray(UUID[]::new);
     }
 
-    private void getHearingParts() {
-        hearingParts = hearing.getStatus().getStatus().equals(Status.Listed)
-            ? hearing.getHearingParts()
+    private void getHearingPartsWithStatus(Status status) {
+        hearingParts = hearing.getHearingParts()
                 .stream()
-                .filter(hp -> hp.getSession() != null)
-                .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
-                .collect(Collectors.toList())
-            : hearing.getHearingParts()
-                .stream()
-                .filter(hp -> hp.getStatus().getStatus().equals(Status.Unlisted))
+                .filter(hp -> hp.getStatus().getStatus().equals(status))
                 .collect(Collectors.toList());
-
-        //if you list
     }
 
     private void getSessions() {
