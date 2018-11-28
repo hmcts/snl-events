@@ -2,8 +2,8 @@ version: '2.1'
 
 services:
   snl-events-db:
-    container_name: snl-db
-    build: ./docker/snl-db
+    container_name: snl-events-db
+    build: ./docker/snl-events-db
     networks:
       - snl-events-network
     ports:
@@ -31,7 +31,7 @@ services:
       - REFORM_SERVICE_NAME
       - REFORM_TEAM
       - REFORM_ENVIRONMENT
-      - SNL_EVENTS_DB_HOST=snl-db
+      - SNL_EVENTS_DB_HOST=snl-events-db
       - SNL_EVENTS_DB_PORT=5432
       - SNL_EVENTS_DB_NAME=snl
       - SNL_EVENTS_DB_USERNAME=snluser
