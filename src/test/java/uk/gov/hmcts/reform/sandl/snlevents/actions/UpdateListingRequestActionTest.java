@@ -17,40 +17,45 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingR
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.*;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
-import uk.gov.hmcts.reform.sandl.snlevents.model.response.ViewSessionResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import javax.persistence.EntityManager;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
+import javax.persistence.EntityManager;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class UpdateListingRequestActionTest {
-
     private static final String ID = "123e4567-e89b-12d3-a456-426655440001";
     private static final String TRANSACTION_ID = "123e4567-e89b-12d3-a456-426655440000";
     private static final String CASE_TYPE_CODE = "case-type-code";
-    private static final String HEARING_TYPE_CODE = "hearing-type-code";
-    private static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-description");
+    private static final String HEARING_TYPE_CODE = "previousHearing-type-code";
+    private static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE,
+        "previousHearing-type-description");
     private static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-description");
 
     private StatusesMock statusesMock = new StatusesMock();
     private UpdateListingRequestAction action;
     private UpdateListingRequest ulr;
-    private Hearing hearing = new Hearing();
+    private Hearing previousHearing = new Hearing();
 
     @Mock
     private HearingRepository hearingRepository;
@@ -75,22 +80,8 @@ public class UpdateListingRequestActionTest {
 
     @Before
     public void setup() {
-        hearing.setId(createUuid(ID));
-        hearing.setCaseType(new CaseType());
-        hearing.setHearingType(new HearingType());
-
-        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(hearing);
-        when(hearingRepository.save(Matchers.any(Hearing.class))).thenReturn(hearing);
-        when(caseTypeRepository.findOne(eq(CASE_TYPE_CODE))).thenReturn(CASE_TYPE);
-        when(hearingTypeRepository.findOne(eq(HEARING_TYPE_CODE))).thenReturn(HEARING_TYPE);
-
-        ulr = new UpdateListingRequest();
-        ulr.setId(createUuid(ID));
-        ulr.setCaseNumber("cn");
-        ulr.setUserTransactionId(createUuid(TRANSACTION_ID));
-        ulr.setCaseTypeCode(CASE_TYPE_CODE);
-        ulr.setHearingTypeCode(HEARING_TYPE_CODE);
-        ulr.setNumberOfSessions(2);
+        this.previousHearing = setPreviousHearing();
+        this.ulr = setUpdateListingRequest();
 
         this.action = new UpdateListingRequestAction(
             ulr,
@@ -102,6 +93,11 @@ public class UpdateListingRequestActionTest {
             hearingPartRepository,
             statusesMock.statusConfigService
         );
+
+        Mockito.when(hearingRepository.findOne(createUuid(ID))).thenReturn(previousHearing);
+        when(hearingRepository.save(Matchers.any(Hearing.class))).thenReturn(previousHearing);
+        when(caseTypeRepository.findOne(eq(CASE_TYPE_CODE))).thenReturn(CASE_TYPE);
+        when(hearingTypeRepository.findOne(eq(HEARING_TYPE_CODE))).thenReturn(HEARING_TYPE);
     }
 
     @Test
@@ -126,25 +122,21 @@ public class UpdateListingRequestActionTest {
 
     @Test
     public void generateFactMessage_returnsMessageOfCorrectType() {
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
+        setPreviousHearing(Status.Listed, true, 2);
+        ulr.setNumberOfSessions(2);
 
         action.getAndValidateEntities();
         List<FactMessage> factMessages = action.generateFactMessages();
 
-        assertThat(factMessages.size()).isEqualTo(hearing.getHearingParts().size());
+        assertThat(factMessages.size()).isEqualTo(previousHearing.getHearingParts().size());
         assertThat(factMessages.get(0).getType()).isEqualTo(RulesService.UPSERT_HEARING_PART);
         assertThat(factMessages.get(0).getData()).isNotNull();
     }
 
     @Test
     public void getUserTransactionData_returnsCorrectData() {
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
+        setPreviousHearing(Status.Unlisted, true, 2);
+        ulr.setNumberOfSessions(2);
 
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
@@ -156,12 +148,13 @@ public class UpdateListingRequestActionTest {
             0)
         );
 
-        hearing.getHearingParts().forEach(hp -> expectedTransactionData.add(new UserTransactionData("hearingPart",
-            hp.getId(),
-            null,
-            "lock",
-            "unlock",
-            0))
+        previousHearing.getHearingParts().forEach(hp -> expectedTransactionData.add(
+            new UserTransactionData("hearingPart",
+                hp.getId(),
+                null,
+                "lock",
+                "unlock",
+                0))
         );
 
         action.getAndValidateEntities();
@@ -174,11 +167,65 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
+    public void getAndValidateEntities_whenChangingNumberOfSessions_ForListedRequest_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Cannot increase number of sessions for a listed request!");
+
+        setPreviousHearing(Status.Listed, true, 2);
+        ulr.setNumberOfSessions(3);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test
+    public void getAndValidateEntities_whenHearingIsOnOrBeforeTodaysDate_ForListedRequest_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Cannot amend listing request if starts on or before today's date!");
+
+        setPreviousHearing(Status.Listed, false, 1);
+        previousHearing.getHearingParts().get(0).getSession().setStart(OffsetDateTime.now());
+        ulr.setNumberOfSessions(1);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test
+    public void getAndValidateEntities_whenTooManySessions_ForSingleSessionRequest_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Single-session hearings cannot have more than 2 sessions!");
+
+        setPreviousHearing(Status.Unlisted, false, 1);
+        ulr.setNumberOfSessions(3);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test
+    public void getAndValidateEntities_whenStatusIsIncorrect_ForSingleSessionRequest_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Cannot amend listing request that is neither listed or unlisted!");
+
+        setPreviousHearing(Status.Adjourned, false, 1);
+        ulr.setNumberOfSessions(1);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test
+    public void getAndValidateEntities_whenNotEnoughSessions_ForMultiSessionRequest_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Multi-session hearings cannot have less than 2 sessions!");
+
+        setPreviousHearing(Status.Listed, true, 2);
+        ulr.setNumberOfSessions(1);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test
     public void act_worksProperly_WhenNotChangingNumberOfSessions() {
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
+        setPreviousHearing(Status.Listed, true, 2);
+        ulr.setNumberOfSessions(2);
 
         action.getAndValidateEntities();
         action.act();
@@ -195,10 +242,7 @@ public class UpdateListingRequestActionTest {
 
     @Test
     public void act_worksProperly_WhenChangingNumberOfSessions_ForUnlistedRequest() {
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
+        setPreviousHearing(Status.Unlisted, true, 2);
         ulr.setNumberOfSessions(3);
 
         action.getAndValidateEntities();
@@ -213,82 +257,8 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
-    public void act_worksProperly_whenChangingNumberOfSessions_ForListedRequest_shouldThrowException() {
-        expectedException.expect(SnlEventsException.class);
-        expectedException.expectMessage("Cannot increase number of sessions for a listed request!");
-
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
-        ulr.setNumberOfSessions(3);
-
-        action.getAndValidateEntities();
-        action.act();
-    }
-
-    @Test
-    public void act_worksProperly_whenAmendingRequestOnOrBeforeTodaysDate_ForListedRequest_shouldThrowException() {
-        expectedException.expect(SnlEventsException.class);
-        expectedException.expectMessage("Cannot amend listing request if starts on or before today's date!");
-
-        Session session = new Session();
-        session.setId(UUID.randomUUID());
-        session.setStart(OffsetDateTime.now());
-
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setMultiSession(false);
-        hearing.setNumberOfSessions(1);
-
-        HearingPart hearingPart = new HearingPart();
-        hearingPart.setId(UUID.randomUUID());
-        hearingPart.setHearing(hearing);
-        hearingPart.setSession(session);
-        hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-
-        hearing.setHearingParts(Arrays.asList(hearingPart));
-        ulr.setNumberOfSessions(1);
-
-        action.getAndValidateEntities();
-        action.act();
-    }
-
-    @Test
-    public void act_worksProperly_whenTooManySessions_ForSingleSessionRequest_shouldThrowException() {
-        expectedException.expect(SnlEventsException.class);
-        expectedException.expectMessage("Single-session hearings cannot have more than 2 sessions!");
-
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
-        hearing.setMultiSession(false);
-        hearing.setNumberOfSessions(1);
-        hearing.setHearingParts(createHearingPartsWithSessions(1));
-        ulr.setNumberOfSessions(3);
-
-        action.getAndValidateEntities();
-        action.act();
-    }
-
-    @Test
-    public void act_worksProperly_whenNotEnoughSessions_ForMultiSessionRequest_shouldThrowException() {
-        expectedException.expect(SnlEventsException.class);
-        expectedException.expectMessage("Multi-session hearings cannot have less than 2 sessions!");
-
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
-        ulr.setNumberOfSessions(1);
-
-        action.getAndValidateEntities();
-        action.act();
-    }
-
-    @Test
     public void act_worksProperly_whenDecreasingNumberOfSessions_ForMultiSessionRequest() {
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(4);
-        hearing.setHearingParts(createHearingPartsWithSessions(4));
+        setPreviousHearing(Status.Listed, true, 4);
         ulr.setNumberOfSessions(2);
 
         action.getAndValidateEntities();
@@ -305,8 +275,21 @@ public class UpdateListingRequestActionTest {
 
         assertThat(captor.getValue().getNumberOfSessions()).isEqualTo(2);
         assertThat(hearingParts.size()).isEqualTo(2);
+    }
 
-        hearingParts = captor.getValue().getHearingParts()
+    @Test
+    public void act_worksProperly_whenDecreasingNumberOfSessions_ForListedMultiSessionRequest() {
+        setPreviousHearing(Status.Listed, true, 4);
+        ulr.setNumberOfSessions(2);
+
+        action.getAndValidateEntities();
+        action.act();
+
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+
+        Mockito.verify(hearingRepository).save(captor.capture());
+
+        List<HearingPart> hearingParts = captor.getValue().getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() == null)
             .collect(Collectors.toList());
@@ -315,11 +298,28 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
+    public void act_worksProperly_whenDecreasingNumberOfSessions_ForUnlistedMultiSessionRequest() {
+        setPreviousHearing(Status.Unlisted, true, 4);
+        ulr.setNumberOfSessions(2);
+
+        action.getAndValidateEntities();
+        action.act();
+
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+
+        Mockito.verify(hearingRepository).save(captor.capture());
+
+        List<HearingPart> hearingParts = captor.getValue().getHearingParts()
+            .stream()
+            .filter(hp -> hp.getSession() == null)
+            .collect(Collectors.toList());
+
+        hearingParts.forEach(hp -> assertThat(hp.getStatus().getStatus()).isEqualTo(Status.Withdrawn));
+    }
+
+    @Test
     public void act_worksProperly_whenIncreasingNumberOfSessions_ForMultiSessionRequest() {
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
-        hearing.setMultiSession(true);
-        hearing.setNumberOfSessions(2);
-        hearing.setHearingParts(createHearingPartsWithSessions(2));
+        setPreviousHearing(Status.Unlisted, true, 2);
         ulr.setNumberOfSessions(4);
 
         action.getAndValidateEntities();
@@ -337,7 +337,23 @@ public class UpdateListingRequestActionTest {
         return UUID.fromString(uuid);
     }
 
-    private List<HearingPart> createHearingPartsWithSessions(int numberOfSessions) {
+    private Hearing setPreviousHearing() {
+        Hearing hearing = new Hearing();
+        hearing.setId(createUuid(ID));
+        hearing.setCaseType(new CaseType());
+        hearing.setHearingType(new HearingType());
+
+        return hearing;
+    }
+
+    private void setPreviousHearing(Status status, boolean isMultiSession, int numOfSessions) {
+        this.previousHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(status));
+        this.previousHearing.setMultiSession(isMultiSession);
+        this.previousHearing.setNumberOfSessions(numOfSessions);
+        this.previousHearing.setHearingParts(setHearingPartsWithSessions(numOfSessions, status));
+    }
+
+    private List<HearingPart> setHearingPartsWithSessions(int numberOfSessions, Status status) {
         List<HearingPart> hearingParts = new ArrayList<>();
 
         for (int i = 0; i < numberOfSessions; i++) {
@@ -346,12 +362,23 @@ public class UpdateListingRequestActionTest {
             session.setStart(OffsetDateTime.now().plusDays(i + 1));
             HearingPart hearingPart = new HearingPart();
             hearingPart.setId(UUID.randomUUID());
-            hearingPart.setHearing(hearing);
+            hearingPart.setHearing(previousHearing);
             hearingPart.setSession(session);
-            hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+            hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(status));
             hearingParts.add(hearingPart);
         }
 
         return hearingParts;
+    }
+
+    private UpdateListingRequest setUpdateListingRequest() {
+        UpdateListingRequest updateListingRequest = new UpdateListingRequest();
+        updateListingRequest.setId(createUuid(ID));
+        updateListingRequest.setCaseNumber("cn");
+        updateListingRequest.setUserTransactionId(createUuid(TRANSACTION_ID));
+        updateListingRequest.setCaseTypeCode(CASE_TYPE_CODE);
+        updateListingRequest.setHearingTypeCode(HEARING_TYPE_CODE);
+
+        return updateListingRequest;
     }
 }

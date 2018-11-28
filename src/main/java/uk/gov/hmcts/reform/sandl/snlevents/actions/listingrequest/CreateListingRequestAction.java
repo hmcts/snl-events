@@ -84,8 +84,12 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public void getAndValidateEntities() {
         hearingParts = hearingMapper.mapToHearingParts(createHearingRequest);
 
-        if(createHearingRequest.isMultiSession() && createHearingRequest.getNumberOfSessions() < 2) {
+        if (createHearingRequest.isMultiSession() && createHearingRequest.getNumberOfSessions() < 2) {
             throw new SnlEventsException("Multi-session hearings cannot have less than 2 sessions!");
+        }
+
+        if (!createHearingRequest.isMultiSession() && createHearingRequest.getNumberOfSessions() > 1) {
+            throw new SnlEventsException("Single-session hearings cannot have more than 2 sessions!");
         }
     }
 
