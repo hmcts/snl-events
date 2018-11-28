@@ -35,6 +35,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     protected HearingSessionRelationship relationship;
     protected UUID hearingId;
     protected Hearing hearing;
+    protected List<HearingPart> hearingParts;
     protected List<Session> targetSessions;
     protected List<UUID> targetSessionsIds;
     protected List<String> previousHearingParts;
@@ -68,23 +69,20 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(hearingId);
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> statusServiceManager.canBeListed(hp))
+            .collect(Collectors.toList());
+
         if (hearing == null) {
             throw new SnlEventsException("Hearing cannot be null!");
         }
-        if (hearing.getHearingParts() == null || hearing.getHearingParts().isEmpty()) {
+        if (hearingParts == null || hearingParts.isEmpty()) {
             throw new SnlEventsException("Hearing parts cannot be null!");
         }
         if (!statusServiceManager.canBeListed(hearing)) {
             throw new SnlEventsException("Hearing can not be listed");
         }
-        hearing.getHearingParts().forEach(hp -> {
-            if (!statusServiceManager.canBeListed(hp)) {
-                // need to add more logic of what to do if one hearingPart is unlistable but
-                // the rest are ok and number of them matches sessions number
-                throw new SnlEventsException("Hearing part can not be listed");
-            }
-        });
-
         if (relationship.getSessionsData() == null) {
             throw new SnlEventsException("SessionsData cannot be null!");
         }
@@ -107,7 +105,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     public UUID[] getAssociatedEntitiesIds() {
         final List<UUID> entitiesIds = new ArrayList<>();
         entitiesIds.add(hearing.getId());
-        for (HearingPart hp : hearing.getHearingParts()) {
+        for (HearingPart hp : hearingParts) {
             entitiesIds.add(hp.getId());
             entitiesIds.add(hp.getSessionId());
         }
@@ -124,7 +122,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
             previousHearingParts = new ArrayList<>();
             AtomicInteger index = new AtomicInteger();
-            for (HearingPart hp : hearing.getHearingParts()) {
+            for (HearingPart hp : hearingParts) {
                 previousHearingParts.add(objectMapper.writeValueAsString(hp));
 
                 Session session = targetSessions.get(index.getAndIncrement());
@@ -168,7 +166,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         );
 
         AtomicInteger index = new AtomicInteger();
-        for (HearingPart hp : hearing.getHearingParts()) {
+        for (HearingPart hp : hearingParts) {
             userTransactionDataList.add(new UserTransactionData("hearingPart",
                 hp.getId(),
                 previousHearingParts.get(index.getAndIncrement()),
@@ -193,7 +191,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public List<FactMessage> generateFactMessages() {
         List<FactMessage> factsMessages = new ArrayList<>();
-        for (HearingPart hp : hearing.getHearingParts()) {
+        for (HearingPart hp : hearingParts) {
             factsMessages.add(
                 new FactMessage(RulesService.UPSERT_HEARING_PART, factsMapper.mapHearingToRuleJsonMessage(hp))
             );
