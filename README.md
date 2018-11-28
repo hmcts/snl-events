@@ -92,9 +92,7 @@ The template contains the following plugins:
 
 Located in `./bin/init.sh`. Simply run and follow the explanation how to execute it.
 
-## Building and deploying the application
-
-### Building the application
+## Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
 `./gradlew` wrapper script, so there's no need to install gradle.
@@ -105,7 +103,7 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
-### Running the application
+## Running the application
 
 Create the image of the application by executing the following command:
 
@@ -118,6 +116,20 @@ Create docker image:
 ```bash
   docker-compose build
 ```
+
+### Running Locally (Recommended)
+
+For this approach, the database must still be served via docker:
+```bash
+  docker-compose up snl-db
+```
+
+The application can be run locally using IntelliJ or by executing the following command (in another terminal window):
+```bash
+./gradlew bootRun
+```
+
+### Running in Docker
 
 Run the distribution (created in `build/install/snl-events` directory)
 by executing the following command:
@@ -141,7 +153,7 @@ You should get a response similar to this:
   {"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
 ```
 
-### Alternative script to run application
+### Alternative script to run application in Docker
 
 To skip all the setting up and building, just execute the following command:
 
@@ -170,6 +182,26 @@ docker image rm <image-id>
 ```
 
 There is no need to remove postgres and java or similar core images.
+
+## Testing and Preparing for Pull Requests
+
+Before creating a PR, ensure that all of the code styling checks and tests have been done locally (they will be caught on Jenkins if there are any discrepancies)
+
+### 1. Code Style
+
+```bash
+./gradlew checkStyleMain
+
+./gradlew checkStyleIntegration
+
+./gradlew checkStyleTest
+```
+
+### 2. Testing
+
+```bash
+./gradlew test
+```
 
 ## Hystrix
 
