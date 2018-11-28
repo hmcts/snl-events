@@ -81,4 +81,14 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Audited(targetAuditMode = NOT_AUDITED)
     @JoinColumn(name = "status", nullable = false)
     private StatusConfig status;
+
+    public void setHearing(Hearing hearing) {
+        this.hearing = hearing;
+        this.hearingId = (hearing != null) ? hearing.getId() : null;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+        this.sessionId = (session != null) ? session.getId() : null;
+    }
 }

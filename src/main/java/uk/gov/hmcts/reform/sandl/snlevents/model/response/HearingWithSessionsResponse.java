@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 
 import java.time.Duration;
@@ -36,22 +38,32 @@ public class HearingWithSessionsResponse {
     private Status status;
     private List<ViewSessionResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
+    private PossibleActions possibleActions;
+    private long version;
+
+    @JsonIgnore
+    private StatusConfig statusConfig;
+
+    @JsonIgnore
+    private OffsetDateTime listingDate;
 
     public HearingWithSessionsResponse(Hearing hearing) {
         this.id = hearing.getId();
         this.caseNumber = hearing.getCaseNumber();
         this.caseTitle = hearing.getCaseTitle();
-        this.caseType = hearing.getCaseType().getDescription();
-        this.hearingType = hearing.getHearingType().getDescription();
+        this.caseType = hearing.getCaseType() != null ? hearing.getCaseType().getDescription() : null;
+        this.hearingType = hearing.getHearingType() != null ? hearing.getHearingType().getDescription() : null;
         this.duration = hearing.getDuration();
         this.numberOfSessions = hearing.getNumberOfSessions();
         this.isMultiSession = hearing.isMultiSession();
         this.scheduleStart = hearing.getScheduleStart();
         this.scheduleEnd = hearing.getScheduleEnd();
-        this.priority = hearing.getPriority().toString();
+        this.priority = hearing.getPriority() != null ? hearing.getPriority().toString() : null;
         this.communicationFacilitator = hearing.getCommunicationFacilitator();
         this.reservedToJudge = hearing.getReservedJudge() != null ? hearing.getReservedJudge().getName() : null;
-        this.status = hearing.getStatus().getStatus();
+        this.status = hearing.getStatus() != null ? hearing.getStatus().getStatus() : null;
+        this.statusConfig = hearing.getStatus();
+        this.version = hearing.getVersion() != null ? hearing.getVersion() : null;
         this.sessions = hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() != null)
@@ -65,5 +77,9 @@ public class HearingWithSessionsResponse {
 
             return versionInfo;
         }).collect(Collectors.toList());
+        if (!this.sessions.isEmpty()) {
+            this.listingDate = this.sessions.get(0).getStart();
+            // thing to use native query instead of JPA Entity
+        }
     }
 }

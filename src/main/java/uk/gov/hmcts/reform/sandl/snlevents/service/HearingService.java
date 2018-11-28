@@ -7,8 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.WithdrawHearingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 @Service
 public class HearingService {
@@ -36,10 +39,15 @@ public class HearingService {
 
     @Autowired
     private ActionService actionService;
+
     @Autowired
     private StatusConfigService statusConfigService;
+
     @Autowired
     private StatusServiceManager statusServiceManager;
+
+    @Autowired
+    private EntityManager entityManager;
 
     public HearingSearchResponseForAmendment get(UUID id) {
         return hearingQueries.get(id);
@@ -57,6 +65,20 @@ public class HearingService {
             statusConfigService,
             statusServiceManager,
             objectMapper
+        );
+
+        return actionService.execute(action);
+    }
+
+    public UserTransaction withdraw(WithdrawHearingRequest withdrawHearingRequest) {
+        Action action = new WithdrawHearingAction(
+            withdrawHearingRequest,
+            hearingRepository,
+            hearingPartRepository,
+            statusConfigService,
+            statusServiceManager,
+            objectMapper,
+            entityManager
         );
 
         return actionService.execute(action);
