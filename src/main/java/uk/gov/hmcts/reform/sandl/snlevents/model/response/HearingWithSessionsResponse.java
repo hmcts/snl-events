@@ -39,7 +39,7 @@ public class HearingWithSessionsResponse {
     private List<ViewSessionResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
     private PossibleActions possibleActions;
-    private long hearingVersion;
+    private long version;
 
     @JsonIgnore
     private StatusConfig statusConfig;
@@ -80,6 +80,6 @@ public class HearingWithSessionsResponse {
             this.listingDate = this.sessions.get(0).getStart(); // TODO: reimplement whole
             // thing to use native query instead of JPA Entity
         }
-        this.hearingVersion = hearing.getVersion() != null ? hearing.getVersion() : null;
+        this.version = hearing.getVersion() != null ? hearing.getVersion() : null;
     }
 }
