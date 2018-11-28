@@ -166,7 +166,12 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
                 .filter(hp -> hp.getSession() != null)
                 .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
                 .collect(Collectors.toList())
-            : hearing.getHearingParts();
+            : hearing.getHearingParts()
+                .stream()
+                .filter(hp -> hp.getStatus().getStatus().equals(Status.Unlisted))
+                .collect(Collectors.toList());
+
+        //if you list
     }
 
     private void getSessions() {
