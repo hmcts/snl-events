@@ -7,8 +7,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
+
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,8 +41,17 @@ public class StatusServiceManagerTest {
     }
 
     @Test
-    public void canAdjournIsTrue_whenHearingHasListedStatus() {
+    public void canAdjournIsTrue_whenHearingHasListedStatus_andListingDateIsBeforeNow() {
         Hearing hearing = createHearingWithStatus(createListedStatus());
+
+        Session session = new Session();
+        session.setStart(OffsetDateTime.now().minusDays(5));
+
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setSession(session);
+
+
+        hearing.setHearingParts(Arrays.asList(hearingPart));
 
         assertThat(statusServiceManager.canBeAdjourned(hearing)).isEqualTo(true);
     }

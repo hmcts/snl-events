@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 public class StatusServiceManager {
 
     private List<PossibleOperationValidator> possibleOperationConfig = new ArrayList();
-    
+
     public StatusServiceManager() {
         possibleOperationConfig.add(new PossibleOperationValidator(checkIfStatusCanBeAdjourned,
             checkIfAdjournCanBePerformed));
@@ -80,7 +80,7 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfAdjournCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        return hearingWithSessionsResponse != null;
+        return hearingWithSessionsResponse.getListingDate().isBefore(OffsetDateTime.now());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
