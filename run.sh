@@ -1,2 +1,2 @@
 #!/bin/sh
-docker-compose down && ./gradlew instDist && docker-compose build && docker-compose up
+docker-compose down && ./gradlew bootRepackage && docker-compose build && docker-compose up
