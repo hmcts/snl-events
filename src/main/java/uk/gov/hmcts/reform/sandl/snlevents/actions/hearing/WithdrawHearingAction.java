@@ -67,7 +67,11 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(withdrawHearingRequest.getHearingId());
-        hearingParts = hearing.getHearingParts();
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> statusServiceManager.canBeWithdrawn(hp))
+            .collect(Collectors.toList());
+
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)
@@ -81,11 +85,17 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        val ids = hearing.getHearingParts().stream().map(HearingPart::getId).collect(Collectors.toList());
-        ids.addAll(hearing.getHearingParts().stream()
+        val ids = hearingParts
+            .stream()
+            .map(HearingPart::getId)
+            .collect(Collectors.toList());
+
+        ids.addAll(hearingParts
+            .stream()
             .map(HearingPart::getSessionId)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
+
         ids.add(withdrawHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);

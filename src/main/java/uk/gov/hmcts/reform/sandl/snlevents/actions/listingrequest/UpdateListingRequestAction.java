@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -24,9 +27,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -35,6 +38,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     private List<HearingPart> hearingParts;
     private Hearing hearing;
+    private List<Session> sessions;
     private UpdateListingRequest updateListingRequest;
     private String currentHearingAsString;
     private EntityManager entityManager;
@@ -43,6 +47,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private HearingRepository hearingRepository;
     private HearingPartRepository hearingPartRepository;
     private StatusConfigService statusConfigService;
+    private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       EntityManager entityManager,
@@ -78,10 +83,8 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(updateListingRequest.getId());
-        hearingParts = hearing.getHearingParts()
-            .stream()
-            .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
-            .collect(Collectors.toList());
+        getHearingParts();
+        getSessions();
 
         if (hearing == null) {
             throw new EntityNotFoundException("Hearing not found");
@@ -119,25 +122,18 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            currentHearingAsString,
-            "update",
-            "update",
-            0));
 
-        hearing.getHearingParts().forEach(hp -> userTransactionDataList.add(
-            new UserTransactionData("hearingPart",
-                hp.getId(),
-                null,
-                "lock",
-                "unlock",
-                0)
-            )
+        hearing.getHearingParts().forEach(hp ->
+            utdps.prepareUserTransactionDataForUpdate("hearingPart", hp.getId(), null,  0)
         );
 
-        return userTransactionDataList;
+        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), currentHearingAsString, 1);
+
+        sessions.stream().forEach(s ->
+            utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
+        );
+
+        return utdps.getUserTransactionDataList();
     }
 
     @Override
@@ -147,7 +143,37 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        return new UUID[]{updateListingRequest.getId()};
+        val ids = hearingParts
+            .stream()
+            .map(HearingPart::getId)
+            .collect(Collectors.toList());
+
+        ids.addAll(hearingParts
+            .stream()
+            .filter(Objects::nonNull)
+            .map(HearingPart::getSessionId)
+            .collect(Collectors.toList()));
+
+        ids.add(updateListingRequest.getId());
+
+        return ids.stream().toArray(UUID[]::new);
+    }
+
+    private void getHearingParts() {
+        hearingParts = hearing.getStatus().getStatus().equals(Status.Listed)
+            ? hearing.getHearingParts()
+                .stream()
+                .filter(hp -> hp.getSession() != null)
+                .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
+                .collect(Collectors.toList())
+            : hearing.getHearingParts();
+    }
+
+    private void getSessions() {
+        sessions = hearingParts.stream()
+            .map(HearingPart::getSession)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     private void setUpdatedHearingValues() {
@@ -194,8 +220,8 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             hearingPart.setId(UUID.randomUUID());
             hearingPart.setHearingId(updateListingRequest.getId());
             hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
-            hearingPart.setHearing(hearing);
             hearing.addHearingPart(hearingPart);
+            hearingPartRepository.save(hearingPart);
         }
     }
 

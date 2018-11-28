@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -108,9 +110,25 @@ public class UpdateListingRequestActionTest {
 
     @Test
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
+        setPreviousHearing(Status.Listed, true, 2);
+        ulr.setNumberOfSessions(2);
+        action.getAndValidateEntities();
+
+        List<HearingPart> hearingParts = previousHearing.getHearingParts();
+        List<UUID> expectedUuids = new ArrayList<>();
+
+        expectedUuids.add(previousHearing.getId());
+        for (int i = 0; i < hearingParts.size(); i++) {
+            expectedUuids.add(hearingParts.get(i).getId());
+            expectedUuids.add(hearingParts.get(i).getSessionId());
+        }
+
+        action.getAndValidateEntities();
         UUID[] ids = action.getAssociatedEntitiesIds();
 
-        assertThat(ids).isEqualTo(new UUID[] {createUuid(ID)});
+        assertThat(ids.length).isEqualTo(expectedUuids.size()
+            + (previousHearing.getNumberOfSessions() - ulr.getNumberOfSessions()));
+        assertTrue(Arrays.asList(ids).containsAll(expectedUuids));
     }
 
     @Test
@@ -138,29 +156,40 @@ public class UpdateListingRequestActionTest {
         setPreviousHearing(Status.Unlisted, true, 2);
         ulr.setNumberOfSessions(2);
 
+        List<HearingPart>  hearingParts = previousHearing.getHearingParts();
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
+
+        hearingParts.forEach(hp -> expectedTransactionData.add(
+            new UserTransactionData("hearingPart",
+                hp.getId(),
+                null,
+                "update",
+                "update",
+                0
+            )
+        ));
 
         expectedTransactionData.add(new UserTransactionData("hearing",
             ulr.getId(),
             Mockito.any(),
             "update",
             "update",
-            0)
+            1
+            )
         );
 
-        previousHearing.getHearingParts().forEach(hp -> expectedTransactionData.add(
-            new UserTransactionData("hearingPart",
-                hp.getId(),
+        hearingParts.forEach(hp -> expectedTransactionData.add(
+            new UserTransactionData("session",
+                hp.getSessionId(),
                 null,
                 "lock",
                 "unlock",
-                0))
-        );
+                0
+            )
+        ));
 
         action.getAndValidateEntities();
-
         action.act();
-
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
 
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);

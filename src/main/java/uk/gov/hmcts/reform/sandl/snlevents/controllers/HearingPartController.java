@@ -47,7 +47,6 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/hearing-part")
 public class HearingPartController {
-
     @Autowired
     HearingPartService hearingPartService;
 
@@ -80,6 +79,7 @@ public class HearingPartController {
 
     @Autowired
     private StatusServiceManager statusServiceManager;
+
     @Autowired
     private StatusConfigService statusConfigService;
 
