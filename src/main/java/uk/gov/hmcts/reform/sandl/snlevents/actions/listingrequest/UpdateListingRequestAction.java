@@ -103,8 +103,10 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(updateListingRequest.getId());
-        hearingParts = hearing.getHearingParts();
-        hearingParts.sort(Comparator.comparing(a -> a.getSession().getStart()));
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
+            .collect(Collectors.toList());
 
         if (hearing == null) {
             throw new EntityNotFoundException("Hearing not found");
