@@ -123,6 +123,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
+            hp.setStart(null);
             if (hp.getStatus().getStatus() == Status.Listed) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             } else if (hp.getStatus().getStatus() == Status.Unlisted) {

@@ -99,8 +99,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
 
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
-            if (!OffsetDateTime.now().toLocalDate().isBefore(
-                hearingParts.get(0).getSession().getStart().toLocalDate())) {
+            if (!OffsetDateTime.now().isBefore( hearingParts.get(0).getSession().getStart())) {
                 throw new SnlEventsException("Cannot amend listing request if starts on or before today's date!");
             }
 
@@ -227,6 +226,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             HearingPart hp = hearingParts.get(i);
             hp.setSession(null);
             hp.setSessionId(null);
+            hp.setStart(null);
             hp.setStatus(statusConfigService.getStatusConfig(status));
             hearingPartRepository.save(hp);
         }

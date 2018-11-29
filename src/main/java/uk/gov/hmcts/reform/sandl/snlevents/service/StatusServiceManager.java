@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.PossibleOperationValidator;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
@@ -49,8 +50,8 @@ public class StatusServiceManager {
         return possibleActions;
     }
 
-    public boolean canBeWithdrawn(Statusable entity) {
-        return entity.getStatus().isCanBeWithdrawn();
+    public boolean canBeWithdrawn(HearingPart hearingPart) {
+        return hearingPart.getStatus().isCanBeWithdrawn();
     }
 
     public boolean canBeWithdrawn(Hearing hearing) {
