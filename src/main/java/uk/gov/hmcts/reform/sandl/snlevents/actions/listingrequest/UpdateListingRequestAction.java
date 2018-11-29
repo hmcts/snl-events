@@ -113,7 +113,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return hearing.getHearingParts().stream().map(hp -> {
+        return hearingParts.stream().map(hp -> {
             String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
         }).collect(Collectors.toList());
@@ -121,7 +121,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        hearing.getHearingParts().forEach(hp ->
+        hearingParts.forEach(hp ->
             utdps.prepareUserTransactionDataForUpdate("hearingPart", hp.getId(), null,  0)
         );
 
@@ -174,10 +174,12 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private void setUpdatedHearingValues() {
         hearing.setCaseNumber(updateListingRequest.getCaseNumber());
         hearing.setCaseTitle(updateListingRequest.getCaseTitle());
-        CaseType caseType = caseTypeRepository.findOne(updateListingRequest.getCaseTypeCode());
-        hearing.setCaseType(caseType);
-        HearingType hearingType = hearingTypeRepository.findOne(updateListingRequest.getHearingTypeCode());
-        hearing.setHearingType(hearingType);
+        hearing.setCaseType(
+            this.entityManager.getReference(CaseType.class, updateListingRequest.getCaseTypeCode())
+        );
+        hearing.setHearingType(
+            this.entityManager.getReference(HearingType.class, updateListingRequest.getHearingTypeCode())
+        );
         hearing.setDuration(updateListingRequest.getDuration());
         hearing.setScheduleStart(updateListingRequest.getScheduleStart());
         hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());

@@ -95,7 +95,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return hearing.getHearingParts().stream().map(hp -> {
+        return hearingParts.stream().map(hp -> {
             String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
         }).collect(Collectors.toList());
