@@ -36,6 +36,10 @@ public class StatusServiceManager {
         return entity.getStatus().isCanBeUnlisted();
     }
 
+    public boolean canHearingPartBeAdjourned(HearingPart entity) {
+        return entity.getStatus().isCanBeAdjourned();
+    }
+
     public boolean shouldBeCountInUtilization(Statusable entity) {
         return entity.getStatus().isCountInUtilization();
     }

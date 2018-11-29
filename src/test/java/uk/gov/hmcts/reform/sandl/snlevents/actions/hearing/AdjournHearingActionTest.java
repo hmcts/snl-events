@@ -77,7 +77,7 @@ public class AdjournHearingActionTest {
             createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
                 hearing, SESSION_ID_A, Status.Listed, OffsetDateTime.now().minusDays(1)),
             createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, SESSION_ID_B, Status.Unlisted, OffsetDateTime.now().plusDays(1))
+                hearing, SESSION_ID_B, Status.Listed, OffsetDateTime.now().plusDays(1))
         ));
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_ADJOURNED))).thenReturn(hearing);
         AdjournHearingRequest adjournHearingRequest = new AdjournHearingRequest();
