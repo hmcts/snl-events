@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8092}
+  port: 8092
 
 management:
   security:
