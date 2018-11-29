@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder()
-//NOSONAR
+// NOSONAR
 public class HearingForListingResponse implements Serializable {
     private UUID id;
     private String caseNumber;
