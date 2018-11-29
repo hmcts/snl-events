@@ -82,7 +82,7 @@ public class HearingWithSessionsResponse {
 
         List<HearingPart> listedHearingParts = hearing.getHearingParts()
             .stream()
-            .filter(hp -> hp.getStatus().getStatus().equals(Status.Listed) && hp.getSession() != null)
+            .filter(hp -> hp.getStatus() != null && hp.getStatus().getStatus().equals(Status.Listed) && hp.getSession() != null)
             .collect(Collectors.toList());
 
         Optional<OffsetDateTime> earliestListingDate = listedHearingParts

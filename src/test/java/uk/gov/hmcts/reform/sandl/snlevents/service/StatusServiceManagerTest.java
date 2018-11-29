@@ -49,7 +49,7 @@ public class StatusServiceManagerTest {
 
         HearingPart hearingPart = new HearingPart();
         hearingPart.setSession(session);
-
+        hearingPart.setStatus(createListedStatus());
 
         hearing.setHearingParts(Arrays.asList(hearingPart));
 

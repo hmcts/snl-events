@@ -93,7 +93,8 @@ public class StatusServiceManager {
             };
 
     private static boolean checkIfAdjournCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        return hearingWithSessionsResponse.getListingDate().isBefore(OffsetDateTime.now());
+        OffsetDateTime listingDate = hearingWithSessionsResponse.getListingDate();
+        return listingDate == null ? false : listingDate.isBefore(OffsetDateTime.now());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
@@ -112,18 +113,18 @@ public class StatusServiceManager {
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
         checkIfUnlistCanBePerformed = (HearingWithSessionsResponse hearing, PossibleActions possibleActions) -> {
             possibleActions.setUnlist(true);
-            return  possibleActions;
+            return possibleActions;
         };
 
     private static boolean checkIfVacatedCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
-        return hearingWithSessionsResponse.getStatus() == Status.Listed &&
-            hearingWithSessionsResponse.isMultiSession() &&
-            hearingWithSessionsResponse.getListingDate().isBefore(OffsetDateTime.now());
+        return hearingWithSessionsResponse.getStatus() == Status.Listed
+            && hearingWithSessionsResponse.isMultiSession()
+            && hearingWithSessionsResponse.getListingDate().isBefore(OffsetDateTime.now());
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
         checkIfVacatedCanBePerformed = (HearingWithSessionsResponse hearing, PossibleActions possibleActions) -> {
-        possibleActions.setVacate(checkIfVacatedCanBePerformed(hearing));
-        return  possibleActions;
-    };
+            possibleActions.setVacate(checkIfVacatedCanBePerformed(hearing));
+            return possibleActions;
+        };
 }
