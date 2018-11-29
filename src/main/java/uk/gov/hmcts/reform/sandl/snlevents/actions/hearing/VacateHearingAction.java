@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,9 +68,8 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(vacateHearingRequest.getHearingId());
         hearingParts = hearing.getHearingParts().stream()
-            .filter(hp ->
-                hp.getStatus().getStatus() == Status.Listed && hp.getSession().getStart().isAfter(OffsetDateTime.now())
-            ).collect(Collectors.toList());
+            .filter(hp -> statusServiceManager.canBeVacated(hp))
+            .collect(Collectors.toList());
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)

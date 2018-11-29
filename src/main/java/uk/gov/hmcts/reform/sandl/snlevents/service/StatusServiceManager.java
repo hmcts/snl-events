@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.model.PossibleOperationValidator;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Statusable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
@@ -71,6 +72,11 @@ public class StatusServiceManager {
 
         return checkIfStatusCanBeVacated.test(hearingWithSessionsResponse)
             && checkIfVacatedCanBePerformed(hearingWithSessionsResponse);
+    }
+
+    public boolean canBeVacated(HearingPart hearingPart) {
+        return hearingPart.getStatus().getStatus() == Status.Listed
+            && hearingPart.getSession().getStart().isAfter(OffsetDateTime.now());
     }
 
     private static Predicate<HearingWithSessionsResponse> checkIfStatusCanBeUnlisted =

@@ -69,6 +69,54 @@ public class StatusServiceManagerTest {
         assertThat(statusServiceManager.canBeWithdrawn(hearing)).isEqualTo(false);
     }
 
+    @Test
+    public void canBeVacatedIsFalse_whenHearingIsSingleSessionHearing() {
+        Hearing hearing = createHearingWithStatus(createUnlistedStatus());
+        hearing.setMultiSession(false);
+
+        assertThat(statusServiceManager.canBeVacated(hearing)).isEqualTo(false);
+    }
+
+    @Test
+    public void canVacatedIsTrue_whenHearingIsListedAndIsMultiSessionAndHearingPartAlreadyStarted() {
+        Hearing hearing = createHearingWithStatus(createListedStatus());
+        hearing.setMultiSession(true);
+
+        Session sessionInThePast = new Session();
+        sessionInThePast.setStart(OffsetDateTime.now().minusDays(5));
+
+        HearingPart hearingPartInThePast = new HearingPart();
+        hearingPartInThePast.setSession(sessionInThePast);
+        hearingPartInThePast.setStatus(createListedStatus());
+        hearing.addHearingPart(hearingPartInThePast);
+
+        Session sessionInTheFuture = new Session();
+        sessionInTheFuture.setStart(OffsetDateTime.now().plusDays(5));
+
+        HearingPart hearingPartInTheFuture = new HearingPart();
+        hearingPartInTheFuture.setSession(sessionInTheFuture);
+        hearingPartInTheFuture.setStatus(createListedStatus());
+        hearing.addHearingPart(hearingPartInTheFuture);
+
+        assertThat(statusServiceManager.canBeVacated(hearing)).isEqualTo(true);
+    }
+
+    @Test
+    public void canBeVacatedIsTrue_whenHearingListedAndSessionStartIsInTheFuture() {
+        Hearing hearing = createHearingWithStatus(createUnlistedStatus());
+        hearing.setMultiSession(true);
+
+        Session sessionInTheFuture = new Session();
+        sessionInTheFuture.setStart(OffsetDateTime.now().plusDays(5));
+
+        HearingPart hearingPartInTheFuture = new HearingPart();
+        hearingPartInTheFuture.setSession(sessionInTheFuture);
+        hearingPartInTheFuture.setStatus(createListedStatus());
+        hearing.addHearingPart(hearingPartInTheFuture);
+
+        assertThat(statusServiceManager.canBeVacated(hearingPartInTheFuture)).isEqualTo(true);
+    }
+
     private Hearing createHearingWithStatus(StatusConfig status) {
         val hearing = new Hearing();
         hearing.setVersion(VERSION);
