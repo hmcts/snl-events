@@ -1,16 +1,31 @@
 #!groovy
 @Library("Infrastructure") _
 
-properties([
-  parameters([
-    string(name: 'PRODUCT_NAME', defaultValue: 'snl', description: ''),
-    string(name: 'APP', defaultValue: 'events', description: ''),
-    string(name: 'TYPE', defaultValue: 'java', description: ''),
-    string(name: 'ENVIRONMENT', defaultValue: 'saat', description: 'Environment where code should be build and deployed'),
-    choice(name: 'SUBSCRIPTION', choices: 'sandbox\nnonprod\nprod', description: 'Azure subscriptions available to build in')
-  ])
-])
+def type = "java"
+def product = "snl"
+def component = "notes"
 
-withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
-  enableDbMigration()
+List<LinkedHashMap<String, Object>> secrets = [
+    secret('s2s-jwt-secret', 'SNL_S2S_JWT_SECRET'),
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+    [ $class: 'AzureKeyVaultSecret',
+      secretType: 'Secret',
+      name: secretName,
+      version: '',
+      envVariable: envVar
+    ]
+}
+
+withPipeline(type, product, component) {
+    enableDbMigration()
+    echo env.CHANGE_TITLE
+    if (env.CHANGE_TITLE && !env.CHANGE_TITLE.contains('[PREVIEW]')
+        && env.CHANGE_TITLE.contains('[AKS]')) {
+        loadVaultSecrets(secrets)
+        setVaultName('snl')
+        enableDockerBuild()
+        enableDeployToAKS()
+    }
 }
