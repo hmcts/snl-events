@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsRes
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
@@ -109,15 +111,15 @@ public class HearingControllerTest {
         hearing.setId(uuid);
         when(hearingService.getHearingsForListing(Optional.empty(),
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty())).thenReturn(new PageImpl(Arrays.asList(HearingForListingResponse.builder().build())));
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC)).thenReturn(new PageImpl(Arrays.asList(HearingForListingResponse.builder().build())));
 
-        mvc.getResponseAsString(URL + "/for-listing");
+        mvc.getResponseAsString(URL + "/for-listing?sortByProperty=case_number&sortByDirection=asc");
 
         verify(hearingService, times(1)).getHearingsForListing(Optional.empty(),
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty());
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC);
     }
 
     @Test

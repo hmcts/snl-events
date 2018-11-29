@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.time.Duration;
@@ -352,13 +354,13 @@ public class HearingServiceTests extends BaseIntegrationTest {
         // When
         final Page<HearingForListingResponse> firstPage = hearingService.getHearingsForListing(Optional.of(0),
             Optional.of(10),
-            Optional.of("case_number"),
-            Optional.of("asc"));
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC);
 
         final Page<HearingForListingResponse> secondPage = hearingService.getHearingsForListing(Optional.of(1),
             Optional.of(10),
-            Optional.of("case_number"),
-            Optional.of("asc"));
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC);
 
         // Then
         assertThat(firstPage.getTotalElements()).isEqualTo(11);

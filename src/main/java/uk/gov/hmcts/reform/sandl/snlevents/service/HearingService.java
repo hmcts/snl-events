@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.UnlistHearingAction;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingQueries;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
@@ -68,11 +70,10 @@ public class HearingService {
 
     public Page<HearingForListingResponse> getHearingsForListing(Optional<Integer> page,
                                                                  Optional<Integer> size,
-                                                                 Optional<String> sortByProperty,
-                                                                 Optional<String> sortByDirection) {
+                                                                 HearingForListingColumn sortByProperty,
+                                                                 Sort.Direction sortByDirection) {
 
-        String hearingForListingQuery = hearingForListingQueries.getMainQuery(
-            sortByProperty.orElse("case_number"), sortByDirection.orElse("asc"));
+        String hearingForListingQuery = hearingForListingQueries.getMainQuery(sortByProperty, sortByDirection);
 
         Query sqlQuery = entityManager.createNativeQuery(hearingForListingQuery, "MapToHearingForListingResponse");
         sqlQuery.setFirstResult(page.orElse(Integer.valueOf(1)) * size.orElse(Integer.valueOf(100)));

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,14 +26,18 @@ public class HearingForListingQueries {
 
     private String orderByQueryPart = "ORDER BY <order_property> <order_direction>";
 
-    public String getOrderByQueryPart(String property, String direction) {
+    private final String orderPropertyPlaceholder = "<order_property>";
+    private final String orderDirectionPlaceholder = "<order_direction>";
+
+    private String getOrderByQueryPart(String property, String direction) {
         return orderByQueryPart
-            .replace("<order_property>", property)
-            .replace("<order_direction>", direction);
+            .replace(orderPropertyPlaceholder, property)
+            .replace(orderDirectionPlaceholder, direction);
     }
 
-    public String getMainQuery(String property, String direction) {
-        return hearingForListingSelectHearings + hearingForListingQueryBody + getOrderByQueryPart(property, direction);
+    public String getMainQuery(HearingForListingColumn property, Sort.Direction direction) {
+        return hearingForListingSelectHearings + hearingForListingQueryBody
+            + getOrderByQueryPart(property.getColumnName(), direction.toString());
     }
 
     public String getCountQuery() {
