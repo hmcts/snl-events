@@ -70,7 +70,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
         hearing = hearingRepository.findOne(vacateHearingRequest.getHearingId());
         hearingParts = hearing.getHearingParts().stream()
             .filter(hp ->
-                hp.getStatus().getStatus() == Status.Listed && hp.getStart().isAfter(OffsetDateTime.now())
+                hp.getStatus().getStatus() == Status.Listed && hp.getSession().getStart().isAfter(OffsetDateTime.now())
             ).collect(Collectors.toList());
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
@@ -103,7 +103,6 @@ public class VacateHearingAction extends Action implements RulesProcessable {
             throw new SnlRuntimeException(e);
         }
 
-        hearing.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
         entityManager.detach(hearing);
         hearing.setVersion(vacateHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);

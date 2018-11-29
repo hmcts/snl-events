@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -77,8 +79,20 @@ public class HearingWithSessionsResponse {
 
             return versionInfo;
         }).collect(Collectors.toList());
-        if (!this.sessions.isEmpty()) {
-            this.listingDate = this.sessions.get(0).getStart();
+
+        List<HearingPart> listedHearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> hp.getStatus().getStatus().equals(Status.Listed) && hp.getSession() != null)
+            .collect(Collectors.toList());
+
+        Optional<OffsetDateTime> earliestListingDate = listedHearingParts
+            .stream()
+            .map(hp -> hp.getSession().getStart())
+            .sorted()
+            .findFirst();
+
+        if (earliestListingDate.isPresent()) {
+            this.listingDate = earliestListingDate.get();
             // thing to use native query instead of JPA Entity
         }
     }
