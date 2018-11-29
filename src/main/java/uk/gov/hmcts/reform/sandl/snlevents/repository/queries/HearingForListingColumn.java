@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.repository.queries;
 
 import lombok.Getter;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 
 public enum HearingForListingColumn {
     CASE_NUMBER("case_number"),
@@ -23,7 +24,7 @@ public enum HearingForListingColumn {
         this.columnName = columnName;
     }
 
-    public static HearingForListingColumn fromString(String columnName) {
+    public static HearingForListingColumn fromString(String columnName) throws SnlEventsException {
         for (HearingForListingColumn sessionSelectColumn : HearingForListingColumn.values()) {
             if (sessionSelectColumn.getColumnName().equalsIgnoreCase(columnName)) {
 
@@ -31,6 +32,6 @@ public enum HearingForListingColumn {
             }
         }
 
-        return null;
+        throw new SnlEventsException("Could not find enum value for the given string: " + columnName);
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.repository.queries.sessionsearch;
 
 import lombok.Getter;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 
 public enum SearchSessionSelectColumn {
     PERSON_NAME("person_name"),
@@ -27,14 +28,13 @@ public enum SearchSessionSelectColumn {
         this.columnName = columnName;
     }
 
-    public static SearchSessionSelectColumn fromString(String columnName) {
+    public static SearchSessionSelectColumn fromString(String columnName) throws SnlEventsException {
         for (SearchSessionSelectColumn sessionSelectColumn : SearchSessionSelectColumn.values()) {
             if (sessionSelectColumn.getColumnName().equalsIgnoreCase(columnName)) {
-
                 return sessionSelectColumn;
             }
         }
 
-        return null;
+        throw new SnlEventsException("Could not find enum value for the given string: " + columnName);
     }
 }
