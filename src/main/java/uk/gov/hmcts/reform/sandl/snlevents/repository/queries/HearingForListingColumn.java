@@ -24,7 +24,7 @@ public enum HearingForListingColumn {
         this.columnName = columnName;
     }
 
-    public static HearingForListingColumn fromString(String columnName) throws SnlEventsException {
+    public static HearingForListingColumn fromString(String columnName) {
         for (HearingForListingColumn sessionSelectColumn : HearingForListingColumn.values()) {
             if (sessionSelectColumn.getColumnName().equalsIgnoreCase(columnName)) {
 

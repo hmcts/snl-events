@@ -28,7 +28,7 @@ public enum SearchSessionSelectColumn {
         this.columnName = columnName;
     }
 
-    public static SearchSessionSelectColumn fromString(String columnName) throws SnlEventsException {
+    public static SearchSessionSelectColumn fromString(String columnName) {
         for (SearchSessionSelectColumn sessionSelectColumn : SearchSessionSelectColumn.values()) {
             if (sessionSelectColumn.getColumnName().equalsIgnoreCase(columnName)) {
                 return sessionSelectColumn;
