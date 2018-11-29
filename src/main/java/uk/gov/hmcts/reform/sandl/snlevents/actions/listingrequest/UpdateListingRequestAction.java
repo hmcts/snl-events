@@ -99,7 +99,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
 
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
-            if (!OffsetDateTime.now().isBefore( hearingParts.get(0).getSession().getStart())) {
+            if (!OffsetDateTime.now().isBefore(hearingParts.get(0).getSession().getStart())) {
                 throw new SnlEventsException("Cannot amend listing request if starts on or before today's date!");
             }
 
