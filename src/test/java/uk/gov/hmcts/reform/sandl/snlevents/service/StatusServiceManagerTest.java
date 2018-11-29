@@ -42,8 +42,6 @@ public class StatusServiceManagerTest {
 
     @Test
     public void canAdjournIsTrue_whenHearingHasListedStatus_andListingDateIsBeforeNow() {
-        Hearing hearing = createHearingWithStatus(createListedStatus());
-
         Session session = new Session();
         session.setStart(OffsetDateTime.now().minusDays(5));
 
@@ -51,6 +49,7 @@ public class StatusServiceManagerTest {
         hearingPart.setSession(session);
         hearingPart.setStatus(createListedStatus());
 
+        Hearing hearing = createHearingWithStatus(createListedStatus());
         hearing.setHearingParts(Arrays.asList(hearingPart));
 
         assertThat(statusServiceManager.canBeAdjourned(hearing)).isEqualTo(true);
