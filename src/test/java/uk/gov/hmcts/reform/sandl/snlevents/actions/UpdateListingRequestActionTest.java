@@ -89,8 +89,6 @@ public class UpdateListingRequestActionTest {
             ulr,
             entityManager,
             objectMapper,
-            hearingTypeRepository,
-            caseTypeRepository,
             hearingRepository,
             hearingPartRepository,
             statusesMock.statusConfigService

@@ -40,27 +40,20 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private UpdateListingRequest updateListingRequest;
     private String currentHearingAsString;
     private EntityManager entityManager;
-    private HearingTypeRepository hearingTypeRepository;
-    private CaseTypeRepository caseTypeRepository;
     private HearingRepository hearingRepository;
     private HearingPartRepository hearingPartRepository;
     private StatusConfigService statusConfigService;
     private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
-    @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public UpdateListingRequestAction(UpdateListingRequest updateListingRequest,
                                       EntityManager entityManager,
                                       ObjectMapper objectMapper,
-                                      HearingTypeRepository hearingTypeRepository,
-                                      CaseTypeRepository caseTypeRepository,
                                       HearingRepository hearingRepository,
                                       HearingPartRepository hearingPartRepository,
                                       StatusConfigService statusConfigService) {
         this.updateListingRequest = updateListingRequest;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
-        this.hearingTypeRepository = hearingTypeRepository;
-        this.caseTypeRepository = caseTypeRepository;
         this.hearingRepository = hearingRepository;
         this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;

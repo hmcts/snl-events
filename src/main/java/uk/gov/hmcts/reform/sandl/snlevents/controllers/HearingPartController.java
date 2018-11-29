@@ -125,8 +125,6 @@ public class HearingPartController {
             updateListingRequest,
             entityManager,
             objectMapper,
-            hearingTypeRepository,
-            caseTypeRepository,
             hearingRepository,
             hearingPartRepository,
             statusConfigService
