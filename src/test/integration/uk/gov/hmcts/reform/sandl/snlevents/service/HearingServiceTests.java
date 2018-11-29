@@ -340,7 +340,7 @@ public class HearingServiceTests extends BaseIntegrationTest {
     }
 
     @Test
-    public void getHearingsForListing_twoPages() {
+    public void getHearingsForListing_returnsTwoPagesWithProperTotalCount() {
         // Given
         Hearing.HearingBuilder unlistedHearingBuilder = hearingUnlisted.toBuilder();
 
