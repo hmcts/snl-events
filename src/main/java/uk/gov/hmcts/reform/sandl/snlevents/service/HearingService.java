@@ -84,7 +84,7 @@ public class HearingService {
 
         BigInteger totalCount = (BigInteger) sqlCountQuery.getSingleResult();
 
-        return new PageImpl<HearingForListingResponse>(sqlQuery.getResultList(), null, totalCount.longValue());
+        return new PageImpl<>(sqlQuery.getResultList(), null, totalCount.longValue());
     }
 
     public UserTransaction unlist(UnlistHearingRequest unlistHearingRequest) {
