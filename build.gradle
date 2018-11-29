@@ -226,7 +226,7 @@ sonarqube {
     property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     property "sonar.exclusions", "**/config/**"
     property "sonar.test.exclusions", ""
-    property 'sonar.coverage.exclusions', "**/config/**", "**/HearingForListingResponse.*"
+    property 'sonar.coverage.exclusions', "**/config/**","**/*HearingForListingResponse*"
   }
 }
 
