@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder()
+@SuppressWarnings("common-java:DuplicatedBlocks")
 public class HearingForListingResponse implements Serializable {
     private UUID id;
     private String caseNumber;

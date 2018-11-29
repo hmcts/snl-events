@@ -42,33 +42,31 @@ import javax.persistence.SqlResultSetMappings;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
-@SqlResultSetMappings({
-    @SqlResultSetMapping(name = "MapToHearingForListingResponse",
-        classes = {
-            @ConstructorResult(
-                targetClass = HearingForListingResponse.class,
-                columns = {
-                    @ColumnResult(name = "id", type = UUID.class),
-                    @ColumnResult(name = "case_number", type = String.class),
-                    @ColumnResult(name = "case_title", type = String.class),
-                    @ColumnResult(name = "case_type_code", type = String.class),
-                    @ColumnResult(name = "case_type_description", type = String.class),
-                    @ColumnResult(name = "hearing_type_code", type = String.class),
-                    @ColumnResult(name = "hearing_type_description", type = String.class),
-                    @ColumnResult(name = "duration", type = Duration.class),
-                    @ColumnResult(name = "schedule_start", type = OffsetDateTime.class),
-                    @ColumnResult(name = "schedule_end", type = OffsetDateTime.class),
-                    @ColumnResult(name = "version", type = Long.class),
-                    @ColumnResult(name = "priority", type = Integer.class),
-                    @ColumnResult(name = "communication_facilitator", type = String.class),
-                    @ColumnResult(name = "reserved_judge_id", type = UUID.class),
-                    @ColumnResult(name = "reserved_judge_name", type = String.class),
-                    @ColumnResult(name = "number_of_sessions", type = Integer.class),
-                    @ColumnResult(name = "status", type = String.class),
-                    @ColumnResult(name = "is_multisession", type = Boolean.class),
-                })
-        })
-})
+@SqlResultSetMapping(name = "MapToHearingForListingResponse",
+    classes = {
+        @ConstructorResult(
+            targetClass = HearingForListingResponse.class,
+            columns = {
+                @ColumnResult(name = "id", type = UUID.class),
+                @ColumnResult(name = "case_number", type = String.class),
+                @ColumnResult(name = "case_title", type = String.class),
+                @ColumnResult(name = "case_type_code", type = String.class),
+                @ColumnResult(name = "case_type_description", type = String.class),
+                @ColumnResult(name = "hearing_type_code", type = String.class),
+                @ColumnResult(name = "hearing_type_description", type = String.class),
+                @ColumnResult(name = "duration", type = Duration.class),
+                @ColumnResult(name = "schedule_start", type = OffsetDateTime.class),
+                @ColumnResult(name = "schedule_end", type = OffsetDateTime.class),
+                @ColumnResult(name = "version", type = Long.class),
+                @ColumnResult(name = "priority", type = Integer.class),
+                @ColumnResult(name = "communication_facilitator", type = String.class),
+                @ColumnResult(name = "reserved_judge_id", type = UUID.class),
+                @ColumnResult(name = "reserved_judge_name", type = String.class),
+                @ColumnResult(name = "number_of_sessions", type = Integer.class),
+                @ColumnResult(name = "status", type = String.class),
+                @ColumnResult(name = "is_multisession", type = Boolean.class),
+            })
+    })
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
