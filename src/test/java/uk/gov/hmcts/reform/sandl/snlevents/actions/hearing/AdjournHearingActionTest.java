@@ -139,8 +139,10 @@ public class AdjournHearingActionTest {
         ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
         Mockito.verify(hearingPartRepository).save(captor.capture());
         captor.getValue().forEach(hp -> {
-            assertNull(hp.getSessionId());
-            assertNull(hp.getSession());
+            if (hp.getStatus().getStatus().equals(Status.Vacated)) {
+                assertNull(hp.getSessionId());
+                assertNull(hp.getSession());
+            }
         });
     }
 

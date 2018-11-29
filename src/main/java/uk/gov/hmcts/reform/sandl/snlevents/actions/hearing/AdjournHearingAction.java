@@ -104,10 +104,10 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
         originalHearingParts = mapHearingPartsToStrings(hearingParts);
         hearingParts.stream().forEach(hp -> {
-            hp.setSession(null);
-            hp.setSessionId(null);
             if (hp.getStart().isAfter(OffsetDateTime.now())) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
+                hp.setSessionId(null);
+                hp.setSession(null);
             }
         });
 
