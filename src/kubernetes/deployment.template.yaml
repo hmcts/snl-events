@@ -18,17 +18,17 @@ spec:
         - image: ${IMAGE_NAME}
           name: ${SERVICE_NAME}
           env:
-            - name: SNL_NOTES_DB_HOST
+            - name: SNL_EVENTS_DB_HOST
               value: "localhost"
-            - name: SNL_NOTES_DB_PORT
+            - name: SNL_EVENTS_DB_PORT
               value: "5432"
-            - name: SNL_NOTES_DB_NAME
+            - name: SNL_EVENTS_DB_NAME
               value: "snl-events"
-            - name: SNL_NOTES_DB_USERNAME
+            - name: SNL_EVENTS_DB_USERNAME
               value: "snluser"
-            - name: SNL_NOTES_DB_PASSWORD
+            - name: SNL_EVENTS_DB_PASSWORD
               value: "snlpass"
-            - name: SNL_NOTES_DB_PARAMS
+            - name: SNL_EVENTS_DB_PARAMS
               value: "?sslmode=disable"
             - name: ENABLE_DB_MIGRATE_IN_SERVICE
               value: "true"
@@ -59,7 +59,7 @@ spec:
           name: ${SERVICE_NAME}-postgres
           env:
             - name: POSTGRES_DB
-              value: snl-notes
+              value: snl-events
             - name: POSTGRES_USER
               value: snluser
             - name: POSTGRES_PASSWORD

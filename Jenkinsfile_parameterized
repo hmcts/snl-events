@@ -3,7 +3,7 @@
 
 def type = "java"
 def product = "snl"
-def component = "notes"
+def component = "events"
 
 List<LinkedHashMap<String, Object>> secrets = [
     secret('s2s-jwt-secret', 'SNL_S2S_JWT_SECRET'),
