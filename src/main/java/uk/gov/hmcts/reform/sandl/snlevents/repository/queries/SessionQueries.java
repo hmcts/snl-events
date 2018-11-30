@@ -21,7 +21,7 @@ public final class SessionQueries {
         + "  r.room_type_code                       AS room_type_code, "
         + "  rt.description                         AS room_description, "
         + "  (SELECT COUNT(hearing_part.id) FROM hearing_part "
-        + "   WHERE hearing_part.session_id = s.id) AS hearing_parts_count, "
+        + "   WHERE hearing_part.session_id = s.id AND hearing_part.is_deleted = false) AS hearing_parts_count, "
         + "  (SELECT CASE WHEN EXISTS("
         + "        SELECT h.id FROM hearing_part hp "
         + "    INNER JOIN hearing h on hp.hearing_id = h.id "

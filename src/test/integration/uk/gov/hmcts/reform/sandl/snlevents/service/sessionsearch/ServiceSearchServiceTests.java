@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.RoomType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
@@ -360,6 +361,37 @@ public class ServiceSearchServiceTests extends BaseSessionSearchTest {
         assertEquals(1, sessions.getNumberOfElements());
         assertEquals(sessionIdWithHearingPart, sessionSearchResponse.getSessionId());
         assertTrue(utilisation > 100);
+    }
+
+    @Test
+    public void search_forAmendment_shouldNotCountDeletedHearingPartInSession() {
+        UUID sessionIdWithHearingParts = UUID.randomUUID();
+
+        final Session session = createSession(
+            ONE_HOUR,
+            sessionIdWithHearingParts,
+            null,
+            null,
+            null
+        );
+
+        Hearing hearing = createHearing(HALF_HOUR, null, false);
+        HearingPart hearingPart = createHearingPart(UUID.randomUUID());
+        hearingPart.setHearing(hearing);
+        hearingPart.setSession(session);
+
+        HearingPart hearingPartDeleted = createHearingPart(UUID.randomUUID());
+        hearingPartDeleted.setHearing(hearing);
+        hearingPartDeleted.setSession(session);
+        hearingPartDeleted.setDeleted(true);
+
+        sessionRepository.saveAndFlush(session);
+        hearingRepository.saveAndFlush(hearing);
+        hearingPartRepository.saveAndFlush(hearingPart);
+        hearingPartRepository.saveAndFlush(hearingPartDeleted);
+
+        SessionAmendResponse response = sessionService.getAmendSession(sessionIdWithHearingParts);
+        assertEquals(1, response.getHearingPartsCount());
     }
 
     @Test
