@@ -14,24 +14,21 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import javax.persistence.EntityManager;
 
-public class AdjournHearingAction extends Action implements RulesProcessable {
-    protected AdjournHearingRequest adjournHearingRequest;
+public class VacateHearingAction extends Action implements RulesProcessable {
+    protected VacateHearingRequest vacateHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
     protected List<Session> sessions;
@@ -43,12 +40,12 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     protected EntityManager entityManager;
 
     // id & hearing part string
+    private UserTransactionDataPreparerService dataPreparerService = new UserTransactionDataPreparerService();
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
-    private UserTransactionDataPreparerService dataPreparer = new UserTransactionDataPreparerService();
 
-    public AdjournHearingAction(
-        AdjournHearingRequest adjournHearingRequest,
+    public VacateHearingAction(
+        VacateHearingRequest vacateHearingRequest,
         HearingRepository hearingRepository,
         HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
@@ -56,7 +53,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
         ObjectMapper objectMapper,
         EntityManager entityManager
     ) {
-        this.adjournHearingRequest = adjournHearingRequest;
+        this.vacateHearingRequest = vacateHearingRequest;
         this.hearingRepository = hearingRepository;
         this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
@@ -67,23 +64,29 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     @Override
     public void getAndValidateEntities() {
-        hearing = hearingRepository.findOne(adjournHearingRequest.getHearingId());
-        hearingParts = hearing.getHearingParts();
+        hearing = hearingRepository.findOne(vacateHearingRequest.getHearingId());
+        hearingParts = hearing.getHearingParts().stream()
+            .filter(hp -> statusServiceManager.canBeVacated(hp))
+            .collect(Collectors.toList());
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+        // Validation moved to act() due to conflict with optimistic lock
 
-        if (!statusServiceManager.canBeAdjourned(hearing)) {
-            throw new SnlEventsException("Hearing can not be adjourned");
+        if (!statusServiceManager.canBeVacated(hearing)) {
+            throw new SnlEventsException("Hearing can not be vacated");
         }
     }
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
         val ids = hearingParts.stream().map(HearingPart::getId).collect(Collectors.toList());
-        ids.addAll(sessions.stream().map(Session::getId).collect(Collectors.toList()));
-        ids.add(adjournHearingRequest.getHearingId());
+        ids.addAll(hearingParts.stream()
+            .map(HearingPart::getSessionId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
+        ids.add(vacateHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);
     }
@@ -96,18 +99,16 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
             throw new SnlRuntimeException(e);
         }
 
-        hearing.setStatus(statusConfigService.getStatusConfig(Status.Adjourned));
         entityManager.detach(hearing);
-        hearing.setVersion(adjournHearingRequest.getHearingVersion());
+        hearing.setVersion(vacateHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);
 
-        originalHearingParts = dataPreparer.mapHearingPartsToStrings(objectMapper, hearingParts);
+        originalHearingParts = dataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
+
         hearingParts.stream().forEach(hp -> {
-            if (hp.getStart().isAfter(OffsetDateTime.now())) {
-                hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
-                hp.setSessionId(null);
-                hp.setSession(null);
-            }
+            hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
+            hp.setSession(null);
+            hp.setStart(null);
         });
 
         hearingPartRepository.save(hearingParts);
@@ -115,44 +116,27 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataList.add(new UserTransactionData("hearingPart",
-                id,
-                hpString,
-                "update",
-                "update",
-                0)
-            )
+            dataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            previousHearing,
-            "update",
-            "update",
-            1)
-        );
+        dataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+            previousHearing, 1);
 
         sessions.stream().forEach(s ->
-            userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
+            dataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        return userTransactionDataList;
+        return dataPreparerService.getUserTransactionDataList();
     }
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return dataPreparer.generateDeleteHearingPartFactMsg(hearingParts, factsMapper);
+        return dataPreparerService.generateDeleteHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
     public UUID getUserTransactionId() {
-        return adjournHearingRequest.getUserTransactionId();
-    }
-
-
-    private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
-        return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
+        return vacateHearingRequest.getUserTransactionId();
     }
 }

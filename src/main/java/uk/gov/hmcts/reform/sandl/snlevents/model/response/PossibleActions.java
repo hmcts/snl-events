@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class PossibleActions {
-
     @JsonProperty(value = "Unlist")
     private boolean unlist;
 
@@ -14,4 +13,7 @@ public class PossibleActions {
 
     @JsonProperty(value = "Adjourn")
     private boolean adjourn;
+
+    @JsonProperty(value = "Vacate")
+    private boolean vacate;
 }

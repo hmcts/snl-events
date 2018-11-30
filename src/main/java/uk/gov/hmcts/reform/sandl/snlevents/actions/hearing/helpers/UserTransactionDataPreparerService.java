@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,5 +52,16 @@ public class UserTransactionDataPreparerService {
         });
 
         return originalIdStringPair;
+    }
+
+    public List<FactMessage> generateDeleteHearingPartFactMsg(List<HearingPart> hearingParts, FactsMapper factsMapper) {
+        List<FactMessage> msgs = new ArrayList<>();
+
+        hearingParts.forEach(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
+        });
+
+        return msgs;
     }
 }

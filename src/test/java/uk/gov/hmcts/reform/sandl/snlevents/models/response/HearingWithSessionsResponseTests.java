@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -83,6 +84,7 @@ public class HearingWithSessionsResponseTests {
 
         val hearingPart = new HearingPart();
         hearingPart.setSession(session);
+        hearingPart.setStatus(new StatusesMock().statusConfigService.getStatusConfig(Status.Listed));
 
         return hearingPart;
     }

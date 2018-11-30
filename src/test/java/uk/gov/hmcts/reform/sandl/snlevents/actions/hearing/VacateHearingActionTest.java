@@ -18,8 +18,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -33,24 +34,31 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class WithdrawHearingActionTest {
-    private static final UUID HEARING_ID_TO_BE_WITHDRAWN = UUID.randomUUID();
-    private static final Long HEARING_VERSION_TO_BE_WITHDRAWN = 0L;
+public class VacateHearingActionTest {
+    private static final UUID HEARING_ID_TO_BE_VACATED = UUID.randomUUID();
+    private static final Long HEARING_VERSION_TO_BE_VACATED = 0L;
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
     private static final UUID HEARING_PART_ID_B = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_B = 2L;
+    private static final UUID HEARING_PART_ID_C = UUID.randomUUID();
+    private static final Long HEARING_VERSION_ID_C = 3L;
+    private static final UUID HEARING_PART_ID_D = UUID.randomUUID();
+    private static final Long HEARING_VERSION_ID_D = 3L;
     private static final UUID SESSION_ID_A = UUID.randomUUID();
     private static final UUID SESSION_ID_B = UUID.randomUUID();
-    private ActionTestHelper ath = new ActionTestHelper();
+    private static final UUID SESSION_ID_C = UUID.randomUUID();
+    private static final UUID SESSION_ID_D = UUID.randomUUID();
+    private static StatusConfig hearingStatusConfig;
     private StatusesMock statusesMock = new StatusesMock();
-    private WithdrawHearingAction action;
+    private VacateHearingAction action;
+
+    private ActionTestHelper ath = new ActionTestHelper();
 
     @Mock
     private HearingRepository hearingRepository;
@@ -64,31 +72,38 @@ public class WithdrawHearingActionTest {
     @Mock
     private EntityManager entityManager;
 
-
     @Before
     public void setup() {
+        hearingStatusConfig = statusesMock.statusConfigService.getStatusConfig(Status.Listed);
         Hearing hearing = new Hearing();
         hearing.setDuration(Duration.ofMinutes(60));
         hearing.setCaseType(new CaseType("cs-code", "cs-desc"));
         hearing.setHearingType(new HearingType("ht-code", "ht-desc"));
-        hearing.setId(HEARING_ID_TO_BE_WITHDRAWN);
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
+        hearing.setId(HEARING_ID_TO_BE_VACATED);
+        hearing.setStatus(hearingStatusConfig);
+        hearing.setVersion(HEARING_VERSION_TO_BE_VACATED);
         hearing.setHearingParts(Arrays.asList(
-            ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, Status.Listed, null, SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
-            ath.createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, Status.Unlisted, null, SESSION_ID_B, OffsetDateTime.now().plusDays(1))
+            ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A, hearing,
+                Status.Listed, OffsetDateTime.now().plusDays(-1), SESSION_ID_A, OffsetDateTime.now().plusDays(-1)),
+            ath.createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B, hearing,
+                Status.Listed, OffsetDateTime.now(), SESSION_ID_B, OffsetDateTime.now()),
+            ath.createHearingPartWithSession(HEARING_PART_ID_C, HEARING_VERSION_ID_C, hearing,
+                Status.Listed, OffsetDateTime.now().plusDays(1), SESSION_ID_C, OffsetDateTime.now().plusDays(1)),
+            ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D, hearing, 
+                Status.Vacated, OffsetDateTime.now().plusDays(2), SESSION_ID_D, OffsetDateTime.now().plusDays(2))
         ));
+        hearing.setMultiSession(true);
 
-        when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);
+        when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_VACATED))).thenReturn(hearing);
 
-        WithdrawHearingRequest whr = new WithdrawHearingRequest();
-        whr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
-        whr.setUserTransactionId(UUID.randomUUID());
+        VacateHearingRequest vhr = new VacateHearingRequest();
+        vhr.setHearingId(HEARING_ID_TO_BE_VACATED);
+        vhr.setUserTransactionId(UUID.randomUUID());
 
-        action = new WithdrawHearingAction(
-            whr, hearingRepository, hearingPartRepository,
+        action = new VacateHearingAction(
+            vhr,
+            hearingRepository,
+            hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -98,18 +113,13 @@ public class WithdrawHearingActionTest {
 
     @Test
     public void getAssociatedEntitiesIds_returnsCorrectIds() {
-        action.getAndValidateEntities();
-        UUID[] ids = action.getAssociatedEntitiesIds();
         UUID[] expectedUuids = new UUID[]{
-            HEARING_ID_TO_BE_WITHDRAWN,
-            HEARING_PART_ID_A,
-            HEARING_PART_ID_B,
-            SESSION_ID_A,
-            SESSION_ID_B
+            HEARING_ID_TO_BE_VACATED,
+            HEARING_PART_ID_C,
+            SESSION_ID_C,
         };
 
-        assertThat(ids.length).isEqualTo(expectedUuids.length);
-        assertTrue(Arrays.asList(ids).containsAll(Arrays.asList(expectedUuids)));
+        ath.assertThat_getAssociatedEntitiesIds_returnsCorrectIds(action, expectedUuids);
     }
 
     @Test
@@ -123,11 +133,9 @@ public class WithdrawHearingActionTest {
         action.act();
         List<UserTransactionData> userTransactionData = action.generateUserTransactionData();
 
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_A, "hearingPart");
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_B, "hearingPart");
-        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_WITHDRAWN, "hearing");
-        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_A);
-        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_B);
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_PART_ID_C, "hearingPart");
+        assertThatContainsEntityWithUpdateAction(userTransactionData, HEARING_ID_TO_BE_VACATED, "hearing");
+        assertThatContainsEntity(userTransactionData, "session", SESSION_ID_C);
     }
 
     @Test
@@ -135,7 +143,7 @@ public class WithdrawHearingActionTest {
         action.getAndValidateEntities();
         val generatedFactMsgs = action.generateFactMessages();
 
-        assertThat(generatedFactMsgs.size()).isEqualTo(2);
+        assertThat(generatedFactMsgs.size()).isEqualTo(1);
         assertThatAllMsgsAreTypeOf(generatedFactMsgs, RulesService.DELETE_HEARING_PART);
     }
 
@@ -145,19 +153,19 @@ public class WithdrawHearingActionTest {
     }
 
     @Test
-    public void act_shouldSetStatusesToWithdrawn() {
+    public void act_shouldNotChangeHearingStatuses() {
         action.getAndValidateEntities();
         action.act();
 
-        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
-        assertThat(action.hearingParts.size()).isEqualTo(2);
-        action.hearingParts.forEach(hearingPart -> {
-            if (hearingPart.getId() == HEARING_PART_ID_A) {
-                assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Vacated);
-            } else if (hearingPart.getId() == HEARING_PART_ID_B) {
-                assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
-            }
-        });
+        assertThat(action.hearing.getStatus().getStatus()).isEqualTo(hearingStatusConfig.getStatus());
+    }
+
+    @Test
+    public void act_shouldSetStatusesToVacated() {
+        action.getAndValidateEntities();
+        action.act();
+
+        assertThat(action.hearingParts.get(0).getStatus().getStatus()).isEqualTo(Status.Vacated);
     }
 
     @Test(expected = SnlRuntimeException.class)
@@ -168,26 +176,23 @@ public class WithdrawHearingActionTest {
     }
 
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingStatusCantBeWithdrawn_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingStatusCantBeVacated_shouldThrowException() {
         Hearing hearing = new Hearing();
-        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
-        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
+        hearing.setVersion(HEARING_VERSION_TO_BE_VACATED);
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Vacated));
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
     }
 
+
     @Test(expected = SnlEventsException.class)
-    public void getAndValidateEntities_whenHearingDateCantBeWithdrawn_shouldThrowException() {
+    public void getAndValidateEntities_whenHearingIsSingleSessionHearing_shouldThrowException() {
         Hearing hearing = new Hearing();
-        hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
+        hearing.setVersion(HEARING_VERSION_TO_BE_VACATED);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
-        hearing.setHearingParts(Arrays.asList(
-            ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, Status.Listed, null, SESSION_ID_A, OffsetDateTime.now().minusDays(1))
-        ));
-        Mockito.when(hearingRepository.findOne(any(UUID.class)))
-            .thenReturn(hearing);
+        hearing.setMultiSession(false);
+        Mockito.when(hearingRepository.findOne(any(UUID.class))).thenReturn(hearing);
         action.getAndValidateEntities();
     }
 
@@ -209,6 +214,6 @@ public class WithdrawHearingActionTest {
     }
 
     private void assertThatAllMsgsAreTypeOf(List<FactMessage> factMessages, String type) {
-        factMessages.stream().forEach(fm -> assertThat(fm.getType()).isEqualTo(type));
+        factMessages.forEach(fm -> assertThat(fm.getType()).isEqualTo(type));
     }
 }
