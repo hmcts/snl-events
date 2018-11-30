@@ -68,7 +68,10 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(adjournHearingRequest.getHearingId());
-        hearingParts = hearing.getHearingParts();
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> statusServiceManager.canHearingPartBeAdjourned(hp))
+            .collect(Collectors.toList());
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)

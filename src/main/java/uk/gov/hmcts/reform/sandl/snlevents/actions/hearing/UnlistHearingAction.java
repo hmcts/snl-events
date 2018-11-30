@@ -67,7 +67,16 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(unlistHearingRequest.getHearingId());
-        hearingParts = hearing.getHearingParts();
+
+        if (hearing == null) {
+            throw new EntityNotFoundException("Hearing not found");
+        }
+
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> statusServiceManager.canBeUnlisted(hp))
+            .collect(Collectors.toList());
+
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)
@@ -77,21 +86,21 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         if (!statusServiceManager.canBeUnlisted(hearing)) {
             throw new SnlEventsException("Hearing can not be unlisted");
         }
-        hearingParts.forEach(hp -> {
-            if (!statusServiceManager.canBeUnlisted(hp)) {
-                // we should define somewhere text of these messages and how much we want to show to the user
-                throw new SnlEventsException("Hearing part can not be unlisted");
-            }
-        });
     }
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        val ids = hearing.getHearingParts().stream().map(HearingPart::getId).collect(Collectors.toList());
-        ids.addAll(hearing.getHearingParts().stream()
+        val ids = hearingParts
+            .stream()
+            .map(HearingPart::getId)
+            .collect(Collectors.toList());
+
+        ids.addAll(hearingParts
+            .stream()
             .map(HearingPart::getSessionId)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
+
         ids.add(unlistHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);

@@ -39,6 +39,10 @@ public class StatusServiceManager {
         return entity.getStatus().isCanBeUnlisted();
     }
 
+    public boolean canHearingPartBeAdjourned(HearingPart entity) {
+        return entity.getStatus().isCanBeAdjourned();
+    }
+
     public boolean shouldBeCountInUtilization(Statusable entity) {
         return entity.getStatus().isCountInUtilization();
     }
@@ -51,6 +55,10 @@ public class StatusServiceManager {
             .forEach(validator -> validator.getBusinessOperationVerifier().apply(hearing, possibleActions));
 
         return possibleActions;
+    }
+
+    public boolean canBeWithdrawn(HearingPart hearingPart) {
+        return hearingPart.getStatus().isCanBeWithdrawn();
     }
 
     public boolean canBeWithdrawn(Hearing hearing) {

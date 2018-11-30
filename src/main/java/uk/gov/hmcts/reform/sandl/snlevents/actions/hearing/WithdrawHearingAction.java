@@ -6,6 +6,7 @@ import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -67,7 +68,16 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public void getAndValidateEntities() {
         hearing = hearingRepository.findOne(withdrawHearingRequest.getHearingId());
-        hearingParts = hearing.getHearingParts();
+
+        if (hearing == null) {
+            throw new EntityNotFoundException("Hearing not found");
+        }
+
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> statusServiceManager.canBeWithdrawn(hp))
+            .collect(Collectors.toList());
+
         sessions = hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)
@@ -81,11 +91,17 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        val ids = hearing.getHearingParts().stream().map(HearingPart::getId).collect(Collectors.toList());
-        ids.addAll(hearing.getHearingParts().stream()
+        val ids = hearingParts
+            .stream()
+            .map(HearingPart::getId)
+            .collect(Collectors.toList());
+
+        ids.addAll(hearingParts
+            .stream()
             .map(HearingPart::getSessionId)
             .filter(Objects::nonNull)
             .collect(Collectors.toList()));
+
         ids.add(withdrawHearingRequest.getHearingId());
 
         return ids.stream().toArray(UUID[]::new);
@@ -102,19 +118,21 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
         entityManager.detach(hearing);
         hearing.setVersion(withdrawHearingRequest.getHearingVersion());
-        hearingRepository.save(hearing);
 
         originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
             hp.setSession(null);
             hp.setSessionId(null);
+            hp.setStart(null);
             if (hp.getStatus().getStatus() == Status.Listed) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             } else if (hp.getStatus().getStatus() == Status.Unlisted) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
+                hearing.setNumberOfSessions(hearing.getNumberOfSessions() - 1);
             }
         });
 
+        hearingRepository.save(hearing);
         hearingPartRepository.save(hearingParts);
     }
 
