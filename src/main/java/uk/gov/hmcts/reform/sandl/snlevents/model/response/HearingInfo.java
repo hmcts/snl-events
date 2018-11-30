@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,7 +51,6 @@ public class HearingInfo implements Serializable {
         this.setNumberOfSessions(hearing.getNumberOfSessions());
         this.setMultiSession(hearing.isMultiSession());
         this.setStatus(hearing.getStatus().getStatus());
-
         this.setDuration((this.isMultiSession() &&  session != null) ? session.getDuration() : hearing.getDuration());
     }
 

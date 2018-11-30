@@ -1,0 +1,116 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${SERVICE_NAME}
+  namespace: ${NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${SERVICE_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${SERVICE_NAME}
+    spec:
+      containers:
+        - image: ${IMAGE_NAME}
+          name: ${SERVICE_NAME}
+          env:
+            - name: SNL_EVENTS_DB_HOST
+              value: "localhost"
+            - name: SNL_EVENTS_DB_PORT
+              value: "5432"
+            - name: SNL_EVENTS_DB_NAME
+              value: "snl-events"
+            - name: SNL_EVENTS_DB_USERNAME
+              value: "snluser"
+            - name: SNL_EVENTS_DB_PASSWORD
+              value: "snlpass"
+            - name: SNL_EVENTS_DB_PARAMS
+              value: "?sslmode=disable"
+            - name: ENABLE_DB_MIGRATE_IN_SERVICE
+              value: "true"
+            - name: SNL_S2S_JWT_SECRET
+              value: "${SNL_S2S_JWT_SECRET}"
+            - name: SNL_SCHEDULEDJOB_ENABLED
+              value: "true"
+            - name: SNL_SCHEDULEDJOB_ENABLED
+              value: "true"
+          envFrom:
+            - configMapRef:
+                name: ${SERVICE_NAME}-config
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1024Mi"
+              cpu: "2500m"
+          ports:
+            - containerPort: 8092
+              name: http
+          imagePullPolicy: Always
+        #
+        # Postgres Container
+        #
+        - image: postgres:10-alpine
+          name: ${SERVICE_NAME}-postgres
+          env:
+            - name: POSTGRES_DB
+              value: snl-events
+            - name: POSTGRES_USER
+              value: snluser
+            - name: POSTGRES_PASSWORD
+              value: snlpass
+          envFrom:
+            - configMapRef:
+                name: ${SERVICE_NAME}-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+          imagePullPolicy: Always
+---
+#
+# Service
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${SERVICE_NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${SERVICE_NAME}
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8092
+  selector:
+    app: ${SERVICE_NAME}
+---
+#
+# Ingress
+#
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ${SERVICE_NAME}
+  namespace: ${NAMESPACE}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: ${SERVICE_FQDN}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ${SERVICE_NAME}
+              servicePort: 80
