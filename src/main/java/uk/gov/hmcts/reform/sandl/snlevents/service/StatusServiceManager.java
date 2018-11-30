@@ -76,7 +76,7 @@ public class StatusServiceManager {
 
     public boolean canBeVacated(HearingPart hearingPart) {
         return hearingPart.getStatus().getStatus() == Status.Listed
-            && hearingPart.getSession().getStart().isAfter(OffsetDateTime.now());
+            && hearingPart.getStart().isAfter(OffsetDateTime.now());
     }
 
     private static Predicate<HearingWithSessionsResponse> checkIfStatusCanBeUnlisted =
