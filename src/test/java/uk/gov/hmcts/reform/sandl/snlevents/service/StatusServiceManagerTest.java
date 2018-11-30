@@ -71,7 +71,7 @@ public class StatusServiceManagerTest {
 
     @Test
     public void canBeVacatedIsFalse_whenHearingIsSingleSessionHearing() {
-        Hearing hearing = createHearingWithStatus(createUnlistedStatus());
+        Hearing hearing = createHearingWithStatus(createListedStatus());
         hearing.setMultiSession(false);
 
         assertThat(statusServiceManager.canBeVacated(hearing)).isEqualTo(false);

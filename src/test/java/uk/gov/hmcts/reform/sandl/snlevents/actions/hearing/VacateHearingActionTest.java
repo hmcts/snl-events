@@ -72,7 +72,6 @@ public class VacateHearingActionTest {
     @Mock
     private EntityManager entityManager;
 
-
     @Before
     public void setup() {
         hearingStatusConfig = statusesMock.statusConfigService.getStatusConfig(Status.Listed);

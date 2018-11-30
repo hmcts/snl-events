@@ -100,7 +100,7 @@ public class StatusServiceManager {
 
     private static boolean checkIfAdjournCanBePerformed(HearingWithSessionsResponse hearingWithSessionsResponse) {
         OffsetDateTime listingDate = hearingWithSessionsResponse.getListingDate();
-        return listingDate == null ? false : listingDate.isBefore(OffsetDateTime.now());
+        return listingDate == null ? false : listingDate.isBefore(OffsetDateTime.now()); //NOSONAR
     }
 
     private static BiFunction<HearingWithSessionsResponse, PossibleActions, PossibleActions>
