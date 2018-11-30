@@ -22,13 +22,14 @@ import static org.junit.Assert.assertTrue;
 public class ActionTestHelper {
     private StatusesMock statusesMock = new StatusesMock();
 
-    public HearingPart createHearingPartWithSession(UUID hpId, Long hpVersion, Hearing hearing, UUID sessionId,
-                                                     Status hpStatus, OffsetDateTime dateTime) {
+    public HearingPart createHearingPartWithSession(UUID hpId, Long hpVersion, Hearing hearing, Status hpStatus,
+                                                    OffsetDateTime hpStartTime, UUID sessionId, OffsetDateTime dateTime) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(hpId);
-        hearingPart.setHearing(hearing);
         hearingPart.setVersion(hpVersion);
+        hearingPart.setHearing(hearing);
         hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(hpStatus));
+        hearingPart.setStart(hpStartTime);
 
         Session session = new Session();
         session.setId(sessionId);

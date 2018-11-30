@@ -84,13 +84,13 @@ public class VacateHearingActionTest {
         hearing.setVersion(HEARING_VERSION_TO_BE_VACATED);
         hearing.setHearingParts(Arrays.asList(
             ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, SESSION_ID_A, Status.Listed, OffsetDateTime.now().plusDays(-1)),
+                hearing, Status.Listed, OffsetDateTime.now().plusDays(-1), SESSION_ID_A, OffsetDateTime.now().plusDays(-1)),
             ath.createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, SESSION_ID_B, Status.Listed, OffsetDateTime.now()),
+                hearing, Status.Listed, OffsetDateTime.now(), SESSION_ID_B, OffsetDateTime.now()),
             ath.createHearingPartWithSession(HEARING_PART_ID_C, HEARING_VERSION_ID_C,
-                hearing, SESSION_ID_C, Status.Listed, OffsetDateTime.now().plusDays(1)),
+                hearing, Status.Listed, OffsetDateTime.now().plusDays(1), SESSION_ID_C, OffsetDateTime.now().plusDays(1)),
             ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D,
-                hearing, SESSION_ID_D, Status.Vacated, OffsetDateTime.now().plusDays(2))
+                hearing, Status.Vacated, OffsetDateTime.now().plusDays(2), SESSION_ID_D, OffsetDateTime.now().plusDays(2))
         ));
         hearing.setMultiSession(true);
 
