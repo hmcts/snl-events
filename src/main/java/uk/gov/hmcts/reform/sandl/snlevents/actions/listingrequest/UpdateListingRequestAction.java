@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -152,6 +153,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         hearingParts = hearing.getHearingParts()
                 .stream()
                 .filter(hp -> hp.getStatus().getStatus().equals(status))
+                .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
                 .collect(Collectors.toList());
     }
 
