@@ -158,7 +158,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
                 hearingParts = hearing.getHearingParts()
                     .stream()
                     .filter(hp -> hp.getStatus().getStatus().equals(status))
-                    .sorted(Comparator.comparing(hp -> hp.getStart()))
+                    .sorted(Comparator.comparing(HearingPart::getStart))
                     .collect(Collectors.toList());
                 break;
             case Unlisted:
