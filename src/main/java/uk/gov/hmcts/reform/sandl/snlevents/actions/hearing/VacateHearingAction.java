@@ -29,6 +29,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
+@SuppressWarnings("common-java:DuplicatedBlocks")
 public class VacateHearingAction extends Action implements RulesProcessable {
     protected VacateHearingRequest vacateHearingRequest;
     protected Hearing hearing;
