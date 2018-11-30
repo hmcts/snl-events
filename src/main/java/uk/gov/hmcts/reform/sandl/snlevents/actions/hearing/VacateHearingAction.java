@@ -29,7 +29,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
-public class VacateHearingAction extends Action implements RulesProcessable { //NOSONAR
+public class VacateHearingAction extends Action implements RulesProcessable {
     protected VacateHearingRequest vacateHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
@@ -44,7 +44,7 @@ public class VacateHearingAction extends Action implements RulesProcessable { //
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
-    private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
+    private UserTransactionDataPreparerService userTransactionDataPreperer = new UserTransactionDataPreparerService();
 
     public VacateHearingAction(
         VacateHearingRequest vacateHearingRequest,
@@ -105,7 +105,7 @@ public class VacateHearingAction extends Action implements RulesProcessable { //
         hearing.setVersion(vacateHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);
 
-        originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
+        originalHearingParts = userTransactionDataPreperer.mapHearingPartsToStrings(objectMapper, hearingParts);
 
         hearingParts.stream().forEach(hp -> {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
@@ -119,17 +119,17 @@ public class VacateHearingAction extends Action implements RulesProcessable { //
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            userTransactionDataPreperer.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        userTransactionDataPreperer.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
             previousHearing, 1);
 
         sessions.stream().forEach(s ->
-            utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            userTransactionDataPreperer.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        return utdps.getUserTransactionDataList();
+        return userTransactionDataPreperer.getUserTransactionDataList();
     }
 
     @Override
