@@ -79,9 +79,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             throw new EntityNotFoundException("Hearing not found");
         }
 
-        getHearingPartsWithStatus(hearing.getStatus().getStatus());
-        getSessions();
-
         if (!hearing.isMultiSession() && updateListingRequest.getNumberOfSessions() > 1) {
             throw new SnlEventsException("Single-session hearings cannot have more than 2 sessions!");
         }
@@ -90,16 +87,22 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             throw new SnlEventsException("Multi-session hearings cannot have less than 2 sessions!");
         }
 
+        if (!hearing.getStatus().getStatus().equals(Status.Unlisted)
+            && !hearing.getStatus().getStatus().equals(Status.Listed)) {
+            throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
+        }
+
+        getHearingPartsWithStatus(hearing.getStatus().getStatus());
+        getSessions();
+
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
-            if (!OffsetDateTime.now().isBefore(hearingParts.get(0).getSession().getStart())) {
+            if (!OffsetDateTime.now().isBefore(hearingParts.get(0).getStart())) {
                 throw new SnlEventsException("Cannot amend listing request if starts on or before today's date!");
             }
 
             if (updateListingRequest.getNumberOfSessions() > hearing.getNumberOfSessions()) {
                 throw new SnlEventsException("Cannot increase number of sessions for a listed request!");
             }
-        } else if (!hearing.getStatus().getStatus().equals(Status.Unlisted)) {
-            throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
         }
     }
 
@@ -150,11 +153,23 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     }
 
     private void getHearingPartsWithStatus(Status status) {
-        hearingParts = hearing.getHearingParts()
-                .stream()
-                .filter(hp -> hp.getStatus().getStatus().equals(status))
-                .sorted(Comparator.comparing(hp -> hp.getSession().getStart()))
-                .collect(Collectors.toList());
+        switch (status) {
+            case Listed:
+                hearingParts = hearing.getHearingParts()
+                    .stream()
+                    .filter(hp -> hp.getStatus().getStatus().equals(status))
+                    .sorted(Comparator.comparing(hp -> hp.getStart()))
+                    .collect(Collectors.toList());
+                break;
+            case Unlisted:
+                hearingParts = hearing.getHearingParts()
+                    .stream()
+                    .filter(hp -> hp.getStatus().getStatus().equals(status))
+                    .collect(Collectors.toList());
+                break;
+            default:
+                break;
+        }
     }
 
     private void getSessions() {

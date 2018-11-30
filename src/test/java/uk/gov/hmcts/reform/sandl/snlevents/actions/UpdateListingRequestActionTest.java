@@ -210,7 +210,7 @@ public class UpdateListingRequestActionTest {
         expectedException.expectMessage("Cannot amend listing request if starts on or before today's date!");
 
         setPreviousHearing(Status.Listed, false, 1);
-        previousHearing.getHearingParts().get(0).getSession().setStart(OffsetDateTime.now());
+        previousHearing.getHearingParts().get(0).setStart(OffsetDateTime.now());
         ulr.setNumberOfSessions(1);
 
         action.getAndValidateEntities();
@@ -386,10 +386,10 @@ public class UpdateListingRequestActionTest {
         for (int i = 0; i < numberOfSessions; i++) {
             Session session = new Session();
             session.setId(UUID.randomUUID());
-            session.setStart(OffsetDateTime.now().plusDays(i + 1));
             HearingPart hearingPart = new HearingPart();
             hearingPart.setId(UUID.randomUUID());
             hearingPart.setHearing(previousHearing);
+            hearingPart.setStart(OffsetDateTime.now().plusDays(i + 1));
             hearingPart.setSession(session);
             hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(status));
             hearingParts.add(hearingPart);
