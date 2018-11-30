@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +24,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingForListingResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
@@ -73,6 +76,23 @@ public class HearingController {
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HearingInfo getHearingById(@PathVariable("id") UUID id) {
         return new HearingInfo(hearingRepository.findOne(id));
+    }
+
+    @GetMapping(path = "/for-listing", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<HearingForListingResponse> getCanBeListed(
+        @RequestParam(value = "page", required = false) Optional<Integer> page,
+        @RequestParam(value = "size", required = false) Optional<Integer> size,
+        @RequestParam(value = "sortByProperty", required = false) Optional<String> sortByProperty,
+        @RequestParam(value = "sortByDirection", required = false) Optional<String> sortByDirection) {
+
+        HearingForListingColumn orderByColumn = null;
+        Sort.Direction direction = null;
+        if (sortByProperty.isPresent() && sortByDirection.isPresent()) {
+            orderByColumn = HearingForListingColumn.fromString(sortByProperty.get());
+            direction = Sort.Direction.fromString(sortByDirection.get());
+        }
+
+        return hearingService.getHearingsForListing(page, size, orderByColumn, direction);
     }
 
     @GetMapping(path = "/{id}/for-amendment", produces = MediaType.APPLICATION_JSON_VALUE)

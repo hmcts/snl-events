@@ -11,6 +11,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.common.EventsMockMvc;
 import uk.gov.hmcts.reform.sandl.snlevents.config.StatusesTestConfiguration;
@@ -24,24 +26,30 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingForListingResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.security.S2SRulesAuthenticationClient;
 import uk.gov.hmcts.reform.sandl.snlevents.service.ActionService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingPartService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.HearingService;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @RunWith(SpringRunner.class)
@@ -97,6 +105,24 @@ public class HearingControllerTest {
     }
 
     @Test
+    public void getHearingsForListing_shouldReturnProperHearings() throws Exception {
+        val uuid = ID.randomUUID();
+        val hearing = createHearing();
+        hearing.setId(uuid);
+        when(hearingService.getHearingsForListing(Optional.empty(),
+            Optional.empty(),
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC)).thenReturn(new PageImpl(Arrays.asList(HearingForListingResponse.builder().build())));
+
+        mvc.getResponseAsString(URL + "/for-listing?sortByProperty=case_number&sortByDirection=asc");
+
+        verify(hearingService, times(1)).getHearingsForListing(Optional.empty(),
+            Optional.empty(),
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC);
+    }
+
+    @Test
     public void getHearingByIdForAmendment_shouldReturnProperHearing() throws Exception {
         val uuid = ID.randomUUID();
         val hearing = createHearingForAmend();
@@ -104,7 +130,8 @@ public class HearingControllerTest {
         when(hearingService.get(uuid)).thenReturn(hearing);
 
         val response = mvc.getAndMapResponse(URL + "/" + uuid + "/for-amendment",
-            new TypeReference<HearingSearchResponseForAmendment>() {});
+            new TypeReference<HearingSearchResponseForAmendment>() {
+            });
         assertThat(response.getId()).isEqualTo(hearing.getId());
     }
 
