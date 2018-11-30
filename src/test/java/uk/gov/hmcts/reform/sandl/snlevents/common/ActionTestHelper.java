@@ -23,7 +23,8 @@ public class ActionTestHelper {
     private StatusesMock statusesMock = new StatusesMock();
 
     public HearingPart createHearingPartWithSession(UUID hpId, Long hpVersion, Hearing hearing, Status hpStatus,
-                                                    OffsetDateTime hpStartTime, UUID sessionId, OffsetDateTime dateTime) {
+                                                    OffsetDateTime hpStartTime, UUID sessionId,
+                                                    OffsetDateTime dateTime) {
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(hpId);
         hearingPart.setVersion(hpVersion);
