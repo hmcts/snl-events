@@ -78,7 +78,7 @@ public class StatusServiceManagerTest {
     }
 
     @Test
-    public void canVacatedIsTrue_whenHearingIsListedAndIsMultiSessionAndHearingPartAlreadyStarted() {
+    public void hearing_canVacatedIsTrue_whenHearingIsListedAndIsMultiSessionAndHearingPartAlreadyStarted() {
         Hearing hearing = createHearingWithStatus(createListedStatus());
         hearing.setMultiSession(true);
 
@@ -102,19 +102,55 @@ public class StatusServiceManagerTest {
     }
 
     @Test
-    public void canBeVacatedIsTrue_whenHearingListedAndSessionStartIsInTheFuture() {
-        Hearing hearing = createHearingWithStatus(createUnlistedStatus());
+    public void hearing_canBeVacatedIsTrue_whenHearingIsListedAndTheEarliestSessionStartIsInThePast() {
+        Hearing hearing = createHearingWithStatus(createListedStatus());
         hearing.setMultiSession(true);
 
-        Session sessionInTheFuture = new Session();
-        sessionInTheFuture.setStart(OffsetDateTime.now().plusDays(5));
+        Session sessionInThePast = new Session();
+        sessionInThePast.setStart(OffsetDateTime.now().minusDays(5));
 
         HearingPart hearingPartInTheFuture = new HearingPart();
-        hearingPartInTheFuture.setSession(sessionInTheFuture);
+        hearingPartInTheFuture.setSession(sessionInThePast);
         hearingPartInTheFuture.setStatus(createListedStatus());
         hearing.addHearingPart(hearingPartInTheFuture);
 
-        assertThat(statusServiceManager.canBeVacated(hearingPartInTheFuture)).isEqualTo(true);
+        assertThat(statusServiceManager.canBeVacated(hearing)).isEqualTo(true);
+    }
+
+    @Test
+    public void hearing_canBeVacatedIsTrue_hearingIsListedAndTheEarliestSessionStartIsInThePastButHpInTheFuture() {
+        Hearing hearing = createHearingWithStatus(createListedStatus());
+        hearing.setMultiSession(true);
+
+        // This scenario might happen due current bug SL-2176
+        Session sessionInThePast = new Session();
+        sessionInThePast.setStart(OffsetDateTime.now().minusDays(5));
+
+        HearingPart hearingPartInTheFuture = new HearingPart();
+        hearingPartInTheFuture.setSession(sessionInThePast);
+        hearingPartInTheFuture.setStatus(createListedStatus());
+        hearingPartInTheFuture.setStart(OffsetDateTime.now().plusDays(5));
+        hearing.addHearingPart(hearingPartInTheFuture);
+
+        assertThat(statusServiceManager.canBeVacated(hearing)).isEqualTo(true);
+    }
+
+    @Test
+    public void hearingPart_canBeVacatedIsTrue_whenHearingPartTimeIsInTheFutureAndIsListed() {
+        HearingPart listedHearingPartInTheFuture = new HearingPart();
+        listedHearingPartInTheFuture.setStatus(createListedStatus());
+        listedHearingPartInTheFuture.setStart(OffsetDateTime.now().plusDays(1));
+
+        assertThat(statusServiceManager.canBeVacated(listedHearingPartInTheFuture)).isEqualTo(true);
+    }
+
+    @Test
+    public void hearingPart_canBeVacatedIsFalse_whenHearingPartTimeIsInThePastAndIsListed() {
+        HearingPart listedHearingPartInTheFuture = new HearingPart();
+        listedHearingPartInTheFuture.setStatus(createListedStatus());
+        listedHearingPartInTheFuture.setStart(OffsetDateTime.now().minusDays(1));
+
+        assertThat(statusServiceManager.canBeVacated(listedHearingPartInTheFuture)).isEqualTo(false);
     }
 
     private Hearing createHearingWithStatus(StatusConfig status) {
