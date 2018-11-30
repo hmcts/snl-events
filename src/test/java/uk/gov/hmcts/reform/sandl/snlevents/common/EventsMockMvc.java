@@ -30,7 +30,7 @@ public class EventsMockMvc {
         return objectMapper.readValue(getResponseAsString(url), clazz);
     }
 
-    private String getResponseAsString(String url) throws Exception {
+    public String getResponseAsString(String url) throws Exception {
         return mockMvc
             .perform(get(url))
             .andExpect(status().isOk())

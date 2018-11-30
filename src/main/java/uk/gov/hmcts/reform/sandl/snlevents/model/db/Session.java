@@ -63,6 +63,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
                 @ColumnResult(name = "session_startDate", type = OffsetDateTime.class),
                 @ColumnResult(name = "session_duration", type = Duration.class),
                 @ColumnResult(name = "no_of_hearing_parts", type = int.class),
+                @ColumnResult(name = "session_version", type = Long.class),
                 @ColumnResult(name = "allocated_duration", type = Duration.class),
                 @ColumnResult(name = "utilisation", type = Long.class),
                 @ColumnResult(name = "available", type = Duration.class),

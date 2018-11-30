@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import uk.gov.hmcts.reform.sandl.snlevents.BaseIntegrationTest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingForListingResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.ComparisonOperations;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.SearchCriteria;
 
 import java.time.Duration;
@@ -33,6 +36,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -56,6 +60,11 @@ public class HearingServiceTests extends BaseIntegrationTest {
     private final HearingType trial = new HearingType("trial", "Trial");
 
     private final PageRequest firstPage = new PageRequest(0, 10);
+
+    private Hearing hearingListed;
+    private Hearing hearingUnlisted;
+
+    private HearingPart hearingPart;
 
     @Autowired
     HearingRepository hearingRepository;
@@ -87,40 +96,40 @@ public class HearingServiceTests extends BaseIntegrationTest {
 
         final Person judgeLinda = personRepository.getOne(UUID.fromString(JUDGE_ID));
 
-        final Hearing hearing = new Hearing();
-        hearing.setId(UUID.randomUUID());
-        hearing.setCaseNumber(CASE_NUMBER_123);
-        hearing.setCaseTitle("Title 123");
-        hearing.setPriority(Priority.Low);
-        hearing.setCaseType(smallClaims);
-        hearing.setHearingType(trial);
-        hearing.setCommunicationFacilitator("Sign Language");
-        hearing.setReservedJudge(judgeLinda);
-        hearing.setNumberOfSessions(1);
-        hearing.setMultiSession(false);
+        hearingListed = new Hearing();
+        hearingListed.setId(UUID.randomUUID());
+        hearingListed.setCaseNumber(CASE_NUMBER_123);
+        hearingListed.setCaseTitle("Title 123");
+        hearingListed.setPriority(Priority.Low);
+        hearingListed.setCaseType(smallClaims);
+        hearingListed.setHearingType(trial);
+        hearingListed.setCommunicationFacilitator("Sign Language");
+        hearingListed.setReservedJudge(judgeLinda);
+        hearingListed.setNumberOfSessions(1);
+        hearingListed.setMultiSession(false);
 
-        final Hearing hearing2 = new Hearing();
-        hearing2.setId(UUID.randomUUID());
-        hearing2.setCaseNumber(CASE_NUMBER_222);
-        hearing2.setCaseTitle("Title 222");
-        hearing2.setPriority(Priority.Low);
-        hearing2.setCaseType(fastTrack);
-        hearing2.setHearingType(trial);
-        hearing2.setNumberOfSessions(1);
-        hearing2.setMultiSession(false);
+        hearingUnlisted = new Hearing();
+        hearingUnlisted.setId(UUID.randomUUID());
+        hearingUnlisted.setCaseNumber(CASE_NUMBER_222);
+        hearingUnlisted.setCaseTitle("Title 222");
+        hearingUnlisted.setPriority(Priority.Low);
+        hearingUnlisted.setCaseType(fastTrack);
+        hearingUnlisted.setHearingType(trial);
+        hearingUnlisted.setNumberOfSessions(1);
+        hearingUnlisted.setMultiSession(false);
 
-        final HearingPart hearingPart = new HearingPart();
+        hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
         hearingPart.setSessionId(session.getId());
-        hearingPart.setHearingId(hearing.getId());
+        hearingPart.setHearingId(hearingListed.getId());
         session.addHearingPart(hearingPart);
 
         final HearingPart hearingPart2 = new HearingPart();
         hearingPart2.setId(UUID.randomUUID());
-        hearingPart2.setHearingId(hearing2.getId());
+        hearingPart2.setHearingId(hearingUnlisted.getId());
 
-        hearing.addHearingPart(hearingPart);
-        hearing2.addHearingPart(hearingPart2);
+        hearingListed.addHearingPart(hearingPart);
+        hearingUnlisted.addHearingPart(hearingPart2);
 
         StatusConfig statusListed = new StatusConfig();
         statusListed.setStatus(Status.valueOf("Listed"));
@@ -128,12 +137,12 @@ public class HearingServiceTests extends BaseIntegrationTest {
         StatusConfig statusUnlisted = new StatusConfig();
         statusUnlisted.setStatus(Status.valueOf("Unlisted"));
 
-        hearing.setStatus(statusListed);
-        hearing2.setStatus(statusUnlisted);
+        hearingListed.setStatus(statusListed);
+        hearingUnlisted.setStatus(statusUnlisted);
 
         sessionRepository.saveAndFlush(session);
-        hearingRepository.saveAndFlush(hearing);
-        hearingRepository.saveAndFlush(hearing2);
+        hearingRepository.saveAndFlush(hearingListed);
+        hearingRepository.saveAndFlush(hearingUnlisted);
     }
 
     @Test
@@ -328,6 +337,37 @@ public class HearingServiceTests extends BaseIntegrationTest {
         assertThat(responseList.getTotalPages()).isEqualTo(2);
         assertThat(responseList.getTotalElements()).isEqualTo(2);
         assertThat(responseList.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void getHearingsForListing_returnsTwoPagesWithProperTotalCount() {
+        // Given
+        Hearing.HearingBuilder unlistedHearingBuilder = hearingUnlisted.toBuilder();
+
+        for (int i = 0; i < 10; i++) {
+            Hearing tempUnlistedHearing = unlistedHearingBuilder
+                .id(UUID.randomUUID())
+                .hearingParts(Arrays.asList(hearingPart.toBuilder().id(UUID.randomUUID()).build()))
+                .build();
+            hearingRepository.saveAndFlush(tempUnlistedHearing);
+        }
+        // When
+        final Page<HearingForListingResponse> firstPage = hearingService.getHearingsForListing(Optional.of(0),
+            Optional.of(10),
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC);
+
+        final Page<HearingForListingResponse> secondPage = hearingService.getHearingsForListing(Optional.of(1),
+            Optional.of(10),
+            HearingForListingColumn.CASE_NUMBER,
+            Sort.Direction.ASC);
+
+        // Then
+        assertThat(firstPage.getTotalElements()).isEqualTo(11);
+        assertThat(firstPage.getContent().size()).isEqualTo(10);
+
+        assertThat(secondPage.getTotalElements()).isEqualTo(11);
+        assertThat(secondPage.getContent().size()).isEqualTo(1);
     }
 }
 
