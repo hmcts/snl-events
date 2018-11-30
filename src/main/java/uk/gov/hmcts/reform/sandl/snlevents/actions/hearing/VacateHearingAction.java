@@ -17,11 +17,9 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,9 +40,9 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     protected EntityManager entityManager;
 
     // id & hearing part string
+    private UserTransactionDataPreparerService dataPreparerService = new UserTransactionDataPreparerService();
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
-    private UserTransactionDataPreparerService userTransactionDataPreperer = new UserTransactionDataPreparerService();
 
     public VacateHearingAction(
         VacateHearingRequest vacateHearingRequest,
@@ -105,7 +103,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
         hearing.setVersion(vacateHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);
 
-        originalHearingParts = userTransactionDataPreperer.mapHearingPartsToStrings(objectMapper, hearingParts);
+        originalHearingParts = dataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
 
         hearingParts.stream().forEach(hp -> {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
@@ -119,29 +117,22 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataPreperer.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            dataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        userTransactionDataPreperer.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        dataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
             previousHearing, 1);
 
         sessions.stream().forEach(s ->
-            userTransactionDataPreperer.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            dataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        return userTransactionDataPreperer.getUserTransactionDataList();
+        return dataPreparerService.getUserTransactionDataList();
     }
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        List<FactMessage> msgs = new ArrayList<>();
-
-        hearingParts.forEach(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
-        });
-
-        return msgs;
+        return dataPreparerService.generateDeleteHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
@@ -16,13 +17,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class AdjournHearingAction extends Action implements RulesProcessable {
-
     protected AdjournHearingRequest adjournHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
@@ -47,6 +45,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
+    private UserTransactionDataPreparerService dataPreparer = new UserTransactionDataPreparerService();
 
     public AdjournHearingAction(
         AdjournHearingRequest adjournHearingRequest,
@@ -102,7 +101,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
         hearing.setVersion(adjournHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);
 
-        originalHearingParts = mapHearingPartsToStrings(hearingParts);
+        originalHearingParts = dataPreparer.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
             if (hp.getStart().isAfter(OffsetDateTime.now())) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
@@ -144,14 +143,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        List<FactMessage> msgs = new ArrayList<>();
-
-        hearingParts.forEach(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
-        });
-
-        return msgs;
+        return dataPreparer.generateDeleteHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
@@ -162,19 +154,5 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
         return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
-    }
-
-    private Map<UUID, String> mapHearingPartsToStrings(List<HearingPart> hearingParts) {
-        Map<UUID, String> originalIdStringPair = new HashMap<>();
-        hearingParts.stream().forEach(hp -> {
-            try {
-                String hearingPartString = objectMapper.writeValueAsString(hp);
-                originalIdStringPair.put(hp.getId(), hearingPartString);
-            } catch (JsonProcessingException e) {
-                throw new SnlRuntimeException(e);
-            }
-        });
-
-        return originalIdStringPair;
     }
 }
