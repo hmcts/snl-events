@@ -211,6 +211,7 @@ public class UpdateListingRequestActionTest {
 
         setPreviousHearing(Status.Listed, false, 1);
         previousHearing.getHearingParts().get(0).setStart(OffsetDateTime.now());
+        previousHearing.getHearingParts().get(0).getSession().setStart(OffsetDateTime.now());
         ulr.setNumberOfSessions(1);
 
         action.getAndValidateEntities();
@@ -386,6 +387,7 @@ public class UpdateListingRequestActionTest {
         for (int i = 0; i < numberOfSessions; i++) {
             Session session = new Session();
             session.setId(UUID.randomUUID());
+            session.setStart(OffsetDateTime.now().plusDays(i + 1));
             HearingPart hearingPart = new HearingPart();
             hearingPart.setId(UUID.randomUUID());
             hearingPart.setHearing(previousHearing);
