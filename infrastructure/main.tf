@@ -6,15 +6,16 @@ locals {
   envInUse = "${(var.env == "preview" || var.env == "spreview") ? "aat" : var.env}"
   shortEnv = "${(var.env == "preview" || var.env == "spreview") ? var.deployment_namespace : var.env}"
 
-  aat_rules_url = "http://snl-rules-aat.service.core-compute-aat.internal"
-  local_rules_url = "http://snl-rules-${var.env}.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
-  rules_url = "${var.env == "preview" ? local.aat_rules_url : local.local_rules_url}"
+  product = "${var.env == "preview" || var.env == "spreview" ? var.raw_product : var.product}"
+  aat_rules_url = "http://${local.product}-rules-aat-vm.service.core-compute-aat.internal"
+  local_rules_url = "http://${local.product}-rules-${var.env}-vm.service.${data.terraform_remote_state.core_apps_compute.ase_name[0]}.internal"
+  rules_url = "${var.env == "preview" || var.env == "spreview" ? local.aat_rules_url : local.local_rules_url}"
 
   // Shared Resources
-  vaultName = "${var.raw_product}-${local.envInUse}"
-  sharedResourceGroup = "${var.raw_product}-shared-infrastructure-${local.envInUse}"
-  sharedAspName = "${var.raw_product}-${local.envInUse}"
-  sharedAspRg = "${var.raw_product}-shared-infrastructure-${local.envInUse}"
+  vaultName = "${local.product}-${local.envInUse}"
+  sharedResourceGroup = "${local.product}-shared-infrastructure-${local.envInUse}"
+  sharedAspName = "${local.product}-${local.envInUse}"
+  sharedAspRg = "${local.product}-shared-infrastructure-${local.envInUse}"
   asp_name = "${(var.env == "preview" || var.env == "spreview") ? "null" : local.sharedAspName}"
   asp_rg = "${(var.env == "preview" || var.env == "spreview") ? "null" : local.sharedAspRg}"
 }
@@ -76,7 +77,7 @@ module "postgres-snl-events" {
 # region save DB details to Azure Key Vault
 module "snl-vault" {
   source = "git@github.com:hmcts/moj-module-key-vault?ref=master"
-  name = "${var.raw_product}-${var.component}-${local.shortEnv}"
+  name = "${local.product}-${var.component}-${local.shortEnv}"
   product = "${var.product}"
   env = "${var.env}"
   tenant_id = "${var.tenant_id}"
