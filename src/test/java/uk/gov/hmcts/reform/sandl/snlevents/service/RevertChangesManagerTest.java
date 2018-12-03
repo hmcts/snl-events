@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,14 +50,14 @@ public class RevertChangesManagerTest {
     @Mock
     EntityManager entityManager;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     FactsMapper factsMapper;
 
     @Mock
     ObjectMapper objectMapper;
 
     @Test
-    public void revertChanges_handleHearing_whenCounterActionIsDelete() throws IOException {
+    public void revertChanges_handleHearing_whenCounterActionIsDelete() {
         Hearing h = createHearing();
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(h);
         val transaction = createUserTransactionWithHearingDelete();
@@ -81,8 +82,9 @@ public class RevertChangesManagerTest {
     }
 
     @Test
-    public void revertChanges_deletesSessionInRuleService_ifCounterActionIsDelete() throws IOException {
+    public void revertChanges_deletesSessionInRuleService_ifCounterActionIsDelete() {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
+        when(factsMapper.mapDbSessionToRuleJsonMessage(any(Session.class), any()).getSessionFact()).thenReturn("");
         val transaction = createUserTransactionWithSessionDelete();
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
@@ -109,7 +111,7 @@ public class RevertChangesManagerTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void revertChanges_throwsException_whenSessionIsNotFound() throws IOException {
+    public void revertChanges_throwsException_whenSessionIsNotFound() {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(null);
         revertChangesManager.revertChanges(createUserTransactionWithSessionDelete());
     }

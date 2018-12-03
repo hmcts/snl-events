@@ -5,12 +5,15 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -67,6 +70,7 @@ public class SessionServiceTest {
     private static final String HEARING_ID = "7684d2a2-6bf2-4a20-a75a-c6593fcc7c63";
     public static final LocalDate START_DATE = LocalDate.MIN;
     public static final LocalDate END_DATE = LocalDate.MAX;
+    public StatusesMock statusesMock = new StatusesMock();
 
     @InjectMocks
     private SessionService sessionService;
@@ -87,7 +91,7 @@ public class SessionServiceTest {
     private UserTransactionService userTransactionService;
     @Mock
     private ObjectMapper objectMapper;
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private FactsMapper factsMapper;
     @Mock
     private RulesService rulesService;
@@ -213,7 +217,7 @@ public class SessionServiceTest {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
         when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
         when(userTransactionService.rulesProcessed(any(UserTransaction.class))).then(returnsFirstArg());
-        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session))).thenReturn(message);
+        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session), any()).getSessionFact()).thenReturn(message);
 
         UserTransaction transaction = sessionService.updateSession(createUpsertSession());
 
@@ -324,6 +328,7 @@ public class SessionServiceTest {
         hearing.setId(createUuid(HEARING_ID));
         hearing.setCaseType(new CaseType());
         hearing.setHearingType(new HearingType());
+        hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         return hearing;
     }
 

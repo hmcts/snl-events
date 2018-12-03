@@ -47,7 +47,6 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/hearing-part")
 public class HearingPartController {
-
     @Autowired
     HearingPartService hearingPartService;
 
@@ -80,6 +79,7 @@ public class HearingPartController {
 
     @Autowired
     private StatusServiceManager statusServiceManager;
+
     @Autowired
     private StatusConfigService statusConfigService;
 
@@ -121,8 +121,14 @@ public class HearingPartController {
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateHearingPart(@Valid @RequestBody UpdateListingRequest updateListingRequest) {
-        Action action = new UpdateListingRequestAction(updateListingRequest,
-            entityManager, objectMapper, hearingTypeRepository, caseTypeRepository, hearingRepository);
+        Action action = new UpdateListingRequestAction(
+            updateListingRequest,
+            entityManager,
+            objectMapper,
+            hearingRepository,
+            hearingPartRepository,
+            statusConfigService
+            );
 
         UserTransaction ut = actionService.execute(action);
 

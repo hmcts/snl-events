@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Priority;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -40,6 +41,7 @@ public class HearingWithSessionsResponseTests {
     private static final Priority PRIORITY = Priority.High;
     private static final String COMMUNICATION_FACILITATOR = "communication-facilitator";
     private static final String JUDGE_NAME = "judge-name";
+    private static final Long VERSION = 0L;
 
     @Test
     public void hearingWithSessionsResponseConstructor_mapsHearingFromDb() {
@@ -82,6 +84,7 @@ public class HearingWithSessionsResponseTests {
 
         val hearingPart = new HearingPart();
         hearingPart.setSession(session);
+        hearingPart.setStatus(new StatusesMock().statusConfigService.getStatusConfig(Status.Listed));
 
         return hearingPart;
     }
@@ -91,6 +94,7 @@ public class HearingWithSessionsResponseTests {
         hearing.setCaseType(createCaseType());
         hearing.setHearingType(createHearingType());
         hearing.setPriority(PRIORITY);
+        hearing.setVersion(VERSION);
 
         val status = new StatusConfig();
         status.setStatus(Status.Listed);
@@ -109,6 +113,7 @@ public class HearingWithSessionsResponseTests {
         hearing.setScheduleEnd(SCHEDULE_END);
         hearing.setCommunicationFacilitator(COMMUNICATION_FACILITATOR);
         hearing.setReservedJudge(createPerson());
+        hearing.setVersion(VERSION);
         val status = new StatusConfig();
         status.setStatus(Status.Listed);
         hearing.setStatus(status);
@@ -132,6 +137,9 @@ public class HearingWithSessionsResponseTests {
         response.setSessions(Collections.emptyList());
         response.setHearingPartsVersions(new ArrayList<>());
         response.setStatus(Status.Listed);
+        val status = new StatusConfig();
+        status.setStatus(Status.Listed);
+        response.setStatusConfig(status);
 
         return response;
     }

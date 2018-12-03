@@ -28,4 +28,10 @@ public class StatusConfig implements Serializable {
     private boolean canBeUnlisted;
 
     private boolean countInUtilization;
+
+    private boolean canBeVacated;
+
+    private boolean canBeAdjourned;
+
+    private boolean canBeWithdrawn;
 }

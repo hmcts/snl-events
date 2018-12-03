@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +35,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Getter
 @Setter
 @Audited
+@Builder(toBuilder = true)
 @EntityListeners(AuditingEntityListener.class)
 @DynamicInsert
 @Where(clause = "is_deleted=false")
@@ -81,4 +83,14 @@ public class HearingPart extends VersionedEntity implements Serializable, Histor
     @Audited(targetAuditMode = NOT_AUDITED)
     @JoinColumn(name = "status", nullable = false)
     private StatusConfig status;
+
+    public void setHearing(Hearing hearing) {
+        this.hearing = hearing;
+        this.hearingId = (hearing != null) ? hearing.getId() : null;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+        this.sessionId = (session != null) ? session.getId() : null;
+    }
 }

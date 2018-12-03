@@ -1,1 +1,1 @@
-docker-compose down & gradle instDist & docker-compose build & docker-compose up
+docker-compose down & gradle bootRepackage & docker-compose build & docker-compose up

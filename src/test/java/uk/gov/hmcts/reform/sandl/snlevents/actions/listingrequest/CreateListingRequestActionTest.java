@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import lombok.val;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -10,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
-import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -39,7 +41,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class CreateListingRequestActionTest {
-
     private static final String HEARING_PART_ID = "123e4567-e89b-12d3-a456-426655440000";
     private static final String HEARING_PART_ID2 = "123e4567-e89b-12d3-a456-426655440001";
     private static final String HEARING_ID = "38692091-8165-43a5-8c63-977723a77228";
@@ -48,7 +49,6 @@ public class CreateListingRequestActionTest {
 
     private CreateListingRequestAction action;
     private CreateHearingRequest createHearingRequest;
-    private HearingPart hearingPart;
 
     @Mock
     private HearingRepository hearingRepository;
@@ -65,8 +65,8 @@ public class CreateListingRequestActionTest {
     @Spy
     private HearingMapper hearingMapper;
 
-    @Spy
-    private FactsMapper factsMapper;
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -81,7 +81,6 @@ public class CreateListingRequestActionTest {
             statusesMock.statusServiceManager,
             entityManager
         );
-        this.hearingPart = createHearingPart(HEARING_PART_ID);
 
         when(hearingRepository.save(any(Hearing.class))).thenReturn(createHearing());
         when(hearingMapper.mapToHearingParts(createHearingRequest)).thenReturn(
@@ -107,6 +106,25 @@ public class CreateListingRequestActionTest {
         action.hearingParts.forEach(hearingPart -> {
             assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
         });
+    }
+
+    @Test
+    public void act_createMultiSessionWithLessThanTwoNumberOfSessions_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Multi-session hearings cannot have less than 2 sessions!");
+        createHearingRequest.setMultiSession(true);
+        action.getAndValidateEntities();
+        action.act();
+    }
+
+    @Test
+    public void act_createSingleSessionWithMoreThanTwoNumberOfSessions_shouldThrowException() {
+        expectedException.expect(SnlEventsException.class);
+        expectedException.expectMessage("Single-session hearings cannot have more than 2 sessions!");
+        createHearingRequest.setMultiSession(false);
+        createHearingRequest.setNumberOfSessions(2);
+        action.getAndValidateEntities();
+        action.act();
     }
 
     @Test
@@ -138,19 +156,26 @@ public class CreateListingRequestActionTest {
     public void getUserTransactionData_returnsCorrectData() {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
 
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
-            createUuid(HEARING_PART_ID),
-            null,
-            "create",
-            "delete",
-            0));
+        expectedTransactionData.add(
+            new UserTransactionData(
+                "hearingPart",
+                createUuid(HEARING_PART_ID),
+                null,
+                "create",
+                "delete",
+                0
+            )
+        );
 
-        expectedTransactionData.add(new UserTransactionData("hearing",
-            createUuid(HEARING_ID),
-            null,
-            "create",
-            "delete",
-            1));
+        expectedTransactionData.add(
+            new UserTransactionData("hearing",
+                createUuid(HEARING_ID),
+                null,
+                "create",
+                "delete",
+                1
+            )
+        );
 
         action.getAndValidateEntities();
         action.act();
