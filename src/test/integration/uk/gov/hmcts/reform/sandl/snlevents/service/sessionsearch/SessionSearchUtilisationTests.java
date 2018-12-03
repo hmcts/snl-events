@@ -185,7 +185,7 @@ public class SessionSearchUtilisationTests extends BaseSessionSearchTest {
         Page<SessionSearchResponse> sessions = sessionService.searchForSession(
             Collections.emptyList(), FIRST_PAGE, SearchSessionSelectColumn.UTILISATION, Sort.Direction.ASC);
 
-        assertSessionSearchResponse(sessions.getContent().get(0), 0, ONE_HOUR, 1, ZERO_MINUTES);
+        assertSessionSearchResponse(sessions.getContent().get(0), 0, ONE_HOUR, 0, ZERO_MINUTES);
     }
 
     @Test
