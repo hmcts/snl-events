@@ -8,6 +8,4 @@ import java.util.UUID;
 
 @Repository
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, UUID> {
-
-    void deleteActivityLogByUserTransactionId(UUID uuid);
 }

@@ -69,6 +69,4 @@ databaseChangeLog:
       file: db/schema/SL-1900-add-statuses-adjourned-vacated-withdrawn.yaml
   - include:
       file: db/schema/SL-1855-create-activity-log-table.yaml
-  - include:
-      file: db/schema/SL-1855-add-additional-columns-to-activity-log-table.yaml
 
