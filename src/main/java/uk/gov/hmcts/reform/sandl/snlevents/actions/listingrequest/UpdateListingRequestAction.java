@@ -72,7 +72,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         entityManager.detach(hearing);
         updateHearing();
         hearingRepository.save(hearing);
-        hearingPartRepository.save(hearingParts);
+        // hearingPartRepository.save(hearingParts);
     }
 
     @Override
@@ -106,8 +106,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
         }
 
-        entityManager.detach(hearingParts);
-        addOrRemoveHearingParts();
+        getHearingParts();
         getSessions();
     }
 
@@ -181,7 +180,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             .collect(Collectors.toList());
     }
 
-    private void addOrRemoveHearingParts() {
+    private void getHearingParts() {
         int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
         if (diff > 0) {
             addHearingParts(diff);
