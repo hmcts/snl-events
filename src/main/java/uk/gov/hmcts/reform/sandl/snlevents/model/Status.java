@@ -5,5 +5,6 @@ public enum Status {
     Listed,
     Adjourned,
     Vacated,
-    Withdrawn
+    Withdrawn,
+    Created
 }
