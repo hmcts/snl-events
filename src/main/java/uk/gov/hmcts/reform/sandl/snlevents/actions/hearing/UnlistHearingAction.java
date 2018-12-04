@@ -5,12 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -31,7 +34,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class UnlistHearingAction extends Action implements RulesProcessable {
+public class UnlistHearingAction extends Action implements RulesProcessable, ActivityLoggable {
     protected UnlistHearingRequest unlistHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
@@ -173,5 +176,22 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         return hpvi.orElseThrow(() ->
             new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
         );
+    }
+
+    @Override
+    public List<ActivityLog> getActivities() {
+        List activities = new ArrayList();
+
+        ActivityLog activityLog = ActivityLog.builder()
+            .userTransactionId(getUserTransactionId())
+            .id(UUID.randomUUID())
+            .entityId(unlistHearingRequest.getHearingId())
+            .entityName(HEARING_ENTITY)
+            .status(ActivityStatus.Unlisted)
+            .build();
+
+        activities.add(activityLog);
+
+        return activities;
     }
 }

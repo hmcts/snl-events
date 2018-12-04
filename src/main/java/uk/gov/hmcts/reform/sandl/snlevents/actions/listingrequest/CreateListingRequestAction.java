@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -140,10 +141,10 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
         ActivityLog activityLog = ActivityLog.builder()
             .id(UUID.randomUUID())
-            .userTransactionId(this.getUserTransactionId())
-            .entityId(this.createHearingRequest.getId())
+            .userTransactionId(getUserTransactionId())
+            .entityId(createHearingRequest.getId())
             .entityName(HEARING_ENTITY)
-            .status(Status.Created)
+            .status(ActivityStatus.Created)
             .build();
 
         activities.add(activityLog);
