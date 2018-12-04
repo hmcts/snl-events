@@ -67,4 +67,6 @@ databaseChangeLog:
       file: db/schema/SL-1968-statuses-configuration-update.yaml
   - include:
       file: db/schema/SL-1900-add-statuses-adjourned-vacated-withdrawn.yaml
+  - include:
+      file: db/schema/SL-2043-add-startedAt-to-user_transaction-table.yaml
 

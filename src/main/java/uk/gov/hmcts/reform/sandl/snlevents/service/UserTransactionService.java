@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.sandl.snlevents.service;
 
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sandl.snlevents.config.ScheduledRollbackConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
@@ -9,6 +11,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransaction
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +31,13 @@ public class UserTransactionService {
 
     @Autowired
     private RevertChangesManager revertChangesManager;
+
+    @Autowired
+    private ScheduledRollbackConfiguration scheduledRollbackConfiguration;
+
+    @Autowired
+    @Setter
+    private Clock clock;
 
     public UserTransaction getUserTransactionById(UUID id) {
         return userTransactionRepository.findOne(id);
@@ -78,5 +89,17 @@ public class UserTransactionService {
         return new UserTransaction(transactionId,
             UserTransactionStatus.CONFLICT,
             UserTransactionRulesProcessingStatus.NOT_STARTED);
+    }
+
+    public List<UserTransaction> getTimedOutTransactions() {
+        final OffsetDateTime fiveMinutesAgo = OffsetDateTime.now(clock).minusMinutes(
+            scheduledRollbackConfiguration.getTimeoutIntervalInMinutes()
+        );
+        final List<UserTransaction> timedOutTransactions =
+            userTransactionRepository.getAllByStartedAtBeforeAndStatusNotInOrderByStartedAtAsc(
+                fiveMinutesAgo,
+                new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED}
+            );
+        return timedOutTransactions;
     }
 }
