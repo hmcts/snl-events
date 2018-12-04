@@ -17,16 +17,16 @@ import java.util.UUID;
 @Entity
 public class ActivityLog {
     @Id
-    UUID id;
+    private UUID id;
 
-    UUID userTransactionId;
+    private UUID userTransactionId;
 
-    UUID entityId;
+    private UUID entityId;
 
-    String entityName;
+    private String entityName;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    String description;
+    private String description;
 }
