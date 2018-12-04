@@ -1,6 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    id: create-activity-log-table
+    id: SL-1855-create-activity-log-table
     author: rkruk
     changes:
     - createTable:
