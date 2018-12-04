@@ -24,6 +24,16 @@ public class UserTransactionDataPreparerService {
         return userTransactionDataList;
     }
 
+    public void prepareUserTransactionDataForCreate(String entity, UUID entityId, int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(entity,
+            entityId,
+            null,
+            "create",
+            "delete",
+            counterActionOrder)
+        );
+    }
+
     public void prepareUserTransactionDataForUpdate(String entity, UUID entityId, String previousEntityString,
                                                            int counterActionOrder) {
         userTransactionDataList.add(new UserTransactionData(entity,
@@ -36,8 +46,14 @@ public class UserTransactionDataPreparerService {
     }
 
     public void prepareLockedEntityTransactionData(String entity, UUID entityId, int counterActionOrder) {
-        userTransactionDataList.add(new UserTransactionData(entity, entityId, null,
-            "lock", "unlock", counterActionOrder));
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
+            entityId,
+            null,
+            "lock",
+            "unlock",
+            counterActionOrder)
+        );
     }
 
     public Map<UUID, String> mapHearingPartsToStrings(ObjectMapper objectMapper, List<HearingPart> hearingParts) {

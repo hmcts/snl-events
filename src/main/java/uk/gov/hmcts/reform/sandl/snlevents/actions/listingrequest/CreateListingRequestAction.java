@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
@@ -39,6 +40,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
+    private UserTransactionDataPreparerService dataPrepService = new UserTransactionDataPreparerService();
 
     @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public CreateListingRequestAction(CreateHearingRequest createHearingRequest,
@@ -95,31 +97,18 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return hearingParts.stream().map(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
-        }).collect(Collectors.toList());
+        return dataPrepService.generateUpsertHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-
         hearingParts.forEach(hp ->
-            userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hp.getId(), 0))
+            dataPrepService.prepareUserTransactionDataForCreate("hearingPart", hp.getId(), 0)
         );
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
-        return userTransactionDataList;
-    }
+        dataPrepService.prepareUserTransactionDataForCreate("hearing", hearing.getId(), 1);
 
-    private UserTransactionData prepareCreateUserTransactionData(String entity, UUID entityId, int actionOrder) {
-        return new UserTransactionData(entity,
-            entityId,
-            null,
-            "create",
-            "delete",
-            actionOrder);
+        return dataPrepService.getUserTransactionDataList();
     }
 
     @Override
