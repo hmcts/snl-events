@@ -25,7 +25,8 @@ public class UserTransactionDataPreparerService {
     }
 
     public void prepareUserTransactionDataForCreate(String entity, UUID entityId, int counterActionOrder) {
-        userTransactionDataList.add(new UserTransactionData(entity,
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
             entityId,
             null,
             "create",
@@ -36,7 +37,8 @@ public class UserTransactionDataPreparerService {
 
     public void prepareUserTransactionDataForDelete(String entity, UUID entityId, String previousEntityString,
                                                     int counterActionOrder) {
-        userTransactionDataList.add(new UserTransactionData(entity,
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
             entityId,
             previousEntityString,
             "delete",
@@ -47,7 +49,8 @@ public class UserTransactionDataPreparerService {
 
     public void prepareUserTransactionDataForUpdate(String entity, UUID entityId, String previousEntityString,
                                                     int counterActionOrder) {
-        userTransactionDataList.add(new UserTransactionData(entity,
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
             entityId,
             previousEntityString,
             "update",

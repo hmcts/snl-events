@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPr
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +35,8 @@ import javax.persistence.EntityManager;
 
 public class UpdateListingRequestAction extends Action implements RulesProcessable {
     private List<HearingPart> hearingParts;
+    private List<HearingPart> hearingPartsToAdd = new ArrayList<>();
+    private List<HearingPart> hearingPartsToRemove = new ArrayList<>();
     private Hearing hearing;
     private List<Session> sessions;
     private UpdateListingRequest updateListingRequest;
@@ -66,8 +70,9 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
 
         entityManager.detach(hearing);
-        setUpdatedHearingValues();
+        updateHearing();
         hearingRepository.save(hearing);
+        hearingPartRepository.save(hearingParts);
     }
 
     @Override
@@ -86,15 +91,8 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             throw new SnlEventsException("Multi-session hearings cannot have less than 2 sessions!");
         }
 
-        if (!hearing.getStatus().getStatus().equals(Status.Unlisted)
-            && !hearing.getStatus().getStatus().equals(Status.Listed)) {
-            throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
-        }
-
-        getHearingPartsWithStatus(hearing.getStatus().getStatus());
-        getSessions();
-
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
+            getListedHearingParts();
             if (!OffsetDateTime.now().isBefore(hearingParts.get(0).getSession().getStart())) {
                 throw new SnlEventsException("Cannot amend listing request if starts on or before today's date!");
             }
@@ -102,7 +100,15 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             if (updateListingRequest.getNumberOfSessions() > hearing.getNumberOfSessions()) {
                 throw new SnlEventsException("Cannot increase number of sessions for a listed request!");
             }
+        } else if (hearing.getStatus().getStatus().equals(Status.Unlisted)) {
+            getUnlistedHearingParts();
+        } else {
+            throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
         }
+
+        entityManager.detach(hearingParts);
+        addOrRemoveHearingParts();
+        getSessions();
     }
 
     @Override
@@ -112,8 +118,12 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        hearingParts.forEach(hp ->
-            utdps.prepareUserTransactionDataForUpdate("hearingPart", hp.getId(), null,  0)
+        hearingPartsToAdd.forEach(hp ->
+            utdps.prepareUserTransactionDataForCreate("hearingPart", hp.getId(),  0)
+        );
+
+        hearingPartsToRemove.forEach(hp ->
+            utdps.prepareUserTransactionDataForUpdate("hearingPart", hp.getId(), getHearingPartString(hp),  0)
         );
 
         utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), currentHearingAsString, 1);
@@ -132,40 +142,85 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public UUID[] getAssociatedEntitiesIds() {
-        val ids = hearingParts
+        val ids = hearingPartsToAdd
             .stream()
             .map(HearingPart::getId)
             .collect(Collectors.toList());
 
-        ids.addAll(hearingParts
+        ids.addAll(hearingPartsToRemove
             .stream()
-            .filter(Objects::nonNull)
-            .map(HearingPart::getSessionId)
-            .collect(Collectors.toList()));
+            .map(HearingPart::getId)
+            .collect(Collectors.toList())
+        );
+
+        if (hearing.getStatus().getStatus().equals(Status.Listed)) {
+            ids.addAll(hearingPartsToRemove
+                .stream()
+                .filter(Objects::nonNull)
+                .map(HearingPart::getSessionId)
+                .collect(Collectors.toList()));
+        }
 
         ids.add(updateListingRequest.getId());
 
         return ids.stream().toArray(UUID[]::new);
     }
 
-    private void getHearingPartsWithStatus(Status status) {
-        switch (status) {
-            case Listed:
-                hearingParts = hearing.getHearingParts()
-                    .stream()
-                    .filter(hp -> hp.getStatus().getStatus().equals(status))
-                    .sorted(Comparator.comparing(HearingPart::getStart))
-                    .collect(Collectors.toList());
-                break;
-            case Unlisted:
-                hearingParts = hearing.getHearingParts()
-                    .stream()
-                    .filter(hp -> hp.getStatus().getStatus().equals(status))
-                    .collect(Collectors.toList());
-                break;
-            default:
-                break;
+    private void getUnlistedHearingParts() {
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> hp.getStatus().getStatus().equals(Status.Unlisted))
+            .collect(Collectors.toList());
+    }
+
+    private void getListedHearingParts() {
+        hearingParts = hearing.getHearingParts()
+            .stream()
+            .filter(hp -> hp.getStatus().getStatus().equals(Status.Listed))
+            .sorted(Comparator.comparing(HearingPart::getStart))
+            .collect(Collectors.toList());
+    }
+
+    private void addOrRemoveHearingParts() {
+        int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
+        if (diff > 0) {
+            addHearingParts(diff);
+        } else if (diff < 0) {
+            removeHearingParts(Math.abs(diff));
         }
+    }
+
+    private void addHearingParts(int numberOfPartsToAdd) {
+        for (int i = 0; i < numberOfPartsToAdd; i++) {
+            HearingPart hp = new HearingPart();
+            hp.setId(UUID.randomUUID());
+            hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
+            hearingPartsToAdd.add(hp);
+            hearing.addHearingPart(hp);
+        }
+    }
+
+    private void removeHearingParts(int numberOfPartsToRemove) {
+        hearingPartsToRemove = hearingParts.subList(hearingParts.size() - numberOfPartsToRemove,
+            hearingParts.size());
+        Status status = hearing.getStatus().getStatus().equals(Status.Listed) ? Status.Vacated : Status.Withdrawn;
+        for (HearingPart hp : hearingPartsToRemove) {
+            hp.setSession(null);
+            hp.setSessionId(null);
+            hp.setStart(null);
+            hp.setStatus(statusConfigService.getStatusConfig(status));
+        }
+    }
+
+    private String getHearingPartString(HearingPart hp) {
+        String hearingPartString;
+        try {
+            hearingPartString = objectMapper.writeValueAsString(hp);
+        } catch (JsonProcessingException e) {
+            throw new SnlRuntimeException(e);
+        }
+
+        return hearingPartString;
     }
 
     private void getSessions() {
@@ -175,66 +230,29 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
             .collect(Collectors.toList());
     }
 
-    private void setUpdatedHearingValues() {
+    private void updateHearing() {
         hearing.setCaseNumber(updateListingRequest.getCaseNumber());
         hearing.setCaseTitle(updateListingRequest.getCaseTitle());
-        hearing.setCaseType(
-            this.entityManager.getReference(CaseType.class, updateListingRequest.getCaseTypeCode())
-        );
-        hearing.setHearingType(
-            this.entityManager.getReference(HearingType.class, updateListingRequest.getHearingTypeCode())
-        );
         hearing.setDuration(updateListingRequest.getDuration());
         hearing.setScheduleStart(updateListingRequest.getScheduleStart());
         hearing.setScheduleEnd(updateListingRequest.getScheduleEnd());
         hearing.setCommunicationFacilitator(updateListingRequest.getCommunicationFacilitator());
         hearing.setPriority(updateListingRequest.getPriority());
         hearing.setVersion(updateListingRequest.getVersion());
-        setNumberOfSessionsAndHearingParts();
-        setJudge();
-    }
-
-    private void setNumberOfSessionsAndHearingParts() {
-        int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
-        if (diff > 0) {
-            addHearingParts(diff);
-        } else if (diff < 0) {
-            removeHearingParts(Math.abs(diff));
-        }
-
         hearing.setNumberOfSessions(updateListingRequest.getNumberOfSessions());
-    }
+        hearing.setCaseType(
+            this.entityManager.getReference(CaseType.class, updateListingRequest.getCaseTypeCode())
+        );
+        hearing.setHearingType(
+            this.entityManager.getReference(HearingType.class, updateListingRequest.getHearingTypeCode())
+        );
 
-    private void setJudge() {
         if (updateListingRequest.getReservedJudgeId() != null) {
             hearing.setReservedJudge(
                 this.entityManager.getReference(Person.class, updateListingRequest.getReservedJudgeId())
             );
         } else {
             hearing.setReservedJudge(null);
-        }
-    }
-
-    private void addHearingParts(int numberOfPartsToAdd) {
-        for (int i = 0; i < numberOfPartsToAdd; i++) {
-            HearingPart hearingPart = new HearingPart();
-            hearingPart.setId(UUID.randomUUID());
-            hearingPart.setHearingId(updateListingRequest.getId());
-            hearingPart.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
-            hearing.addHearingPart(hearingPart);
-            hearingPartRepository.save(hearingPart);
-        }
-    }
-
-    private void removeHearingParts(int numberOfPartsToRemove) {
-        Status status = hearing.getStatus().getStatus().equals(Status.Listed) ? Status.Vacated : Status.Withdrawn;
-        for (int i = hearingParts.size() - 1; i >= hearingParts.size() - numberOfPartsToRemove; i--) {
-            HearingPart hp = hearingParts.get(i);
-            hp.setSession(null);
-            hp.setSessionId(null);
-            hp.setStart(null);
-            hp.setStatus(statusConfigService.getStatusConfig(status));
-            hearingPartRepository.save(hp);
         }
     }
 }

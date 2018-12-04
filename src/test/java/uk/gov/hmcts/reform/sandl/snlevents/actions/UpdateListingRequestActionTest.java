@@ -107,26 +107,54 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
-    public void getAssociatedEntitiesIds_returnsCorrectIds() {
+    public void getAssociatedEntitiesIds_returnsCorrectIds_whenNot_addingOrRemoving_numberOfSessions_Listed() {
         setPreviousHearing(Status.Listed, true, 2);
         ulr.setNumberOfSessions(2);
-        action.getAndValidateEntities();
 
-        List<HearingPart> hearingParts = previousHearing.getHearingParts();
         List<UUID> expectedUuids = new ArrayList<>();
 
         expectedUuids.add(previousHearing.getId());
-        for (int i = 0; i < hearingParts.size(); i++) {
-            expectedUuids.add(hearingParts.get(i).getId());
-            expectedUuids.add(hearingParts.get(i).getSessionId());
+
+        action.getAndValidateEntities();
+        UUID[] ids = action.getAssociatedEntitiesIds();
+
+        assertThat(ids.length).isEqualTo(expectedUuids.size());
+        assertTrue(Arrays.asList(ids).containsAll(expectedUuids));
+    }
+
+    @Test
+    public void getAssociatedEntitiesIds_returnsCorrectIds_when_adding_numberOfSessions_Unlisted() {
+        setPreviousHearing(Status.Unlisted, true, 2);
+        ulr.setNumberOfSessions(3);
+
+        List<UUID> expectedUuids = new ArrayList<>();
+        expectedUuids.add(previousHearing.getId());
+        for (int i = 0; i < ulr.getNumberOfSessions() - previousHearing.getNumberOfSessions(); i++) {
+            expectedUuids.add(UUID.randomUUID());
         }
 
         action.getAndValidateEntities();
         UUID[] ids = action.getAssociatedEntitiesIds();
 
-        assertThat(ids.length).isEqualTo(expectedUuids.size()
-            + (previousHearing.getNumberOfSessions() - ulr.getNumberOfSessions()));
-        assertTrue(Arrays.asList(ids).containsAll(expectedUuids));
+        assertThat(ids.length).isEqualTo(expectedUuids.size());
+    }
+
+    @Test
+    public void getAssociatedEntitiesIds_returnsCorrectIds_when_decreasing_numberOfSessions_Listed() {
+        setPreviousHearing(Status.Listed, true, 3);
+        ulr.setNumberOfSessions(2);
+
+        List<UUID> expectedUuids = new ArrayList<>();
+        expectedUuids.add(previousHearing.getId());
+        for (int i = 0; i < previousHearing.getNumberOfSessions() - ulr.getNumberOfSessions(); i++) {
+            expectedUuids.add(UUID.randomUUID());
+            expectedUuids.add(UUID.randomUUID());
+        }
+
+        action.getAndValidateEntities();
+        UUID[] ids = action.getAssociatedEntitiesIds();
+
+        assertThat(ids.length).isEqualTo(expectedUuids.size());
     }
 
     @Test
@@ -150,22 +178,12 @@ public class UpdateListingRequestActionTest {
     }
 
     @Test
-    public void getUserTransactionData_returnsCorrectData() {
-        setPreviousHearing(Status.Unlisted, true, 2);
+    public void getUserTransactionData_returnsCorrectData_whenNot_addingOrRemoving_numberOfSessions_Listed() {
+        setPreviousHearing(Status.Listed, true, 2);
         ulr.setNumberOfSessions(2);
 
         List<HearingPart>  hearingParts = previousHearing.getHearingParts();
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
-
-        hearingParts.forEach(hp -> expectedTransactionData.add(
-            new UserTransactionData("hearingPart",
-                hp.getId(),
-                null,
-                "update",
-                "update",
-                0
-            )
-        ));
 
         expectedTransactionData.add(new UserTransactionData("hearing",
             ulr.getId(),
@@ -298,7 +316,7 @@ public class UpdateListingRequestActionTest {
 
         List<HearingPart> hearingParts = captor.getValue().getHearingParts()
             .stream()
-            .filter(hp -> hp.getSession() != null)
+            .filter(hp -> hp.getStatus().getStatus().equals(Status.Listed))
             .collect(Collectors.toList());
 
         assertThat(captor.getValue().getNumberOfSessions()).isEqualTo(2);
