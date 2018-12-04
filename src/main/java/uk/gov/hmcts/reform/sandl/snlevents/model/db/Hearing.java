@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -135,6 +136,7 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
     @LastModifiedBy
     private String modifiedBy;
 
+    @JsonIgnore
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "hearing", orphanRemoval = true, cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
     @NotAudited

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -118,30 +117,18 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataList.add(new UserTransactionData("hearingPart",
-                id,
-                hpString,
-                "update",
-                "update",
-                0)
-            )
+            dataPreparer.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            hearing.getId(),
-            previousHearing,
-            "update",
-            "update",
-            1)
+        dataPreparer.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+            previousHearing, 1);
+
+        sessions.forEach(s ->
+            dataPreparer.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        sessions.stream().forEach(s ->
-            userTransactionDataList.add(prepareLockedEntityTransactionData("session", s.getId()))
-        );
-
-        return userTransactionDataList;
+        return dataPreparer.getUserTransactionDataList();
     }
 
     @Override
@@ -152,10 +139,5 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     @Override
     public UUID getUserTransactionId() {
         return adjournHearingRequest.getUserTransactionId();
-    }
-
-
-    private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
-        return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
     }
 }

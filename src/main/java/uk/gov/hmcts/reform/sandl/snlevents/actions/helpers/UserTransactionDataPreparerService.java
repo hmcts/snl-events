@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +60,17 @@ public class UserTransactionDataPreparerService {
         hearingParts.forEach(hp -> {
             String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
+        });
+
+        return msgs;
+    }
+
+    public List<FactMessage> generateUpsertHearingPartFactMsg(List<HearingPart> hearingParts, FactsMapper factsMapper) {
+        List<FactMessage> msgs = new ArrayList<>();
+
+        hearingParts.forEach(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            msgs.add(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
         });
 
         return msgs;

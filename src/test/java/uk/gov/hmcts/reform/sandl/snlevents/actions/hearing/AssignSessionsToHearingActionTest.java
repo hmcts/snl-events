@@ -267,30 +267,30 @@ public class AssignSessionsToHearingActionTest {
         action.act();
 
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            HEARING_PART_ID,
+            action.originalHearingParts.get(0),
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
+            0)
+        );
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            HEARING_PART_ID_2,
+            action.originalHearingParts.get(1),
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
+            0)
+        );
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
             null,
             "lock",
             "unlock",
-            0)
+            1)
         );
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
             action.previousHearing,
-            UPDATE_ACTION_TEXT,
-            UPDATE_ACTION_TEXT,
-            1)
-        );
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
-            HEARING_PART_ID,
-            action.previousHearingParts.get(0),
-            UPDATE_ACTION_TEXT,
-            UPDATE_ACTION_TEXT,
-            2)
-        );
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
-            HEARING_PART_ID_2,
-            action.previousHearingParts.get(1),
             UPDATE_ACTION_TEXT,
             UPDATE_ACTION_TEXT,
             2)

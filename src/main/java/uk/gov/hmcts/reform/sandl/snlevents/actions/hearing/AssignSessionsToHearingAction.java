@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -38,7 +40,8 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     protected List<HearingPart> hearingParts;
     protected List<Session> targetSessions;
     protected List<UUID> targetSessionsIds;
-    protected List<String> previousHearingParts;
+    // id & hearing part string
+    protected Map<UUID, String> originalHearingParts;
     protected String previousHearing;
 
     protected HearingRepository hearingRepository;
@@ -46,6 +49,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected Hearing savedHearing;
+    protected UserTransactionDataPreparerService dataPreparerServce = new UserTransactionDataPreparerService();
 
     @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public AssignSessionsToHearingAction(UUID hearingId,
@@ -122,29 +126,27 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     @Override
     public void act() {
-        final StatusConfig listedConfig = statusConfigService.getStatusConfig(Status.Listed);
         try {
             previousHearing = objectMapper.writeValueAsString(hearing);
-
-            previousHearingParts = new ArrayList<>();
-            AtomicInteger index = new AtomicInteger();
-            for (HearingPart hp : hearingParts) {
-                previousHearingParts.add(objectMapper.writeValueAsString(hp));
-
-                Session session = targetSessions.get(index.getAndIncrement());
-                hp.setSessionId(session.getId());
-                hp.setSession(session);
-                hp.setStatus(listedConfig);
-                if (targetSessions.size() > 1) {
-                    hp.setStart(session.getStart());
-                } else {
-                    hp.setStart(relationship.getStart());
-                }
-            }
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);
         }
         entityManager.detach(hearing);
+        final StatusConfig listedConfig = statusConfigService.getStatusConfig(Status.Listed);
+
+        originalHearingParts = dataPreparerServce.mapHearingPartsToStrings(objectMapper, hearingParts);
+        AtomicInteger index = new AtomicInteger();
+        for (HearingPart hp : hearingParts) {
+            Session session = targetSessions.get(index.getAndIncrement());
+            hp.setSessionId(session.getId());
+            hp.setSession(session);
+            hp.setStatus(listedConfig);
+            if (targetSessions.size() > 1) {
+                hp.setStart(session.getStart());
+            } else {
+                hp.setStart(relationship.getStart());
+            }
+        }
 
         hearing.setVersion(relationship.getHearingVersion());
         hearing.setStatus(listedConfig);
@@ -153,40 +155,18 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            savedHearing.getId(),
-            null,
-            "lock",
-            "unlock",
-            0)
+        originalHearingParts.forEach((id, hpString) ->
+            dataPreparerServce.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
         );
 
-        userTransactionDataList.add(new UserTransactionData("hearing",
-            savedHearing.getId(),
-            previousHearing,
-            UPDATE_ACTION_TEXT,
-            UPDATE_ACTION_TEXT,
-            1)
+        dataPreparerServce.prepareLockedEntityTransactionData("hearing",  savedHearing.getId(), 1);
+        dataPreparerServce.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), previousHearing, 2);
+
+        targetSessions.forEach(s ->
+            dataPreparerServce.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
-        AtomicInteger index = new AtomicInteger();
-        for (HearingPart hp : hearingParts) {
-            userTransactionDataList.add(new UserTransactionData("hearingPart",
-                hp.getId(),
-                previousHearingParts.get(index.getAndIncrement()),
-                UPDATE_ACTION_TEXT,
-                UPDATE_ACTION_TEXT,
-                2
-            ));
-        }
-
-        targetSessions.forEach(session ->
-            userTransactionDataList.add(getLockedSessionTransactionData(session.getId()))
-        );
-
-        return userTransactionDataList;
+        return dataPreparerServce.getUserTransactionDataList();
     }
 
     @Override
@@ -196,16 +176,6 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        List<FactMessage> factsMessages = new ArrayList<>();
-        for (HearingPart hp : hearingParts) {
-            factsMessages.add(
-                new FactMessage(RulesService.UPSERT_HEARING_PART, factsMapper.mapHearingToRuleJsonMessage(hp))
-            );
-        }
-        return factsMessages;
-    }
-
-    private UserTransactionData getLockedSessionTransactionData(UUID id) {
-        return new UserTransactionData("session", id, null, "lock", "unlock", 0);
+        return dataPreparerServce.generateUpsertHearingPartFactMsg(hearingParts, factsMapper);
     }
 }

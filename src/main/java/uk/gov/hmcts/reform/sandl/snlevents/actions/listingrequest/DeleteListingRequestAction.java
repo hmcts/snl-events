@@ -84,16 +84,16 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         List<UserTransactionData> userTransactionDataList = new ArrayList<>();
         userTransactionDataList.add(prepareDeleteUserTransactionData("hearing", hearing.getId(),
-            currentHearingAsString));
+            currentHearingAsString, 0));
 
         currentHearingPartsMap.forEach((id, jsonValue) ->
-            userTransactionDataList.add(prepareDeleteUserTransactionData("hearingPart", id, jsonValue)));
+            userTransactionDataList.add(prepareDeleteUserTransactionData("hearingPart", id, jsonValue, 1)));
 
         return userTransactionDataList;
     }
 
     private UserTransactionData prepareDeleteUserTransactionData(String entityName, UUID entityId,
-                                                                 String currentEntityString) {
+                                                                 String currentEntityString, int counterActionOrder) {
         return new UserTransactionData(entityName,
             entityId,
             currentEntityString,

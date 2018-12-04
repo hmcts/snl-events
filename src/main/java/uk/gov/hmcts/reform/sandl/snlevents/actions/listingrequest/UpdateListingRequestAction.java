@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
 import java.time.OffsetDateTime;
@@ -108,10 +107,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return hearingParts.stream().map(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
-        }).collect(Collectors.toList());
+        return utdps.generateUpsertHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
