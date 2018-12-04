@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -20,7 +21,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -33,6 +33,7 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -54,9 +55,6 @@ public class WithdrawHearingActionTest {
 
     @Mock
     private HearingRepository hearingRepository;
-
-    @Mock
-    private HearingPartRepository hearingPartRepository;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -88,7 +86,7 @@ public class WithdrawHearingActionTest {
         whr.setUserTransactionId(UUID.randomUUID());
 
         action = new WithdrawHearingAction(
-            whr, hearingRepository, hearingPartRepository,
+            whr, hearingRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -140,11 +138,6 @@ public class WithdrawHearingActionTest {
     }
 
     @Test
-    public void act_shouldSetHearingPartSessionIdToNull() {
-        ath.assertHearingPartsSessionIsSetToNull(action, hearingPartRepository);
-    }
-
-    @Test
     public void act_shouldSetStatusesToWithdrawn() {
         action.getAndValidateEntities();
         action.act();
@@ -189,6 +182,21 @@ public class WithdrawHearingActionTest {
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
+    }
+
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+        Mockito.verify(hearingRepository).save(captor.capture());
+        captor.getValue().getHearingParts().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Vacated)
+                || hp.getStatus().getStatus().equals(Status.Withdrawn)) {
+                assertNull(hp.getSessionId());
+                assertNull(hp.getSession());
+            }
+        });
     }
 
     private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,

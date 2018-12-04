@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
@@ -43,7 +42,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private String currentHearingAsString;
     private EntityManager entityManager;
     private HearingRepository hearingRepository;
-    private HearingPartRepository hearingPartRepository;
     private StatusConfigService statusConfigService;
     private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
@@ -51,13 +49,11 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
                                       EntityManager entityManager,
                                       ObjectMapper objectMapper,
                                       HearingRepository hearingRepository,
-                                      HearingPartRepository hearingPartRepository,
                                       StatusConfigService statusConfigService) {
         this.updateListingRequest = updateListingRequest;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
     }
 
@@ -72,7 +68,6 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         entityManager.detach(hearing);
         updateHearing();
         hearingRepository.save(hearing);
-        // hearingPartRepository.save(hearingParts);
     }
 
     @Override

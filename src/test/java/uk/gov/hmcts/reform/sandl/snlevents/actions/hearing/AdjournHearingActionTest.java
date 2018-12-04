@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -58,8 +57,6 @@ public class AdjournHearingActionTest {
     @Mock
     private HearingRepository hearingRepository;
     @Mock
-    private HearingPartRepository hearingPartRepository;
-    @Mock
     private ObjectMapper objectMapper;
     @Mock
     private EntityManager entityManager;
@@ -84,7 +81,7 @@ public class AdjournHearingActionTest {
         adjournHearingRequest.setHearingId(HEARING_ID_TO_BE_ADJOURNED);
         adjournHearingRequest.setUserTransactionId(TRANSACTION_ID);
         action = new AdjournHearingAction(
-            adjournHearingRequest, hearingRepository, hearingPartRepository,
+            adjournHearingRequest, hearingRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -136,9 +133,9 @@ public class AdjournHearingActionTest {
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
-        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
-        Mockito.verify(hearingPartRepository).save(captor.capture());
-        captor.getValue().forEach(hp -> {
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+        Mockito.verify(hearingRepository).save(captor.capture());
+        captor.getValue().getHearingParts().forEach(hp -> {
             if (hp.getStatus().getStatus().equals(Status.Vacated)) {
                 assertNull(hp.getSessionId());
                 assertNull(hp.getSession());

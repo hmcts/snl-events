@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AdjournHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
@@ -36,7 +35,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
-    protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
@@ -49,7 +47,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     public AdjournHearingAction(
         AdjournHearingRequest adjournHearingRequest,
         HearingRepository hearingRepository,
-        HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
         ObjectMapper objectMapper,
@@ -57,7 +54,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     ) {
         this.adjournHearingRequest = adjournHearingRequest;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
@@ -101,7 +97,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Adjourned));
         entityManager.detach(hearing);
         hearing.setVersion(adjournHearingRequest.getHearingVersion());
-        hearingRepository.save(hearing);
+
 
         originalHearingParts = dataPreparer.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
@@ -112,7 +108,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
             }
         });
 
-        hearingPartRepository.save(hearingParts);
+        hearingRepository.save(hearing);
     }
 
     @Override

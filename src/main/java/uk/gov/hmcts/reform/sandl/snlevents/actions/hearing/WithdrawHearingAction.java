@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
@@ -35,7 +34,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
-    protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
@@ -48,7 +46,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     public WithdrawHearingAction(
         WithdrawHearingRequest withdrawHearingRequest,
         HearingRepository hearingRepository,
-        HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
         ObjectMapper objectMapper,
@@ -56,7 +53,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     ) {
         this.withdrawHearingRequest = withdrawHearingRequest;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
@@ -131,7 +127,6 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         });
 
         hearingRepository.save(hearing);
-        hearingPartRepository.save(hearingParts);
     }
 
     @Override

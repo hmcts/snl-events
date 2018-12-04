@@ -126,7 +126,6 @@ public class HearingPartController {
             entityManager,
             objectMapper,
             hearingRepository,
-            hearingPartRepository,
             statusConfigService
             );
 

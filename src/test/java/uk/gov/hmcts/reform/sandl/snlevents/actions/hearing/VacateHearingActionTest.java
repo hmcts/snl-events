@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -21,7 +22,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
-import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -34,6 +34,7 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -64,9 +65,6 @@ public class VacateHearingActionTest {
     private HearingRepository hearingRepository;
 
     @Mock
-    private HearingPartRepository hearingPartRepository;
-
-    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -90,7 +88,7 @@ public class VacateHearingActionTest {
             ath.createHearingPartWithSession(HEARING_PART_ID_C, HEARING_VERSION_ID_C, hearing,
                 Status.Listed, OffsetDateTime.now().plusDays(1), SESSION_ID_C, OffsetDateTime.now().plusDays(1)),
             ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D, hearing, 
-                Status.Vacated, OffsetDateTime.now().plusDays(2), SESSION_ID_D, OffsetDateTime.now().plusDays(2))
+                Status.Vacated, OffsetDateTime.now().plusDays(2), null, OffsetDateTime.now().plusDays(2))
         ));
         hearing.setMultiSession(true);
 
@@ -103,7 +101,6 @@ public class VacateHearingActionTest {
         action = new VacateHearingAction(
             vhr,
             hearingRepository,
-            hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -148,16 +145,25 @@ public class VacateHearingActionTest {
     }
 
     @Test
-    public void act_shouldSetHearingPartSessionIdToNull() {
-        ath.assertHearingPartsSessionIsSetToNull(action, hearingPartRepository);
-    }
-
-    @Test
     public void act_shouldNotChangeHearingStatuses() {
         action.getAndValidateEntities();
         action.act();
 
         assertThat(action.hearing.getStatus().getStatus()).isEqualTo(hearingStatusConfig.getStatus());
+    }
+
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+        Mockito.verify(hearingRepository).save(captor.capture());
+        captor.getValue().getHearingParts().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Vacated)) {
+                assertNull(hp.getSessionId());
+                assertNull(hp.getSession());
+            }
+        });
     }
 
     @Test
