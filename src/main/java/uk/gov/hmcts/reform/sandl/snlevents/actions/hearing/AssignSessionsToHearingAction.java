@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelations
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
@@ -31,8 +30,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
-
-    protected static final String UPDATE_ACTION_TEXT = "update";
     protected final EntityManager entityManager;
     protected HearingSessionRelationship relationship;
     protected UUID hearingId;

@@ -99,7 +99,7 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
             currentEntityString,
             "delete",
             "create",
-            0);
+            counterActionOrder);
     }
 
     @Override

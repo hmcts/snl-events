@@ -135,7 +135,7 @@ public class DeleteListingRequestActionTest {
             null,
             "delete",
             "create",
-            0)
+            1)
         );
 
         action.getAndValidateEntities();
