@@ -34,8 +34,19 @@ public class UserTransactionDataPreparerService {
         );
     }
 
+    public void prepareUserTransactionDataForDelete(String entity, UUID entityId, String previousEntityString,
+                                                    int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(entity,
+            entityId,
+            previousEntityString,
+            "delete",
+            "create",
+            counterActionOrder)
+        );
+    }
+
     public void prepareUserTransactionDataForUpdate(String entity, UUID entityId, String previousEntityString,
-                                                           int counterActionOrder) {
+                                                    int counterActionOrder) {
         userTransactionDataList.add(new UserTransactionData(entity,
             entityId,
             previousEntityString,

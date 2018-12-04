@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
@@ -26,7 +28,9 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     private EntityManager entityManager;
     private Hearing hearing;
     private String currentHearingAsString;
+    private List<HearingPart> hearingParts;
     private HashMap<UUID, String> currentHearingPartsMap = new HashMap<>();
+    private UserTransactionDataPreparerService tdps = new UserTransactionDataPreparerService();
 
     public DeleteListingRequestAction(
         DeleteListingRequest deleteListingRequest,
@@ -47,14 +51,14 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         if (hearing == null) {
             throw new EntityNotFoundException("Hearing not found");
         }
+
+        hearingParts = hearing.getHearingParts();
     }
 
     @Override
     public void act() {
         currentHearingAsString = writeObjectAsString(hearing);
-
-        hearing.getHearingParts().forEach(hp ->
-            currentHearingPartsMap.put(hp.getId(), writeObjectAsString(hp)));
+        hearingParts.forEach(hp -> currentHearingPartsMap.put(hp.getId(), writeObjectAsString(hp)));
 
         entityManager.detach(hearing);
         hearing.setVersion(deleteListingRequest.getHearingVersion());
@@ -74,32 +78,18 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return hearing.getHearingParts().stream().map(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            return new FactMessage(RulesService.DELETE_HEARING_PART, msg);
-        }).collect(Collectors.toList());
+        return tdps.generateDeleteHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(prepareDeleteUserTransactionData("hearing", hearing.getId(),
-            currentHearingAsString, 0));
+        tdps.prepareUserTransactionDataForDelete("hearing", hearing.getId(), currentHearingAsString, 0);
 
         currentHearingPartsMap.forEach((id, jsonValue) ->
-            userTransactionDataList.add(prepareDeleteUserTransactionData("hearingPart", id, jsonValue, 1)));
+            tdps.prepareUserTransactionDataForDelete("hearingPart", id, jsonValue, 1)
+        );
 
-        return userTransactionDataList;
-    }
-
-    private UserTransactionData prepareDeleteUserTransactionData(String entityName, UUID entityId,
-                                                                 String currentEntityString, int counterActionOrder) {
-        return new UserTransactionData(entityName,
-            entityId,
-            currentEntityString,
-            "delete",
-            "create",
-            counterActionOrder);
+        return tdps.getUserTransactionDataList();
     }
 
     @Override
