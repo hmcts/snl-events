@@ -1,0 +1,49 @@
+databaseChangeLog:
+- changeSet:
+    id: create-activity-log-table
+    author: rkruk
+    changes:
+    - createTable:
+        tableName: activity_log
+        columns:
+        - column:
+            constraints:
+              primaryKey: true
+            name: id
+            type: UUID
+        - column:
+            name: user_transaction_id
+            type: UUID
+            constraints:
+              nullable: false
+        - column:
+            name: entity_id
+            type: UUID
+            constraints:
+              nullable: false
+        - column:
+            name: entity_name
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        - column:
+            name: status
+            type: VARCHAR(30)
+            constraints:
+              nullable: false
+        - column:
+            name: description
+            type: TEXT
+    - addForeignKeyConstraint:
+        baseColumnNames: status
+        baseTableName: activity_log
+        constraintName: fk_activity_log_status_code_status_config
+        referencedColumnNames: status
+        referencedTableName: status_config
+    - addForeignKeyConstraint:
+        baseColumnNames: user_transaction_id
+        baseTableName: activity_log
+        constraintName: fk_activity_log_user_transaction_id
+        referencedColumnNames: id
+        referencedTableName: user_transaction
+
