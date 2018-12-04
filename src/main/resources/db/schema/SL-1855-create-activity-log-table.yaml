@@ -33,7 +33,7 @@ databaseChangeLog:
               nullable: false
         - column:
             name: description
-            type: TEXT
+            type: VARCHAR(500)
     - addForeignKeyConstraint:
         baseColumnNames: status
         baseTableName: activity_log
