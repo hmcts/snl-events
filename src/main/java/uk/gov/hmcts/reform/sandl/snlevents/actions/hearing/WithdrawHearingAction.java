@@ -5,12 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -30,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
-public class WithdrawHearingAction extends Action implements RulesProcessable {
+public class WithdrawHearingAction extends Action implements RulesProcessable, ActivityLoggable {
     protected WithdrawHearingRequest withdrawHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
@@ -167,5 +170,22 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public UUID getUserTransactionId() {
         return withdrawHearingRequest.getUserTransactionId();
+    }
+
+    @Override
+    public List<ActivityLog> getActivities() {
+        List activities = new ArrayList();
+
+        ActivityLog activityLog = ActivityLog.builder()
+            .userTransactionId(getUserTransactionId())
+            .id(UUID.randomUUID())
+            .entityId(withdrawHearingRequest.getHearingId())
+            .entityName(HEARING_ENTITY)
+            .status(ActivityStatus.Withdrawn)
+            .build();
+
+        activities.add(activityLog);
+
+        return activities;
     }
 }
