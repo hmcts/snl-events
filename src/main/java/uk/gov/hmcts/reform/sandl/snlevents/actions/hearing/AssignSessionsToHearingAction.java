@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
+import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -28,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
-public class AssignSessionsToHearingAction extends Action implements RulesProcessable {
+public class AssignSessionsToHearingAction extends Action implements RulesProcessable, ActivityLoggable {
 
     protected static final String UPDATE_ACTION_TEXT = "update";
     protected final EntityManager entityManager;
@@ -207,5 +210,22 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     private UserTransactionData getLockedSessionTransactionData(UUID id) {
         return new UserTransactionData("session", id, null, "lock", "unlock", 0);
+    }
+
+    @Override
+    public List<ActivityLog> getActivities() {
+        List activities = new ArrayList();
+
+        ActivityLog activityLog = ActivityLog.builder()
+            .userTransactionId(getUserTransactionId())
+            .id(UUID.randomUUID())
+            .entityId(relationship.getHearingId())
+            .entityName(HEARING_ENTITY)
+            .status(ActivityStatus.Listed)
+            .build();
+
+        activities.add(activityLog);
+
+        return activities;
     }
 }

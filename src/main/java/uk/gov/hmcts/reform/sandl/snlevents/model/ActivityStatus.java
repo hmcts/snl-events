@@ -4,5 +4,7 @@ public enum ActivityStatus {
     Created,
     Unlisted,
     Withdrawn,
-    Adjourned
+    Adjourned,
+    Listed,
+    Rescheduled
 }
