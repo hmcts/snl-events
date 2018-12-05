@@ -63,19 +63,23 @@ public class UserTransactionService {
     @Transactional
     public UserTransaction commit(UUID id) {
         UserTransaction ut = userTransactionRepository.findOne(id);
-        ut.setStatus(UserTransactionStatus.COMMITTED);
-        return userTransactionRepository.save(ut);
+        if (canRollbackOrCommit(ut)) {
+            ut.setStatus(UserTransactionStatus.COMMITTED);
+            ut = userTransactionRepository.save(ut);
+        }
+        return ut;
     }
 
     @Transactional
     public UserTransaction rollback(UUID id) {
         UserTransaction ut = userTransactionRepository.findOne(id);
-
-        revertChangesManager.revertChanges(ut);
-        //todo implement and check optimistic locking using version, don't need to detach entity
-        ut.setStatus(UserTransactionStatus.ROLLEDBACK);
-
-        return userTransactionRepository.save(ut);
+        if (canRollbackOrCommit(ut)) {
+            revertChangesManager.revertChanges(ut);
+            //todo implement and check optimistic locking using version, don't need to detach entity
+            ut.setStatus(UserTransactionStatus.ROLLEDBACK);
+            ut = userTransactionRepository.save(ut);
+        }
+        return ut;
     }
 
     public boolean isAnyBeingTransacted(UUID... entityIds) {
@@ -101,5 +105,14 @@ public class UserTransactionService {
                 new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED}
             );
         return timedOutTransactions;
+    }
+
+    private boolean canRollbackOrCommit(UserTransaction userTransaction) {
+        if (userTransaction.getStatus().equals(UserTransactionStatus.ROLLEDBACK)
+            || userTransaction.getStatus().equals(UserTransactionStatus.COMMITTED)
+        ) {
+            return false;
+        }
+        return true;
     }
 }
