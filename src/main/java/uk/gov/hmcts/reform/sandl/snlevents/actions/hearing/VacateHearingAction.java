@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
@@ -33,6 +34,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
+    protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
@@ -45,6 +47,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     public VacateHearingAction(
         VacateHearingRequest vacateHearingRequest,
         HearingRepository hearingRepository,
+        HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
         ObjectMapper objectMapper,
@@ -52,6 +55,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     ) {
         this.vacateHearingRequest = vacateHearingRequest;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
@@ -97,16 +101,16 @@ public class VacateHearingAction extends Action implements RulesProcessable {
 
         entityManager.detach(hearing);
         hearing.setVersion(vacateHearingRequest.getHearingVersion());
+        hearingRepository.save(hearing);
 
         originalHearingParts = dataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
-
         hearingParts.forEach(hp -> {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             hp.setSession(null);
             hp.setStart(null);
         });
 
-        hearingRepository.save(hearing);
+        hearingPartRepository.save(hearingParts);
     }
 
     @Override

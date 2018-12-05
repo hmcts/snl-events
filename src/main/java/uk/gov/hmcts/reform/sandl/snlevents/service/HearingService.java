@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingForListingResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingQueries;
@@ -44,6 +45,9 @@ public class HearingService {
 
     @Autowired
     private HearingRepository hearingRepository;
+
+    @Autowired
+    private HearingPartRepository hearingPartRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -91,6 +95,7 @@ public class HearingService {
         Action action = new UnlistHearingAction(
             unlistHearingRequest,
             hearingRepository,
+            hearingPartRepository,
             statusConfigService,
             statusServiceManager,
             objectMapper,
@@ -104,6 +109,7 @@ public class HearingService {
         Action action = new WithdrawHearingAction(
             withdrawHearingRequest,
             hearingRepository,
+            hearingPartRepository,
             statusConfigService,
             statusServiceManager,
             objectMapper,
@@ -117,6 +123,7 @@ public class HearingService {
         Action action = new AdjournHearingAction(
             adjournHearingRequest,
             hearingRepository,
+            hearingPartRepository,
             statusConfigService,
             statusServiceManager,
             objectMapper,
@@ -130,6 +137,7 @@ public class HearingService {
         Action action = new VacateHearingAction(
             vacateHearingRequest,
             hearingRepository,
+            hearingPartRepository,
             statusConfigService,
             statusServiceManager,
             objectMapper,

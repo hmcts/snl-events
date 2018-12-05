@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpdateListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 
@@ -42,6 +43,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private String currentHearingAsString;
     private EntityManager entityManager;
     private HearingRepository hearingRepository;
+    private HearingPartRepository hearingPartRepository;
     private StatusConfigService statusConfigService;
     private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
 
@@ -49,11 +51,13 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
                                       EntityManager entityManager,
                                       ObjectMapper objectMapper,
                                       HearingRepository hearingRepository,
+                                      HearingPartRepository hearingPartRepository,
                                       StatusConfigService statusConfigService) {
         this.updateListingRequest = updateListingRequest;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
     }
 
@@ -68,6 +72,14 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         entityManager.detach(hearing);
         updateHearing();
         hearingRepository.save(hearing);
+
+        if (!hearingPartsToAdd.isEmpty()) {
+            hearingPartRepository.save(hearingPartsToAdd);
+        }
+        
+        if (!hearingPartsToRemove.isEmpty()) {
+            hearingPartRepository.save(hearingPartsToRemove);
+        }
     }
 
     @Override
@@ -178,25 +190,24 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private void prepareRequiredHearingParts() {
         int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
         if (diff > 0) {
-            prepareHearingPartsToAdd(diff);
+            addHearingPartsToHearing(diff);
         } else if (diff < 0) {
-            hearingPartsToRemove = hearingParts.subList(hearingParts.size() - Math.abs(diff), hearingParts.size());
-            prepareHearingPartsToRemove();
+            removeHearingPartsFromHearing(Math.abs(diff));
         }
     }
 
-    private void prepareHearingPartsToAdd(int numberOfPartsToAdd) {
+    private void addHearingPartsToHearing(int numberOfPartsToAdd) {
         for (int i = 0; i < numberOfPartsToAdd; i++) {
             HearingPart hp = new HearingPart();
             hp.setId(UUID.randomUUID());
             hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
             hearingPartsToAdd.add(hp);
-            hearing.addHearingPart(hp);
         }
     }
 
-    private void prepareHearingPartsToRemove() {
+    private void removeHearingPartsFromHearing(int numberOfPartsToRemove) {
         Status status = hearing.getStatus().getStatus().equals(Status.Listed) ? Status.Vacated : Status.Withdrawn;
+        hearingPartsToRemove = hearingParts.subList(hearingParts.size() - numberOfPartsToRemove, hearingParts.size());
         for (HearingPart hp : hearingPartsToRemove) {
             hp.setSession(null);
             hp.setStart(null);

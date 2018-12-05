@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import javax.persistence.EntityManager;
 public class DeleteListingRequestAction extends Action implements RulesProcessable {
     private DeleteListingRequest deleteListingRequest;
     private HearingRepository hearingRepository;
+    private HearingPartRepository hearingPartRepository;
     private EntityManager entityManager;
     private Hearing hearing;
     private String currentHearingAsString;
@@ -32,11 +34,13 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     public DeleteListingRequestAction(
         DeleteListingRequest deleteListingRequest,
         HearingRepository hearingRepository,
+        HearingPartRepository hearingPartRepository,
         EntityManager entityManager,
         ObjectMapper objectMapper
     ) {
         this.deleteListingRequest = deleteListingRequest;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
     }
@@ -60,9 +64,10 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
         entityManager.detach(hearing);
         hearing.setVersion(deleteListingRequest.getHearingVersion());
         hearing.setDeleted(true);
-        hearing.getHearingParts().forEach(hp -> hp.setDeleted(true));
-
         hearingRepository.save(hearing);
+
+        hearingParts.forEach(hp -> hp.setDeleted(true));
+        hearingPartRepository.save(hearingParts);
     }
 
     private String writeObjectAsString(Object obj) {

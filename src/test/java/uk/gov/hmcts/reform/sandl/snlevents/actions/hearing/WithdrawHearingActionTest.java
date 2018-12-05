@@ -18,9 +18,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -57,6 +59,9 @@ public class WithdrawHearingActionTest {
     private HearingRepository hearingRepository;
 
     @Mock
+    private HearingPartRepository hearingPartRepository;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -86,7 +91,7 @@ public class WithdrawHearingActionTest {
         whr.setUserTransactionId(UUID.randomUUID());
 
         action = new WithdrawHearingAction(
-            whr, hearingRepository,
+            whr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -188,9 +193,9 @@ public class WithdrawHearingActionTest {
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
-        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
-        Mockito.verify(hearingRepository).save(captor.capture());
-        captor.getValue().getHearingParts().forEach(hp -> {
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
             if (hp.getStatus().getStatus().equals(Status.Vacated)
                 || hp.getStatus().getStatus().equals(Status.Withdrawn)) {
                 assertNull(hp.getSessionId());

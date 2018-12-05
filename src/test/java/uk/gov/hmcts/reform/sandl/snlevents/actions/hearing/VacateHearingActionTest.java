@@ -18,10 +18,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VacateHearingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -65,6 +67,9 @@ public class VacateHearingActionTest {
     private HearingRepository hearingRepository;
 
     @Mock
+    private HearingPartRepository hearingPartRepository;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -100,7 +105,7 @@ public class VacateHearingActionTest {
 
         action = new VacateHearingAction(
             vhr,
-            hearingRepository,
+            hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -156,9 +161,9 @@ public class VacateHearingActionTest {
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
-        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
-        Mockito.verify(hearingRepository).save(captor.capture());
-        captor.getValue().getHearingParts().forEach(hp -> {
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
             if (hp.getStatus().getStatus().equals(Status.Vacated)) {
                 assertNull(hp.getSessionId());
                 assertNull(hp.getSession());
@@ -170,9 +175,9 @@ public class VacateHearingActionTest {
     public void act_shouldNotSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
-        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
-        Mockito.verify(hearingRepository).save(captor.capture());
-        captor.getValue().getHearingParts().forEach(hp -> {
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
             if (hp.getStatus().getStatus().equals(Status.Listed)) {
                 assertNotNull(hp.getSessionId());
                 assertNotNull(hp.getSession());

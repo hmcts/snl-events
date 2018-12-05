@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
@@ -36,6 +37,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
+    protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
@@ -49,6 +51,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
         HearingRepository hearingRepository,
+        HearingPartRepository hearingPartRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
         ObjectMapper objectMapper,
@@ -56,6 +59,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     ) {
         this.unlistHearingRequest = unlistHearingRequest;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
@@ -117,6 +121,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
 
         entityManager.detach(hearing);
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
+        hearingRepository.save(hearing);
 
         originalHearingParts = userTransactionDataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.forEach(hp -> {
@@ -127,7 +132,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
         });
 
-        hearingRepository.save(hearing);
+        hearingPartRepository.save(hearingParts);
     }
 
     @Override

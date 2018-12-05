@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -61,6 +62,9 @@ public class UnlistHearingActionTest {
     private HearingRepository hearingRepository;
 
     @Mock
+    private HearingPartRepository hearingPartRepository;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -89,7 +93,7 @@ public class UnlistHearingActionTest {
         bhr.setHearingPartsVersions(hearingVersions);
 
         action = new UnlistHearingAction(
-            bhr, hearingRepository,
+            bhr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper, entityManager
@@ -159,9 +163,9 @@ public class UnlistHearingActionTest {
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
-        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
-        Mockito.verify(hearingRepository).save(captor.capture());
-        captor.getValue().getHearingParts().forEach(hp -> {
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
             if (hp.getStatus().getStatus().equals(Status.Unlisted)) {
                 assertNull(hp.getSessionId());
                 assertNull(hp.getSession());

@@ -126,6 +126,7 @@ public class HearingPartController {
             entityManager,
             objectMapper,
             hearingRepository,
+            hearingPartRepository,
             statusConfigService
             );
 
@@ -154,7 +155,7 @@ public class HearingPartController {
         @RequestBody DeleteListingRequest request
     ) {
         Action action = new DeleteListingRequestAction(
-            request, hearingRepository, entityManager, objectMapper
+            request, hearingRepository, hearingPartRepository, entityManager, objectMapper
         );
 
         return ok(actionService.execute(action));
