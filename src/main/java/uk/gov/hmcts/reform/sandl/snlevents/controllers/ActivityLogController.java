@@ -22,7 +22,6 @@ public class ActivityLogController {
     @Autowired
     private ActivityLogRepository activityLogRepository;
 
-
     @GetMapping(path = "/{entityId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ActivityResponse> getActivitiesByEntityId(@PathVariable("entityId") UUID entityId) {
         List<ActivityLog> activityLogs = activityLogRepository.getActivityLogByEntityId(entityId);
