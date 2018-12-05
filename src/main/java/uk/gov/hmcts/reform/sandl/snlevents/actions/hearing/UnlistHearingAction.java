@@ -116,7 +116,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         originalHearingParts = userTransactionDataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.forEach(hp -> {
             hp.setSession(null);
-            hp.setSessionId(null);
             hp.setStart(null);
             VersionInfo vi = getVersionInfo(hp);
             hp.setVersion(vi.getVersion());

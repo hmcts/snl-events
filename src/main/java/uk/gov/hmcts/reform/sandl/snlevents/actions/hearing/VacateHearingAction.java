@@ -103,7 +103,6 @@ public class VacateHearingAction extends Action implements RulesProcessable {
         hearingParts.stream().forEach(hp -> {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             hp.setSession(null);
-            hp.setSessionId(null);
             hp.setStart(null);
         });
 
