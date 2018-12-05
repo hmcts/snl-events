@@ -38,7 +38,7 @@ public class HearingWithSessionsResponse {
     private String communicationFacilitator;
     private String reservedToJudge;
     private Status status;
-    private List<ViewSessionResponse> sessions;
+    private List<ScheduledListingResponse> sessions;
     private List<VersionInfo> hearingPartsVersions;
     private PossibleActions possibleActions;
     private long version;
@@ -69,8 +69,8 @@ public class HearingWithSessionsResponse {
         this.sessions = hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getSession() != null)
-            .map(hp -> new ViewSessionResponse(hp.getSession()))
-            .sorted(comparing(ViewSessionResponse::getStart))
+            .map(hp -> new ScheduledListingResponse(hp.getSession(), hearing))
+            .sorted(comparing(ScheduledListingResponse::getHearingPartStartTime))
             .collect(Collectors.toList());
         this.hearingPartsVersions = hearing.getHearingParts().stream().map(hp -> {
             val versionInfo = new VersionInfo();

@@ -69,9 +69,9 @@ public class HearingWithSessionsResponseTests {
         val response = new HearingWithSessionsResponse(hearing);
 
         // assert correct order of sessions
-        assertThat(response.getSessions().get(0).getStart().getDayOfMonth()).isEqualTo(1);
-        assertThat(response.getSessions().get(1).getStart().getDayOfMonth()).isEqualTo(2);
-        assertThat(response.getSessions().get(2).getStart().getDayOfMonth()).isEqualTo(3);
+        assertThat(response.getSessions().get(0).getHearingPartStartTime().getDayOfMonth()).isEqualTo(1);
+        assertThat(response.getSessions().get(1).getHearingPartStartTime().getDayOfMonth()).isEqualTo(2);
+        assertThat(response.getSessions().get(2).getHearingPartStartTime().getDayOfMonth()).isEqualTo(3);
     }
 
     private HearingPart createHearingPartWithSession(int day) {
