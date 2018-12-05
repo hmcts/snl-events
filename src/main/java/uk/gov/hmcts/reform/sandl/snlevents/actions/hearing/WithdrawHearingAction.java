@@ -114,7 +114,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         hearing.setVersion(withdrawHearingRequest.getHearingVersion());
 
         originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
-        hearingParts.stream().forEach(hp -> {
+        hearingParts.forEach(hp -> {
             hp.setSession(null);
             hp.setStart(null);
             if (hp.getStatus().getStatus() == Status.Listed) {
@@ -137,7 +137,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
         utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
             previousHearing, 1);
 
-        sessions.stream().forEach(s ->
+        sessions.forEach(s ->
             utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 

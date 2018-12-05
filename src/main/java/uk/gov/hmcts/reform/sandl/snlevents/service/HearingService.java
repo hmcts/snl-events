@@ -93,7 +93,8 @@ public class HearingService {
             hearingRepository,
             statusConfigService,
             statusServiceManager,
-            objectMapper
+            objectMapper,
+            entityManager
         );
 
         return actionService.execute(action);

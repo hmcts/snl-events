@@ -87,7 +87,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
 
         if (hearing.getStatus().getStatus().equals(Status.Listed)) {
-            getListedHearingParts();
+            hearingParts = getListedHearingParts();
             if (!OffsetDateTime.now().isBefore(hearingParts.get(0).getSession().getStart())) {
                 throw new SnlEventsException("Cannot amend listing request if starts on or before today's date!");
             }
@@ -96,13 +96,13 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
                 throw new SnlEventsException("Cannot increase number of sessions for a listed request!");
             }
         } else if (hearing.getStatus().getStatus().equals(Status.Unlisted)) {
-            getUnlistedHearingParts();
+            hearingParts = getUnlistedHearingParts();
         } else {
             throw new SnlEventsException("Cannot amend listing request that is neither listed or unlisted!");
         }
 
-        getHearingParts();
-        getSessions();
+        sessions = getSessions();
+        prepareRequiredHearingParts();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
 
         utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), currentHearingAsString, 1);
 
-        sessions.stream().forEach(s ->
+        sessions.forEach(s ->
             utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 
@@ -160,31 +160,32 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         return ids.stream().toArray(UUID[]::new);
     }
 
-    private void getUnlistedHearingParts() {
-        hearingParts = hearing.getHearingParts()
+    private List<HearingPart> getUnlistedHearingParts() {
+        return hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getStatus().getStatus().equals(Status.Unlisted))
             .collect(Collectors.toList());
     }
 
-    private void getListedHearingParts() {
-        hearingParts = hearing.getHearingParts()
+    private List<HearingPart> getListedHearingParts() {
+        return hearing.getHearingParts()
             .stream()
             .filter(hp -> hp.getStatus().getStatus().equals(Status.Listed))
             .sorted(Comparator.comparing(HearingPart::getStart))
             .collect(Collectors.toList());
     }
 
-    private void getHearingParts() {
+    private void prepareRequiredHearingParts() {
         int diff = updateListingRequest.getNumberOfSessions() - hearing.getNumberOfSessions();
         if (diff > 0) {
-            addHearingParts(diff);
+            prepareHearingPartsToAdd(diff);
         } else if (diff < 0) {
-            removeHearingParts(Math.abs(diff));
+            hearingPartsToRemove = hearingParts.subList(hearingParts.size() - Math.abs(diff), hearingParts.size());
+            prepareHearingPartsToRemove();
         }
     }
 
-    private void addHearingParts(int numberOfPartsToAdd) {
+    private void prepareHearingPartsToAdd(int numberOfPartsToAdd) {
         for (int i = 0; i < numberOfPartsToAdd; i++) {
             HearingPart hp = new HearingPart();
             hp.setId(UUID.randomUUID());
@@ -194,31 +195,25 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         }
     }
 
-    private void removeHearingParts(int numberOfPartsToRemove) {
-        hearingPartsToRemove = hearingParts.subList(hearingParts.size() - numberOfPartsToRemove,
-            hearingParts.size());
+    private void prepareHearingPartsToRemove() {
         Status status = hearing.getStatus().getStatus().equals(Status.Listed) ? Status.Vacated : Status.Withdrawn;
         for (HearingPart hp : hearingPartsToRemove) {
             hp.setSession(null);
-            hp.setSessionId(null);
             hp.setStart(null);
             hp.setStatus(statusConfigService.getStatusConfig(status));
         }
     }
 
     private String getHearingPartString(HearingPart hp) {
-        String hearingPartString;
         try {
-            hearingPartString = objectMapper.writeValueAsString(hp);
+            return objectMapper.writeValueAsString(hp);
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);
         }
-
-        return hearingPartString;
     }
 
-    private void getSessions() {
-        sessions = hearingParts.stream()
+    private List<Session> getSessions() {
+        return hearingParts.stream()
             .map(HearingPart::getSession)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());

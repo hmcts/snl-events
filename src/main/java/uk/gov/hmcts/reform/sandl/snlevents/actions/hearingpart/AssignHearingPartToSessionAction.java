@@ -103,6 +103,7 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         } catch (JsonProcessingException e) {
             throw new SnlEventsException(e);
         }
+        entityManager.detach(hearingPart);
         hearingPart.setVersion(relationship.getHearingPartVersion());
         UUID targetSessionId = targetSession.getId();
         hearingPart.setSessionId(targetSessionId);

@@ -100,7 +100,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
 
         originalHearingParts = dataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
 
-        hearingParts.stream().forEach(hp -> {
+        hearingParts.forEach(hp -> {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             hp.setSession(null);
             hp.setStart(null);
@@ -118,7 +118,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
         dataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
             previousHearing, 1);
 
-        sessions.stream().forEach(s ->
+        sessions.forEach(s ->
             dataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
         );
 

@@ -72,7 +72,7 @@ public class UserTransactionDataPreparerService {
 
     public Map<UUID, String> mapHearingPartsToStrings(ObjectMapper objectMapper, List<HearingPart> hearingParts) {
         Map<UUID, String> originalIdStringPair = new HashMap<>();
-        hearingParts.stream().forEach(hp -> {
+        hearingParts.forEach(hp -> {
             try {
                 String hearingPartString = objectMapper.writeValueAsString(hp);
                 originalIdStringPair.put(hp.getId(), hearingPartString);

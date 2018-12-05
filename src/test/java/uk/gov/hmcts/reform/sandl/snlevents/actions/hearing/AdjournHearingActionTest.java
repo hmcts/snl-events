@@ -34,6 +34,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -139,6 +140,20 @@ public class AdjournHearingActionTest {
             if (hp.getStatus().getStatus().equals(Status.Vacated)) {
                 assertNull(hp.getSessionId());
                 assertNull(hp.getSession());
+            }
+        });
+    }
+
+    @Test
+    public void act_shouldNotSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+        Mockito.verify(hearingRepository).save(captor.capture());
+        captor.getValue().getHearingParts().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Listed)) {
+                assertNotNull(hp.getSessionId());
+                assertNotNull(hp.getSession());
             }
         });
     }

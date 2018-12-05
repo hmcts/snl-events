@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -62,6 +63,9 @@ public class UnlistHearingActionTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private EntityManager entityManager;
+
 
     @Before
     public void setup() {
@@ -88,7 +92,7 @@ public class UnlistHearingActionTest {
             bhr, hearingRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
-            objectMapper
+            objectMapper, entityManager
         );
     }
 

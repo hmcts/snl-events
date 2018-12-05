@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 
 public class UnlistHearingAction extends Action implements RulesProcessable {
     protected UnlistHearingRequest unlistHearingRequest;
@@ -37,6 +38,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected HearingRepository hearingRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
+    protected EntityManager entityManager;
 
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
@@ -49,13 +51,15 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
         HearingRepository hearingRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        EntityManager entityManager
     ) {
         this.unlistHearingRequest = unlistHearingRequest;
         this.hearingRepository = hearingRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
         this.objectMapper = objectMapper;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -111,6 +115,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             throw new SnlRuntimeException(e);
         }
 
+        entityManager.detach(hearing);
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
 
         originalHearingParts = userTransactionDataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);

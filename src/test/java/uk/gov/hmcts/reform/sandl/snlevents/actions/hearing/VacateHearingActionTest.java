@@ -167,6 +167,20 @@ public class VacateHearingActionTest {
     }
 
     @Test
+    public void act_shouldNotSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
+        Mockito.verify(hearingRepository).save(captor.capture());
+        captor.getValue().getHearingParts().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Listed)) {
+                assertNotNull(hp.getSessionId());
+                assertNotNull(hp.getSession());
+            }
+        });
+    }
+
+    @Test
     public void act_shouldSetStatusesToVacated() {
         action.getAndValidateEntities();
         action.act();

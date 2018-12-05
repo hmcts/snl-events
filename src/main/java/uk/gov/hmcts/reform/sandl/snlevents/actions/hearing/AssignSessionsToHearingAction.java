@@ -153,11 +153,11 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparerServce.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            dataPreparerServce.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  2)
         );
 
-        dataPreparerServce.prepareLockedEntityTransactionData("hearing",  savedHearing.getId(), 1);
-        dataPreparerServce.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), previousHearing, 2);
+        dataPreparerServce.prepareLockedEntityTransactionData("hearing",  savedHearing.getId(), 0);
+        dataPreparerServce.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), previousHearing, 1);
 
         targetSessions.forEach(s ->
             dataPreparerServce.prepareLockedEntityTransactionData("session", s.getId(), 0)

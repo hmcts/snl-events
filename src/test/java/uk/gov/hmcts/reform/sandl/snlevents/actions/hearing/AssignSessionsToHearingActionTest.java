@@ -272,29 +272,30 @@ public class AssignSessionsToHearingActionTest {
             action.originalHearingParts.get(0),
             UPDATE_ACTION_TEXT,
             UPDATE_ACTION_TEXT,
-            0)
+            2)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             HEARING_PART_ID_2,
             action.originalHearingParts.get(1),
             UPDATE_ACTION_TEXT,
             UPDATE_ACTION_TEXT,
-            0)
+            2)
         );
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
             null,
             "lock",
             "unlock",
-            1)
+            0)
         );
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
             action.previousHearing,
             UPDATE_ACTION_TEXT,
             UPDATE_ACTION_TEXT,
-            2)
+            1)
         );
+
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID_2));
 
