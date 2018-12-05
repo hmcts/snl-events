@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.ActivityResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ActivityLogRepository;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,11 +23,12 @@ public class ActivityLogController {
 
     @GetMapping(path = "/{entityId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ActivityResponse> getActivitiesByEntityId(@PathVariable("entityId") UUID entityId) {
-        List<ActivityLog> activityLogs = activityLogRepository.getActivityLogByEntityId(entityId);
+        List<ActivityLog> activityLogs = activityLogRepository.getActivityLogByEntityIdOrderByCreatedAtAsc(entityId);
+        // As there won't be many activityLogs linked with one entity there's no need to limit results. Most of the
+        // activities would set entities in their final state, so it won't be possible to do any operation on them.
 
         return activityLogs.stream()
             .map(ActivityResponse::new)
-            .sorted(Comparator.comparing(ActivityResponse::getCreatedAt))
             .collect(Collectors.toList());
     }
 }

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -164,8 +165,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable, Ac
 
     @Override
     public List<ActivityLog> getActivities() {
-        List activities = new ArrayList();
-
         ActivityLog activityLog = ActivityLog.builder()
             .userTransactionId(getUserTransactionId())
             .id(UUID.randomUUID())
@@ -174,8 +173,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable, Ac
             .status(ActivityStatus.Adjourned)
             .build();
 
-        activities.add(activityLog);
-
-        return activities;
+        return Arrays.asList(activityLog);
     }
 }

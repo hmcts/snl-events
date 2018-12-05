@@ -160,8 +160,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override
     public List<ActivityLog> getActivities() {
-        List activities = new ArrayList();
-
         ActivityLog activityLog = ActivityLog.builder()
             .userTransactionId(getUserTransactionId())
             .id(UUID.randomUUID())
@@ -170,8 +168,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
             .status(ActivityStatus.Rescheduled)
             .build();
 
-        activities.add(activityLog);
-
-        return activities;
+        return Arrays.asList(activityLog);
     }
 }

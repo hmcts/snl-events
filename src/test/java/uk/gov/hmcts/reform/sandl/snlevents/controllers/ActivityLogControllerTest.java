@@ -60,12 +60,11 @@ public class ActivityLogControllerTest {
         activityLogs.add(log2);
         activityLogs.add(log1);
 
-        when(activityLogRepository.getActivityLogByEntityId(entityId)).thenReturn(activityLogs);
+        when(activityLogRepository.getActivityLogByEntityIdOrderByCreatedAtAsc(entityId)).thenReturn(activityLogs);
 
         val response = mvc.getAndMapResponse(URL + "/" + entityId, new TypeReference<List<ActivityResponse>>() {
         });
 
         assertThat(response.size()).isEqualTo(2);
-        assertThat(response.get(0).getCreatedAt().isBefore(response.get(1).getCreatedAt()));
     }
 }

@@ -16,13 +16,13 @@ import javax.transaction.Transactional;
 public class ActionService {
 
     @Autowired
-    UserTransactionService userTransactionService;
+    private UserTransactionService userTransactionService;
 
     @Autowired
-    RulesService rulesService;
+    private RulesService rulesService;
 
     @Autowired
-    ActivityLogRepository activityLogRepository;
+    private ActivityLogRepository activityLogRepository;
 
     @Transactional
     public UserTransaction execute(Action action) {

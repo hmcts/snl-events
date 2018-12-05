@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -180,8 +181,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
 
     @Override
     public List<ActivityLog> getActivities() {
-        List activities = new ArrayList();
-
         ActivityLog activityLog = ActivityLog.builder()
             .userTransactionId(getUserTransactionId())
             .id(UUID.randomUUID())
@@ -190,8 +189,6 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
             .status(ActivityStatus.Unlisted)
             .build();
 
-        activities.add(activityLog);
-
-        return activities;
+        return Arrays.asList(activityLog);
     }
 }

@@ -12,5 +12,5 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, UUID> 
 
     void deleteActivityLogByUserTransactionId(UUID uuid);
 
-    List<ActivityLog> getActivityLogByEntityId(UUID uuid);
+    List<ActivityLog> getActivityLogByEntityIdOrderByCreatedAtAsc(UUID uuid);
 }

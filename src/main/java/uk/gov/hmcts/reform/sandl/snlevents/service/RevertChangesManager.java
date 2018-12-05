@@ -57,7 +57,7 @@ public class RevertChangesManager {
         for (UserTransactionData utd : sortedUserTransactionDataList) {
             handleTransactionData(utd);
         }
-        handleActivityLog(ut);
+        revertActivityLogData(ut);
     }
 
     private void handleTransactionData(UserTransactionData utd) {
@@ -70,7 +70,7 @@ public class RevertChangesManager {
         }
     }
 
-    private void handleActivityLog(UserTransaction userTransaction) {
+    private void revertActivityLogData(UserTransaction userTransaction) {
         activityLogRepository.deleteActivityLogByUserTransactionId(userTransaction.getId());
     }
 

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -214,8 +215,6 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
 
     @Override
     public List<ActivityLog> getActivities() {
-        List activities = new ArrayList();
-
         ActivityLog activityLog = ActivityLog.builder()
             .userTransactionId(getUserTransactionId())
             .id(UUID.randomUUID())
@@ -224,8 +223,6 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
             .status(ActivityStatus.Listed)
             .build();
 
-        activities.add(activityLog);
-
-        return activities;
+        return Arrays.asList(activityLog);
     }
 }
