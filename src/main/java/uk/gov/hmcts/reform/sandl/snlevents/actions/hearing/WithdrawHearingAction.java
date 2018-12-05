@@ -115,7 +115,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
 
         originalHearingParts = utdps.mapHearingPartsToStrings(objectMapper, hearingParts);
         hearingParts.stream().forEach(hp -> {
-            hp.setSessionId(null);
+            hp.setSession(null);
             hp.setStart(null);
             if (hp.getStatus().getStatus() == Status.Listed) {
                 hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
