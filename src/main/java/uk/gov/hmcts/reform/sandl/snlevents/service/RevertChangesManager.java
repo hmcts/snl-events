@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
-import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;

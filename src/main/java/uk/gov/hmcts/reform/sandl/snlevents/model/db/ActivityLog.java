@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
-import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
