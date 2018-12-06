@@ -37,10 +37,10 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
-    protected HearingPartRepository hearingPartRepository;
+    protected HearingPartRepository hpRepo;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
-    protected EntityManager entityManager;
+    protected EntityManager entityMgr;
 
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
@@ -51,19 +51,19 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
         HearingRepository hearingRepository,
-        HearingPartRepository hearingPartRepository,
+        HearingPartRepository hpRepo,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper,
-        EntityManager entityManager
+        ObjectMapper objectMap,
+        EntityManager entityMgr
     ) {
         this.unlistHearingRequest = unlistHearingRequest;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
+        this.hpRepo = hpRepo;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
-        this.objectMapper = objectMapper;
-        this.entityManager = entityManager;
+        this.objectMapper = objectMap;
+        this.entityMgr = entityMgr;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             throw new SnlRuntimeException(e);
         }
 
-        entityManager.detach(hearing);
+        entityMgr.detach(hearing);
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
         hearingRepository.save(hearing);
 
@@ -132,7 +132,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
         });
 
-        hearingPartRepository.save(hearingParts);
+        hpRepo.save(hearingParts);
     }
 
     @Override

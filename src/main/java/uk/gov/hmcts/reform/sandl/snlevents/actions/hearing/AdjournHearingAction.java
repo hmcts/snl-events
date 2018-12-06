@@ -36,7 +36,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
-    protected HearingPartRepository hearingPartRepository;
+    protected HearingPartRepository hpRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
@@ -49,18 +49,18 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     public AdjournHearingAction(
         AdjournHearingRequest adjournHearingRequest,
         HearingRepository hearingRepository,
-        HearingPartRepository hearingPartRepository,
+        HearingPartRepository hpRepository,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper,
+        ObjectMapper objMap,
         EntityManager entityManager
     ) {
         this.adjournHearingRequest = adjournHearingRequest;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
+        this.hpRepository = hpRepository;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
-        this.objectMapper = objectMapper;
+        this.objectMapper = objMap;
         this.entityManager = entityManager;
     }
 
@@ -112,7 +112,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
             }
         });
 
-        hearingPartRepository.save(hearingParts);
+        hpRepository.save(hearingParts);
     }
 
     @Override
