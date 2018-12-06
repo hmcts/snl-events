@@ -116,14 +116,14 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            dataPreparerService.prepareUserTransactionDataForUpdate(dataPreparerService.hearingPart, id, hpString,  0)
         );
 
-        dataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        dataPreparerService.prepareUserTransactionDataForUpdate(dataPreparerService.hearing, hearing.getId(),
             previousHearing, 1);
 
         sessions.forEach(s ->
-            dataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            dataPreparerService.prepareLockedEntityTransactionData(dataPreparerService.session, s.getId(), 0)
         );
 
         return dataPreparerService.getUserTransactionDataList();

@@ -93,7 +93,8 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        userDatPrepServ.prepareUserTransactionDataForUpdate("session", session.getId(), currentSessionAsString, 0);
+        userDatPrepServ.prepareUserTransactionDataForUpdate(userDatPrepServ.session, session.getId(),
+            currentSessionAsString, 0);
 
         return userDatPrepServ.getUserTransactionDataList();
     }

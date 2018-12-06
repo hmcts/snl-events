@@ -18,6 +18,10 @@ import java.util.UUID;
 
 @Service
 public class UserTransactionDataPreparerService {
+    public String hearing = "hearing";
+    public String hearingPart = "hearingPart";
+    public String session = "session";
+
     private List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
     public List<UserTransactionData> getUserTransactionDataList() {

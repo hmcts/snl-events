@@ -118,14 +118,14 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparer.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            dataPreparer.prepareUserTransactionDataForUpdate(dataPreparer.hearingPart, id, hpString,  0)
         );
 
-        dataPreparer.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        dataPreparer.prepareUserTransactionDataForUpdate(dataPreparer.hearing, hearing.getId(),
             previousHearing, 1);
 
         sessions.forEach(s ->
-            dataPreparer.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            dataPreparer.prepareLockedEntityTransactionData(dataPreparer.session, s.getId(), 0)
         );
 
         return dataPreparer.getUserTransactionDataList();

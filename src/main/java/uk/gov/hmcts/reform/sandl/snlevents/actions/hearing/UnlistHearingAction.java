@@ -138,14 +138,16 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
+                userTransactionDataPreparerService.hearingPart, id, hpString,  0)
         );
 
-        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
-            previousHearing, 1);
+        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
+            userTransactionDataPreparerService.hearing, hearing.getId(), previousHearing, 1);
 
         sessions.forEach(s ->
-            userTransactionDataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            userTransactionDataPreparerService.prepareLockedEntityTransactionData(
+                userTransactionDataPreparerService.session, s.getId(), 0)
         );
 
         return userTransactionDataPreparerService.getUserTransactionDataList();

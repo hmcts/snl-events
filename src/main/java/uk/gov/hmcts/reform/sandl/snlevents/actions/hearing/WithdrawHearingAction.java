@@ -136,14 +136,14 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            utdps.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            utdps.prepareUserTransactionDataForUpdate(utdps.hearingPart, id, hpString,  0)
         );
 
-        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
+        utdps.prepareUserTransactionDataForUpdate(utdps.hearing, hearing.getId(),
             previousHearing, 1);
 
         sessions.forEach(s ->
-            utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            utdps.prepareLockedEntityTransactionData(utdps.session, s.getId(), 0)
         );
 
         return utdps.getUserTransactionDataList();

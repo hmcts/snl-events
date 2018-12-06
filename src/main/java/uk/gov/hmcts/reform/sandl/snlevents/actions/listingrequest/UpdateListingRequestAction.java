@@ -125,17 +125,17 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         hearingPartsToAdd.forEach(hp ->
-            utdps.prepareUserTransactionDataForCreate("hearingPart", hp.getId(),  0)
+            utdps.prepareUserTransactionDataForCreate(utdps.hearing, hp.getId(),  0)
         );
 
         hearingPartsToRemove.forEach(hp ->
-            utdps.prepareUserTransactionDataForUpdate("hearingPart", hp.getId(), getHearingPartString(hp),  0)
+            utdps.prepareUserTransactionDataForUpdate(utdps.hearingPart, hp.getId(), getHearingPartString(hp),  0)
         );
 
-        utdps.prepareUserTransactionDataForUpdate("hearing", hearing.getId(), currentHearingAsString, 1);
+        utdps.prepareUserTransactionDataForUpdate(utdps.hearing, hearing.getId(), currentHearingAsString, 1);
 
         sessions.forEach(s ->
-            utdps.prepareLockedEntityTransactionData("session", s.getId(), 0)
+            utdps.prepareLockedEntityTransactionData(utdps.session, s.getId(), 0)
         );
 
         return utdps.getUserTransactionDataList();

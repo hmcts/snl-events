@@ -115,15 +115,15 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override //Done although hearing and session for user transactionDAta are not needed
     public List<UserTransactionData> generateUserTransactionData() {
-        dataPrepService.prepareLockedEntityTransactionData("hearing", savedHearingPart.getHearingId(), 0);
+        dataPrepService.prepareLockedEntityTransactionData(dataPrepService.hearing, savedHearingPart.getHearingId(), 0);
 
-        dataPrepService.prepareUserTransactionDataForUpdate("hearingPart", savedHearingPart.getId(),
+        dataPrepService.prepareUserTransactionDataForUpdate(dataPrepService.hearingPart, savedHearingPart.getId(),
             previousHearingPart, 1);
 
         if (previousSession != null) {
-            dataPrepService.prepareLockedEntityTransactionData("session", previousSession.getId(), 0);
+            dataPrepService.prepareLockedEntityTransactionData(dataPrepService.session, previousSession.getId(), 0);
         }
-        dataPrepService.prepareLockedEntityTransactionData("session", targetSession.getId(), 0);
+        dataPrepService.prepareLockedEntityTransactionData(dataPrepService.session, targetSession.getId(), 0);
 
         return dataPrepService.getUserTransactionDataList();
     }
