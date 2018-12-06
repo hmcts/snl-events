@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 
 import java.time.OffsetDateTime;
@@ -15,13 +15,13 @@ import java.time.OffsetDateTime;
 @Builder
 public class ActivityResponse {
 
-    private ActivityStatus activityStatus;
+    private ActivityStatus hearingActivityStatus;
     private String description;
     private String createdBy;
     private OffsetDateTime createdAt;
 
     public ActivityResponse(ActivityLog activityLog) {
-        this.activityStatus = activityLog.getStatus();
+        this.hearingActivityStatus = activityLog.getStatus();
         this.description = activityLog.getDescription();
         this.createdBy = activityLog.getCreatedBy();
         this.createdAt = activityLog.getCreatedAt();

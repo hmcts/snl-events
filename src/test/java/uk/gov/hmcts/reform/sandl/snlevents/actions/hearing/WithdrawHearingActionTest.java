@@ -10,13 +10,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.common.ActionTestHelper;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
-import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
@@ -175,7 +174,7 @@ public class WithdrawHearingActionTest {
         ActivityLog activityLog = activities.get(0);
 
         assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Withdrawn);
-        assertThat(activityLog.getEntityName()).isEqualTo(ActivityLoggable.HEARING_ENTITY);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
         assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 

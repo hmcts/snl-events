@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
-import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -137,18 +138,9 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<ActivityLog> getActivities() {
-        List activities = new ArrayList();
-
-        ActivityLog activityLog = ActivityLog.builder()
-            .id(UUID.randomUUID())
+        return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .entityId(createHearingRequest.getId())
-            .entityName(HEARING_ENTITY)
-            .status(ActivityStatus.Created)
+            .withActivity(hearing.getId(), hearing.ENTITY_NAME, ActivityStatus.Created)
             .build();
-
-        activities.add(activityLog);
-
-        return activities;
     }
 }

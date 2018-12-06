@@ -3,13 +3,15 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
-import uk.gov.hmcts.reform.sandl.snlevents.model.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -160,14 +162,9 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
 
     @Override
     public List<ActivityLog> getActivities() {
-        ActivityLog activityLog = ActivityLog.builder()
+        return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .id(UUID.randomUUID())
-            .entityId(hearingPart.getHearingId())
-            .entityName(HEARING_ENTITY)
-            .status(ActivityStatus.Rescheduled)
+            .withActivity(hearingPart.getHearingId(), Hearing.ENTITY_NAME, ActivityStatus.Rescheduled)
             .build();
-
-        return Arrays.asList(activityLog);
     }
 }

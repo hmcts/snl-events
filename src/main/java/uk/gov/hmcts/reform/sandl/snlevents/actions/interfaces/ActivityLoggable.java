@@ -6,7 +6,5 @@ import java.util.List;
 
 @SuppressWarnings("squid:S1214")
 public interface ActivityLoggable {
-    String HEARING_ENTITY = "hearing";
-
     List<ActivityLog> getActivities();
 }
