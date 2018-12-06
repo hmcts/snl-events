@@ -42,7 +42,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityMgr;
 
-    // id & hearing part string
+    // id & HEARING part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
     private UserTransactionDataPreparerService userTransactionDataPreparerService =
@@ -139,15 +139,15 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
             userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
-                userTransactionDataPreparerService.hearingPart, id, hpString,  0)
+                UserTransactionDataPreparerService.HEARING_PART, id, hpString,  0)
         );
 
         userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
-            userTransactionDataPreparerService.hearing, hearing.getId(), previousHearing, 1);
+            UserTransactionDataPreparerService.HEARING, hearing.getId(), previousHearing, 1);
 
         sessions.forEach(s ->
             userTransactionDataPreparerService.prepareLockedEntityTransactionData(
-                userTransactionDataPreparerService.session, s.getId(), 0)
+                UserTransactionDataPreparerService.SESSION, s.getId(), 0)
         );
 
         return userTransactionDataPreparerService.getUserTransactionDataList();
@@ -169,7 +169,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
             .filter(hpv -> hpv.getId().equals(hp.getId()))
             .findFirst();
         return hpvi.orElseThrow(() ->
-            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
+            new EntityNotFoundException("Couldn't find version for HEARING part with id " + hp.getId().toString())
         );
     }
 }

@@ -85,10 +85,11 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        tdps.prepareUserTransactionDataForDelete(tdps.hearing, hearing.getId(), currentHearingAsString, 0);
+        tdps.prepareUserTransactionDataForDelete(UserTransactionDataPreparerService.HEARING, hearing.getId(),
+            currentHearingAsString, 0);
 
         currentHearingPartsMap.forEach((id, jsonValue) ->
-            tdps.prepareUserTransactionDataForDelete(tdps.hearingPart, id, jsonValue, 1)
+            tdps.prepareUserTransactionDataForDelete(UserTransactionDataPreparerService.HEARING_PART, id, jsonValue, 1)
         );
 
         return tdps.getUserTransactionDataList();

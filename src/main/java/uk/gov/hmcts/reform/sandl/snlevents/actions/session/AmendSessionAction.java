@@ -52,7 +52,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         try {
             currentSessionAsString = objectMapper.writeValueAsString(session);
         } catch (JsonProcessingException e) {
-            throw new ServiceException("Given session couldn't be converted into string");
+            throw new ServiceException("Given SESSION couldn't be converted into string");
         }
 
         entityManager.detach(session);
@@ -93,8 +93,8 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        userDatPrepServ.prepareUserTransactionDataForUpdate(userDatPrepServ.session, session.getId(),
-            currentSessionAsString, 0);
+        userDatPrepServ.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.SESSION,
+            session.getId(), currentSessionAsString, 0);
 
         return userDatPrepServ.getUserTransactionDataList();
     }

@@ -166,10 +166,9 @@ public class UnlistHearingActionTest {
         ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
         Mockito.verify(hearingPartRepository).save(captor.capture());
         captor.getValue().forEach(hp -> {
-            if (hp.getStatus().getStatus().equals(Status.Unlisted)) {
-                assertNull(hp.getSessionId());
-                assertNull(hp.getSession());
-            }
+            assertNull(hp.getSessionId());
+            assertNull(hp.getSession());
+            assertThat(hp.getStatus().getStatus()).isEqualTo(Status.Unlisted);
         });
     }
 

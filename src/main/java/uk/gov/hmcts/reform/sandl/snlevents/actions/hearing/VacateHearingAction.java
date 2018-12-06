@@ -39,7 +39,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
 
-    // id & hearing part string
+    // id & HEARING part string
     private UserTransactionDataPreparerService dataPreparerService = new UserTransactionDataPreparerService();
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
@@ -116,14 +116,16 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparerService.prepareUserTransactionDataForUpdate(dataPreparerService.hearingPart, id, hpString,  0)
+            dataPreparerService.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART,
+                id, hpString,  0)
         );
 
-        dataPreparerService.prepareUserTransactionDataForUpdate(dataPreparerService.hearing, hearing.getId(),
-            previousHearing, 1);
+        dataPreparerService.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING,
+            hearing.getId(), previousHearing, 1);
 
         sessions.forEach(s ->
-            dataPreparerService.prepareLockedEntityTransactionData(dataPreparerService.session, s.getId(), 0)
+            dataPreparerService.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.SESSION,
+                s.getId(), 0)
         );
 
         return dataPreparerService.getUserTransactionDataList();

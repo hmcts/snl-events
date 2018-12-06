@@ -41,7 +41,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
 
-    // id & hearing part string
+    // id & HEARING part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
     private UserTransactionDataPreparerService dataPreparer = new UserTransactionDataPreparerService();
@@ -118,14 +118,15 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparer.prepareUserTransactionDataForUpdate(dataPreparer.hearingPart, id, hpString,  0)
+            dataPreparer.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART, id,
+                hpString,  0)
         );
 
-        dataPreparer.prepareUserTransactionDataForUpdate(dataPreparer.hearing, hearing.getId(),
+        dataPreparer.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING, hearing.getId(),
             previousHearing, 1);
 
         sessions.forEach(s ->
-            dataPreparer.prepareLockedEntityTransactionData(dataPreparer.session, s.getId(), 0)
+            dataPreparer.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.SESSION, s.getId(), 0)
         );
 
         return dataPreparer.getUserTransactionDataList();

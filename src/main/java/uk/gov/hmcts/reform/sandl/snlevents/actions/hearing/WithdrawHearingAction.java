@@ -40,7 +40,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     protected HearingPartRepository hearingPartRepo;
     protected StatusServiceManager statusServiceManager;
 
-    // id & hearing part string
+    // id & HEARING part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
     private UserTransactionDataPreparerService utdps = new UserTransactionDataPreparerService();
@@ -136,14 +136,14 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            utdps.prepareUserTransactionDataForUpdate(utdps.hearingPart, id, hpString,  0)
+            utdps.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART, id, hpString,0)
         );
 
-        utdps.prepareUserTransactionDataForUpdate(utdps.hearing, hearing.getId(),
+        utdps.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING, hearing.getId(),
             previousHearing, 1);
 
         sessions.forEach(s ->
-            utdps.prepareLockedEntityTransactionData(utdps.session, s.getId(), 0)
+            utdps.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.SESSION, s.getId(), 0)
         );
 
         return utdps.getUserTransactionDataList();

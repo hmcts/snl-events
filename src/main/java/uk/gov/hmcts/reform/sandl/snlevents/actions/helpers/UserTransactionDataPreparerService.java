@@ -18,9 +18,9 @@ import java.util.UUID;
 
 @Service
 public class UserTransactionDataPreparerService {
-    public String hearing = "hearing";
-    public String hearingPart = "hearingPart";
-    public String session = "session";
+    public static final String HEARING = "hearing";
+    public static final String HEARING_PART = "hearingPart";
+    public static final String SESSION = "session";
 
     private List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 

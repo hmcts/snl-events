@@ -38,7 +38,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     protected List<HearingPart> hearingParts;
     protected List<Session> targetSessions;
     protected List<UUID> targetSessionsIds;
-    // id & hearing part string
+    // id & HEARING part string
     protected Map<UUID, String> originalHearingParts;
     protected String previousHearing;
 
@@ -93,7 +93,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         }
 
         if (relationship.getSessionsData() == null) {
-            throw new SnlEventsException("SessionsData cannot be null!");
+            throw new SnlEventsException("Sessions Data cannot be null!");
         }
 
         targetSessionsIds = relationship.getSessionsData().stream()
@@ -158,15 +158,18 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparerServce.prepareUserTransactionDataForUpdate(dataPreparerServce.hearingPart, id, hpString,  2)
+            dataPreparerServce.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART, id,
+                hpString,  2)
         );
 
-        dataPreparerServce.prepareLockedEntityTransactionData(dataPreparerServce.hearing,  savedHearing.getId(), 0);
-        dataPreparerServce.prepareUserTransactionDataForUpdate(dataPreparerServce.hearing, hearing.getId(),
-            previousHearing, 1);
+        dataPreparerServce.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.HEARING,
+            savedHearing.getId(), 0);
+        dataPreparerServce.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING,
+            hearing.getId(), previousHearing, 1);
 
         targetSessions.forEach(s ->
-            dataPreparerServce.prepareLockedEntityTransactionData(dataPreparerServce.session, s.getId(), 0)
+            dataPreparerServce.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.SESSION,
+                s.getId(), 0)
         );
 
         return dataPreparerServce.getUserTransactionDataList();
