@@ -8,7 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.List;
@@ -32,9 +31,8 @@ public class UserTransactionsRollbackScheduledTask {
         List<UserTransaction> timedOutTransactions = userTransactionService.getTimedOutTransactions();
         logger.info("Found: " + timedOutTransactions.size());
         timedOutTransactions.forEach(ut -> {
-            UserTransactionStatus previousStatus = ut.getStatus();
-            final UserTransaction afterRollbackState = userTransactionService.rollback(ut.getId());
-            if (afterRollbackState == null || previousStatus.equals(afterRollbackState.getStatus())) {
+            boolean succeeded = userTransactionService.rollback(ut.getId());
+            if (!succeeded) {
                 logger.info("Automatic rollback failed for user-transaction[ " + ut.getId() + " ] status: "
                     + ut.getStatus().name()
                 );

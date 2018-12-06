@@ -75,7 +75,7 @@ public class UserTransactionsRollbackScheduledTaskTest {
         when(utService.getTimedOutTransactions())
             .thenReturn(Collections.singletonList(userTransaction));
         when(utService.rollback(any()))
-            .thenReturn(userTransaction); // no status change
+            .thenReturn(false);
 
         scheduledTasks.rollbackForgottenTransactions();
 

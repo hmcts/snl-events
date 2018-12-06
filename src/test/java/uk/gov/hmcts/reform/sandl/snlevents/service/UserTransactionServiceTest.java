@@ -106,18 +106,18 @@ public class UserTransactionServiceTest {
     public void commit_should_set_transactionStatus_to_committed() {
         when(userTransactionRepository.findOne(this.someId)).thenReturn(ut);
 
-        UserTransaction userTransaction = this.userTransactionService.commit(this.someId);
+        boolean successfulResult = this.userTransactionService.commit(this.someId);
 
-        assertThat(userTransaction.getStatus()).isEqualTo(UserTransactionStatus.COMMITTED);
+        assertThat(successfulResult).isEqualTo(true);
     }
 
     @Test
     public void rollback_should_set_transactionStatus_to_rolledback() {
         when(userTransactionRepository.findOne(this.someId)).thenReturn(ut);
 
-        UserTransaction userTransaction = this.userTransactionService.rollback(this.someId);
+        boolean successfulResult = this.userTransactionService.rollback(this.someId);
 
-        assertThat(userTransaction.getStatus()).isEqualTo(UserTransactionStatus.ROLLEDBACK);
+        assertThat(successfulResult).isEqualTo(true);
     }
 
     @Test
