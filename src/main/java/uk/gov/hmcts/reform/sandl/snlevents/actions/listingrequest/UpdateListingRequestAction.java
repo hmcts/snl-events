@@ -200,6 +200,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         for (int i = 0; i < numberOfPartsToAdd; i++) {
             HearingPart hp = new HearingPart();
             hp.setId(UUID.randomUUID());
+            hp.setHearing(hearing);
             hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
             hearingPartsToAdd.add(hp);
         }
