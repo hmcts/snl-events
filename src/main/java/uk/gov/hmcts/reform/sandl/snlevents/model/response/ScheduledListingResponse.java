@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Data
@@ -23,6 +21,8 @@ public class ScheduledListingResponse {
     private String roomName;
     private String judgeName;
     private String sessionType;
+    private UUID hearingPartIdOfCurrentHearing;
+    private Long hearingPartVersionOfCurrentHearing;
 
     public ScheduledListingResponse(Session session, Hearing hearing) {
         this.id = session.getId();
@@ -33,6 +33,8 @@ public class ScheduledListingResponse {
             .findFirst()
             .get();
         this.hearingPartStartTime = hearingPartOfCurrentHearing.getStart();
+        this.hearingPartIdOfCurrentHearing = hearingPartOfCurrentHearing.getId();
+        this.hearingPartVersionOfCurrentHearing = hearingPartOfCurrentHearing.getVersion();
 
         this.duration = hearing.isMultiSession() ? session.getDuration() : hearing.getDuration();
 
