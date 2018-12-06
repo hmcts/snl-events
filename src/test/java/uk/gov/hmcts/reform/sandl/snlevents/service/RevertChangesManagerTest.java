@@ -48,6 +48,7 @@ public class RevertChangesManagerTest {
     RulesService rulesService;
 
     @Mock
+    @SuppressWarnings("PMD.UnusedPrivateField")
     EntityManager entityManager;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -75,9 +76,6 @@ public class RevertChangesManagerTest {
         when(objectMapper.readValue(any(String.class), eq(Hearing.class))).thenReturn(prevHearing);
 
         revertChangesManager.revertChanges(transaction);
-        verify(rulesService, times(1))
-            .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
-
         verify(hearingRepository, times(1)).save(prevHearing);
     }
 
@@ -93,7 +91,7 @@ public class RevertChangesManagerTest {
 
     @Test
     public void revertChanges_deleteHearingPart() throws IOException {
-        when(hearingPartRepository.findById(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         val transaction = createUserTransactionWithHearingPartDelete();
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
@@ -102,7 +100,7 @@ public class RevertChangesManagerTest {
 
     @Test
     public void revertChanges_updateHearingPart() throws IOException {
-        when(hearingPartRepository.findById(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
         when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(createHearingPart());
         val transaction = createUserTransactionWithHearingPartUpsert();
         revertChangesManager.revertChanges(transaction);
