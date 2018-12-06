@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
@@ -42,6 +43,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     protected String previousHearing;
 
     protected HearingRepository hearingRepository;
+    protected HearingPartRepository hearingPartRepository;
     protected SessionRepository sessionRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
@@ -52,6 +54,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     public AssignSessionsToHearingAction(UUID hearingId,
                                          HearingSessionRelationship relationship,
                                          HearingRepository hearingRepository,
+                                         HearingPartRepository hearingPartRepository,
                                          SessionRepository sessionRepository,
                                          StatusConfigService statusConfigService,
                                          StatusServiceManager statusServiceManager,
@@ -60,6 +63,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         this.relationship = relationship;
         this.hearingId = hearingId;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.sessionRepository = sessionRepository;
         this.objectMapper = objectMapper;
         this.entityManager = entityManager;
@@ -128,8 +132,11 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
         } catch (JsonProcessingException e) {
             throw new SnlRuntimeException(e);
         }
-        entityManager.detach(hearing);
         final StatusConfig listedConfig = statusConfigService.getStatusConfig(Status.Listed);
+        entityManager.detach(hearing);
+        hearing.setVersion(relationship.getHearingVersion());
+        hearing.setStatus(listedConfig);
+        savedHearing = hearingRepository.save(hearing);
 
         originalHearingParts = dataPreparerServce.mapHearingPartsToStrings(objectMapper, hearingParts);
         AtomicInteger index = new AtomicInteger();
@@ -145,9 +152,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
             }
         }
 
-        hearing.setVersion(relationship.getHearingVersion());
-        hearing.setStatus(listedConfig);
-        savedHearing = hearingRepository.save(hearing);
+        hearingPartRepository.save(hearingParts);
     }
 
     @Override

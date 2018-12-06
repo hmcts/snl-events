@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -36,6 +38,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.times;
@@ -62,8 +65,12 @@ public class AssignSessionsToHearingActionTest {
 
     @Mock
     private SessionRepository sessionRepository;
+
     @Mock
     private HearingRepository hearingRepository;
+
+    @Mock
+    private HearingPartRepository hearingPartRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -236,6 +243,19 @@ public class AssignSessionsToHearingActionTest {
     }
 
     @Test
+    public void act_shouldSetHearingPart_to_Listed() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            assertNotNull(hp.getSessionId());
+            assertNotNull(hp.getSession());
+            assertThat(hp.getStatus().getStatus()).isEqualTo(Status.Listed);
+        });
+    }
+
+    @Test
     public void generateFactMessages_forMultiSession_shouldReturnManyElementsWithTypeUpsertSession() {
         action.getAndValidateEntities();
         action.act();
@@ -360,8 +380,8 @@ public class AssignSessionsToHearingActionTest {
 
     private AssignSessionsToHearingAction createAction(HearingSessionRelationship request) {
         return new AssignSessionsToHearingAction(request.getHearingId(), request,
-            hearingRepository, sessionRepository, statusesMock.statusConfigService, statusesMock.statusServiceManager,
-            entityManager, objectMapper
+            hearingRepository, hearingPartRepository, sessionRepository, statusesMock.statusConfigService,
+            statusesMock.statusServiceManager, entityManager, objectMapper
         );
     }
 

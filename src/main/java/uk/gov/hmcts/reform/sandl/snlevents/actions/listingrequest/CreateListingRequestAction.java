@@ -69,6 +69,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         );
 
         final StatusConfig unlistedStatus = statusConfigService.getStatusConfig(Status.Unlisted);
+        entityManager.detach(hearing);
         hearing.setStatus(unlistedStatus);
 
         hearingParts.forEach(hearingPart -> {

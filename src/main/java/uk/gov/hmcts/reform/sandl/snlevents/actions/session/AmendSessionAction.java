@@ -55,10 +55,10 @@ public class AmendSessionAction extends Action implements RulesProcessable {
             throw new ServiceException("Given session couldn't be converted into string");
         }
 
+        entityManager.detach(session);
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
         session.setDuration(amendSessionRequest.getDurationInSeconds());
         session.setStart(updateStartTimeFromRequest(session.getStart(), amendSessionRequest.getStartTime()));
-        entityManager.detach(session);
         session.setVersion(amendSessionRequest.getVersion());
 
         sessionRepository.save(session);
