@@ -109,6 +109,7 @@ public class HearingPartController {
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository,
+            hearingPartRepository,
             statusConfigService,
             statusServiceManager,
             entityManager

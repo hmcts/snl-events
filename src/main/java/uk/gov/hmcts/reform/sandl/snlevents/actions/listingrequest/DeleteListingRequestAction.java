@@ -59,14 +59,16 @@ public class DeleteListingRequestAction extends Action implements RulesProcessab
     @Override
     public void act() {
         currentHearingAsString = writeObjectAsString(hearing);
-        hearingParts.forEach(hp -> currentHearingPartsMap.put(hp.getId(), writeObjectAsString(hp)));
-
         entityManager.detach(hearing);
         hearing.setVersion(deleteListingRequest.getHearingVersion());
         hearing.setDeleted(true);
         hearingRepository.save(hearing);
 
-        hearingParts.forEach(hp -> hp.setDeleted(true));
+        hearingParts.forEach(hp -> {
+            hp.setDeleted(true);
+            currentHearingPartsMap.put(hp.getId(), writeObjectAsString(hp));
+        });
+        
         hearingPartRepository.save(hearingParts);
     }
 

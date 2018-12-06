@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -54,6 +55,9 @@ public class CreateListingRequestActionTest {
     private HearingRepository hearingRepository;
 
     @Mock
+    private HearingPartRepository hearingPartRepository;
+
+    @Mock
     private HearingTypeRepository hearingTypeRepository;
 
     @Mock
@@ -77,6 +81,7 @@ public class CreateListingRequestActionTest {
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository,
+            hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             entityManager

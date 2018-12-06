@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
@@ -34,6 +35,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected CaseTypeRepository caseTypeRepository;
     protected HearingMapper hearingMapper;
     protected HearingRepository hearingRepository;
+    protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
@@ -45,6 +47,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository,
                                       HearingRepository hearingRepository,
+                                      HearingPartRepository hearingPartRepository,
                                       StatusConfigService statusConfigService,
                                       StatusServiceManager statusServiceManager,
                                       EntityManager entityManager) {
@@ -53,6 +56,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         this.hearingTypeRepository = hearingTypeRepository;
         this.caseTypeRepository = caseTypeRepository;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
@@ -71,13 +75,14 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         final StatusConfig unlistedStatus = statusConfigService.getStatusConfig(Status.Unlisted);
         entityManager.detach(hearing);
         hearing.setStatus(unlistedStatus);
+        hearingRepository.save(hearing);
 
         hearingParts.forEach(hearingPart -> {
             hearingPart.setStatus(unlistedStatus);
-            hearing.addHearingPart(hearingPart);
+            hearingPart.setHearing(hearing);
         });
 
-        hearingRepository.save(hearing);
+        hearingPartRepository.save(hearingParts);
     }
 
     @Override
