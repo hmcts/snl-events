@@ -35,10 +35,10 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
-    protected HearingPartRepository hearingPartRepository;
+    protected EntityManager entityMngr;
     protected StatusConfigService statusConfigService;
+    protected HearingPartRepository hearingPartRepo;
     protected StatusServiceManager statusServiceManager;
-    protected EntityManager entityManager;
 
     // id & hearing part string
     private Map<UUID, String> originalHearingParts;
@@ -48,19 +48,19 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
     public WithdrawHearingAction(
         WithdrawHearingRequest withdrawHearingRequest,
         HearingRepository hearingRepository,
-        HearingPartRepository hearingPartRepository,
+        HearingPartRepository hearingPartRepo,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper,
-        EntityManager entityManager
+        ObjectMapper objMapper,
+        EntityManager entityMngr
     ) {
         this.withdrawHearingRequest = withdrawHearingRequest;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
+        this.hearingPartRepo = hearingPartRepo;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
-        this.objectMapper = objectMapper;
-        this.entityManager = entityManager;
+        this.objectMapper = objMapper;
+        this.entityMngr = entityMngr;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
             throw new SnlRuntimeException(e);
         }
 
-        entityManager.detach(hearing);
+        entityMngr.detach(hearing);
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Withdrawn));
         hearing.setVersion(withdrawHearingRequest.getHearingVersion());
         hearingRepository.save(hearing);
@@ -130,7 +130,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable {
             }
         });
 
-        hearingPartRepository.save(hearingParts);
+        hearingPartRepo.save(hearingParts);
     }
 
     @Override
