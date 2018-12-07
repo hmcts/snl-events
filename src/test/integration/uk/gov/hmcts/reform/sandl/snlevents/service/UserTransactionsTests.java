@@ -67,7 +67,7 @@ public class UserTransactionsTests extends BaseIntegrationTest {
                 UUID.randomUUID(), UserTransactionStatus.ROLLEDBACK, UserTransactionRulesProcessingStatus.IN_PROGRESS
             )
         ));
-        OffsetDateTime fiveMinAgo = OffsetDateTime.now(clock).minusMinutes(5);
+        OffsetDateTime fiveMinAgo = OffsetDateTime.now(clock).minusMinutes(5).minusSeconds(1);
         transactions.forEach(ut -> {
             ut.setStartedAt(fiveMinAgo);
         });
