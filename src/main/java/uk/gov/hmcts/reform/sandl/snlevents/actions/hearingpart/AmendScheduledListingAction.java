@@ -73,7 +73,7 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
         hearingPart.setVersion(amendScheduledListing.getHearingPartVersion());
 
         val localTime = LocalTime.parse(amendScheduledListing.getStartTime(),
-            DateTimeFormatter.ofPattern("HH:mm"));
+            DateTimeFormatter.ofPattern(AmendScheduledListing.TIME_FORMAT));
         val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
         val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
 
