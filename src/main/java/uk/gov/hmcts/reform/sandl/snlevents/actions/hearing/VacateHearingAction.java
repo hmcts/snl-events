@@ -117,7 +117,7 @@ public class VacateHearingAction extends Action implements RulesProcessable {
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
             dataPreparerService.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART,
-                id, hpString,  0)
+                id, hpString,  2)
         );
 
         dataPreparerService.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING,

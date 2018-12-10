@@ -52,10 +52,9 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         try {
             currentSessionAsString = objectMapper.writeValueAsString(session);
         } catch (JsonProcessingException e) {
-            throw new ServiceException("Given SESSION couldn't be converted into string");
+            throw new ServiceException("Given session couldn't be converted into string");
         }
 
-        entityManager.detach(session);
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
         session.setDuration(amendSessionRequest.getDurationInSeconds());
         session.setStart(updateStartTimeFromRequest(session.getStart(), amendSessionRequest.getStartTime()));

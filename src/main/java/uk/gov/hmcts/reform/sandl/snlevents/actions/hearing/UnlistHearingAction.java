@@ -139,7 +139,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable {
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
             userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
-                UserTransactionDataPreparerService.HEARING_PART, id, hpString,  0)
+                UserTransactionDataPreparerService.HEARING_PART, id, hpString,  2)
         );
 
         userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(

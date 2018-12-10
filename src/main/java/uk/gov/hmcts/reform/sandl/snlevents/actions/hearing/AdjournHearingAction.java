@@ -119,7 +119,7 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
             dataPreparer.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART, id,
-                hpString,  0)
+                hpString,  2)
         );
 
         dataPreparer.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING, hearing.getId(),

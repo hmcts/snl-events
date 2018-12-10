@@ -182,14 +182,14 @@ public class AssignHearingPartToSessionActionTest {
             null,
             "lock",
             "unlock",
-            0)
+            1)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             ID,
             action.previousHearingPart,
             "update",
             "update",
-            1)
+            2)
         );
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));
 
@@ -214,14 +214,14 @@ public class AssignHearingPartToSessionActionTest {
             null,
             "lock",
             "unlock",
-            0)
+            1)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             ID,
             action.previousHearingPart,
             "update",
             "update",
-            1)
+            2)
         );
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID_PREVIOUS));
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));
