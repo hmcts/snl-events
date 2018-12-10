@@ -29,12 +29,12 @@ public class UserTransactionsRollbackScheduledTask {
     public void rollbackForgottenTransactions() {
         logger.info("Initiating rollback of forgotten transactions ");
         List<UserTransaction> timedOutTransactions = userTransactionService.getTimedOutTransactions();
-        logger.info("Found: " + timedOutTransactions.size());
+        logger.info("Found: {}", timedOutTransactions.size());
         timedOutTransactions.forEach(ut -> {
             boolean succeeded = userTransactionService.rollback(ut.getId());
             if (!succeeded) {
-                logger.info("Automatic rollback failed for user-transaction[ " + ut.getId() + " ] status: "
-                    + ut.getStatus().name()
+                logger.info("Automatic rollback failed for user-transaction[ {} ] status: {}",
+                    ut.getId(), ut.getStatus().name()
                 );
             }
         });

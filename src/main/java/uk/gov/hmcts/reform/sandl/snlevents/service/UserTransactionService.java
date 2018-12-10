@@ -101,20 +101,14 @@ public class UserTransactionService {
         final OffsetDateTime fiveMinutesAgo = OffsetDateTime.now(clock).minusMinutes(
             scheduledRollbackConfiguration.getTimeoutIntervalInMinutes()
         );
-        final List<UserTransaction> timedOutTransactions =
-            userTransactionRepository.getAllByStartedAtBeforeAndStatusNotInOrderByStartedAtAsc(
-                fiveMinutesAgo,
-                new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED}
-            );
-        return timedOutTransactions;
+        return userTransactionRepository.getAllByStartedAtBeforeAndStatusNotInOrderByStartedAtAsc(
+            fiveMinutesAgo,
+            new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED}
+        );
     }
 
     private boolean canRollbackOrCommit(UserTransaction userTransaction) {
-        if (userTransaction.getStatus().equals(UserTransactionStatus.ROLLEDBACK)
-            || userTransaction.getStatus().equals(UserTransactionStatus.COMMITTED)
-        ) {
-            return false;
-        }
-        return true;
+        return !userTransaction.getStatus().equals(UserTransactionStatus.ROLLEDBACK)
+            && !userTransaction.getStatus().equals(UserTransactionStatus.COMMITTED);
     }
 }

@@ -81,6 +81,6 @@ public class UserTransactionsRollbackScheduledTaskTest {
 
         List<ILoggingEvent> logsList = listAppender.list;
         assertThat(logsList.size()).isEqualTo(3);
-        assertThat(logsList.get(2).getMessage()).contains(userTransaction.getId().toString());
+        assertThat(logsList.get(2).getFormattedMessage()).contains(userTransaction.getId().toString());
     }
 }
