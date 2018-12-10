@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
@@ -65,19 +66,23 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
 
     @Override
     public void act() {
+        OffsetDateTime start = OffsetDateTime.now();
         try {
             previousHearingPart = objectMapper.writeValueAsString(hearingPart);
         } catch (JsonProcessingException e) {
             throw new SnlEventsException(e);
         }
-        hearingPart.setVersion(amendScheduledListing.getHearingPartVersion());
 
         val localTime = LocalTime.parse(amendScheduledListing.getStartTime(),
             DateTimeFormatter.ofPattern(AmendScheduledListing.TIME_FORMAT));
         val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
         val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
 
-        hearingPart.setStart(hearingPart.getStart().withHour(hour).withMinute(minute));
+        //hearingPart.setStart(start.withHour(hour).withMinute(minute));
+        //hearingPart.set
+        entityManager.detach(hearingPart);
+        hearingPart.setVersion(amendScheduledListing.getHearingPartVersion());
+
         hearingPartRepository.save(hearingPart);
     }
 

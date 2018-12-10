@@ -70,7 +70,7 @@ public class HearingWithSessionsResponse {
             .stream()
             .filter(hp -> hp.getSession() != null)
             .map(hp -> new ScheduledListingResponse(hp.getSession(), hearing))
-            .sorted(comparing(ScheduledListingResponse::getHearingPartStartTime))
+            .sorted(comparing(ScheduledListingResponse::getStart))
             .collect(Collectors.toList());
         this.hearingPartsVersions = hearing.getHearingParts().stream().map(hp -> {
             val versionInfo = new VersionInfo();

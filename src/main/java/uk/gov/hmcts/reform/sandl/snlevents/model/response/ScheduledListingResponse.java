@@ -17,6 +17,7 @@ import java.util.UUID;
 public class ScheduledListingResponse {
     private UUID id;
     private OffsetDateTime hearingPartStartTime;
+    private OffsetDateTime start;
     private Duration duration;
     private String roomName;
     private String judgeName;
@@ -26,6 +27,7 @@ public class ScheduledListingResponse {
 
     public ScheduledListingResponse(Session session, Hearing hearing) {
         this.id = session.getId();
+        this.start = session.getStart();
 
         // A session might contain multiple hearingParts so it's important to get only the one for the current hearing
         HearingPart hearingPartOfCurrentHearing = session.getHearingParts().stream()
