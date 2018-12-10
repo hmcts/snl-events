@@ -7,5 +7,6 @@ public enum ActivityStatus {
     Withdrawn,
     Adjourned,
     Listed,
-    Rescheduled
+    Rescheduled,
+    Vacated
 }
