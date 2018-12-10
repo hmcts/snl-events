@@ -84,6 +84,16 @@ public class UserTransactionService {
         return true;
     }
 
+    public List<UserTransaction> getTimedOutTransactions() {
+        final OffsetDateTime fiveMinutesAgo = OffsetDateTime.now(clock).minusMinutes(
+            scheduledRollbackConfiguration.getTimeoutIntervalInMinutes()
+        );
+        return userTransactionRepository.getAllByStartedAtBeforeAndStatusNotInOrderByStartedAtAsc(
+            fiveMinutesAgo,
+            new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED}
+        );
+    }
+
     public boolean isAnyBeingTransacted(UUID... entityIds) {
         return userTransactionDataRepository
             .existsByEntityIdInAndUserTransaction_StatusEquals(
@@ -95,16 +105,6 @@ public class UserTransactionService {
         return new UserTransaction(transactionId,
             UserTransactionStatus.CONFLICT,
             UserTransactionRulesProcessingStatus.NOT_STARTED);
-    }
-
-    public List<UserTransaction> getTimedOutTransactions() {
-        final OffsetDateTime fiveMinutesAgo = OffsetDateTime.now(clock).minusMinutes(
-            scheduledRollbackConfiguration.getTimeoutIntervalInMinutes()
-        );
-        return userTransactionRepository.getAllByStartedAtBeforeAndStatusNotInOrderByStartedAtAsc(
-            fiveMinutesAgo,
-            new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED}
-        );
     }
 
     private boolean canRollbackOrCommit(UserTransaction userTransaction) {
