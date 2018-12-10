@@ -140,7 +140,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .withActivity(hearing.getId(), hearing.ENTITY_NAME, ActivityStatus.Created)
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Created)
             .build();
     }
 }

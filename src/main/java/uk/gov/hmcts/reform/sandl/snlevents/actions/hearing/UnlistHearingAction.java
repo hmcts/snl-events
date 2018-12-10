@@ -183,7 +183,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .withActivity(hearing.getId(), hearing.ENTITY_NAME, ActivityStatus.Unlisted)
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Unlisted)
             .build();
     }
 }

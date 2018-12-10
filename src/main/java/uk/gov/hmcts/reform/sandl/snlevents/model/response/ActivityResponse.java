@@ -23,7 +23,12 @@ public class ActivityResponse {
     public ActivityResponse(ActivityLog activityLog) {
         this.activityStatus = activityLog.getStatus();
         this.description = activityLog.getDescription();
-        this.createdBy = activityLog.getCreatedBy();
+        this.createdBy = prepareUsernameForResponse(activityLog.getCreatedBy());
         this.createdAt = activityLog.getCreatedAt();
+    }
+
+    private String prepareUsernameForResponse(String username) {
+        return username.split(":")[1]; // usernames in db contains prefix with service wich sent the request e.g.
+        // snl-api:username
     }
 }

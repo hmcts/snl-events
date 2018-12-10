@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers;
 
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.ActivityBuilderException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 
@@ -40,11 +41,11 @@ public class ActivityBuilder {
 
     private void validate() {
         if (userTransactionId == null) {
-            throw new RuntimeException();
+            throw new ActivityBuilderException("User transaction id must be set");
         }
 
         if (activityLogs.isEmpty()) {
-            throw new RuntimeException();
+            throw new ActivityBuilderException("No activity provided");
         }
     }
 }

@@ -177,7 +177,7 @@ public class WithdrawHearingAction extends Action implements RulesProcessable, A
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .withActivity(hearing.getId(), hearing.ENTITY_NAME, ActivityStatus.Withdrawn)
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Withdrawn)
             .build();
     }
 }

@@ -217,7 +217,7 @@ public class AssignSessionsToHearingAction extends Action implements RulesProces
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .withActivity(hearing.getId(), hearing.ENTITY_NAME, ActivityStatus.Listed)
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Listed)
             .build();
     }
 }

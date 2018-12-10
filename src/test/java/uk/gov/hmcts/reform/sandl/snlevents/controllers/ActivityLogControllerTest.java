@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 public class ActivityLogControllerTest {
 
     private static final String URL = "/activity-log";
+    private static final String USERNAME = "snl-api:user";
 
     @Autowired
     private EventsMockMvc mvc;
@@ -51,10 +52,12 @@ public class ActivityLogControllerTest {
 
         val log1 = ActivityLog.builder()
             .createdAt(dateTime)
+            .createdBy(USERNAME)
             .build();
 
         val log2 = ActivityLog.builder()
             .createdAt(dateTime.plusHours(1))
+            .createdBy(USERNAME)
             .build();
 
         activityLogs.add(log2);
