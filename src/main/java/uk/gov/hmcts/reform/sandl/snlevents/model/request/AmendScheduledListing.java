@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AmendScheduledListing {
-    public final static String TIME_FORMAT = "HH:mm";
+    public static final String TIME_FORMAT = "HH:mm";
 
     private UUID userTransactionId;
     private UUID hearingPartId;
