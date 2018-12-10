@@ -15,13 +15,13 @@ import java.time.OffsetDateTime;
 @Builder
 public class ActivityResponse {
 
-    private ActivityStatus hearingActivityStatus;
+    private ActivityStatus activityStatus;
     private String description;
     private String createdBy;
     private OffsetDateTime createdAt;
 
     public ActivityResponse(ActivityLog activityLog) {
-        this.hearingActivityStatus = activityLog.getStatus();
+        this.activityStatus = activityLog.getStatus();
         this.description = activityLog.getDescription();
         this.createdBy = activityLog.getCreatedBy();
         this.createdAt = activityLog.getCreatedAt();
