@@ -79,6 +79,7 @@ public class AdjournHearingActionTest {
             createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
                 hearing, SESSION_ID_B, Status.Listed, OffsetDateTime.now().plusDays(1))
         ));
+
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_ADJOURNED))).thenReturn(hearing);
         AdjournHearingRequest adjournHearingRequest = new AdjournHearingRequest();
         adjournHearingRequest.setHearingId(HEARING_ID_TO_BE_ADJOURNED);
@@ -171,8 +172,14 @@ public class AdjournHearingActionTest {
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_whenHearingStatusCantBeAdjourned_shouldThrowException() {
         Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
         hearing.setVersion(HEARING_VERSION_TO_BE_ADJOURNED);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
+        hearing.getHearingParts().forEach(hp -> {
+            hp.getSession().setHearingParts(Arrays.asList(hp));
+            hp.setStart(OffsetDateTime.now());
+        });
+
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
@@ -191,6 +198,7 @@ public class AdjournHearingActionTest {
         hearingPart.setSessionId(sessionId);
         hearingPart.setSession(session);
         hearingPart.setStart(start);
+        session.setHearingParts(Arrays.asList(hearingPart));
         return hearingPart;
     }
 
