@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DragAndDropSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionAmendResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
@@ -138,8 +139,8 @@ public class SessionController {
     }
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateSession(@RequestBody UpsertSession upsertSession) throws IOException {
-        UserTransaction ut = sessionService.updateSession(upsertSession);
+    public ResponseEntity updateSession(@RequestBody DragAndDropSessionRequest dropSessionRequest) throws IOException {
+        UserTransaction ut = sessionService.updateSession(dropSessionRequest);
         return ok(ut);
     }
 

@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.DragAndDropSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -95,6 +96,8 @@ public class SessionServiceTest {
     private FactsMapper factsMapper;
     @Mock
     private RulesService rulesService;
+    @Mock
+    private ActionService actionService;
 
     @Before
     public void init() {
@@ -203,6 +206,12 @@ public class SessionServiceTest {
         assertThat(transaction).isEqualToComparingFieldByFieldRecursively(createUserTransaction());
         verify(userTransactionService, times(1))
             .startTransaction(eq(createUuid(UUID_STRING)), eq(createUserTransactionDataList()));
+    }
+
+    @Test
+    public void updateSession_callsDragAndDropSessionAction() {
+        sessionService.updateSession(createUpsertSession());
+        verify(actionService, times(1)).execute(any(DragAndDropSessionAction.class));
     }
 
     @Test
