@@ -160,7 +160,8 @@ public class HearingPartController {
             amendScheduledListing,
             hearingPartRepository,
             entityManager,
-            objectMapper
+            objectMapper,
+            hearingRepository
         );
 
         UserTransaction ut = actionService.execute(action);
