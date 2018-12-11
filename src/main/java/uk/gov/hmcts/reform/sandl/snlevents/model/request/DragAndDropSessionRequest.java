@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -25,9 +25,9 @@ public class DragAndDropSessionRequest implements UserTransactional {
     @Min(1)
     private Long durationInSeconds;
 
-    private String personId;
+    private UUID personId;
 
-    private String roomId;
+    private UUID roomId;
 
     @NotNull
     private UUID userTransactionId;

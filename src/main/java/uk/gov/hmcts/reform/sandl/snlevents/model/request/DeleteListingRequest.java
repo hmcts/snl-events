@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactional;
 
-import javax.validation.constraints.NotNull;
 import java.util.UUID;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
