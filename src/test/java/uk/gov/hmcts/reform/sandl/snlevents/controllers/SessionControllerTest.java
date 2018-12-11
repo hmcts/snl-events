@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DragAndDropSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -139,7 +140,7 @@ public class SessionControllerTest {
         UpsertSession upsertSession = createUpsertSession();
         UserTransaction userTransaction = new UserTransaction();
 
-        when(sessionService.updateSession(any(UpsertSession.class))).thenReturn(userTransaction);
+        when(sessionService.updateSession(any(DragAndDropSessionRequest.class))).thenReturn(userTransaction);
 
         val response = mvc.putAndMapResponse(
             SESSION_URL + "/update", objectMapper.writeValueAsString(upsertSession), UserTransaction.class
