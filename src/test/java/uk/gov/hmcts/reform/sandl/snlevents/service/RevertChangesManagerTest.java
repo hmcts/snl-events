@@ -10,8 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
@@ -59,6 +62,8 @@ public class RevertChangesManagerTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    private StatusesMock statusesMock = new StatusesMock();
 
     @Test(expected = EntityNotFoundException.class)
     public void revertChanges_throwsException_whenSessionIsNotFound() {
@@ -131,9 +136,11 @@ public class RevertChangesManagerTest {
     public void revertChanges_updatesSession_whenCounterActionIsUpdate() throws IOException {
         Session sessionBeingRolledBack = createSession();
         sessionBeingRolledBack.setVersion(1L);
+        sessionBeingRolledBack.setDuration(Duration.ofHours(3));
         Session previousSession = createSession();
         previousSession.setId(sessionBeingRolledBack.getId());
         previousSession.setVersion(0L);
+        previousSession.setDuration(Duration.ofHours(2));
 
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(sessionBeingRolledBack);
         when(objectMapper.readValue("{}", Session.class)).thenReturn(previousSession);
@@ -145,6 +152,7 @@ public class RevertChangesManagerTest {
         Mockito.verify(entityManager).merge(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(sessionBeingRolledBack.getId());
         assertThat(captor.getValue().getVersion()).isEqualTo(1L);
+        assertThat(captor.getValue().getDuration()).isEqualTo(Duration.ofHours(2));
     }
 
     @Test
@@ -178,9 +186,11 @@ public class RevertChangesManagerTest {
     public void revertChanges_updatesHearing_whenCounterActionIsUpdate() throws IOException {
         Hearing hearingBeingRolledBack = createHearing();
         hearingBeingRolledBack.setVersion(1L);
+        hearingBeingRolledBack.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         Hearing previousHearing = createHearing();
         previousHearing.setId(hearingBeingRolledBack.getId());
         previousHearing.setVersion(0L);
+        previousHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
 
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(hearingBeingRolledBack);
         when(objectMapper.readValue("{}", Hearing.class)).thenReturn(previousHearing);
@@ -192,6 +202,8 @@ public class RevertChangesManagerTest {
         Mockito.verify(entityManager).merge(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(hearingBeingRolledBack.getId());
         assertThat(captor.getValue().getVersion()).isEqualTo(1L);
+        assertThat(captor.getValue().getStatus()).isEqualTo(
+            statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
     }
 
     @Test
@@ -224,8 +236,10 @@ public class RevertChangesManagerTest {
     @Test
     public void revertChanges_updatesHearingPart_whenCounterActionIsUpdate() throws IOException {
         HearingPart hearingPartBeingRolledBack = createHearingPart();
+        hearingPartBeingRolledBack.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
         HearingPart previousHearingPart = createHearingPart();
         previousHearingPart.setId(hearingPartBeingRolledBack.getId());
+        previousHearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(hearingPartBeingRolledBack);
         when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(previousHearingPart);
@@ -236,6 +250,8 @@ public class RevertChangesManagerTest {
         ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
         Mockito.verify(entityManager).merge(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(hearingPartBeingRolledBack.getId());
+        assertThat(captor.getValue().getStatus()).isEqualTo(
+            statusesMock.statusConfigService.getStatusConfig(Status.Listed));
     }
 
     @Test
@@ -284,7 +300,6 @@ public class RevertChangesManagerTest {
     }
 
     private UserTransaction createUserTransactionWithHearingPartCreate() {
-
         val data = new UserTransactionData();
         data.setEntity("hearingPart");
         data.setCounterAction("create");
