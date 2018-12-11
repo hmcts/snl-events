@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -19,13 +19,12 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import javax.persistence.EntityManager;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 
 public class DragAndDropSessionAction extends Action implements RulesProcessable {
     private DragAndDropSessionRequest dragAndDropSessionRequest;
@@ -63,7 +62,7 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
         try {
             currentSessionAsString = objectMapper.writeValueAsString(session);
         } catch (JsonProcessingException e) {
-            throw new ServiceException("Given session couldn't be converted into string");
+            throw new SnlEventsException("Given session couldn't be converted into string");
         }
 
         Session session = updateSession(dragAndDropSessionRequest);
@@ -77,9 +76,9 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     public List<FactMessage> generateFactMessages() {
         SessionWithHearingPartsFacts sessionWithHpFacts =
             factsMapper.mapDbSessionToRuleJsonMessage(session, hearingParts);
-        List<FactMessage> facts = sessionWithHpFacts.getHearingPartsFacts().stream().map(hpFact ->
-            new FactMessage(RulesService.UPSERT_HEARING_PART, hpFact)
-        ).collect(Collectors.toList());
+        List<FactMessage> facts = sessionWithHpFacts.getHearingPartsFacts().stream()
+            .map(hpFact -> new FactMessage(RulesService.UPSERT_HEARING_PART, hpFact))
+            .collect(Collectors.toList());
         facts.add(new FactMessage(RulesService.UPSERT_SESSION, sessionWithHpFacts.getSessionFact()));
 
         return facts;
@@ -135,12 +134,11 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
 
     private void validateIfJudgeCanBeChanged(Session session, DragAndDropSessionRequest dragAndDropSessionRequest) {
         boolean sessionHasMultiSessionHearingPart = session.getHearingParts().stream()
-            .filter(hp -> hp.getHearing().isMultiSession())
-            .count() > 0;
+            .anyMatch(hp -> hp.getHearing().isMultiSession());
 
-        String assignedPersonId = session.getPerson() != null ? session.getPerson().getId().toString() : null;
+        UUID assignedPersonId = session.getPerson() != null ? session.getPerson().getId() : null;
 
-        if(sessionHasMultiSessionHearingPart && !assignedPersonId.equals(dragAndDropSessionRequest.getPersonId())) {
+        if (sessionHasMultiSessionHearingPart && !assignedPersonId.equals(dragAndDropSessionRequest.getPersonId())) {
             throw new SnlRuntimeException("This session cannot be assigned to a different judge "
                 + "as it includes a multi-session hearing which needs the same judge throughout");
         }
@@ -149,23 +147,14 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     private Session updateSession(DragAndDropSessionRequest dragAndDropSessionRequest) {
         session.setDuration(Duration.ofSeconds(dragAndDropSessionRequest.getDurationInSeconds()));
         session.setStart(dragAndDropSessionRequest.getStart());
+        Room room = (dragAndDropSessionRequest.getRoomId() != null)
+            ? roomRepository.findOne(dragAndDropSessionRequest.getRoomId()) : null;
+        session.setRoom(room);
+        Person person = (dragAndDropSessionRequest.getPersonId() != null)
+            ? personRepository.findOne(dragAndDropSessionRequest.getPersonId()) : null;
 
-        Optional.ofNullable(dragAndDropSessionRequest.getRoomId()).ifPresent(id -> {
-            UUID roomId = getUuidFromString(dragAndDropSessionRequest.getRoomId());
-            Room room = (roomId == null) ? null : roomRepository.findOne(roomId);
-            session.setRoom(room);
-        });
-
-        Optional.ofNullable(dragAndDropSessionRequest.getPersonId()).ifPresent(id -> {
-            UUID personId = getUuidFromString(dragAndDropSessionRequest.getPersonId());
-            Person person = (personId == null) ? null : personRepository.findOne(personId);
-            session.setPerson(person);
-        });
+        session.setPerson(person);
 
         return session;
-    }
-
-    private UUID getUuidFromString(String id) {
-        return "empty".equals(id) ? null : UUID.fromString(id);
     }
 }
