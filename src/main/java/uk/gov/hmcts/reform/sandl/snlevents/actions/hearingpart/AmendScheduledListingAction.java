@@ -73,7 +73,7 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
 
     @Override
     public void act() {
-        OffsetDateTime start = OffsetDateTime.now();
+        OffsetDateTime start = hearingPart.getStart();
         try {
             previousHearingPart = objectMapper.writeValueAsString(hearingPart);
         } catch (JsonProcessingException e) {
@@ -86,8 +86,7 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
         val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
         val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
 
-        //hearingPart.setStart(start.withHour(hour).withMinute(minute));
-        //hearingPart.set
+        hearingPart.setStart(start.withHour(hour).withMinute(minute));
         entityManager.detach(hearingPart);
         hearingPart.setVersion(amendScheduledListing.getHearingPartVersion());
 
