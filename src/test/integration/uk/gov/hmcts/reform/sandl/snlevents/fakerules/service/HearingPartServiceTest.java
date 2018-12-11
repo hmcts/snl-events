@@ -84,6 +84,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearing.setId(UUID.randomUUID());
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
+        hearingPart.setHearing(hearing);
         hearing.addHearingPart(hearingPart);
         hearing.setCaseType(getCaseType());
         hearing.setHearingType(getHearingType());
@@ -91,6 +92,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearing.setMultiSession(false);
 
         Hearing savedHearing = hearingRepository.save(hearing);
+        HearingPart savedHearingPart = hearingPartRepository.save(hearingPart);
         assertThat(savedHearing.getHearingParts().get(0).getSessionId()).isNull();
 
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
@@ -118,6 +120,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearing.setId(UUID.randomUUID());
         HearingPart hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
+        hearingPart.setHearing(hearing);
         hearing.addHearingPart(hearingPart);
         hearing.setCaseType(getCaseType());
         hearing.setHearingType(getHearingType());
@@ -125,6 +128,7 @@ public class HearingPartServiceTest extends BaseIntegrationTestWithFakeRules {
         hearing.setMultiSession(false);
 
         Hearing savedHearing = hearingRepository.save(hearing);
+        HearingPart savedHearingPart = hearingPartRepository.save(hearingPart);
         Session savedSession = sessionRepository.save(sessionBuilder.withSessionType(getSessionType()).build());
 
         HearingSessionRelationship hearingSessionRelationship = createRelationship(
