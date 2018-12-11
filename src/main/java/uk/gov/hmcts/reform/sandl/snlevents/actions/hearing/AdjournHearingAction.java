@@ -146,10 +146,6 @@ public class AdjournHearingAction extends Action implements RulesProcessable, Ac
         return adjournHearingRequest.getUserTransactionId();
     }
 
-    private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
-        return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
-    }
-
     @Override
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()

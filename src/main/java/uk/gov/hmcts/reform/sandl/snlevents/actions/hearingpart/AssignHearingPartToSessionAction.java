@@ -147,10 +147,6 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
         return relationship.getUserTransactionId();
     }
 
-    private UserTransactionData getLockedSessionTransactionData(UUID id) {
-        return new UserTransactionData("session", id, null, "lock", "unlock", 0);
-    }
-
     @Override
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()
