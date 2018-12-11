@@ -25,7 +25,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
@@ -138,7 +137,7 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "hearing", orphanRemoval = true, cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "hearing", orphanRemoval = true, fetch = FetchType.EAGER)
     @NotAudited
     private List<HearingPart> hearingParts = new ArrayList<>();
 
