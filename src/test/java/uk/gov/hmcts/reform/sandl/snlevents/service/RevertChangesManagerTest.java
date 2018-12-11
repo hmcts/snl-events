@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ActivityLogRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -56,6 +57,9 @@ public class RevertChangesManagerTest {
     @Mock
     ObjectMapper objectMapper;
 
+    @Mock
+    ActivityLogRepository activityLogRepository;
+
     @Test
     public void revertChanges_handleHearing_whenCounterActionIsDelete() {
         Hearing h = createHearing();
@@ -63,6 +67,7 @@ public class RevertChangesManagerTest {
         val transaction = createUserTransactionWithHearingDelete();
         revertChangesManager.revertChanges(transaction);
         verify(hearingRepository, times(1)).delete(h.getId());
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -79,6 +84,7 @@ public class RevertChangesManagerTest {
             .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
 
         verify(hearingRepository, times(1)).save(prevHearing);
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -89,6 +95,7 @@ public class RevertChangesManagerTest {
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
             .postMessage(any(UUID.class), eq(RulesService.DELETE_SESSION), anyString());
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -98,6 +105,7 @@ public class RevertChangesManagerTest {
         revertChangesManager.revertChanges(transaction);
         verify(rulesService, times(1))
             .postMessage(any(UUID.class), eq(RulesService.DELETE_HEARING_PART), anyString());
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -106,6 +114,7 @@ public class RevertChangesManagerTest {
         when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(createHearingPart());
         val transaction = createUserTransactionWithHearingPartUpsert();
         revertChangesManager.revertChanges(transaction);
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
         //verify(rulesService, times(1)) @TODO to be considered while working on multiple sessions
         //    .postMessage(any(UUID.class), eq(RulesService.UPSERT_HEARING_PART), anyString());
     }
@@ -114,6 +123,10 @@ public class RevertChangesManagerTest {
     public void revertChanges_throwsException_whenSessionIsNotFound() {
         when(sessionRepository.findOne(any(UUID.class))).thenReturn(null);
         revertChangesManager.revertChanges(createUserTransactionWithSessionDelete());
+    }
+
+    private void verifyActivityLogRepositoryWasCalled(UUID transactionId) {
+        verify(activityLogRepository, times(1)).deleteActivityLogByUserTransactionId(transactionId);
     }
 
     private UserTransaction createUserTransactionWithSessionDelete() {

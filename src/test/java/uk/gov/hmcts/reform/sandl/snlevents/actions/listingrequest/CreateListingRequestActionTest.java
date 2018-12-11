@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -220,6 +222,18 @@ public class CreateListingRequestActionTest {
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
 
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+        action.act();
+        List<ActivityLog> activities = action.getActivities();
+        assertThat(activities.size()).isEqualTo(1);
+        ActivityLog activityLog = activities.get(0);
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Created);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(UUID.fromString(TRANSACTION_ID));
     }
 
     private CreateHearingRequest createCreateHearingPart(int numberOfSessions) {
