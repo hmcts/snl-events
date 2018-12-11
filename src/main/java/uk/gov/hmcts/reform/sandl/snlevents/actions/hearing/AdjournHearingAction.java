@@ -4,12 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -30,7 +34,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-public class AdjournHearingAction extends Action implements RulesProcessable {
+public class AdjournHearingAction extends Action implements RulesProcessable, ActivityLoggable {
     protected AdjournHearingRequest adjournHearingRequest;
     protected Hearing hearing;
     protected List<HearingPart> hearingParts;
@@ -157,5 +161,13 @@ public class AdjournHearingAction extends Action implements RulesProcessable {
 
     private UserTransactionData prepareLockedEntityTransactionData(String entity, UUID id) {
         return new UserTransactionData(entity, id, null, "lock", "unlock", 0);
+    }
+
+    @Override
+    public List<ActivityLog> getActivities() {
+        return ActivityBuilder.activityBuilder()
+            .userTransactionId(getUserTransactionId())
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Adjourned)
+            .build();
     }
 }

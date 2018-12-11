@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFacts;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ActivityLogRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -40,10 +41,13 @@ public class RevertChangesManager {
     private FactsMapper factsMapper;
 
     @Autowired
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private ActivityLogRepository activityLogRepository;
 
     public void revertChanges(UserTransaction ut) {
         List<UserTransactionData> sortedUserTransactionDataList = ut.getUserTransactionDataList()
@@ -53,6 +57,7 @@ public class RevertChangesManager {
         for (UserTransactionData utd : sortedUserTransactionDataList) {
             handleTransactionData(utd);
         }
+        revertActivityLogData(ut);
     }
 
     private void handleTransactionData(UserTransactionData utd) {
@@ -63,6 +68,10 @@ public class RevertChangesManager {
         } else if ("hearing".equals(utd.getEntity())) {
             handleHearing(utd);
         }
+    }
+
+    private void revertActivityLogData(UserTransaction userTransaction) {
+        activityLogRepository.deleteActivityLogByUserTransactionId(userTransaction.getId());
     }
 
     private void handleHearing(UserTransactionData utd) {
