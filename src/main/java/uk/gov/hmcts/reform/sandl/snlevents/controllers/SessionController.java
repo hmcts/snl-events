@@ -139,7 +139,7 @@ public class SessionController {
     }
 
     @PutMapping(path = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateSession(@RequestBody DragAndDropSessionRequest dropSessionRequest) throws IOException {
+    public ResponseEntity updateSession(@Valid @RequestBody DragAndDropSessionRequest dropSessionRequest) throws IOException {
         UserTransaction ut = sessionService.updateSession(dropSessionRequest);
         return ok(ut);
     }
