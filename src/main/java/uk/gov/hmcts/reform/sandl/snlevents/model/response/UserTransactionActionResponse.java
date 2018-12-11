@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UserTransactionAction;
 
 import java.util.UUID;
 
@@ -11,6 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserTransactionActionResponse {
     UUID transactionId;
-    String action;
+    UserTransactionAction action;
     boolean success;
 }
