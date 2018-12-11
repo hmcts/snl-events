@@ -14,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -46,6 +48,7 @@ public class AssignHearingPartToSessionActionTest {
     private static final OffsetDateTime dateTime = OffsetDateTime.now();
     private static final OffsetDateTime START_TIME = dateTime.withHour(10).withMinute(0);
 
+    private static final UUID TRANSACTION_ID = UUID.randomUUID();
     private static final UUID ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     private static final UUID SESSION_ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440002");
     private static final UUID SESSION_ID_PREVIOUS = UUID.fromString("123e4567-e89b-12d3-a456-426655440012");
@@ -83,7 +86,7 @@ public class AssignHearingPartToSessionActionTest {
         request.setHearingPartVersion(0);
         request.setSessionData(sessionAssignmentData);
         request.setStart(START_TIME);
-        request.setUserTransactionId(UUID.randomUUID());
+        request.setUserTransactionId(TRANSACTION_ID);
 
         action = createAction(request);
 
@@ -228,6 +231,21 @@ public class AssignHearingPartToSessionActionTest {
 
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Rescheduled);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 
     private void mockHearingPart() {

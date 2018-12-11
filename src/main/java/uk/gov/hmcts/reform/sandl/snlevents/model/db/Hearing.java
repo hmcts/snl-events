@@ -78,6 +78,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @Where(clause = "is_deleted=false")
 @SuppressWarnings("squid:S3437")
 public class Hearing extends VersionedEntity implements Serializable, HistoryAuditable, Statusable {
+    public static final String ENTITY_NAME = "Hearing";
 
     @Id
     private UUID id;

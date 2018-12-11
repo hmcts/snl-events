@@ -1,12 +1,16 @@
 package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
@@ -25,7 +29,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
-public class CreateListingRequestAction extends Action implements RulesProcessable {
+public class CreateListingRequestAction extends Action implements RulesProcessable, ActivityLoggable {
 
     protected CreateHearingRequest createHearingRequest;
     protected List<HearingPart> hearingParts;
@@ -124,5 +128,13 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     @Override
     public UUID[] getAssociatedEntitiesIds() {
         return new UUID[] {this.createHearingRequest.getId()};
+    }
+
+    @Override
+    public List<ActivityLog> getActivities() {
+        return ActivityBuilder.activityBuilder()
+            .userTransactionId(getUserTransactionId())
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Created)
+            .build();
     }
 }

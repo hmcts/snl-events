@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class WithdrawHearingActionTest {
+    private static final UUID TRANSACTION_ID = UUID.randomUUID();
     private static final UUID HEARING_ID_TO_BE_WITHDRAWN = UUID.randomUUID();
     private static final Long HEARING_VERSION_TO_BE_WITHDRAWN = 0L;
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
@@ -88,7 +91,7 @@ public class WithdrawHearingActionTest {
 
         WithdrawHearingRequest whr = new WithdrawHearingRequest();
         whr.setHearingId(HEARING_ID_TO_BE_WITHDRAWN);
-        whr.setUserTransactionId(UUID.randomUUID());
+        whr.setUserTransactionId(TRANSACTION_ID);
 
         action = new WithdrawHearingAction(
             whr, hearingRepository, hearingPartRepository,
@@ -156,6 +159,21 @@ public class WithdrawHearingActionTest {
                 assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Withdrawn);
             }
         });
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Withdrawn);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 
     @Test(expected = SnlRuntimeException.class)

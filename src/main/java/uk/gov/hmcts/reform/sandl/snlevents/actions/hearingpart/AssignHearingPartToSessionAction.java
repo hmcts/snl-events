@@ -3,11 +3,16 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -25,7 +30,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
-public class AssignHearingPartToSessionAction extends Action implements RulesProcessable {
+public class AssignHearingPartToSessionAction extends Action implements RulesProcessable, ActivityLoggable {
 
     protected HearingPartSessionRelationship relationship;
     protected UUID hearingPartId;
@@ -140,5 +145,17 @@ public class AssignHearingPartToSessionAction extends Action implements RulesPro
     @Override
     public UUID getUserTransactionId() {
         return relationship.getUserTransactionId();
+    }
+
+    private UserTransactionData getLockedSessionTransactionData(UUID id) {
+        return new UserTransactionData("session", id, null, "lock", "unlock", 0);
+    }
+
+    @Override
+    public List<ActivityLog> getActivities() {
+        return ActivityBuilder.activityBuilder()
+            .userTransactionId(getUserTransactionId())
+            .withActivity(hearingPart.getHearingId(), Hearing.ENTITY_NAME, ActivityStatus.Rescheduled)
+            .build();
     }
 }

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ActivityLogRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -63,6 +64,9 @@ public class RevertChangesManagerTest {
     @Mock
     ObjectMapper objectMapper;
 
+    @Mock
+    ActivityLogRepository activityLogRepository;
+
     private StatusesMock statusesMock = new StatusesMock();
 
     @Test(expected = EntityNotFoundException.class)
@@ -93,6 +97,7 @@ public class RevertChangesManagerTest {
 
         verify(rulesService, times(1))
             .postMessage(any(UUID.class), eq(RulesService.DELETE_SESSION), anyString());
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -130,6 +135,7 @@ public class RevertChangesManagerTest {
 
         verify(rulesService, times(1))
             .postMessage(any(UUID.class), eq(RulesService.DELETE_HEARING_PART), anyString());
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -153,6 +159,7 @@ public class RevertChangesManagerTest {
         assertThat(captor.getValue().getId()).isEqualTo(sessionBeingRolledBack.getId());
         assertThat(captor.getValue().getVersion()).isEqualTo(1L);
         assertThat(captor.getValue().getDuration()).isEqualTo(Duration.ofHours(2));
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -215,6 +222,7 @@ public class RevertChangesManagerTest {
         revertChangesManager.revertChanges(transaction);
 
         verify(hearingRepository, times(1)).delete(hearingBeingRolledBack);
+        verifyActivityLogRepositoryWasCalled(transaction.getId());
     }
 
     @Test
@@ -227,11 +235,8 @@ public class RevertChangesManagerTest {
 
         val transaction = createUserTransactionWithHearingPartCreate();
         revertChangesManager.revertChanges(transaction);
-
-        ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
-        Mockito.verify(entityManager).merge(captor.capture());
-        assertThat(captor.getValue().isDeleted()).isFalse();
     }
+
 
     @Test
     public void revertChanges_updatesHearingPart_whenCounterActionIsUpdate() throws IOException {
@@ -263,6 +268,10 @@ public class RevertChangesManagerTest {
         revertChangesManager.revertChanges(transaction);
 
         verify(hearingPartRepository, times(1)).delete(hearingPartBeingRolledBack);
+    }
+
+    private void verifyActivityLogRepositoryWasCalled(UUID transactionId) {
+        verify(activityLogRepository, times(1)).deleteActivityLogByUserTransactionId(transactionId);
     }
 
     private UserTransaction createUserTransactionWithHearingCreate() {
