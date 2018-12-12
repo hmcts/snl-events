@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class UnlistHearingActionTest {
+    private static final UUID TRANSACTION_ID = UUID.randomUUID();
     private static final UUID HEARING_ID_TO_BE_UNLISTED = UUID.randomUUID();
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
@@ -84,7 +87,7 @@ public class UnlistHearingActionTest {
 
         UnlistHearingRequest bhr = new UnlistHearingRequest();
         bhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
-        bhr.setUserTransactionId(UUID.randomUUID());
+        bhr.setUserTransactionId(TRANSACTION_ID);
 
         bhr.setHearingPartsVersions(hearingVersions);
 
@@ -182,6 +185,21 @@ public class UnlistHearingActionTest {
         action.hearingParts.forEach(hearingPart -> {
             assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
         });
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Unlisted);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 
     @Test(expected = SnlRuntimeException.class)

@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -160,6 +162,21 @@ public class AdjournHearingActionTest {
                 assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Vacated);
             }
         });
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Adjourned);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 
     @Test(expected = SnlRuntimeException.class)

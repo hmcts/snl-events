@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
@@ -54,6 +56,7 @@ public class VacateHearingActionTest {
     private static final UUID SESSION_ID_B = UUID.randomUUID();
     private static final UUID SESSION_ID_C = UUID.randomUUID();
     private static final UUID SESSION_ID_D = UUID.randomUUID();
+    private static final UUID USER_TRANSACTION_ID = UUID.randomUUID();
     private static StatusConfig hearingStatusConfig;
     private StatusesMock statusesMock = new StatusesMock();
     private VacateHearingAction action;
@@ -98,7 +101,7 @@ public class VacateHearingActionTest {
 
         VacateHearingRequest vhr = new VacateHearingRequest();
         vhr.setHearingId(HEARING_ID_TO_BE_VACATED);
-        vhr.setUserTransactionId(UUID.randomUUID());
+        vhr.setUserTransactionId(USER_TRANSACTION_ID);
 
         action = new VacateHearingAction(
             vhr,
@@ -201,6 +204,21 @@ public class VacateHearingActionTest {
         hearing.setMultiSession(false);
         Mockito.when(hearingRepository.findOne(any(UUID.class))).thenReturn(hearing);
         action.getAndValidateEntities();
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Vacated);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(USER_TRANSACTION_ID);
     }
 
     private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,
