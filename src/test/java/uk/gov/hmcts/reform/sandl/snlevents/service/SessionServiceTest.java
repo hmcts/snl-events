@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.DragAndDropSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.config.JpaTestConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.FactsMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DragAndDropSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingPartResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
@@ -35,7 +37,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -95,6 +96,8 @@ public class SessionServiceTest {
     private FactsMapper factsMapper;
     @Mock
     private RulesService rulesService;
+    @Mock
+    private ActionService actionService;
 
     @Before
     public void init() {
@@ -206,39 +209,9 @@ public class SessionServiceTest {
     }
 
     @Test
-    public void updateSession_updatesWithTransaction_whenTheresNoTransactionInProgress() throws IOException {
-        Session session = createSession();
-        String message = "message";
-
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class)))
-            .thenReturn(false);
-        when(userTransactionService.startTransaction(any(UUID.class), any(List.class)))
-            .thenReturn(createUserTransaction());
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
-        when(sessionTypeRepository.findOne(any(String.class))).thenReturn(new SessionType("code", "desc"));
-        when(userTransactionService.rulesProcessed(any(UserTransaction.class))).then(returnsFirstArg());
-        when(factsMapper.mapUpdateSessionToRuleJsonMessage(eq(session), any()).getSessionFact()).thenReturn(message);
-
-        UserTransaction transaction = sessionService.updateSession(createUpsertSession());
-
-        verify(objectMapper, times(1)).writeValueAsString(any());
-        verify(rulesService, times(1)).postMessage(any(UUID.class), eq(RulesService.UPSERT_SESSION), eq(message));
-        assertThat(transaction).isEqualToComparingFieldByFieldRecursively(createUserTransaction());
-    }
-
-    @Test
-    public void updateSession_indicatesConflict_whenTransactionIsInProgress() throws IOException {
-        when(userTransactionService.isAnyBeingTransacted(any(UUID.class)))
-            .thenReturn(true);
-        when(sessionRepository.findOne(any(UUID.class))).thenReturn(createSession());
-
-        UserTransaction ut = createUserTransaction(UserTransactionStatus.CONFLICT);
-        when(userTransactionService.transactionConflicted(any(UUID.class)))
-            .thenReturn(ut);
-
-        UserTransaction transaction = sessionService.updateSession(createUpsertSession());
-
-        assertThat(transaction).isEqualToComparingFieldByFieldRecursively(ut);
+    public void updateSession_callsDragAndDropSessionAction() {
+        sessionService.updateSession(new DragAndDropSessionRequest());
+        verify(actionService, times(1)).execute(any(DragAndDropSessionAction.class));
     }
 
     private UserTransaction createUserTransaction() {

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

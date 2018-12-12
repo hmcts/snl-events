@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.DragAndDropSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.UpsertSession;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.SessionWithHearings;
@@ -136,14 +137,17 @@ public class SessionControllerTest {
 
     @Test
     public void updateSession_returnsUserTransaction() throws Exception {
-        UpsertSession upsertSession = createUpsertSession();
+        DragAndDropSessionRequest dragAndDropSessionRequest = createDragAndDropRequest();
         UserTransaction userTransaction = new UserTransaction();
 
-        when(sessionService.updateSession(any(UpsertSession.class))).thenReturn(userTransaction);
+        when(sessionService.updateSession(any(DragAndDropSessionRequest.class))).thenReturn(userTransaction);
 
         val response = mvc.putAndMapResponse(
-            SESSION_URL + "/update", objectMapper.writeValueAsString(upsertSession), UserTransaction.class
+            SESSION_URL + "/update",
+            objectMapper.writeValueAsString(dragAndDropSessionRequest),
+            UserTransaction.class
         );
+
         assertEquals(userTransaction, response);
     }
 
@@ -196,6 +200,16 @@ public class SessionControllerTest {
         s.setSessionType(new SessionType());
 
         return s;
+    }
+
+    private DragAndDropSessionRequest createDragAndDropRequest() {
+        DragAndDropSessionRequest dragAndDropSessionRequest = new DragAndDropSessionRequest();
+        dragAndDropSessionRequest.setSessionId(UUID.randomUUID());
+        dragAndDropSessionRequest.setUserTransactionId(UUID.randomUUID());
+        dragAndDropSessionRequest.setVersion(1L);
+        dragAndDropSessionRequest.setStart(OffsetDateTime.now());
+
+        return dragAndDropSessionRequest;
     }
 
     private UpsertSession createUpsertSession() {
