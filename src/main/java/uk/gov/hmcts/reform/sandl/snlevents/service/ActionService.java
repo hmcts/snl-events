@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.sandl.snlevents.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.ActivityLogRepository;
 
 import java.util.UUID;
 
@@ -14,10 +16,13 @@ import javax.transaction.Transactional;
 public class ActionService {
 
     @Autowired
-    UserTransactionService userTransactionService;
+    private UserTransactionService userTransactionService;
 
     @Autowired
-    RulesService rulesService;
+    private RulesService rulesService;
+
+    @Autowired
+    private ActivityLogRepository activityLogRepository;
 
     @Transactional
     public UserTransaction execute(Action action) {
@@ -40,6 +45,10 @@ public class ActionService {
         if (action instanceof RulesProcessable) {
             ((RulesProcessable) action).generateFactMessages()
                 .forEach(factMessage -> rulesService.postMessage(transactionId, factMessage));
+        }
+
+        if (action instanceof ActivityLoggable) {
+            activityLogRepository.save(((ActivityLoggable) action).getActivities());
         }
 
         return userTransactionService.rulesProcessed(ut);
