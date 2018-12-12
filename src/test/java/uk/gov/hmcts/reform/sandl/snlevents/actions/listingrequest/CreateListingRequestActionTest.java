@@ -186,7 +186,7 @@ public class CreateListingRequestActionTest {
                 null,
                 "create",
                 "delete",
-                1
+                0
             )
         );
 
@@ -196,7 +196,7 @@ public class CreateListingRequestActionTest {
                 null,
                 "create",
                 "delete",
-                0
+                1
             )
         );
 
@@ -217,7 +217,7 @@ public class CreateListingRequestActionTest {
             null,
             "create",
             "delete",
-            1));
+            0));
 
 
         expectedTransactionData.add(new UserTransactionData("hearingPart",
@@ -225,14 +225,14 @@ public class CreateListingRequestActionTest {
             null,
             "create",
             "delete",
-            1));
+            0));
 
         expectedTransactionData.add(new UserTransactionData("hearing",
             createUuid(HEARING_ID),
             null,
             "create",
             "delete",
-            0));
+            1));
 
         when(hearingMapper.mapToHearingParts(createHearingRequest)).thenReturn(Arrays.asList(
             createHearingPart(HEARING_PART_ID), createHearingPart(HEARING_PART_ID2))

@@ -111,11 +111,11 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     public List<UserTransactionData> generateUserTransactionData() {
         hearingParts.forEach(hp ->
             dataPrepService.prepareUserTransactionDataForCreate(UserTransactionDataPreparerService.HEARING_PART,
-                hp.getId(), 1)
+                hp.getId(), 0)
         );
 
         dataPrepService.prepareUserTransactionDataForCreate(UserTransactionDataPreparerService.HEARING,
-            hearing.getId(), 0);
+            hearing.getId(), 1);
 
         return dataPrepService.getUserTransactionDataList();
     }
