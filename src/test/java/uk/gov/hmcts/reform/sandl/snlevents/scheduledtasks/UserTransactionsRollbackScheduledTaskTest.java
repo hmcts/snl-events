@@ -36,16 +36,16 @@ public class UserTransactionsRollbackScheduledTaskTest {
     private UserTransactionService utService;
 
     @Test
-    public void rollbackForgottenTransactions_forNoMatchingEntries_shouldNotRollbackAnything() {
+    public void rollbackPendingTransactions_forNoMatchingEntries_shouldNotRollbackAnything() {
         when(utService.getTimedOutTransactions()).thenReturn(Collections.emptyList());
 
-        scheduledTasks.rollbackForgottenTransactions();
+        scheduledTasks.rollbackPendingTransactions();
 
         verify(utService, times(0)).rollback(any());
     }
 
     @Test
-    public void rollbackForgottenTransactions_forMatchingEntries_shouldCallRollback() {
+    public void rollbackPendingTransactions_forMatchingEntries_shouldCallRollback() {
         when(utService.getTimedOutTransactions()).thenReturn(Arrays.asList(
             new UserTransaction(
                 UUID.randomUUID(), UserTransactionStatus.STARTED, UserTransactionRulesProcessingStatus.IN_PROGRESS
@@ -56,13 +56,13 @@ public class UserTransactionsRollbackScheduledTaskTest {
             )
         ));
 
-        scheduledTasks.rollbackForgottenTransactions();
+        scheduledTasks.rollbackPendingTransactions();
 
         verify(utService, times(3)).rollback(any());
     }
 
     @Test
-    public void verifyThat_rollbackForgottenTransactions_logsInformationOfNotCompletedRollback() {
+    public void verifyThat_rollbackPendingTransactions_logsInformationOfNotCompletedRollback() {
         // setup logger
         Logger logger = (Logger) LoggerFactory.getLogger(UserTransactionsRollbackScheduledTask.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -77,7 +77,7 @@ public class UserTransactionsRollbackScheduledTaskTest {
         when(utService.rollback(any()))
             .thenReturn(false);
 
-        scheduledTasks.rollbackForgottenTransactions();
+        scheduledTasks.rollbackPendingTransactions();
 
         List<ILoggingEvent> logsList = listAppender.list;
         assertThat(logsList.size()).isEqualTo(3);

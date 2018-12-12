@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.scheduledtasks;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 import java.util.List;
 import javax.transaction.Transactional;
 
+@Slf4j
 @Component
 @Transactional
 @EnableScheduling
@@ -20,20 +20,19 @@ import javax.transaction.Transactional;
     prefix = "scheduler.auto-rollback",
     name = "enabled", havingValue = "true")
 public class UserTransactionsRollbackScheduledTask {
-    private static final Logger logger = LoggerFactory.getLogger(UserTransactionsRollbackScheduledTask.class);
 
     @Autowired
     private UserTransactionService userTransactionService;
 
     @Scheduled(fixedRate = 60 * 1000) // check every minute
-    public void rollbackForgottenTransactions() {
-        logger.info("Initiating rollback of forgotten transactions ");
+    public void rollbackPendingTransactions() {
+        log.info("Initiating rollback of pending transactions ");
         List<UserTransaction> timedOutTransactions = userTransactionService.getTimedOutTransactions();
-        logger.info("Found: {}", timedOutTransactions.size());
+        log.info("Found: {}", timedOutTransactions.size());
         timedOutTransactions.forEach(ut -> {
             boolean succeeded = userTransactionService.rollback(ut.getId());
             if (!succeeded) {
-                logger.info("Automatic rollback failed for user-transaction[ {} ] status: {}",
+                log.info("Automatic rollback failed for user-transaction[ {} ] status: {}",
                     ut.getId(), ut.getStatus().name()
                 );
             }
