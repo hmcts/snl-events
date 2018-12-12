@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingR
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendScheduledListing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendScheduledListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
@@ -154,10 +154,10 @@ public class HearingPartController {
 
     @PutMapping(path = "/amend-scheduled-listing", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity amendScheduledListing(
-        @Valid @RequestBody AmendScheduledListing amendScheduledListing) {
+        @Valid @RequestBody AmendScheduledListingRequest amendScheduledListingRequest) {
 
         Action action = new AmendScheduledListingAction(
-            amendScheduledListing,
+            amendScheduledListingRequest,
             hearingPartRepository,
             entityManager,
             objectMapper,

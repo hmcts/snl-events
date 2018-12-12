@@ -79,9 +79,11 @@ public class WithdrawHearingActionTest {
         hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setHearingParts(Arrays.asList(
             ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, Status.Listed, OffsetDateTime.now().plusDays(0), SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
+                hearing, Status.Listed, OffsetDateTime.now().plusDays(0),
+                SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
             ath.createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, Status.Unlisted, OffsetDateTime.now().plusDays(1), SESSION_ID_B, OffsetDateTime.now().plusDays(1))
+                hearing, Status.Unlisted, OffsetDateTime.now().plusDays(1),
+                SESSION_ID_B, OffsetDateTime.now().plusDays(1))
         ));
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);

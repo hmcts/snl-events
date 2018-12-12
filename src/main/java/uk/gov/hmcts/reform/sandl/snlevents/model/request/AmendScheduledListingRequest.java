@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AmendScheduledListing {
+public class AmendScheduledListingRequest {
     public static final String TIME_FORMAT = "HH:mm";
 
     private UUID userTransactionId;

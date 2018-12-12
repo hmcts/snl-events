@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendScheduledListing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendScheduledListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -29,7 +29,7 @@ import javax.persistence.EntityManager;
 
 public class AmendScheduledListingAction extends Action implements RulesProcessable {
 
-    protected AmendScheduledListing amendScheduledListing;
+    protected AmendScheduledListingRequest amendScheduledListingRequest;
     protected HearingPart hearingPart;
     protected Hearing hearing;
     protected String previousHearingPart;
@@ -40,12 +40,12 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
     protected EntityManager entityManager;
 
     @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
-    public AmendScheduledListingAction(AmendScheduledListing amendScheduledListing,
+    public AmendScheduledListingAction(AmendScheduledListingRequest amendScheduledListingRequest,
                                        HearingPartRepository hearingPartRepository,
                                        EntityManager entityManager,
                                        ObjectMapper objectMapper,
                                        HearingRepository hearingRepository) {
-        this.amendScheduledListing = amendScheduledListing;
+        this.amendScheduledListingRequest = amendScheduledListingRequest;
         this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
@@ -54,7 +54,7 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
 
     @Override
     public void getAndValidateEntities() {
-        hearingPart = hearingPartRepository.findOne(amendScheduledListing.getHearingPartId());
+        hearingPart = hearingPartRepository.findOne(amendScheduledListingRequest.getHearingPartId());
         hearing = hearingRepository.findOne(hearingPart.getHearingId());
 
         if (hearingPart == null) {
@@ -81,14 +81,14 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
         }
         entityManager.detach(hearing);
 
-        val localTime = LocalTime.parse(amendScheduledListing.getStartTime(),
-            DateTimeFormatter.ofPattern(AmendScheduledListing.TIME_FORMAT));
+        val localTime = LocalTime.parse(amendScheduledListingRequest.getStartTime(),
+            DateTimeFormatter.ofPattern(AmendScheduledListingRequest.TIME_FORMAT));
         val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
         val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
 
         hearingPart.setStart(start.withHour(hour).withMinute(minute));
         entityManager.detach(hearingPart);
-        hearingPart.setVersion(amendScheduledListing.getHearingPartVersion());
+        hearingPart.setVersion(amendScheduledListingRequest.getHearingPartVersion());
 
         hearingPartRepository.save(hearingPart);
     }
@@ -116,6 +116,6 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
 
     @Override
     public UUID getUserTransactionId() {
-        return amendScheduledListing.getUserTransactionId();
+        return amendScheduledListingRequest.getUserTransactionId();
     }
 }
