@@ -37,7 +37,7 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     private Session session;
     private List<HearingPart> hearingParts;
     private String currentSessionAsString;
-    private UserTransactionDataPreparerService userTransactionDataPreparerService = new UserTransactionDataPreparerService();
+    private UserTransactionDataPreparerService userTransactionDataService = new UserTransactionDataPreparerService();
 
     public DragAndDropSessionAction(DragAndDropSessionRequest dragAndDropSessionRequest,
                                     SessionRepository sessionRepository,
@@ -89,21 +89,21 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
+        userTransactionDataService.prepareUserTransactionDataForUpdate(
             "session",
             session.getId(),
             currentSessionAsString,
             0
         );
         hearingParts.forEach(hp ->
-            userTransactionDataPreparerService.prepareLockedEntityTransactionData(
+            userTransactionDataService.prepareLockedEntityTransactionData(
                 "hearingPart",
                 hp.getId(),
                 0
             )
         );
 
-        return userTransactionDataPreparerService.getUserTransactionDataList();
+        return userTransactionDataService.getUserTransactionDataList();
     }
 
     @Override
@@ -124,10 +124,10 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
         boolean sessionHasMultiSessionHearingPart = session.getHearingParts().stream()
             .anyMatch(hp -> hp.getHearing().isMultiSession());
 
-         boolean hasJudgeChanged = Optional.ofNullable(session.getPerson())
-             .map(Person::getId)
-             .filter(id -> !id.equals(dragAndDropSessionRequest.getPersonId()))
-             .isPresent();
+        boolean hasJudgeChanged = Optional.ofNullable(session.getPerson())
+            .map(Person::getId)
+            .filter(id -> !id.equals(dragAndDropSessionRequest.getPersonId()))
+            .isPresent();
 
         if (sessionHasMultiSessionHearingPart && hasJudgeChanged) {
             throw new SnlRuntimeException("This session cannot be assigned to a different judge "
