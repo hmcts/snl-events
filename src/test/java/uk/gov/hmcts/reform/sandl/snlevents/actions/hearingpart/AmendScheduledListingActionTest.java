@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.EntityManager;
@@ -68,7 +69,7 @@ public class AmendScheduledListingActionTest {
         hearing.setHearingType(new HearingType("", ""));
 
         request = new AmendScheduledListingRequest(TRANSACTION_ID, HEARING_PART_ID,
-            HEARING_VERSION, startTimeHour.toString() + ":00");
+            HEARING_VERSION, LocalTime.of(startTimeHour, 0));
 
         unlistedHearingPart = HearingPart.builder()
             .id(UUID.randomUUID())

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
@@ -18,8 +17,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,12 +79,8 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
         }
         entityManager.detach(hearing);
 
-        val localTime = LocalTime.parse(amendScheduledListingRequest.getStartTime(),
-            DateTimeFormatter.ofPattern(AmendScheduledListingRequest.TIME_FORMAT));
-        val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
-        val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
-
-        hearingPart.setStart(start.withHour(hour).withMinute(minute));
+        LocalTime time = amendScheduledListingRequest.getStartTime();
+        hearingPart.setStart(start.withHour(time.getHour()).withMinute(time.getMinute()));
         entityManager.detach(hearingPart);
         hearingPart.setVersion(amendScheduledListingRequest.getHearingPartVersion());
 
