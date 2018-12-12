@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.model.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -33,7 +34,7 @@ public class ScheduledListingResponse {
         HearingPart hearingPartOfCurrentHearing = session.getHearingParts().stream()
             .filter(hp -> hp.getHearing().getId().equals(hearing.getId()))
             .findFirst()
-            .get();
+            .orElseThrow(SnlEventsException::new);
         this.hearingPartStartTime = hearingPartOfCurrentHearing.getStart();
         this.hearingPartIdOfCurrentHearing = hearingPartOfCurrentHearing.getId();
         this.hearingPartVersionOfCurrentHearing = hearingPartOfCurrentHearing.getVersion();

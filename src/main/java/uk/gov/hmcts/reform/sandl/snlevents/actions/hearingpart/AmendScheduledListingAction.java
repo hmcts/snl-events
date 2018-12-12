@@ -55,7 +55,6 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
     @Override
     public void getAndValidateEntities() {
         hearingPart = hearingPartRepository.findOne(amendScheduledListingRequest.getHearingPartId());
-        hearing = hearingRepository.findOne(hearingPart.getHearingId());
 
         if (hearingPart == null) {
             throw new SnlEventsException("Hearing part cannot be null!");
@@ -64,6 +63,8 @@ public class AmendScheduledListingAction extends Action implements RulesProcessa
         if (!hearingPart.getStatus().getStatus().equals(Status.Listed)) {
             throw new SnlEventsException("You cannot amend a hearing part that is not listed");
         }
+
+        hearing = hearingRepository.findOne(hearingPart.getHearingId());
     }
 
     @Override
