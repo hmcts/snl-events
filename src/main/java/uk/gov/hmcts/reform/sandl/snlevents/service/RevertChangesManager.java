@@ -85,7 +85,7 @@ public class RevertChangesManager {
                 throw new RuntimeException(e);
             }
 
-            entityManager.detach(previousHearing);
+            entityManager.detach(hearingToRollback);
             previousHearing.setVersion(hearingToRollback.getVersion());
             entityManager.merge(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
@@ -95,16 +95,14 @@ public class RevertChangesManager {
         } else if ("create".equals(utd.getCounterAction())) {
             Hearing hearingToRollback = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
 
-            entityManager.detach(hearingToRollback);
             hearingToRollback.setDeleted(false);
-            entityManager.merge(hearingToRollback);
+            hearingRepository.save(hearingToRollback);
         }
     }
 
     private void handleHearingPart(UserTransactionData utd) {
-        HearingPart hearingPartToRollback = hearingPartRepository.findOne(utd.getEntityId());
-
         if ("update".equals(utd.getCounterAction())) {
+            HearingPart hearingPartToRollback = hearingPartRepository.findOne(utd.getEntityId());
             HearingPart previousHearingPart;
 
             try {
@@ -113,7 +111,7 @@ public class RevertChangesManager {
                 throw new RuntimeException(e);
             }
 
-            entityManager.detach(previousHearingPart);
+            entityManager.detach(hearingPartToRollback);
             previousHearingPart.setVersion(hearingPartToRollback.getVersion());
 
             if (previousHearingPart.getHearingId() != null) {
@@ -129,18 +127,21 @@ public class RevertChangesManager {
 
             entityManager.merge(previousHearingPart);
         } else if ("delete".equals(utd.getCounterAction())) {
+            HearingPart hearingPartToRollback = hearingPartRepository.findOne(utd.getEntityId());
+
             String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPartToRollback);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_HEARING_PART, msg);
 
             hearingPartRepository.delete(hearingPartToRollback);
         } else if ("create".equals(utd.getCounterAction())) {
-            entityManager.detach(hearingPartToRollback);
+            HearingPart hearingPartToRollback =
+                hearingPartRepository.getHearingPartByIdIgnoringWhereDeletedClause(utd.getEntityId());
             hearingPartToRollback.setDeleted(false);
 
             String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPartToRollback);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
-            entityManager.merge(hearingPartToRollback);
+            hearingPartRepository.save(hearingPartToRollback);
         }
     }
 
@@ -153,15 +154,18 @@ public class RevertChangesManager {
             }
 
             sessionRepository.delete(sessionToRollback);
+            
             SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(
                 sessionToRollback,
                 sessionToRollback.getHearingParts()
             );
+
             rulesService.postMessage(
                 utd.getUserTransactionId(),
                 RulesService.DELETE_SESSION,
                 sessionWithHpFacts.getSessionFact()
             );
+
             sessionWithHpFacts.getHearingPartsFacts().forEach(hpFact ->
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, hpFact)
             );
@@ -188,7 +192,7 @@ public class RevertChangesManager {
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, hpFact)
             );
 
-            entityManager.detach(previousSession);
+            entityManager.detach(sessionToRollback);
             previousSession.setVersion(sessionToRollback.getVersion());
             entityManager.merge(previousSession);
         }

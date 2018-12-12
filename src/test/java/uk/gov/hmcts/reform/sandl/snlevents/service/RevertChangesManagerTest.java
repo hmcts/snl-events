@@ -102,7 +102,8 @@ public class RevertChangesManagerTest {
 
     @Test
     public void revertChanges_createsHearingPartInRuleService_whenCounterActionIsCreate() throws IOException {
-        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(createHearingPart());
+        when(hearingPartRepository.getHearingPartByIdIgnoringWhereDeletedClause(any(UUID.class)))
+            .thenReturn(createHearingPart());
         when(factsMapper.mapHearingToRuleJsonMessage(any(HearingPart.class))).thenReturn("");
         when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(createHearingPart());
 
@@ -185,7 +186,7 @@ public class RevertChangesManagerTest {
         revertChangesManager.revertChanges(transaction);
 
         ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
-        Mockito.verify(entityManager).merge(captor.capture());
+        Mockito.verify(hearingRepository).save(captor.capture());
         assertThat(captor.getValue().isDeleted()).isFalse();
     }
 
@@ -230,11 +231,15 @@ public class RevertChangesManagerTest {
         HearingPart hearingPartBeingRolledBack = createHearingPart();
         hearingPartBeingRolledBack.setDeleted(true);
 
-        when(hearingPartRepository.findOne(any(UUID.class)))
+        when(hearingPartRepository.getHearingPartByIdIgnoringWhereDeletedClause(any(UUID.class)))
             .thenReturn(hearingPartBeingRolledBack);
 
         val transaction = createUserTransactionWithHearingPartCreate();
         revertChangesManager.revertChanges(transaction);
+
+        ArgumentCaptor<HearingPart> captor = ArgumentCaptor.forClass(HearingPart.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        assertThat(captor.getValue().isDeleted()).isFalse();
     }
 
 
