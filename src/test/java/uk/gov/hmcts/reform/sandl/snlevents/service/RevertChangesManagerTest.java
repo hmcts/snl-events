@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -275,8 +277,93 @@ public class RevertChangesManagerTest {
         verify(hearingPartRepository, times(1)).delete(hearingPartBeingRolledBack);
     }
 
+    @Test
+    public void revertChanges_updatesListingRequest_whenCounterActionIsUpdate() throws IOException {
+        Hearing hearingBeingRolledBack = createHearing();
+        hearingBeingRolledBack.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+
+        Hearing previousHearing = createHearing();
+        previousHearing.setId(hearingBeingRolledBack.getId());
+        previousHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        HearingPart hearingPartBeingRolledBack1 = createHearingPart();
+        hearingPartBeingRolledBack1.setHearing(hearingBeingRolledBack);
+        hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+
+        HearingPart previousHearingPart1 = createHearingPart();
+        previousHearingPart1.setId(hearingPartBeingRolledBack1.getId());
+        previousHearingPart1.setHearing(hearingPartBeingRolledBack1.getHearing());
+        previousHearingPart1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        HearingPart hearingPartBeingRolledBack2 = createHearingPart();
+        hearingPartBeingRolledBack2.setHearing(hearingBeingRolledBack);
+        hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+
+        HearingPart previousHearingPart2 = createHearingPart();
+        previousHearingPart2.setId(hearingPartBeingRolledBack2.getId());
+        previousHearingPart1.setHearing(hearingPartBeingRolledBack2.getHearing());
+        previousHearingPart2.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        when(hearingRepository.findOne(any(UUID.class))).thenReturn(hearingBeingRolledBack);
+        when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(hearingPartBeingRolledBack1,
+            hearingPartBeingRolledBack2);
+        when(objectMapper.readValue("{}", Hearing.class)).thenReturn(previousHearing);
+        when(objectMapper.readValue("{}", HearingPart.class)).thenReturn(previousHearingPart1,
+            previousHearingPart2);
+
+        val transaction = createUserTransactionWithMultiSessionHearingUpdate();
+        revertChangesManager.revertChanges(transaction);
+
+        ArgumentCaptor<Hearing> hearingCaptor = ArgumentCaptor.forClass(Hearing.class);
+        ArgumentCaptor<HearingPart> hearingPartCaptor = ArgumentCaptor.forClass(HearingPart.class);
+        InOrder verifyInOrder = inOrder(entityManager, entityManager);
+
+        verifyInOrder.verify(entityManager, times(1)).merge(hearingCaptor.capture());
+        assertThat(hearingCaptor.getValue().getStatus()).isEqualTo(
+            statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+
+        verifyInOrder.verify(entityManager, times(2)).merge(hearingPartCaptor.capture());
+        hearingPartCaptor.getAllValues().forEach(hp -> {
+            assertThat(hp.getStatus()).isEqualTo(
+                statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        });
+    }
+
     private void verifyActivityLogRepositoryWasCalled(UUID transactionId) {
         verify(activityLogRepository, times(1)).deleteActivityLogByUserTransactionId(transactionId);
+    }
+
+    private UserTransaction createUserTransactionWithMultiSessionHearingUpdate() {
+        val session = new UserTransactionData();
+        session.setEntity("session");
+        session.setCounterAction("unlock");
+        session.setCounterActionOrder(0);
+
+        val hearing = new UserTransactionData();
+        hearing.setEntity("hearing");
+        hearing.setCounterAction("update");
+        hearing.setBeforeData("{}");
+        hearing.setCounterActionOrder(1);
+
+        val hearingPart1 = new UserTransactionData();
+        hearingPart1.setEntity("hearingPart");
+        hearingPart1.setCounterAction("update");
+        hearingPart1.setBeforeData("{}");
+        hearingPart1.setCounterActionOrder(2);
+
+        val hearingPart2 = new UserTransactionData();
+        hearingPart2.setEntity("hearingPart");
+        hearingPart2.setCounterAction("update");
+        hearingPart2.setBeforeData("{}");
+        hearingPart2.setCounterActionOrder(2);
+
+        val transaction = new UserTransaction();
+        transaction.addUserTransactionData(hearing);
+        transaction.addUserTransactionData(hearingPart1);
+        transaction.addUserTransactionData(hearingPart2);
+
+        return transaction;
     }
 
     private UserTransaction createUserTransactionWithHearingCreate() {
@@ -384,15 +471,8 @@ public class RevertChangesManagerTest {
     }
 
     private Hearing createHearing() {
-        val hp = new HearingPart();
-        hp.setVersion(0L);
         val h = new Hearing();
         h.setVersion(0L);
-
-        hp.setHearingId(createUuid());
-        hp.setHearing(h);
-
-        h.addHearingPart(hp);
 
         return h;
     }
