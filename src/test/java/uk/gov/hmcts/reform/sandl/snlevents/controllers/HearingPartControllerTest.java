@@ -263,7 +263,12 @@ public class HearingPartControllerTest {
     }
 
     private DeleteListingRequest createDeleteListingRequest() {
-        return new DeleteListingRequest();
+        val dlr = new DeleteListingRequest();
+        dlr.setHearingId(UUID.randomUUID());
+        dlr.setHearingVersion(1L);
+        dlr.setUserTransactionId(UUID.randomUUID());
+
+        return dlr;
     }
 
     private CreateHearingRequest createCreateHearingPart() {
