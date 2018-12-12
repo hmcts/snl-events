@@ -30,7 +30,12 @@ public class UserTransactionsRollbackScheduledTask {
         List<UserTransaction> timedOutTransactions = userTransactionService.getTimedOutTransactions();
         log.info("Found: {}", timedOutTransactions.size());
         timedOutTransactions.forEach(ut -> {
-            boolean succeeded = userTransactionService.rollback(ut.getId());
+            boolean succeeded = false;
+            try {
+                succeeded = userTransactionService.rollback(ut.getId());
+            } catch (RuntimeException re) {
+                log.error("Runtime exception during Automatic Rollback", re);
+            }
             if (!succeeded) {
                 log.info("Automatic rollback failed for user-transaction[ {} ] status: {}",
                     ut.getId(), ut.getStatus().name()

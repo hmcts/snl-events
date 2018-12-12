@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.scheduledtasks;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -82,5 +83,29 @@ public class UserTransactionsRollbackScheduledTaskTest {
         List<ILoggingEvent> logsList = listAppender.list;
         assertThat(logsList.size()).isEqualTo(3);
         assertThat(logsList.get(2).getFormattedMessage()).contains(userTransaction.getId().toString());
+    }
+
+    @Test
+    public void verifyThat_rollbackPendingTransactions_logsInformationOfNotCompletedRollbackBecauseOfRuntimeEx() {
+        // setup logger
+        Logger logger = (Logger) LoggerFactory.getLogger(UserTransactionsRollbackScheduledTask.class);
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+
+        final UserTransaction userTransaction = new UserTransaction(
+            UUID.randomUUID(), UserTransactionStatus.STARTED, UserTransactionRulesProcessingStatus.IN_PROGRESS
+        );
+        when(utService.getTimedOutTransactions())
+            .thenReturn(Collections.singletonList(userTransaction));
+        when(utService.rollback(any()))
+            .thenThrow(RuntimeException.class);
+
+        scheduledTasks.rollbackPendingTransactions();
+
+        List<ILoggingEvent> logsList = listAppender.list;
+        assertThat(logsList.size()).isEqualTo(4);
+        assertThat(logsList.get(2).getLevel()).isEqualTo(Level.ERROR);
+        assertThat(logsList.get(3).getFormattedMessage()).contains(userTransaction.getId().toString());
     }
 }

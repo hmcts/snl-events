@@ -15,7 +15,7 @@ scheduler:
   enabled: ${SNL_SCHEDULEDJOB_ENABLED:true}
   auto-rollback:
     enabled: "${SNL_AUTO_ROLLBACK_ENABLED:true}"
-    timeoutIntervalInMinutes: "${SNL_AUTO_ROLLBACK_TIMEOUT_INTERVAL:5}"
+    timeoutIntervalInMinutes: "${SNL_AUTO_ROLLBACK_TIMEOUT_INTERVAL:1}"
 
 fact-propagation:
   engines:
