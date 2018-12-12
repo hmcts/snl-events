@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -35,6 +37,7 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     private Session session;
     private List<HearingPart> hearingParts;
     private String currentSessionAsString;
+    private UserTransactionDataPreparerService userTransactionDataPreparerService = new UserTransactionDataPreparerService();
 
     public DragAndDropSessionAction(DragAndDropSessionRequest dragAndDropSessionRequest,
                                     SessionRepository sessionRepository,
@@ -65,57 +68,42 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
             throw new SnlEventsException("Given session couldn't be converted into string");
         }
 
-        Session session = updateSession(dragAndDropSessionRequest);
-        entityManager.detach(session);
-        session.setVersion(dragAndDropSessionRequest.getVersion());
+        Session updatedSession = updateSession(dragAndDropSessionRequest);
+        entityManager.detach(updatedSession);
+        updatedSession.setVersion(dragAndDropSessionRequest.getVersion());
 
-        sessionRepository.save(session);
+        sessionRepository.save(updatedSession);
     }
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        SessionWithHearingPartsFacts sessionWithHpFacts =
+        SessionWithHearingPartsFacts sessionWithItsHpFacts =
             factsMapper.mapDbSessionToRuleJsonMessage(session, hearingParts);
-        List<FactMessage> facts = sessionWithHpFacts.getHearingPartsFacts().stream()
+        List<FactMessage> facts = sessionWithItsHpFacts.getHearingPartsFacts().stream()
             .map(hpFact -> new FactMessage(RulesService.UPSERT_HEARING_PART, hpFact))
             .collect(Collectors.toList());
-        facts.add(new FactMessage(RulesService.UPSERT_SESSION, sessionWithHpFacts.getSessionFact()));
+        facts.add(new FactMessage(RulesService.UPSERT_SESSION, sessionWithItsHpFacts.getSessionFact()));
 
         return facts;
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("session",
+        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
+            "session",
             session.getId(),
             currentSessionAsString,
-            "update",
-            "update",
-            0)
+            0
+        );
+        hearingParts.forEach(hp ->
+            userTransactionDataPreparerService.prepareLockedEntityTransactionData(
+                "hearingPart",
+                hp.getId(),
+                0
+            )
         );
 
-        for (HearingPart hp : hearingParts) {
-            String hearingPartAsString = null;
-
-            try {
-                hearingPartAsString = objectMapper.writeValueAsString(hp);
-            } catch (JsonProcessingException e) {
-                throw new SnlRuntimeException("Could not convert hearing part to String. Hearing part id: "
-                    + hp.getId());
-            }
-
-            UserTransactionData transactionData = new UserTransactionData("hearingPart",
-                hp.getId(),
-                hearingPartAsString,
-                "lock",
-                "unlock",
-                0
-            );
-            userTransactionDataList.add(transactionData);
-        }
-
-        return userTransactionDataList;
+        return userTransactionDataPreparerService.getUserTransactionDataList();
     }
 
     @Override
@@ -136,9 +124,12 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
         boolean sessionHasMultiSessionHearingPart = session.getHearingParts().stream()
             .anyMatch(hp -> hp.getHearing().isMultiSession());
 
-        UUID assignedPersonId = session.getPerson() != null ? session.getPerson().getId() : null;
+         boolean hasJudgeChanged = Optional.ofNullable(session.getPerson())
+             .map(Person::getId)
+             .filter(id -> !id.equals(dragAndDropSessionRequest.getPersonId()))
+             .isPresent();
 
-        if (sessionHasMultiSessionHearingPart && !assignedPersonId.equals(dragAndDropSessionRequest.getPersonId())) {
+        if (sessionHasMultiSessionHearingPart && hasJudgeChanged) {
             throw new SnlRuntimeException("This session cannot be assigned to a different judge "
                 + "as it includes a multi-session hearing which needs the same judge throughout");
         }
