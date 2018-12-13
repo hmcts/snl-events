@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     private List<HearingPart> hearingParts;
     private List<HearingPart> hearingPartsToAdd = new ArrayList<>();
     private List<HearingPart> hearingPartsToRemove = new ArrayList<>();
+    private HashMap<UUID, String> currenthearingPartsToRemoveMap = new HashMap<>();
     private Hearing hearing;
     private List<Session> sessions;
     private UpdateListingRequest updateListingRequest;
@@ -125,16 +127,16 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         hearingPartsToAdd.forEach(hp ->
-            utdps.prepareUserTransactionDataForCreate(UserTransactionDataPreparerService.HEARING, hp.getId(),  2)
+            utdps.prepareUserTransactionDataForCreate(UserTransactionDataPreparerService.HEARING_PART, hp.getId(),  1)
         );
 
-        hearingPartsToRemove.forEach(hp ->
-            utdps.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART, hp.getId(),
-                getHearingPartString(hp),  2)
+        currenthearingPartsToRemoveMap.forEach((id, jsonValue) ->
+            utdps.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART, id,
+                jsonValue,  3)
         );
 
         utdps.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING, hearing.getId(),
-            currentHearingAsString, 1);
+            currentHearingAsString, 2);
 
         sessions.forEach(s ->
             utdps.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.SESSION, s.getId(), 0)
@@ -212,6 +214,7 @@ public class UpdateListingRequestAction extends Action implements RulesProcessab
         Status status = hearing.getStatus().getStatus().equals(Status.Listed) ? Status.Vacated : Status.Withdrawn;
         hearingPartsToRemove = hearingParts.subList(hearingParts.size() - numberOfPartsToRemove, hearingParts.size());
         for (HearingPart hp : hearingPartsToRemove) {
+            currenthearingPartsToRemoveMap.put(hp.getId(), getHearingPartString(hp));
             hp.setSession(null);
             hp.setStart(null);
             hp.setStatus(statusConfigService.getStatusConfig(status));

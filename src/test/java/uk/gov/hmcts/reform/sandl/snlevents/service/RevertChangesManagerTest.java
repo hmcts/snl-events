@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
@@ -278,32 +279,39 @@ public class RevertChangesManagerTest {
     }
 
     @Test
-    public void revertChanges_updatesListingRequest_whenCounterActionIsUpdate() throws IOException {
+    public void revertChanges_updatesListingRequest_whenCounterActionIsUpdate_toListed() throws IOException {
+        Session session = createSession();
+
         Hearing hearingBeingRolledBack = createHearing();
-        hearingBeingRolledBack.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearingBeingRolledBack.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
 
         Hearing previousHearing = createHearing();
         previousHearing.setId(hearingBeingRolledBack.getId());
-        previousHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        previousHearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         HearingPart hearingPartBeingRolledBack1 = createHearingPart();
         hearingPartBeingRolledBack1.setHearing(hearingBeingRolledBack);
-        hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
 
         HearingPart previousHearingPart1 = createHearingPart();
         previousHearingPart1.setId(hearingPartBeingRolledBack1.getId());
         previousHearingPart1.setHearing(hearingPartBeingRolledBack1.getHearing());
-        previousHearingPart1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        previousHearingPart1.setSession(session);
+        previousHearingPart1.setStart(OffsetDateTime.now());
+        previousHearingPart1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         HearingPart hearingPartBeingRolledBack2 = createHearingPart();
         hearingPartBeingRolledBack2.setHearing(hearingBeingRolledBack);
-        hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+        hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
 
         HearingPart previousHearingPart2 = createHearingPart();
         previousHearingPart2.setId(hearingPartBeingRolledBack2.getId());
-        previousHearingPart1.setHearing(hearingPartBeingRolledBack2.getHearing());
-        previousHearingPart2.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+        previousHearingPart2.setHearing(hearingPartBeingRolledBack2.getHearing());
+        previousHearingPart2.setSession(session);
+        previousHearingPart2.setStart(OffsetDateTime.now());
+        previousHearingPart2.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
+        when(sessionRepository.findOne(any(UUID.class))).thenReturn(session);
         when(hearingRepository.findOne(any(UUID.class))).thenReturn(hearingBeingRolledBack);
         when(hearingPartRepository.findOne(any(UUID.class))).thenReturn(hearingPartBeingRolledBack1,
             hearingPartBeingRolledBack2);
@@ -320,13 +328,14 @@ public class RevertChangesManagerTest {
 
         verifyInOrder.verify(entityManager, times(1)).merge(hearingCaptor.capture());
         assertThat(hearingCaptor.getValue().getStatus()).isEqualTo(
-            statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
-
+            statusesMock.statusConfigService.getStatusConfig(Status.Listed));
 
         verifyInOrder.verify(entityManager, times(2)).merge(hearingPartCaptor.capture());
         hearingPartCaptor.getAllValues().forEach(hp -> {
             assertThat(hp.getStatus()).isEqualTo(
-                statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+                statusesMock.statusConfigService.getStatusConfig(Status.Listed));
+            assertThat(hp.getSessionId()).isNotNull();
+            assertThat(hp.getStart()).isNotNull();
         });
     }
 
@@ -460,8 +469,10 @@ public class RevertChangesManagerTest {
 
     private HearingPart createHearingPart() {
         val hp = new HearingPart();
+        hp.setId(UUID.randomUUID());
         hp.setVersion(0L);
         val h = new Hearing();
+        h.setId(UUID.randomUUID());
         h.setVersion(0L);
 
         hp.setHearingId(createUuid());
@@ -472,6 +483,7 @@ public class RevertChangesManagerTest {
 
     private Hearing createHearing() {
         val h = new Hearing();
+        h.setId(UUID.randomUUID());
         h.setVersion(0L);
 
         return h;
@@ -479,6 +491,7 @@ public class RevertChangesManagerTest {
 
     private Session createSession() {
         Session session = new Session();
+        session.setId(UUID.randomUUID());
         session.setVersion(0L);
 
         return session;

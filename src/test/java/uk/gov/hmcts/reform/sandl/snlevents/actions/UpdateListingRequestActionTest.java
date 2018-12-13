@@ -190,7 +190,7 @@ public class UpdateListingRequestActionTest {
             Mockito.any(),
             "update",
             "update",
-            1
+            2
             )
         );
 
