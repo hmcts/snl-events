@@ -280,8 +280,6 @@ public class RevertChangesManagerTest {
 
     @Test
     public void revertChanges_updatesListingRequest_whenCounterActionIsUpdate_toListed() throws IOException {
-        Session session = createSession();
-
         Hearing hearingBeingRolledBack = createHearing();
         hearingBeingRolledBack.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
 
@@ -292,6 +290,8 @@ public class RevertChangesManagerTest {
         HearingPart hearingPartBeingRolledBack1 = createHearingPart();
         hearingPartBeingRolledBack1.setHearing(hearingBeingRolledBack);
         hearingPartBeingRolledBack1.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Unlisted));
+
+        Session session = createSession();
 
         HearingPart previousHearingPart1 = createHearingPart();
         previousHearingPart1.setId(hearingPartBeingRolledBack1.getId());
