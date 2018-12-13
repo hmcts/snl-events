@@ -60,21 +60,21 @@ public class HearingWithSessionsResponseTests {
 
         hearing.setHearingParts(
             Arrays.asList(
-                createHearingPartWithSession(1),
-                createHearingPartWithSession(3),
-                createHearingPartWithSession(2)
+                createHearingPartWithSession(1, hearing),
+                createHearingPartWithSession(3, hearing),
+                createHearingPartWithSession(2, hearing)
             )
         );
 
         val response = new HearingWithSessionsResponse(hearing);
 
         // assert correct order of sessions
-        assertThat(response.getSessions().get(0).getStart().getDayOfMonth()).isEqualTo(1);
-        assertThat(response.getSessions().get(1).getStart().getDayOfMonth()).isEqualTo(2);
-        assertThat(response.getSessions().get(2).getStart().getDayOfMonth()).isEqualTo(3);
+        assertThat(response.getSessions().get(0).getHearingPartStartTime().getDayOfMonth()).isEqualTo(1);
+        assertThat(response.getSessions().get(1).getHearingPartStartTime().getDayOfMonth()).isEqualTo(2);
+        assertThat(response.getSessions().get(2).getHearingPartStartTime().getDayOfMonth()).isEqualTo(3);
     }
 
-    private HearingPart createHearingPartWithSession(int day) {
+    private HearingPart createHearingPartWithSession(int day, Hearing hearing) {
         val sessionType = new SessionType();
         sessionType.setDescription("desc");
 
@@ -85,6 +85,11 @@ public class HearingWithSessionsResponseTests {
         val hearingPart = new HearingPart();
         hearingPart.setSession(session);
         hearingPart.setStatus(new StatusesMock().statusConfigService.getStatusConfig(Status.Listed));
+        hearingPart.setHearing(hearing);
+        hearingPart.setStart(OffsetDateTime.of(2000, 1, day, 0, 0, 0, 0, ZoneOffset.UTC));
+        hearing.setHearingParts(Arrays.asList(hearingPart));
+
+        session.setHearingParts(Arrays.asList(hearingPart));
 
         return hearingPart;
     }
@@ -95,6 +100,7 @@ public class HearingWithSessionsResponseTests {
         hearing.setHearingType(createHearingType());
         hearing.setPriority(PRIORITY);
         hearing.setVersion(VERSION);
+        hearing.setId(UUID.randomUUID());
 
         val status = new StatusConfig();
         status.setStatus(Status.Listed);

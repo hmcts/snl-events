@@ -36,7 +36,7 @@ public class ActionTestHelper {
             Session session = new Session();
             session.setId(sessionId);
             session.setStart(dateTime);
-
+            session.setHearingParts(Arrays.asList(hearingPart));
             hearingPart.setSessionId(sessionId);
             hearingPart.setSession(session);
         }

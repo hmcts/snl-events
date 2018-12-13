@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart.AmendScheduledListingAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearingpart.AssignHearingPartToSessionAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.CreateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.DeleteListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest.UpdateListingRequestAction;
 import uk.gov.hmcts.reform.sandl.snlevents.mappers.HearingMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendScheduledListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingPartSessionRelationship;
@@ -144,6 +146,23 @@ public class HearingPartController {
         Action action = new AssignHearingPartToSessionAction(hearingPartId, assignment,
             hearingPartRepository, sessionRepository, statusConfigService, statusServiceManager,
             entityManager, objectMapper
+        );
+
+        UserTransaction ut = actionService.execute(action);
+
+        return ok(ut);
+    }
+
+    @PutMapping(path = "/amend-scheduled-listing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity amendScheduledListing(
+        @Valid @RequestBody AmendScheduledListingRequest amendScheduledListingRequest) {
+
+        Action action = new AmendScheduledListingAction(
+            amendScheduledListingRequest,
+            hearingPartRepository,
+            entityManager,
+            objectMapper,
+            hearingRepository
         );
 
         UserTransaction ut = actionService.execute(action);
