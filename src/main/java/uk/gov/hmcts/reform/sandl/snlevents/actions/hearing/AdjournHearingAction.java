@@ -167,7 +167,8 @@ public class AdjournHearingAction extends Action implements RulesProcessable, Ac
     public List<ActivityLog> getActivities() {
         return ActivityBuilder.activityBuilder()
             .userTransactionId(getUserTransactionId())
-            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Adjourned)
+            .withActivity(hearing.getId(), Hearing.ENTITY_NAME, ActivityStatus.Adjourned,
+                adjournHearingRequest.getDescription())
             .build();
     }
 }

@@ -14,6 +14,7 @@ public class AdjournHearingRequest implements UserTransactional {
     private UUID hearingId;
     private long hearingVersion;
     private UUID userTransactionId;
+    private String description;
 
     @Override
     public UUID getUserTransactionId() {
