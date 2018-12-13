@@ -6,7 +6,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -38,6 +41,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +58,9 @@ public class CreateListingRequestActionTest {
 
     @Mock
     private HearingRepository hearingRepository;
+
+    @Mock
+    private HearingPartRepository hearingPartRepository;
 
     @Mock
     private HearingTypeRepository hearingTypeRepository;
@@ -79,6 +86,7 @@ public class CreateListingRequestActionTest {
             hearingTypeRepository,
             caseTypeRepository,
             hearingRepository,
+            hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             entityManager
@@ -127,6 +135,19 @@ public class CreateListingRequestActionTest {
         createHearingRequest.setNumberOfSessions(2);
         action.getAndValidateEntities();
         action.act();
+    }
+
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            assertNull(hp.getSessionId());
+            assertNull(hp.getSession());
+            assertThat(hp.getStatus().getStatus()).isEqualTo(Status.Unlisted);
+        });
     }
 
     @Test

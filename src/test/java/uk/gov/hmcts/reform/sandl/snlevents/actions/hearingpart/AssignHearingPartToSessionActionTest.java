@@ -135,7 +135,7 @@ public class AssignHearingPartToSessionActionTest {
         assertThat(action.hearingPart.getSessionId()).isEqualTo(mockedSession.getId());
         assertThat(action.hearingPart.getStart()).isEqualTo(mockedSession.getStart());
 
-        Mockito.verify(objectMapper, times(2)).writeValueAsString(any());
+        Mockito.verify(objectMapper, times(1)).writeValueAsString(any());
     }
 
     @Test
@@ -182,17 +182,17 @@ public class AssignHearingPartToSessionActionTest {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
-            action.previousHearing,
+            null,
             "lock",
             "unlock",
-            0)
+            1)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             ID,
             action.previousHearingPart,
             "update",
             "update",
-            1)
+            2)
         );
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));
 
@@ -214,17 +214,17 @@ public class AssignHearingPartToSessionActionTest {
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
-            action.previousHearing,
+            null,
             "lock",
             "unlock",
-            0)
+            1)
         );
         expectedTransactionData.add(new UserTransactionData("hearingPart",
             ID,
             action.previousHearingPart,
             "update",
             "update",
-            1)
+            2)
         );
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID_PREVIOUS));
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));

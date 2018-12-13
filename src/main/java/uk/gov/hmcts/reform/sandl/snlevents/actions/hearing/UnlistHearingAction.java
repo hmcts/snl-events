@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.EntityNotFoundException;
@@ -23,17 +23,16 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.request.UnlistHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.VersionInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 
 public class UnlistHearingAction extends Action implements RulesProcessable, ActivityLoggable {
     protected UnlistHearingRequest unlistHearingRequest;
@@ -42,11 +41,12 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
     protected List<Session> sessions;
 
     protected HearingRepository hearingRepository;
-    protected HearingPartRepository hearingPartRepository;
+    protected HearingPartRepository hpRepo;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
+    protected EntityManager entityMgr;
 
-    // id & hearing part string
+    // id & HEARING part string
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
     private UserTransactionDataPreparerService userTransactionDataPreparerService =
@@ -55,17 +55,19 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
     public UnlistHearingAction(
         UnlistHearingRequest unlistHearingRequest,
         HearingRepository hearingRepository,
-        HearingPartRepository hearingPartRepository,
+        HearingPartRepository hpRepo,
         StatusConfigService statusConfigService,
         StatusServiceManager statusServiceManager,
-        ObjectMapper objectMapper
+        ObjectMapper objectMap,
+        EntityManager entityMgr
     ) {
         this.unlistHearingRequest = unlistHearingRequest;
         this.hearingRepository = hearingRepository;
-        this.hearingPartRepository = hearingPartRepository;
+        this.hpRepo = hpRepo;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMap;
+        this.entityMgr = entityMgr;
     }
 
     @Override
@@ -121,32 +123,35 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
             throw new SnlRuntimeException(e);
         }
 
+        entityMgr.detach(hearing);
         hearing.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
+        hearingRepository.save(hearing);
 
         originalHearingParts = userTransactionDataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
-        hearingParts.stream().forEach(hp -> {
+        hearingParts.forEach(hp -> {
             hp.setSession(null);
-            hp.setSessionId(null);
             hp.setStart(null);
             VersionInfo vi = getVersionInfo(hp);
             hp.setVersion(vi.getVersion());
             hp.setStatus(statusConfigService.getStatusConfig(Status.Unlisted));
         });
 
-        hearingPartRepository.save(hearingParts);
+        hpRepo.save(hearingParts);
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
+                UserTransactionDataPreparerService.HEARING_PART, id, hpString,  2)
         );
 
-        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
-            previousHearing, 1);
+        userTransactionDataPreparerService.prepareUserTransactionDataForUpdate(
+            UserTransactionDataPreparerService.HEARING, hearing.getId(), previousHearing, 1);
 
-        sessions.stream().forEach(s ->
-            userTransactionDataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
+        sessions.forEach(s ->
+            userTransactionDataPreparerService.prepareLockedEntityTransactionData(
+                UserTransactionDataPreparerService.SESSION, s.getId(), 0)
         );
 
         return userTransactionDataPreparerService.getUserTransactionDataList();
@@ -154,14 +159,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        List<FactMessage> msgs = new ArrayList<>();
-
-        hearingParts.forEach(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            msgs.add(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
-        });
-
-        return msgs;
+        return userTransactionDataPreparerService.generateUpsertHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
@@ -175,7 +173,7 @@ public class UnlistHearingAction extends Action implements RulesProcessable, Act
             .filter(hpv -> hpv.getId().equals(hp.getId()))
             .findFirst();
         return hpvi.orElseThrow(() ->
-            new EntityNotFoundException("Couldn't find version for hearing part with id " + hp.getId().toString())
+            new EntityNotFoundException("Couldn't find version for HEARING part with id " + hp.getId().toString())
         );
     }
 
