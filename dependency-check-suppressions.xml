@@ -30,4 +30,24 @@
     <gav regex="true">^dom4j:dom4j:.*$</gav>
     <cve>CVE-2018-1000632</cve>
   </suppress>
+  <suppress>
+    <notes>new issue to be addressed by SL-2195</notes>
+    <gav regex="true">^org\.slf4j:log4j-over-slf4j:.*$</gav>
+    <cpe>cpe:/a:slf4j:slf4j</cpe>
+  </suppress>
+  <suppress>
+    <notes>new issue to be addressed by SL-2195</notes>
+    <gav regex="true">^org\.slf4j:slf4j-api:.*$</gav>
+    <cpe>cpe:/a:slf4j:slf4j</cpe>
+  </suppress>
+  <suppress>
+    <notes>new issue to be addressed by SL-2195</notes>
+    <gav regex="true">^org\.slf4j:jul-to-slf4j:.*$</gav>
+    <cpe>cpe:/a:slf4j:slf4j</cpe>
+  </suppress>
+  <suppress>
+    <notes>new issue to be addressed by SL-2195</notes>
+    <gav regex="true">^org\.slf4j:jcl-over-slf4j:.*$</gav>
+    <cpe>cpe:/a:slf4j:slf4j</cpe>
+  </suppress>
 </suppressions>

@@ -92,7 +92,7 @@ public class VacateHearingActionTest {
                 Status.Listed, OffsetDateTime.now(), SESSION_ID_B, OffsetDateTime.now()),
             ath.createHearingPartWithSession(HEARING_PART_ID_C, HEARING_VERSION_ID_C, hearing,
                 Status.Listed, OffsetDateTime.now().plusDays(1), SESSION_ID_C, OffsetDateTime.now().plusDays(1)),
-            ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D, hearing, 
+            ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D, hearing,
                 Status.Vacated, OffsetDateTime.now().plusDays(2), SESSION_ID_D, OffsetDateTime.now().plusDays(2))
         ));
         hearing.setMultiSession(true);
@@ -181,8 +181,15 @@ public class VacateHearingActionTest {
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_whenHearingStatusCantBeVacated_shouldThrowException() {
         Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
         hearing.setVersion(HEARING_VERSION_TO_BE_VACATED);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Vacated));
+        hearing.getHearingParts().forEach(hp -> {
+            hp.getSession().setHearingParts(Arrays.asList(hp));
+            hp.setStart(OffsetDateTime.now());
+        });
+
+
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();

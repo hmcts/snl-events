@@ -79,9 +79,11 @@ public class WithdrawHearingActionTest {
         hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setHearingParts(Arrays.asList(
             ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, Status.Listed, null, SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
+                hearing, Status.Listed, OffsetDateTime.now().plusDays(0),
+                SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
             ath.createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, Status.Unlisted, null, SESSION_ID_B, OffsetDateTime.now().plusDays(1))
+                hearing, Status.Unlisted, OffsetDateTime.now().plusDays(1),
+                SESSION_ID_B, OffsetDateTime.now().plusDays(1))
         ));
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);
@@ -199,11 +201,18 @@ public class WithdrawHearingActionTest {
     public void getAndValidateEntities_whenHearingDateCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
+        hearing.setId(UUID.randomUUID());
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         hearing.setHearingParts(Arrays.asList(
             ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
                 hearing, Status.Listed, null, SESSION_ID_A, OffsetDateTime.now().minusDays(1))
         ));
+
+        hearing.getHearingParts().forEach(hp -> {
+            hp.getSession().setHearingParts(Arrays.asList(hp));
+            hp.setStart(OffsetDateTime.now());
+        });
+
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
