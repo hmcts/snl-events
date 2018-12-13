@@ -108,6 +108,7 @@ public class UnlistHearingActionTest {
 
         Session session = new Session();
         session.setId(sessionId);
+        session.setHearingParts(Arrays.asList(hearingPart));
 
         hearingPart.setSessionId(sessionId);
         hearingPart.setSession(session);
