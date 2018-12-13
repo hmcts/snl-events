@@ -6,21 +6,29 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sandl.snlevents.config.ScheduledRollbackConfiguration;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
-import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionDataRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.UserTransactionRepository;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus.COMPLETE;
+import static uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus.IN_PROGRESS;
+import static uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus.NOT_STARTED;
 
 @RunWith(SpringRunner.class)
 public class UserTransactionServiceTest {
@@ -41,12 +49,22 @@ public class UserTransactionServiceTest {
     @SuppressWarnings("PMD.UnusedPrivateField")
     private RevertChangesManager revertChangesManager;
 
+    @Mock
+    private Clock clock;
+
+    @Mock
+    private ScheduledRollbackConfiguration rollbackConfig;
+
     @Before
     public void setUp() {
         this.ut = new UserTransaction(someId,
             UserTransactionStatus.STARTED,
-            UserTransactionRulesProcessingStatus.IN_PROGRESS);
+            IN_PROGRESS);
         when(userTransactionRepository.save(any(UserTransaction.class))).thenAnswer(returnsFirstArg());
+        when(clock.getZone()).thenReturn(ZoneOffset.UTC);
+
+        when(rollbackConfig.getTimeoutIntervalInMinutes()).thenReturn(1);
+        when(rollbackConfig.isEnabled()).thenReturn(true);
     }
 
     @Test
@@ -79,7 +97,7 @@ public class UserTransactionServiceTest {
     public void rulesProcessed_should_set_processingStatus_to_complete() {
         UserTransaction userTransaction = this.userTransactionService.rulesProcessed(ut);
 
-        assertThat(userTransaction.getRulesProcessingStatus()).isEqualTo(UserTransactionRulesProcessingStatus.COMPLETE);
+        assertThat(userTransaction.getRulesProcessingStatus()).isEqualTo(COMPLETE);
         assertThat(userTransaction).isEqualTo(ut);
     }
 
@@ -88,18 +106,18 @@ public class UserTransactionServiceTest {
     public void commit_should_set_transactionStatus_to_committed() {
         when(userTransactionRepository.findOne(this.someId)).thenReturn(ut);
 
-        UserTransaction userTransaction = this.userTransactionService.commit(this.someId);
+        boolean successfulResult = this.userTransactionService.commit(this.someId);
 
-        assertThat(userTransaction.getStatus()).isEqualTo(UserTransactionStatus.COMMITTED);
+        assertThat(successfulResult).isEqualTo(true);
     }
 
     @Test
     public void rollback_should_set_transactionStatus_to_rolledback() {
         when(userTransactionRepository.findOne(this.someId)).thenReturn(ut);
 
-        UserTransaction userTransaction = this.userTransactionService.rollback(this.someId);
+        boolean successfulResult = this.userTransactionService.rollback(this.someId);
 
-        assertThat(userTransaction.getStatus()).isEqualTo(UserTransactionStatus.ROLLEDBACK);
+        assertThat(successfulResult).isEqualTo(true);
     }
 
     @Test
@@ -112,7 +130,24 @@ public class UserTransactionServiceTest {
     public void transactionConflicted_should_set_ProcessingStatus_to_not_started() {
         UserTransaction userTransaction = this.userTransactionService.transactionConflicted(this.someId);
         assertThat(userTransaction.getRulesProcessingStatus())
-            .isEqualTo(UserTransactionRulesProcessingStatus.NOT_STARTED);
+            .isEqualTo(NOT_STARTED);
+    }
+
+    @Test
+    public void getTimedOutTransactions_should_return_entries() {
+        Instant now = Instant.now();
+        when(userTransactionRepository.getAllByStartedAtBeforeAndStatusNotInOrderByStartedAtAsc(any(),
+            eq(new UserTransactionStatus[] {UserTransactionStatus.ROLLEDBACK, UserTransactionStatus.COMMITTED})))
+            .thenReturn(Arrays.asList(
+                new UserTransaction(UUID.randomUUID(), UserTransactionStatus.STARTED, NOT_STARTED),
+                new UserTransaction(UUID.randomUUID(), UserTransactionStatus.CONFLICT, NOT_STARTED),
+                new UserTransaction(UUID.randomUUID(), UserTransactionStatus.INPROGRESS, NOT_STARTED)
+            ));
+        when(clock.instant()).thenReturn(now);
+
+        List<UserTransaction> userTransactions = this.userTransactionService.getTimedOutTransactions();
+
+        assertThat(userTransactions.size()).isEqualTo(3);
     }
 
     private List<UserTransactionData> generateUserTransactionsData(int size) {

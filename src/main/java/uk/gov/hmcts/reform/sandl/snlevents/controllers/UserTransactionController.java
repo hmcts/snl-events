@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.request.UserTransactionAction;
+import uk.gov.hmcts.reform.sandl.snlevents.model.response.UserTransactionActionResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.service.UserTransactionService;
 
 import java.util.UUID;
@@ -26,13 +28,15 @@ public class UserTransactionController {
 
     @PostMapping(path = "/{id}/commit", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserTransaction commit(@PathVariable("id") UUID id) {
-        return userTransactionService.commit(id);
+    public UserTransactionActionResponse commit(@PathVariable("id") UUID id) {
+        boolean succeeded = userTransactionService.commit(id);
+        return new UserTransactionActionResponse(id, UserTransactionAction.COMMIT, succeeded);
     }
 
     @PostMapping(path = "/{id}/rollback", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserTransaction rollback(@PathVariable("id") UUID id) {
-        return userTransactionService.rollback(id);
+    public UserTransactionActionResponse rollback(@PathVariable("id") UUID id) {
+        boolean succeeded = userTransactionService.rollback(id);
+        return new UserTransactionActionResponse(id, UserTransactionAction.ROLLBACK, succeeded);
     }
 }
