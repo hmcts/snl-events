@@ -84,7 +84,8 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
                     @ColumnResult(name = "room_type_code", type = String.class),
                     @ColumnResult(name = "hearing_parts_count", type = Integer.class),
                     @ColumnResult(name = "has_multi_session_hearing_assigned", type = Boolean.class),
-                    @ColumnResult(name = "version", type = Long.class)
+                    @ColumnResult(name = "version", type = Long.class),
+                    @ColumnResult(name = "has_listed_hearing_parts", type = Boolean.class),
                 })
         })
 })

@@ -36,4 +36,6 @@ public class SessionAmendResponse implements Serializable {
     boolean hasMultiSessionHearingAssigned;
 
     Long version;
+
+    boolean hasListedHearingParts;
 }
