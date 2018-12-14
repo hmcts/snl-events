@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
+import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -153,7 +154,7 @@ public class HearingController {
     }
 
     @PutMapping(path = "/adjourn", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity adjourn(@RequestBody AdjournHearingRequest adjournHearingRequest) {
+    public ResponseEntity adjourn(@Valid @RequestBody AdjournHearingRequest adjournHearingRequest) {
         return ok(hearingService.adjourn(adjournHearingRequest));
     }
 

@@ -34,6 +34,21 @@ public class ActivityBuilder {
         return this;
     }
 
+    public ActivityBuilder withActivity(UUID entityId, String entityName, ActivityStatus activityStatus,
+                                        String description) {
+        this.activityLogs.add(ActivityLog.builder()
+            .id(UUID.randomUUID())
+            .entityId(entityId)
+            .entityName(entityName)
+            .status(activityStatus)
+            .description(description)
+            .userTransactionId(this.userTransactionId)
+            .build()
+        );
+
+        return this;
+    }
+
     public List<ActivityLog> build() {
         validate();
         return this.activityLogs;
