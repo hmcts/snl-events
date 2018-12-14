@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.listingrequest;
 
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
@@ -16,16 +17,14 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.CaseTypeRepository;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
-import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusConfigService;
 import uk.gov.hmcts.reform.sandl.snlevents.service.StatusServiceManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -40,9 +39,11 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
     protected CaseTypeRepository caseTypeRepository;
     protected HearingMapper hearingMapper;
     protected HearingRepository hearingRepository;
+    protected HearingPartRepository hearingPartRepository;
     protected StatusConfigService statusConfigService;
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
+    private UserTransactionDataPreparerService dataPrepService = new UserTransactionDataPreparerService();
 
     @SuppressWarnings("squid:S00107") // we intentionally go around DI here as such the amount of parameters
     public CreateListingRequestAction(CreateHearingRequest createHearingRequest,
@@ -50,6 +51,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
                                       HearingTypeRepository hearingTypeRepository,
                                       CaseTypeRepository caseTypeRepository,
                                       HearingRepository hearingRepository,
+                                      HearingPartRepository hearingPartRepository,
                                       StatusConfigService statusConfigService,
                                       StatusServiceManager statusServiceManager,
                                       EntityManager entityManager) {
@@ -58,6 +60,7 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         this.hearingTypeRepository = hearingTypeRepository;
         this.caseTypeRepository = caseTypeRepository;
         this.hearingRepository = hearingRepository;
+        this.hearingPartRepository = hearingPartRepository;
         this.entityManager = entityManager;
         this.statusConfigService = statusConfigService;
         this.statusServiceManager = statusServiceManager;
@@ -74,14 +77,16 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
         );
 
         final StatusConfig unlistedStatus = statusConfigService.getStatusConfig(Status.Unlisted);
+        entityManager.detach(hearing);
         hearing.setStatus(unlistedStatus);
+        hearingRepository.save(hearing);
 
         hearingParts.forEach(hearingPart -> {
             hearingPart.setStatus(unlistedStatus);
-            hearing.addHearingPart(hearingPart);
+            hearingPart.setHearing(hearing);
         });
 
-        hearingRepository.save(hearing);
+        hearingPartRepository.save(hearingParts);
     }
 
     @Override
@@ -99,31 +104,20 @@ public class CreateListingRequestAction extends Action implements RulesProcessab
 
     @Override
     public List<FactMessage> generateFactMessages() {
-        return hearingParts.stream().map(hp -> {
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-            return new FactMessage(RulesService.UPSERT_HEARING_PART, msg);
-        }).collect(Collectors.toList());
+        return dataPrepService.generateUpsertHearingPartFactMsg(hearingParts, factsMapper);
     }
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-
         hearingParts.forEach(hp ->
-            userTransactionDataList.add(prepareCreateUserTransactionData("hearingPart", hp.getId(), 0))
+            dataPrepService.prepareUserTransactionDataForCreate(UserTransactionDataPreparerService.HEARING_PART,
+                hp.getId(), 0)
         );
-        userTransactionDataList.add(prepareCreateUserTransactionData("hearing", hearing.getId(), 1));
 
-        return userTransactionDataList;
-    }
+        dataPrepService.prepareUserTransactionDataForCreate(UserTransactionDataPreparerService.HEARING,
+            hearing.getId(), 1);
 
-    private UserTransactionData prepareCreateUserTransactionData(String entity, UUID entityId, int actionOrder) {
-        return new UserTransactionData(entity,
-            entityId,
-            null,
-            "create",
-            "delete",
-            actionOrder);
+        return dataPrepService.getUserTransactionDataList();
     }
 
     @Override

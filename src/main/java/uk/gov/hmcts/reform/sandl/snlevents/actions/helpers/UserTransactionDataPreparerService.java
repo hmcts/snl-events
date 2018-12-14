@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers;
+package uk.gov.hmcts.reform.sandl.snlevents.actions.helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,15 +18,43 @@ import java.util.UUID;
 
 @Service
 public class UserTransactionDataPreparerService {
+    public static final String HEARING = "hearing";
+    public static final String HEARING_PART = "hearingPart";
+    public static final String SESSION = "session";
+
     private List<UserTransactionData> userTransactionDataList = new ArrayList<>();
 
     public List<UserTransactionData> getUserTransactionDataList() {
         return userTransactionDataList;
     }
 
+    public void prepareUserTransactionDataForCreate(String entity, UUID entityId, int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
+            entityId,
+            null,
+            "create",
+            "delete",
+            counterActionOrder)
+        );
+    }
+
+    public void prepareUserTransactionDataForDelete(String entity, UUID entityId, String previousEntityString,
+                                                    int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
+            entityId,
+            previousEntityString,
+            "delete",
+            "create",
+            counterActionOrder)
+        );
+    }
+
     public void prepareUserTransactionDataForUpdate(String entity, UUID entityId, String previousEntityString,
-                                                           int counterActionOrder) {
-        userTransactionDataList.add(new UserTransactionData(entity,
+                                                    int counterActionOrder) {
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
             entityId,
             previousEntityString,
             "update",
@@ -36,13 +64,19 @@ public class UserTransactionDataPreparerService {
     }
 
     public void prepareLockedEntityTransactionData(String entity, UUID entityId, int counterActionOrder) {
-        userTransactionDataList.add(new UserTransactionData(entity, entityId, null,
-            "lock", "unlock", counterActionOrder));
+        userTransactionDataList.add(new UserTransactionData(
+            entity,
+            entityId,
+            null,
+            "lock",
+            "unlock",
+            counterActionOrder)
+        );
     }
 
     public Map<UUID, String> mapHearingPartsToStrings(ObjectMapper objectMapper, List<HearingPart> hearingParts) {
         Map<UUID, String> originalIdStringPair = new HashMap<>();
-        hearingParts.stream().forEach(hp -> {
+        hearingParts.forEach(hp -> {
             try {
                 String hearingPartString = objectMapper.writeValueAsString(hp);
                 originalIdStringPair.put(hp.getId(), hearingPartString);
@@ -60,6 +94,17 @@ public class UserTransactionDataPreparerService {
         hearingParts.forEach(hp -> {
             String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
             msgs.add(new FactMessage(RulesService.DELETE_HEARING_PART, msg));
+        });
+
+        return msgs;
+    }
+
+    public List<FactMessage> generateUpsertHearingPartFactMsg(List<HearingPart> hearingParts, FactsMapper factsMapper) {
+        List<FactMessage> msgs = new ArrayList<>();
+
+        hearingParts.forEach(hp -> {
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            msgs.add(new FactMessage(RulesService.UPSERT_HEARING_PART, msg));
         });
 
         return msgs;

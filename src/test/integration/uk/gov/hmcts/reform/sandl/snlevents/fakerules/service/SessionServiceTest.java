@@ -50,8 +50,8 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
         UserTransaction ut = sessionService.saveWithTransaction(us);
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
 
-        ut = userTransactionService.commit(ut.getId());
-        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.COMMITTED);
+        boolean successfulResult = userTransactionService.commit(ut.getId());
+        assertThat(successfulResult).isEqualTo(true);
 
         session = sessionRepository.findOne(sessionUuid);
         assertThat(session).isNotNull();
@@ -70,8 +70,8 @@ public class SessionServiceTest extends BaseIntegrationTestWithFakeRules {
         assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.STARTED);
         assertThat(sessionRepository.findOne(sessionUuid)).isEqualTo(session);
 
-        ut = userTransactionService.rollback(ut.getId());
-        assertThat(ut.getStatus()).isEqualTo(UserTransactionStatus.ROLLEDBACK);
+        boolean successfulResult = userTransactionService.rollback(ut.getId());
+        assertThat(successfulResult).isEqualTo(true);
 
         session = sessionRepository.findOne(sessionUuid);
         assertThat(session).isNull();
