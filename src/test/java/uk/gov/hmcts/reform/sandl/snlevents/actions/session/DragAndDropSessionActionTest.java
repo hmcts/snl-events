@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DragAndDropSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.PersonRepository;
@@ -61,10 +63,12 @@ public class DragAndDropSessionActionTest {
 
     @Before
     public void setup() {
+        val start = OffsetDateTime.now();
+        val duration = Duration.ofMinutes(30L);
         request = DragAndDropSessionRequest.builder()
             .sessionId(SESSION_ID)
-            .start(OffsetDateTime.now())
-            .durationInSeconds(30 * 60L)
+            .start(start)
+            .durationInSeconds(duration.getSeconds())
             .personId(UUID.randomUUID())
             .roomId(UUID.randomUUID())
             .userTransactionId(UUID.randomUUID())
@@ -82,6 +86,8 @@ public class DragAndDropSessionActionTest {
 
         Session session = new Session();
         session.setId(SESSION_ID);
+        session.setStart(start);
+        session.setDuration(duration);
 
         val hearing = createHearing();
         hearing.setMultiSession(false);
@@ -208,6 +214,9 @@ public class DragAndDropSessionActionTest {
         val hearingPart = new HearingPart();
         hearingPart.setId(UUID.randomUUID());
         hearingPart.setHearing(hearing);
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Listed);
+        hearingPart.setStatus(statusConfig);
         return hearingPart;
     }
 }

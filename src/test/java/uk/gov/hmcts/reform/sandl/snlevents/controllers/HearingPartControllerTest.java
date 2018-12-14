@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
@@ -242,6 +243,9 @@ public class HearingPartControllerTest {
         val hearingPart = new HearingPart();
         hearingPart.setId(createUuid());
         hearingPart.setHearing(createHearing());
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Unlisted);
+        hearingPart.setStatus(statusConfig);
 
         return hearingPart;
     }

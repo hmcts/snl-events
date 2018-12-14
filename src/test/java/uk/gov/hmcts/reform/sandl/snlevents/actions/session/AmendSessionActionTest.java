@@ -33,7 +33,6 @@ import static org.mockito.Matchers.any;
 public class AmendSessionActionTest {
     private static final String SESSION_TYPE_CODE = "TYPE";
     private static final Duration DURATION = Duration.ofMinutes(30);
-    private static final String START_TIME = "10:00";
 
     private static final UUID ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     private static final OffsetDateTime dateTime = OffsetDateTime.now();
@@ -57,7 +56,7 @@ public class AmendSessionActionTest {
         request.setId(ID);
         request.setDurationInSeconds(DURATION);
         request.setSessionTypeCode(SESSION_TYPE_CODE);
-        request.setStartTime(START_TIME);
+        request.setStartTime(dateTime);
         request.setUserTransactionId(UUID.randomUUID());
 
         action = createAction(request);
@@ -139,7 +138,7 @@ public class AmendSessionActionTest {
     private Session createExpectedSession() {
         val s = new Session();
         s.setId(ID);
-        s.setStart(dateTime.withHour(10).withMinute(0));
+        s.setStart(dateTime);
         s.setSessionType(createSessionType());
         s.setDuration(DURATION);
 

@@ -252,12 +252,14 @@ public class HearingPartServiceTest {
     private HearingPart createHearingPart() {
         HearingPart hp = new HearingPart();
         Hearing h = new Hearing();
+        val statusConfig = createStatusConfigListed();
         h.addHearingPart(hp);
-        h.setStatus(createStatusConfigListed());
+        h.setStatus(statusConfig);
         hp.setHearing(h);
         hp.getHearing().setCaseType(new CaseType("code", "desc"));
         hp.getHearing().setHearingType(new HearingType("code", "desc"));
         hp.setSessionId(createUuid());
+        hp.setStatus(statusConfig);
 
         return hp;
     }
@@ -302,6 +304,7 @@ public class HearingPartServiceTest {
 
         hp.getHearing().setCaseType(new CaseType("code", "desc"));
         hp.getHearing().setHearingType(new HearingType("code", "desc"));
+        hp.setStatus(status);
 
         return hp;
     }

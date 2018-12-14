@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Room;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DragAndDropSessionRequest;
@@ -284,6 +285,9 @@ public class SessionServiceTest {
         val h = createHearing();
         hp.setHearing(h);
         hp.setHearingId(h.getId());
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Unlisted);
+        hp.setStatus(statusConfig);
 
         return hp;
     }
