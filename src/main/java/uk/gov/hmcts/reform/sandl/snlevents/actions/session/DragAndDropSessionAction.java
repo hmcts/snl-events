@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.helpers.AmendSessionValidators;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
-import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Person;
@@ -22,9 +22,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
@@ -38,6 +39,11 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     private List<HearingPart> hearingParts;
     private String currentSessionAsString;
     private UserTransactionDataPreparerService userTransactionDataService = new UserTransactionDataPreparerService();
+    private List<BiConsumer<Session, DragAndDropSessionRequest>> validators = Arrays.asList(
+        AmendSessionValidators.validateIfJudgeCanBeChanged,
+        AmendSessionValidators.validateStartAndEndDateWasShrieked,
+        AmendSessionValidators.canChangeDay
+    );
 
     public DragAndDropSessionAction(DragAndDropSessionRequest dragAndDropSessionRequest,
                                     SessionRepository sessionRepository,
@@ -57,7 +63,7 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     public void getAndValidateEntities() {
         session  = sessionRepository.findOne(dragAndDropSessionRequest.getSessionId());
         hearingParts = session.getHearingParts();
-        validateIfJudgeCanBeChanged(session, dragAndDropSessionRequest);
+        validators.forEach(validator -> validator.accept(session, dragAndDropSessionRequest));
     }
 
     @Override
@@ -118,21 +124,6 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
         hearingParts.forEach(hp -> associatedEntitiesIds.add(hp.getId()));
 
         return associatedEntitiesIds.toArray(new UUID[0]);
-    }
-
-    private void validateIfJudgeCanBeChanged(Session session, DragAndDropSessionRequest dragAndDropSessionRequest) {
-        boolean sessionHasMultiSessionHearingPart = session.getHearingParts().stream()
-            .anyMatch(hp -> hp.getHearing().isMultiSession());
-
-        boolean hasJudgeChanged = Optional.ofNullable(session.getPerson())
-            .map(Person::getId)
-            .filter(id -> !id.equals(dragAndDropSessionRequest.getPersonId()))
-            .isPresent();
-
-        if (sessionHasMultiSessionHearingPart && hasJudgeChanged) {
-            throw new SnlRuntimeException("This session cannot be assigned to a different judge "
-                + "as it includes a multi-session hearing which needs the same judge throughout");
-        }
     }
 
     private Session updateSession(DragAndDropSessionRequest dragAndDropSessionRequest) {
