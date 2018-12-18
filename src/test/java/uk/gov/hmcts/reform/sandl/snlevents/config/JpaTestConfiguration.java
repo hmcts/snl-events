@@ -17,7 +17,7 @@ import javax.persistence.metamodel.Metamodel;
 
 public class JpaTestConfiguration {
     @Bean
-    @Qualifier(value = "entityManager")
+    @Qualifier(value = "entityMgr")
     public EntityManager entityManagerStub(EntityManagerFactory entityManagerFactory) {
         return entityManagerFactory.createEntityManager();
     }

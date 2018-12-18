@@ -37,6 +37,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -81,16 +82,17 @@ public class AdjournHearingActionTest {
             createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
                 hearing, SESSION_ID_B, Status.Listed, OffsetDateTime.now().plusDays(1))
         ));
+
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_ADJOURNED))).thenReturn(hearing);
         AdjournHearingRequest adjournHearingRequest = new AdjournHearingRequest();
         adjournHearingRequest.setHearingId(HEARING_ID_TO_BE_ADJOURNED);
         adjournHearingRequest.setUserTransactionId(TRANSACTION_ID);
         action = new AdjournHearingAction(
-            adjournHearingRequest, hearingRepository, hearingPartRepository,
+            adjournHearingRequest,
+            hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
-            objectMapper,
-            entityManager
+            objectMapper, entityManager
         );
     }
 
@@ -149,6 +151,20 @@ public class AdjournHearingActionTest {
     }
 
     @Test
+    public void act_shouldNotSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Listed)) {
+                assertNotNull(hp.getSessionId());
+                assertNotNull(hp.getSession());
+            }
+        });
+    }
+
+    @Test
     public void act_shouldSetProperStatuses() {
         action.getAndValidateEntities();
         action.act();
@@ -188,8 +204,14 @@ public class AdjournHearingActionTest {
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_whenHearingStatusCantBeAdjourned_shouldThrowException() {
         Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
         hearing.setVersion(HEARING_VERSION_TO_BE_ADJOURNED);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Adjourned));
+        hearing.getHearingParts().forEach(hp -> {
+            hp.getSession().setHearingParts(Arrays.asList(hp));
+            hp.setStart(OffsetDateTime.now());
+        });
+
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
@@ -208,6 +230,7 @@ public class AdjournHearingActionTest {
         hearingPart.setSessionId(sessionId);
         hearingPart.setSession(session);
         hearingPart.setStart(start);
+        session.setHearingParts(Arrays.asList(hearingPart));
         return hearingPart;
     }
 

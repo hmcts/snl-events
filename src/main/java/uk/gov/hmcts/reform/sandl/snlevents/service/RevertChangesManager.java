@@ -75,9 +75,8 @@ public class RevertChangesManager {
     }
 
     private void handleHearing(UserTransactionData utd) {
-
         if ("update".equals(utd.getCounterAction())) {
-            Hearing hearing = hearingRepository.findOne(utd.getEntityId());
+            Hearing hearingToRollback = hearingRepository.findOne(utd.getEntityId());
             Hearing previousHearing;
 
             try {
@@ -86,98 +85,87 @@ public class RevertChangesManager {
                 throw new RuntimeException(e);
             }
 
-            previousHearing.getHearingParts().stream().forEach(hp -> {
-                // For some reason after serialization hearing is null even though hearingId is set
-                hp.setHearing(hearing);
-                String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
-                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
-            });
-
-            entityManager.detach(hearing);
-
-            previousHearing.setVersion(hearing.getVersion());
+            entityManager.detach(hearingToRollback);
+            previousHearing.setVersion(hearingToRollback.getVersion());
             entityManager.merge(previousHearing);
-
-            previousHearing.getHearingParts().get(0).setHearing(hearingRepository.findOne(previousHearing.getId()));
-
-            hearingRepository.save(previousHearing);
         } else if ("delete".equals(utd.getCounterAction())) {
-            hearingRepository.delete(utd.getEntityId());
+            Hearing hearingToRollback = hearingRepository.findOne(utd.getEntityId());
+
+            hearingRepository.delete(hearingToRollback);
         } else if ("create".equals(utd.getCounterAction())) {
-            Hearing deletedHearing = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
-            deletedHearing.setDeleted(false);
+            Hearing hearingToRollback = hearingRepository.getHearingByIdIgnoringWhereDeletedClause(utd.getEntityId());
 
-            List<HearingPart> hearingParts = hearingPartRepository
-                .getHearingPartsByHearingIdIgnoringWhereDeletedClause(deletedHearing.getId());
-            hearingParts.forEach(hp -> hp.setDeleted(false));
-
-            hearingPartRepository.save(hearingParts);
-            hearingRepository.save(deletedHearing);
-
-            hearingParts.forEach(hp -> {
-                String msg = factsMapper.mapHearingPartToRuleJsonMessage(hp);
-                rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
-            });
+            hearingToRollback.setDeleted(false);
+            hearingRepository.save(hearingToRollback);
         }
     }
 
     private void handleHearingPart(UserTransactionData utd) {
-        HearingPart hp = hearingPartRepository.findById(utd.getEntityId());
-
         if ("update".equals(utd.getCounterAction())) {
-            HearingPart previousHearingPart = new HearingPart();
-            String msg = null;
+            HearingPart hearingPartToRollback = hearingPartRepository.findOne(utd.getEntityId());
+            HearingPart previousHearingPart;
 
             try {
                 previousHearingPart = objectMapper.readValue(utd.getBeforeData(), HearingPart.class);
-                previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
-
-                msg = factsMapper.mapHearingToRuleJsonMessage(previousHearingPart);
-                //to have both entities
-                //hearing and hearingPart then we would have to send a hearingPart here
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+            entityManager.detach(hearingPartToRollback);
+            previousHearingPart.setVersion(hearingPartToRollback.getVersion());
 
-            entityManager.detach(previousHearingPart);
-
-            previousHearingPart.setVersion(hp.getVersion());
-            entityManager.merge(previousHearingPart);
+            if (previousHearingPart.getHearingId() != null) {
+                previousHearingPart.setHearing(hearingRepository.findOne(previousHearingPart.getHearingId()));
+            }
 
             if (previousHearingPart.getSessionId() != null) {
                 previousHearingPart.setSession(sessionRepository.findOne(previousHearingPart.getSessionId()));
-
             }
 
-            hearingPartRepository.save(previousHearingPart);
-        } else if ("delete".equals(utd.getCounterAction())) {
-            hearingPartRepository.delete(utd.getEntityId());
+            String msg = factsMapper.mapHearingToRuleJsonMessage(previousHearingPart);
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
 
-            String msg = factsMapper.mapHearingToRuleJsonMessage(hp);
+            entityManager.merge(previousHearingPart);
+        } else if ("delete".equals(utd.getCounterAction())) {
+            HearingPart hearingPartToRollback = hearingPartRepository.findOne(utd.getEntityId());
+
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPartToRollback);
             rulesService.postMessage(utd.getUserTransactionId(), RulesService.DELETE_HEARING_PART, msg);
+
+            hearingPartRepository.delete(hearingPartToRollback);
+        } else if ("create".equals(utd.getCounterAction())) {
+            HearingPart hearingPartToRollback =
+                hearingPartRepository.getHearingPartByIdIgnoringWhereDeletedClause(utd.getEntityId());
+            hearingPartToRollback.setDeleted(false);
+
+            String msg = factsMapper.mapHearingToRuleJsonMessage(hearingPartToRollback);
+            rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, msg);
+
+            hearingPartRepository.save(hearingPartToRollback);
         }
     }
 
     private void handleSession(UserTransactionData utd) {
-        if ("delete".equals(utd.getCounterAction())) {
-            Session session = sessionRepository.findOne(utd.getEntityId());
+        Session sessionToRollback = sessionRepository.findOne(utd.getEntityId());
 
-            if (session == null) {
+        if ("delete".equals(utd.getCounterAction())) {
+            if (sessionToRollback == null) {
                 throw new EntityNotFoundException("session not found");
             }
 
-            sessionRepository.delete(utd.getEntityId());
+            sessionRepository.delete(sessionToRollback);
+            
             SessionWithHearingPartsFacts sessionWithHpFacts = factsMapper.mapDbSessionToRuleJsonMessage(
-                session,
-                session.getHearingParts()
+                sessionToRollback,
+                sessionToRollback.getHearingParts()
             );
+
             rulesService.postMessage(
                 utd.getUserTransactionId(),
                 RulesService.DELETE_SESSION,
                 sessionWithHpFacts.getSessionFact()
             );
+
             sessionWithHpFacts.getHearingPartsFacts().forEach(hpFact ->
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, hpFact)
             );
@@ -204,10 +192,9 @@ public class RevertChangesManager {
                 rulesService.postMessage(utd.getUserTransactionId(), RulesService.UPSERT_HEARING_PART, hpFact)
             );
 
-            Session session = sessionRepository.findOne(utd.getEntityId());
-            previousSession.setVersion(session.getVersion());
-
-            sessionRepository.save(previousSession);
+            entityManager.detach(sessionToRollback);
+            previousSession.setVersion(sessionToRollback.getVersion());
+            entityManager.merge(previousSession);
         }
     }
 }

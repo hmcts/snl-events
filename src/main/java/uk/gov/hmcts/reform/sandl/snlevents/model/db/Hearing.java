@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -24,7 +25,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
@@ -136,8 +136,9 @@ public class Hearing extends VersionedEntity implements Serializable, HistoryAud
     @LastModifiedBy
     private String modifiedBy;
 
+    @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "hearing", orphanRemoval = true, cascade = {CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "hearing", orphanRemoval = true, fetch = FetchType.EAGER)
     @NotAudited
     private List<HearingPart> hearingParts = new ArrayList<>();
 

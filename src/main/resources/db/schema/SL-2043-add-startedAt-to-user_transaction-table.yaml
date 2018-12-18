@@ -1,0 +1,33 @@
+databaseChangeLog:
+- changeSet:
+    id: SL-2043-add-startedAt-column-to-userTransation-table
+    author: lgurniewicz
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: started_at
+            type: TIMESTAMP WITH TIME ZONE
+            defaultValueDate: NOW()
+        tableName: user_transaction
+
+- changeSet:
+    id: SL-2043-set-current-date-for-nullable-started-at-rows
+    author: lgurniewicz
+    changes:
+    - update:
+        columns:
+        - column:
+            name: started_at
+            valueDate: NOW()
+        where: started_at IS NULL
+        tableName: user_transaction
+
+- changeSet:
+    id: SL-2043-add_not_null_constraint_to_startedAt_on_userTransaction-table
+    author: lgurniewicz
+    changes:
+    - addNotNullConstraint:
+        columnName: started_at
+        columnDataType: TIMESTAMP WITH TIME ZONE
+        tableName: user_transaction

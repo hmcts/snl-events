@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.PossibleActions;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
@@ -65,6 +66,7 @@ public class HearingControllerTest {
     private EventsMockMvc mvc;
 
     @MockBean
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private HearingPartService hearingPartService;
 
     @MockBean
@@ -75,10 +77,13 @@ public class HearingControllerTest {
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private SessionRepository sessionRepository;
+    private HearingPartRepository hearingPartRepository;
 
     @MockBean
     @SuppressWarnings("PMD.UnusedPrivateField")
+    private SessionRepository sessionRepository;
+
+    @MockBean
     private ActionService actionService;
 
     @MockBean
@@ -86,6 +91,7 @@ public class HearingControllerTest {
     private EntityManager entityManager;
 
     @Autowired
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private ObjectMapper objectMapper;
 
     @MockBean

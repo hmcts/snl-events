@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.WithdrawHearingRequest;
@@ -35,6 +37,7 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -79,9 +82,11 @@ public class WithdrawHearingActionTest {
         hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
         hearing.setHearingParts(Arrays.asList(
             ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
-                hearing, Status.Listed, null, SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
+                hearing, Status.Listed, OffsetDateTime.now().plusDays(0),
+                SESSION_ID_A, OffsetDateTime.now().plusDays(0)),
             ath.createHearingPartWithSession(HEARING_PART_ID_B, HEARING_VERSION_ID_B,
-                hearing, Status.Unlisted, null, SESSION_ID_B, OffsetDateTime.now().plusDays(1))
+                hearing, Status.Unlisted, OffsetDateTime.now().plusDays(1),
+                SESSION_ID_B, OffsetDateTime.now().plusDays(1))
         ));
 
         when(hearingRepository.findOne(eq(HEARING_ID_TO_BE_WITHDRAWN))).thenReturn(hearing);
@@ -143,11 +148,6 @@ public class WithdrawHearingActionTest {
     }
 
     @Test
-    public void act_shouldSetHearingPartSessionIdToNull() {
-        ath.assertHearingPartsSessionIsSetToNull(action, hearingPartRepository);
-    }
-
-    @Test
     public void act_shouldSetStatusesToWithdrawn() {
         action.getAndValidateEntities();
         action.act();
@@ -199,14 +199,36 @@ public class WithdrawHearingActionTest {
     public void getAndValidateEntities_whenHearingDateCantBeWithdrawn_shouldThrowException() {
         Hearing hearing = new Hearing();
         hearing.setVersion(HEARING_VERSION_TO_BE_WITHDRAWN);
+        hearing.setId(UUID.randomUUID());
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Listed));
         hearing.setHearingParts(Arrays.asList(
             ath.createHearingPartWithSession(HEARING_PART_ID_A, HEARING_VERSION_ID_A,
                 hearing, Status.Listed, null, SESSION_ID_A, OffsetDateTime.now().minusDays(1))
         ));
+
+        hearing.getHearingParts().forEach(hp -> {
+            hp.getSession().setHearingParts(Arrays.asList(hp));
+            hp.setStart(OffsetDateTime.now());
+        });
+
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
+    }
+
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Vacated)
+                || hp.getStatus().getStatus().equals(Status.Withdrawn)) {
+                assertNull(hp.getSessionId());
+                assertNull(hp.getSession());
+            }
+        });
     }
 
     private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,

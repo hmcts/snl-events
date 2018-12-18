@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.springframework.data.annotation.CreatedDate;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionRulesProcessingStatus;
 import uk.gov.hmcts.reform.sandl.snlevents.model.usertransaction.UserTransactionStatus;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 @Entity
+@DynamicInsert
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,6 +36,10 @@ public class UserTransaction {
 
     @Enumerated(EnumType.STRING)
     private UserTransactionRulesProcessingStatus rulesProcessingStatus;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private OffsetDateTime startedAt;
 
     @OneToMany(mappedBy = "userTransaction", cascade = CascadeType.ALL)
     @JsonIgnore

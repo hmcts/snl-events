@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingInfo;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponse;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingSearchResponseForAmendment;
 import uk.gov.hmcts.reform.sandl.snlevents.model.response.HearingWithSessionsResponse;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.queries.HearingForListingColumn;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.EntityManager;
+import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -52,6 +54,9 @@ public class HearingController {
 
     @Autowired
     private HearingRepository hearingRepository;
+
+    @Autowired
+    private HearingPartRepository hearingPartRepository;
 
     @Autowired
     private SessionRepository sessionRepository;
@@ -116,8 +121,8 @@ public class HearingController {
         @RequestBody HearingSessionRelationship assignment) {
 
         Action action = new AssignSessionsToHearingAction(
-            hearingId, assignment, hearingRepository, sessionRepository, statusConfigService, statusServiceManager,
-            entityManager, objectMapper
+            hearingId, assignment, hearingRepository, hearingPartRepository, sessionRepository, statusConfigService,
+            statusServiceManager, entityManager, objectMapper
         );
 
         UserTransaction ut = actionService.execute(action);
@@ -149,7 +154,7 @@ public class HearingController {
     }
 
     @PutMapping(path = "/adjourn", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity adjourn(@RequestBody AdjournHearingRequest adjournHearingRequest) {
+    public ResponseEntity adjourn(@Valid @RequestBody AdjournHearingRequest adjournHearingRequest) {
         return ok(hearingService.adjourn(adjournHearingRequest));
     }
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.Hibernate;
 import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.session.helpers.AmendSessionValidators;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
@@ -17,7 +18,6 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFa
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +33,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     private Session session;
     private List<HearingPart> hearingParts;
     private String currentSessionAsString;
+    private UserTransactionDataPreparerService userDatPrepServ = new UserTransactionDataPreparerService();
     private List<BiConsumer<Session, AmendSessionRequest>> validators = Arrays.asList(
         AmendSessionValidators.validateDurationIsGreaterOrEqual,
         AmendSessionValidators.validateStartIsSetEarlier
@@ -87,16 +88,10 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("session",
-            session.getId(),
-            currentSessionAsString,
-            "update",
-            "update",
-            0)
-        );
+        userDatPrepServ.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.SESSION,
+            session.getId(), currentSessionAsString, 0);
 
-        return userTransactionDataList;
+        return userDatPrepServ.getUserTransactionDataList();
     }
 
     @Override

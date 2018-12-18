@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.ActivityBuilder;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.hearing.helpers.UserTransactionDataPreparerService;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.ActivityLoggable;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
@@ -43,7 +43,7 @@ public class VacateHearingAction extends Action implements RulesProcessable, Act
     protected StatusServiceManager statusServiceManager;
     protected EntityManager entityManager;
 
-    // id & hearing part string
+    // id & HEARING part string
     private UserTransactionDataPreparerService dataPreparerService = new UserTransactionDataPreparerService();
     private Map<UUID, String> originalHearingParts;
     private String previousHearing;
@@ -108,8 +108,7 @@ public class VacateHearingAction extends Action implements RulesProcessable, Act
         hearingRepository.save(hearing);
 
         originalHearingParts = dataPreparerService.mapHearingPartsToStrings(objectMapper, hearingParts);
-
-        hearingParts.stream().forEach(hp -> {
+        hearingParts.forEach(hp -> {
             hp.setStatus(statusConfigService.getStatusConfig(Status.Vacated));
             hp.setSession(null);
             hp.setStart(null);
@@ -121,14 +120,16 @@ public class VacateHearingAction extends Action implements RulesProcessable, Act
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
         originalHearingParts.forEach((id, hpString) ->
-            dataPreparerService.prepareUserTransactionDataForUpdate("hearingPart", id, hpString,  0)
+            dataPreparerService.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING_PART,
+                id, hpString,  2)
         );
 
-        dataPreparerService.prepareUserTransactionDataForUpdate("hearing", hearing.getId(),
-            previousHearing, 1);
+        dataPreparerService.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.HEARING,
+            hearing.getId(), previousHearing, 1);
 
-        sessions.stream().forEach(s ->
-            dataPreparerService.prepareLockedEntityTransactionData("session", s.getId(), 0)
+        sessions.forEach(s ->
+            dataPreparerService.prepareLockedEntityTransactionData(UserTransactionDataPreparerService.SESSION,
+                s.getId(), 0)
         );
 
         return dataPreparerService.getUserTransactionDataList();

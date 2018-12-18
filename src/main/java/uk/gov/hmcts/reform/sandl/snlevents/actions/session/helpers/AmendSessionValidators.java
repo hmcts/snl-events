@@ -14,6 +14,8 @@ import java.util.function.BiConsumer;
 
 public class AmendSessionValidators {
 
+    private AmendSessionValidators() { }
+
     public static BiConsumer<Session, DragAndDropSessionRequest> validateIfJudgeCanBeChanged =
         (Session session, DragAndDropSessionRequest dragAndDropSessionRequest) -> {
             boolean sessionHasMultiSessionHearingPart = session.getHearingParts().stream()
