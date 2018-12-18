@@ -16,7 +16,7 @@ public class AmendSessionValidators {
 
     private AmendSessionValidators() { }
 
-    public static BiConsumer<Session, DragAndDropSessionRequest> validateIfJudgeCanBeChanged =
+    public static final BiConsumer<Session, DragAndDropSessionRequest> validateIfJudgeCanBeChanged =
         (Session session, DragAndDropSessionRequest dragAndDropSessionRequest) -> {
             boolean sessionHasMultiSessionHearingPart = session.getHearingParts().stream()
                 .anyMatch(hp -> hp.getHearing().isMultiSession());
@@ -32,7 +32,7 @@ public class AmendSessionValidators {
             }
         };
 
-    public static BiConsumer<Session, DragAndDropSessionRequest> validateStartAndEndDateWasShrieked =
+    public static final BiConsumer<Session, DragAndDropSessionRequest> validateStartAndEndDateWasShrieked =
         (Session session, DragAndDropSessionRequest dragAndDropSessionRequest) -> {
             boolean containsAtLeastOneListedHearingPart = isContainsAtLeastOneListedHearingPart(session);
             if (!containsAtLeastOneListedHearingPart) {
@@ -54,7 +54,7 @@ public class AmendSessionValidators {
             }
         };
 
-    public static BiConsumer<Session, DragAndDropSessionRequest> canChangeDay =
+    public static final BiConsumer<Session, DragAndDropSessionRequest> canChangeDay =
         (Session session, DragAndDropSessionRequest dragAndDropSessionRequest) -> {
             boolean containsAtLeastOneListedHearingPart = isContainsAtLeastOneListedHearingPart(session);
             if (!containsAtLeastOneListedHearingPart) {
@@ -75,7 +75,7 @@ public class AmendSessionValidators {
         };
 
 
-    public static BiConsumer<Session, AmendSessionRequest> validateStartIsSetEarlier =
+    public static final BiConsumer<Session, AmendSessionRequest> validateStartIsSetEarlier =
         (Session session, AmendSessionRequest amendSessionRequest) -> {
             boolean containsAtLeastOneListedHearingPart = isContainsAtLeastOneListedHearingPart(session);
             if (!containsAtLeastOneListedHearingPart) {
@@ -88,7 +88,7 @@ public class AmendSessionValidators {
             }
         };
 
-    public static BiConsumer<Session, AmendSessionRequest> validateDurationIsGreaterOrEqual =
+    public static final BiConsumer<Session, AmendSessionRequest> validateDurationIsGreaterOrEqual =
         (Session session, AmendSessionRequest amendSessionRequest) -> {
             boolean containsAtLeastOneListedHearingPart = isContainsAtLeastOneListedHearingPart(session);
             if (!containsAtLeastOneListedHearingPart) {
