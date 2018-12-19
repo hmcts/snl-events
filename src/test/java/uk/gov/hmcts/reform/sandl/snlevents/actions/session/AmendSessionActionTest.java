@@ -11,9 +11,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.sandl.snlevents.actions.session.AmendSessionAction;
+import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
+import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.SessionType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.AmendSessionRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
@@ -33,7 +36,6 @@ import static org.mockito.Matchers.any;
 public class AmendSessionActionTest {
     private static final String SESSION_TYPE_CODE = "TYPE";
     private static final Duration DURATION = Duration.ofMinutes(30);
-    private static final String START_TIME = "10:00";
 
     private static final UUID ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     private static final OffsetDateTime dateTime = OffsetDateTime.now();
@@ -57,7 +59,7 @@ public class AmendSessionActionTest {
         request.setId(ID);
         request.setDurationInSeconds(DURATION);
         request.setSessionTypeCode(SESSION_TYPE_CODE);
-        request.setStartTime(START_TIME);
+        request.setStartTime(dateTime);
         request.setUserTransactionId(UUID.randomUUID());
 
         action = createAction(request);
@@ -109,6 +111,31 @@ public class AmendSessionActionTest {
         assertThat(factMsgs.get(0).getType()).isEqualTo(RulesService.UPSERT_SESSION);
     }
 
+    @Test(expected = SnlRuntimeException.class)
+    public void generateFactMessages_shouldThrowExceptionWhenDurationIsDecreasedWhenSessionHasListedHearingParts() {
+        Session session = createSessionWithListedHearingPart();
+        Duration duration = Duration.ofMinutes(30);
+        session.setDuration(duration);
+        session.setStart(OffsetDateTime.now());
+
+        Mockito.when(sessionRepository.findOne(ID)).thenReturn(session);
+        request.setDurationInSeconds(duration.minusSeconds(1));
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlRuntimeException.class)
+    public void generateFactMessages_shouldThrowExceptionWhenStartTimeIsSetAfterSessionStartTime() {
+        Session session = createSessionWithListedHearingPart();
+        Duration duration = Duration.ofMinutes(30);
+        session.setDuration(duration);
+        OffsetDateTime sessionStartTime = OffsetDateTime.now();
+        session.setStart(sessionStartTime);
+
+        Mockito.when(sessionRepository.findOne(ID)).thenReturn(session);
+        request.setStartTime(sessionStartTime.plusDays(1));
+        action.getAndValidateEntities();
+    }
+
     @Test(expected = ServiceException.class)
     public void act_shouldThrowServiceException() throws JsonProcessingException {
         action.getAndValidateEntities();
@@ -136,10 +163,23 @@ public class AmendSessionActionTest {
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
     }
 
+    private Session createSessionWithListedHearingPart() {
+        StatusConfig statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Listed);
+
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setStatus(statusConfig);
+
+        Session session = new Session();
+        session.setId(ID);
+        session.addHearingPart(hearingPart);
+        return session;
+    }
+
     private Session createExpectedSession() {
         val s = new Session();
         s.setId(ID);
-        s.setStart(dateTime.withHour(10).withMinute(0));
+        s.setStart(dateTime);
         s.setSessionType(createSessionType());
         s.setDuration(DURATION);
 

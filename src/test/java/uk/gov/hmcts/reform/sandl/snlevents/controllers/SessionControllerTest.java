@@ -227,7 +227,7 @@ public class SessionControllerTest {
     private AmendSessionRequest createAmendSessionRequest() {
         AmendSessionRequest amendSessionRequest = new AmendSessionRequest();
         amendSessionRequest.setDurationInSeconds(Duration.ofMinutes(2));
-        amendSessionRequest.setStartTime("15:00");
+        amendSessionRequest.setStartTime(OffsetDateTime.now());
         amendSessionRequest.setSessionTypeCode("f-track");
         amendSessionRequest.setVersion(0L);
         amendSessionRequest.setId(UUID.randomUUID());
