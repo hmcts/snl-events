@@ -42,6 +42,8 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class DragAndDropSessionActionTest {
     private static final UUID SESSION_ID = UUID.randomUUID();
+    private final Duration duration = Duration.ofMinutes(30);
+    private final OffsetDateTime sessionStartTime = OffsetDateTime.now();
     private DragAndDropSessionAction action;
     private DragAndDropSessionRequest request;
     private HearingPart hearingPart;
@@ -114,6 +116,28 @@ public class DragAndDropSessionActionTest {
         session.addHearingPart(hearingPart);
 
         request.setPersonId(UUID.randomUUID());
+
+        when(sessionRepository.findOne(SESSION_ID)).thenReturn(session);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlRuntimeException.class)
+    public void getAndValidateEntities_ThrowsExceptionWhenDurationIsShrinkedWhenSessionHasListedHearingParts() {
+        Session session = createSessionWithListedHearingParts();
+        request.setStart(sessionStartTime);
+        request.setDurationInSeconds(duration.minusMinutes(5).getSeconds());
+
+        when(sessionRepository.findOne(SESSION_ID)).thenReturn(session);
+
+        action.getAndValidateEntities();
+    }
+
+    @Test(expected = SnlRuntimeException.class)
+    public void getAndValidateEntities_ThrowsExceptionWhenStartOrEndDayChangeChangedWhenSessionHasListedHearingParts() {
+        Session session = createSessionWithListedHearingParts();
+        request.setStart(sessionStartTime.plusDays(1));
+        request.setDurationInSeconds(duration.getSeconds());
 
         when(sessionRepository.findOne(SESSION_ID)).thenReturn(session);
 
@@ -200,6 +224,26 @@ public class DragAndDropSessionActionTest {
         assertThat(actualTransactionData.size()).isEqualTo(2);
         assertTrue(actualTransactionData.stream().anyMatch(utd -> utd.getEntity().equals("session")));
         assertTrue(actualTransactionData.stream().anyMatch(utd -> utd.getEntity().equals("hearingPart")));
+    }
+
+    private Session createSessionWithListedHearingParts() {
+        StatusConfig statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Listed);
+
+        Hearing hearing = new Hearing();
+        hearing.setMultiSession(false);
+
+        HearingPart hearingPart = new HearingPart();
+        hearingPart.setStatus(statusConfig);
+        hearingPart.setHearing(hearing);
+
+        Session session = new Session();
+        session.setId(SESSION_ID);
+        session.addHearingPart(hearingPart);
+        session.setDuration(duration);
+        session.setStart(sessionStartTime);
+
+        return session;
     }
 
     private Hearing createHearing() {

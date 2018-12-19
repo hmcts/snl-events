@@ -32,7 +32,7 @@ public class AmendSessionValidators {
             }
         };
 
-    public static final BiConsumer<Session, DragAndDropSessionRequest> validateStartAndEndDateWasShrieked =
+    public static final BiConsumer<Session, DragAndDropSessionRequest> validateStartAndEndDateWasShrinked =
         (Session session, DragAndDropSessionRequest dragAndDropSessionRequest) -> {
             boolean containsAtLeastOneListedHearingPart = isContainsAtLeastOneListedHearingPart(session);
             if (!containsAtLeastOneListedHearingPart) {

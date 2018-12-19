@@ -41,7 +41,7 @@ public class DragAndDropSessionAction extends Action implements RulesProcessable
     private UserTransactionDataPreparerService userTransactionDataService = new UserTransactionDataPreparerService();
     private List<BiConsumer<Session, DragAndDropSessionRequest>> validators = Arrays.asList(
         AmendSessionValidators.validateIfJudgeCanBeChanged,
-        AmendSessionValidators.validateStartAndEndDateWasShrieked,
+        AmendSessionValidators.validateStartAndEndDateWasShrinked,
         AmendSessionValidators.canChangeDay
     );
 
