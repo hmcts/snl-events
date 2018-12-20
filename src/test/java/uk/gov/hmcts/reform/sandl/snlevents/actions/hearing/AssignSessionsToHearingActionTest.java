@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -13,6 +14,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.StatusesMock;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -22,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.HearingSessionRelationship;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.SessionAssignmentData;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
@@ -36,6 +40,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.times;
@@ -45,6 +50,7 @@ public class AssignSessionsToHearingActionTest {
     private static final OffsetDateTime dateTime = OffsetDateTime.now();
     private static final OffsetDateTime START_TIME = dateTime.withHour(10).withMinute(0);
 
+    private static final UUID TRANSACTION_ID = UUID.randomUUID();
     private static final UUID HEARING_PART_ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440001");
     private static final UUID HEARING_PART_ID_2 = UUID.fromString("123e4567-e89b-12d3-a456-426655440011");
     private static final UUID SESSION_ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440002");
@@ -62,8 +68,12 @@ public class AssignSessionsToHearingActionTest {
 
     @Mock
     private SessionRepository sessionRepository;
+
     @Mock
     private HearingRepository hearingRepository;
+
+    @Mock
+    private HearingPartRepository hearingPartRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -85,7 +95,7 @@ public class AssignSessionsToHearingActionTest {
         request.setHearingVersion(0);
         request.setSessionsData(Arrays.asList(sessionAssignmentData, sessionAssignmentData2));
         request.setStart(START_TIME);
-        request.setUserTransactionId(UUID.randomUUID());
+        request.setUserTransactionId(TRANSACTION_ID);
 
         action = createAction(request);
 
@@ -236,6 +246,19 @@ public class AssignSessionsToHearingActionTest {
     }
 
     @Test
+    public void act_shouldSetHearingPart_to_Listed() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            assertNotNull(hp.getSessionId());
+            assertNotNull(hp.getSession());
+            assertThat(hp.getStatus().getStatus()).isEqualTo(Status.Listed);
+        });
+    }
+
+    @Test
     public void generateFactMessages_forMultiSession_shouldReturnManyElementsWithTypeUpsertSession() {
         action.getAndValidateEntities();
         action.act();
@@ -267,6 +290,20 @@ public class AssignSessionsToHearingActionTest {
         action.act();
 
         List<UserTransactionData> expectedTransactionData = new ArrayList<>();
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            HEARING_PART_ID,
+            action.originalHearingParts.get(0),
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
+            2)
+        );
+        expectedTransactionData.add(new UserTransactionData("hearingPart",
+            HEARING_PART_ID_2,
+            action.originalHearingParts.get(1),
+            UPDATE_ACTION_TEXT,
+            UPDATE_ACTION_TEXT,
+            2)
+        );
         expectedTransactionData.add(new UserTransactionData("hearing",
             HEARING_ID,
             null,
@@ -281,25 +318,27 @@ public class AssignSessionsToHearingActionTest {
             UPDATE_ACTION_TEXT,
             1)
         );
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
-            HEARING_PART_ID,
-            action.previousHearingParts.get(0),
-            UPDATE_ACTION_TEXT,
-            UPDATE_ACTION_TEXT,
-            2)
-        );
-        expectedTransactionData.add(new UserTransactionData("hearingPart",
-            HEARING_PART_ID_2,
-            action.previousHearingParts.get(1),
-            UPDATE_ACTION_TEXT,
-            UPDATE_ACTION_TEXT,
-            2)
-        );
+
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID));
         expectedTransactionData.add(getLockedSessionTransactionData(SESSION_ID_2));
 
         List<UserTransactionData> actualTransactionData = action.generateUserTransactionData();
         assertThat(actualTransactionData).isEqualTo(expectedTransactionData);
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Listed);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 
     //
@@ -359,8 +398,8 @@ public class AssignSessionsToHearingActionTest {
 
     private AssignSessionsToHearingAction createAction(HearingSessionRelationship request) {
         return new AssignSessionsToHearingAction(request.getHearingId(), request,
-            hearingRepository, sessionRepository, statusesMock.statusConfigService, statusesMock.statusServiceManager,
-            entityManager, objectMapper
+            hearingRepository, hearingPartRepository, sessionRepository, statusesMock.statusConfigService,
+            statusesMock.statusServiceManager, entityManager, objectMapper
         );
     }
 

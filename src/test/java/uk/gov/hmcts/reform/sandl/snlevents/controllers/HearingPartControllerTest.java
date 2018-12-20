@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransaction;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.CreateHearingRequest;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
@@ -63,11 +64,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc(secure = false)
 public class HearingPartControllerTest {
     public static final String CASE_TYPE_CODE = "type";
-    public static final CaseType CASE_TYPE = new CaseType(CASE_TYPE_CODE, "case-type-desc");
     public static final String CASE_NUMBER = "90";
     public static final String TITLE = "title";
     public static final String HEARING_TYPE_CODE = "hearing-type-code";
-    public static final HearingType HEARING_TYPE = new HearingType(HEARING_TYPE_CODE, "hearing-type-desc");
     public static final String URL = "/hearing-part";
     public static final String URL_IS_LISTED_FALSE = "/hearing-part?isListed=false";
     public static final String COMMUNICATION_FACILITATOR = "Interpreter";
@@ -242,6 +241,9 @@ public class HearingPartControllerTest {
         val hearingPart = new HearingPart();
         hearingPart.setId(createUuid());
         hearingPart.setHearing(createHearing());
+        val statusConfig = new StatusConfig();
+        statusConfig.setStatus(Status.Unlisted);
+        hearingPart.setStatus(statusConfig);
 
         return hearingPart;
     }
@@ -263,7 +265,12 @@ public class HearingPartControllerTest {
     }
 
     private DeleteListingRequest createDeleteListingRequest() {
-        return new DeleteListingRequest();
+        val dlr = new DeleteListingRequest();
+        dlr.setHearingId(UUID.randomUUID());
+        dlr.setHearingVersion(1L);
+        dlr.setUserTransactionId(UUID.randomUUID());
+
+        return dlr;
     }
 
     private CreateHearingRequest createCreateHearingPart() {

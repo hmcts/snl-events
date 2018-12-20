@@ -6,6 +6,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -15,8 +16,11 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.StatusConfig;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
@@ -34,6 +38,7 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -54,6 +59,7 @@ public class VacateHearingActionTest {
     private static final UUID SESSION_ID_B = UUID.randomUUID();
     private static final UUID SESSION_ID_C = UUID.randomUUID();
     private static final UUID SESSION_ID_D = UUID.randomUUID();
+    private static final UUID USER_TRANSACTION_ID = UUID.randomUUID();
     private static StatusConfig hearingStatusConfig;
     private StatusesMock statusesMock = new StatusesMock();
     private VacateHearingAction action;
@@ -89,7 +95,7 @@ public class VacateHearingActionTest {
                 Status.Listed, OffsetDateTime.now(), SESSION_ID_B, OffsetDateTime.now()),
             ath.createHearingPartWithSession(HEARING_PART_ID_C, HEARING_VERSION_ID_C, hearing,
                 Status.Listed, OffsetDateTime.now().plusDays(1), SESSION_ID_C, OffsetDateTime.now().plusDays(1)),
-            ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D, hearing, 
+            ath.createHearingPartWithSession(HEARING_PART_ID_D, HEARING_VERSION_ID_D, hearing,
                 Status.Vacated, OffsetDateTime.now().plusDays(2), SESSION_ID_D, OffsetDateTime.now().plusDays(2))
         ));
         hearing.setMultiSession(true);
@@ -98,12 +104,11 @@ public class VacateHearingActionTest {
 
         VacateHearingRequest vhr = new VacateHearingRequest();
         vhr.setHearingId(HEARING_ID_TO_BE_VACATED);
-        vhr.setUserTransactionId(UUID.randomUUID());
+        vhr.setUserTransactionId(USER_TRANSACTION_ID);
 
         action = new VacateHearingAction(
             vhr,
-            hearingRepository,
-            hearingPartRepository,
+            hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
             objectMapper,
@@ -148,16 +153,39 @@ public class VacateHearingActionTest {
     }
 
     @Test
-    public void act_shouldSetHearingPartSessionIdToNull() {
-        ath.assertHearingPartsSessionIsSetToNull(action, hearingPartRepository);
-    }
-
-    @Test
     public void act_shouldNotChangeHearingStatuses() {
         action.getAndValidateEntities();
         action.act();
 
         assertThat(action.hearing.getStatus().getStatus()).isEqualTo(hearingStatusConfig.getStatus());
+    }
+
+    @Test
+    public void act_shouldSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Vacated)) {
+                assertNull(hp.getSessionId());
+                assertNull(hp.getSession());
+            }
+        });
+    }
+
+    @Test
+    public void act_shouldNotSetHearingPartSessionIdToNull() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> {
+            if (hp.getStatus().getStatus().equals(Status.Listed)) {
+                assertNotNull(hp.getSessionId());
+                assertNotNull(hp.getSession());
+            }
+        });
     }
 
     @Test
@@ -178,8 +206,15 @@ public class VacateHearingActionTest {
     @Test(expected = SnlEventsException.class)
     public void getAndValidateEntities_whenHearingStatusCantBeVacated_shouldThrowException() {
         Hearing hearing = new Hearing();
+        hearing.setId(UUID.randomUUID());
         hearing.setVersion(HEARING_VERSION_TO_BE_VACATED);
         hearing.setStatus(statusesMock.statusConfigService.getStatusConfig(Status.Vacated));
+        hearing.getHearingParts().forEach(hp -> {
+            hp.getSession().setHearingParts(Arrays.asList(hp));
+            hp.setStart(OffsetDateTime.now());
+        });
+
+
         Mockito.when(hearingRepository.findOne(any(UUID.class)))
             .thenReturn(hearing);
         action.getAndValidateEntities();
@@ -194,6 +229,21 @@ public class VacateHearingActionTest {
         hearing.setMultiSession(false);
         Mockito.when(hearingRepository.findOne(any(UUID.class))).thenReturn(hearing);
         action.getAndValidateEntities();
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Vacated);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(USER_TRANSACTION_ID);
     }
 
     private void assertThatContainsEntityWithUpdateAction(List<UserTransactionData> userTransactionData, UUID entityId,

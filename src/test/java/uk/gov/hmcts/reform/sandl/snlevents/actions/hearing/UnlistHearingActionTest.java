@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlEventsException;
 import uk.gov.hmcts.reform.sandl.snlevents.exceptions.SnlRuntimeException;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
+import uk.gov.hmcts.reform.sandl.snlevents.model.activities.ActivityStatus;
+import uk.gov.hmcts.reform.sandl.snlevents.model.db.ActivityLog;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.CaseType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Hearing;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
@@ -32,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -43,6 +46,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class UnlistHearingActionTest {
+    private static final UUID TRANSACTION_ID = UUID.randomUUID();
     private static final UUID HEARING_ID_TO_BE_UNLISTED = UUID.randomUUID();
     private static final UUID HEARING_PART_ID_A = UUID.randomUUID();
     private static final Long HEARING_VERSION_ID_A = 1L;
@@ -66,6 +70,9 @@ public class UnlistHearingActionTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private EntityManager entityManager;
+
 
     @Before
     public void setup() {
@@ -84,7 +91,7 @@ public class UnlistHearingActionTest {
 
         UnlistHearingRequest bhr = new UnlistHearingRequest();
         bhr.setHearingId(HEARING_ID_TO_BE_UNLISTED);
-        bhr.setUserTransactionId(UUID.randomUUID());
+        bhr.setUserTransactionId(TRANSACTION_ID);
 
         bhr.setHearingPartsVersions(hearingVersions);
 
@@ -92,7 +99,7 @@ public class UnlistHearingActionTest {
             bhr, hearingRepository, hearingPartRepository,
             statusesMock.statusConfigService,
             statusesMock.statusServiceManager,
-            objectMapper
+            objectMapper, entityManager
         );
     }
 
@@ -105,6 +112,7 @@ public class UnlistHearingActionTest {
 
         Session session = new Session();
         session.setId(sessionId);
+        session.setHearingParts(Arrays.asList(hearingPart));
 
         hearingPart.setSessionId(sessionId);
         hearingPart.setSession(session);
@@ -159,15 +167,12 @@ public class UnlistHearingActionTest {
     public void act_shouldSetHearingPartSessionIdToNull() {
         action.getAndValidateEntities();
         action.act();
-
         ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
-
         Mockito.verify(hearingPartRepository).save(captor.capture());
-        assertThat(captor.getValue().size()).isEqualTo(hearingVersions.size());
         captor.getValue().forEach(hp -> {
             assertNull(hp.getSessionId());
             assertNull(hp.getSession());
-            assertNull(hp.getStart());
+            assertThat(hp.getStatus().getStatus()).isEqualTo(Status.Unlisted);
         });
     }
 
@@ -181,6 +186,21 @@ public class UnlistHearingActionTest {
         action.hearingParts.forEach(hearingPart -> {
             assertThat(hearingPart.getStatus().getStatus()).isEqualTo(Status.Unlisted);
         });
+    }
+
+    @Test
+    public void getActivities_shouldProduceProperActivities() {
+        action.getAndValidateEntities();
+
+        List<ActivityLog> activities = action.getActivities();
+
+        assertThat(activities.size()).isEqualTo(1);
+
+        ActivityLog activityLog = activities.get(0);
+
+        assertThat(activityLog.getStatus()).isEqualTo(ActivityStatus.Unlisted);
+        assertThat(activityLog.getEntityName()).isEqualTo(Hearing.ENTITY_NAME);
+        assertThat(activityLog.getUserTransactionId()).isEqualTo(TRANSACTION_ID);
     }
 
     @Test(expected = SnlRuntimeException.class)

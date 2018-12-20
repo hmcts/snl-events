@@ -1,0 +1,20 @@
+databaseChangeLog:
+- changeSet:
+    id: SL-1855-add-additional-columns-to-activity-log
+    author: rkruk
+    changes:
+    - addColumn:
+        tableName: activity_log
+        columns:
+        - column:
+            name: created_at
+            type: timestamp with time zone
+    - addColumn:
+        tableName: activity_log
+        columns:
+        - column:
+            name: created_by
+            type: varchar(255)
+    - dropForeignKeyConstraint:
+        baseTableName: activity_log
+        constraintName: fk_activity_log_status_code_status_config

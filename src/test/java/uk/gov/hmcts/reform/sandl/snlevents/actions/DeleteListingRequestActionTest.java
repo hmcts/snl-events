@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingType;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.UserTransactionData;
 import uk.gov.hmcts.reform.sandl.snlevents.model.request.DeleteListingRequest;
+import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingPartRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
@@ -45,6 +46,9 @@ public class DeleteListingRequestActionTest {
     private HearingRepository hearingRepository;
 
     @Mock
+    private HearingPartRepository hearingPartRepository;
+
+    @Mock
     private EntityManager entityManager;
 
     @Mock
@@ -59,6 +63,7 @@ public class DeleteListingRequestActionTest {
 
         this.action = new DeleteListingRequestAction(dlr,
             hearingRepository,
+            hearingPartRepository,
             entityManager,
             objectMapper);
 
@@ -112,10 +117,18 @@ public class DeleteListingRequestActionTest {
         action.act();
 
         ArgumentCaptor<Hearing> captor = ArgumentCaptor.forClass(Hearing.class);
-
         Mockito.verify(hearingRepository).save(captor.capture());
 
         assertThat(captor.getValue().isDeleted()).isEqualTo(true);
+    }
+
+    @Test
+    public void act_shouldSetHearingPartToDeleted() {
+        action.getAndValidateEntities();
+        action.act();
+        ArgumentCaptor<List<HearingPart>> captor = ArgumentCaptor.forClass((Class) List.class);
+        Mockito.verify(hearingPartRepository).save(captor.capture());
+        captor.getValue().forEach(hp -> assertThat(hp.isDeleted()).isEqualTo(true));
     }
 
     @Test
@@ -135,7 +148,7 @@ public class DeleteListingRequestActionTest {
             null,
             "delete",
             "create",
-            0)
+            1)
         );
 
         action.getAndValidateEntities();

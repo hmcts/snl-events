@@ -32,12 +32,14 @@ public class ActionTestHelper {
         hearingPart.setStatus(statusesMock.statusConfigService.getStatusConfig(hpStatus));
         hearingPart.setStart(hpStartTime);
 
-        Session session = new Session();
-        session.setId(sessionId);
-        session.setStart(dateTime);
-
-        hearingPart.setSessionId(sessionId);
-        hearingPart.setSession(session);
+        if (sessionId != null) {
+            Session session = new Session();
+            session.setId(sessionId);
+            session.setStart(dateTime);
+            session.setHearingParts(Arrays.asList(hearingPart));
+            hearingPart.setSessionId(sessionId);
+            hearingPart.setSession(session);
+        }
 
         return hearingPart;
     }

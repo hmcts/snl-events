@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sandl.snlevents.model.db;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.sandl.snlevents.model.Status;
@@ -16,6 +17,7 @@ import javax.persistence.Id;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Data
 public class StatusConfig implements Serializable {
 

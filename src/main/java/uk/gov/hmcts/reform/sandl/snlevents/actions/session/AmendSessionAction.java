@@ -2,11 +2,12 @@ package uk.gov.hmcts.reform.sandl.snlevents.actions.session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.val;
 import org.hibernate.Hibernate;
 import org.hibernate.service.spi.ServiceException;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.Action;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.helpers.UserTransactionDataPreparerService;
 import uk.gov.hmcts.reform.sandl.snlevents.actions.interfaces.RulesProcessable;
+import uk.gov.hmcts.reform.sandl.snlevents.actions.session.helpers.AmendSessionValidators;
 import uk.gov.hmcts.reform.sandl.snlevents.messages.FactMessage;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.HearingPart;
 import uk.gov.hmcts.reform.sandl.snlevents.model.db.Session;
@@ -17,13 +18,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.model.rules.SessionWithHearingPartsFa
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.service.RulesService;
 
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
@@ -35,6 +33,11 @@ public class AmendSessionAction extends Action implements RulesProcessable {
     private Session session;
     private List<HearingPart> hearingParts;
     private String currentSessionAsString;
+    private UserTransactionDataPreparerService userDatPrepServ = new UserTransactionDataPreparerService();
+    private List<BiConsumer<Session, AmendSessionRequest>> validators = Arrays.asList(
+        AmendSessionValidators.validateDurationIsGreaterOrEqual,
+        AmendSessionValidators.validateStartIsSetEarlier
+    );
 
     public AmendSessionAction(AmendSessionRequest amendSessionRequest,
                               SessionRepository sessionRepository,
@@ -56,19 +59,11 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
         session.setSessionType(entityManager.getReference(SessionType.class, amendSessionRequest.getSessionTypeCode()));
         session.setDuration(amendSessionRequest.getDurationInSeconds());
-        session.setStart(updateStartTimeFromRequest(session.getStart(), amendSessionRequest.getStartTime()));
+        session.setStart(amendSessionRequest.getStartTime());
         entityManager.detach(session);
         session.setVersion(amendSessionRequest.getVersion());
 
         sessionRepository.save(session);
-    }
-
-    private OffsetDateTime updateStartTimeFromRequest(OffsetDateTime startDateTime, String startTime) {
-        val localTime = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
-        val hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
-        val minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
-
-        return startDateTime.withHour(hour).withMinute(minute);
     }
 
     @Override
@@ -76,6 +71,7 @@ public class AmendSessionAction extends Action implements RulesProcessable {
         session  = sessionRepository.findOne(amendSessionRequest.getId());
         Hibernate.initialize(session.getHearingParts());
         hearingParts = session.getHearingParts();
+        validators.forEach(validator -> validator.accept(session, amendSessionRequest));
     }
 
     @Override
@@ -92,16 +88,10 @@ public class AmendSessionAction extends Action implements RulesProcessable {
 
     @Override
     public List<UserTransactionData> generateUserTransactionData() {
-        List<UserTransactionData> userTransactionDataList = new ArrayList<>();
-        userTransactionDataList.add(new UserTransactionData("session",
-            session.getId(),
-            currentSessionAsString,
-            "update",
-            "update",
-            0)
-        );
+        userDatPrepServ.prepareUserTransactionDataForUpdate(UserTransactionDataPreparerService.SESSION,
+            session.getId(), currentSessionAsString, 0);
 
-        return userTransactionDataList;
+        return userDatPrepServ.getUserTransactionDataList();
     }
 
     @Override
