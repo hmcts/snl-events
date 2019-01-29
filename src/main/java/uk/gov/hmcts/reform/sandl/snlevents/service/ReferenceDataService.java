@@ -11,8 +11,10 @@ import uk.gov.hmcts.reform.sandl.snlevents.repository.db.HearingTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.RoomTypeRepository;
 import uk.gov.hmcts.reform.sandl.snlevents.repository.db.SessionTypeRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,11 @@ public class ReferenceDataService {
     @Autowired
     RoomTypeRepository roomTypeRepository;
 
+    // comparator to order case types and hearing types by their description i.e.
+    // the order to be displayed in drop-down controls
+    private Comparator<SimpleDictionaryData> sddDescriptionComparator =
+        Comparator.comparing(SimpleDictionaryData::getDescription);
+
     public List<CaseTypeWithHearingTypesResponse> getCaseTypes() {
         return caseTypeRepository
             .findAll()
@@ -43,13 +50,13 @@ public class ReferenceDataService {
                 final Set<SimpleDictionaryData> associatedHearingTypes = caseType.getHearingTypes()
                     .stream()
                     .map(val -> new SimpleDictionaryData(val.getCode(), val.getDescription()))
-                    .collect(Collectors.toSet());
-
+                    .collect(Collectors.toCollection(() -> new TreeSet<>(sddDescriptionComparator)));
                 mappedTo.setHearingTypes(associatedHearingTypes);
                 mappedTo.setCode(caseType.getCode());
                 mappedTo.setDescription(caseType.getDescription());
                 return mappedTo;
             })
+            .sorted(sddDescriptionComparator)
             .collect(Collectors.toList());
     }
 
