@@ -109,6 +109,7 @@ dependencies {
   compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.2'
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.7'
   compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
