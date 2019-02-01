@@ -5,7 +5,7 @@ services:
     container_name: snl-events-db
     build: ./docker/snl-events-db
     networks:
-      - snl-events-network
+      - snl-network
     ports:
       - "5432:5432"
     environment:
@@ -31,16 +31,18 @@ services:
       - REFORM_SERVICE_NAME
       - REFORM_TEAM
       - REFORM_ENVIRONMENT
-      - SNL_EVENTS_DB_HOST=snl-events-db
+      - SNL_EVENTS_DB_HOST=host.docker.internal
       - SNL_EVENTS_DB_PORT=5432
       - SNL_EVENTS_DB_NAME=snl
       - SNL_EVENTS_DB_USERNAME=snluser
       - SNL_EVENTS_DB_PASSWORD=snlpass
-      - SNL_RULES_URL=http://localhost:8091
+      - SNL_RULES_URL=http://host.docker.internal:8091
     ports:
       - 8092:8092
     networks:
-      - snl-events-network
+      - snl-network
 networks:
-  snl-events-network:
+  snl-network:
     driver: bridge
+    name: snl-network
+
